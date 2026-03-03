@@ -10,6 +10,7 @@ import type {
   TrackedPeak,
   DetectorSettings,
 } from '@/types/advisory'
+import type { CombPatternResult } from '@/lib/dsp/advancedDetection'
 import { DEFAULT_SETTINGS } from '@/lib/dsp/constants'
 
 export interface AudioAnalyzerCallbacks {
@@ -18,6 +19,8 @@ export interface AudioAnalyzerCallbacks {
   onPeakDetected?: (peak: DetectedPeak, spectrum: Float32Array, sampleRate: number, fftSize: number) => void
   /** Peak cleared — route to DSP worker */
   onPeakCleared?: (peak: { binIndex: number; frequencyHz: number; timestamp: number }) => void
+  /** Comb filter pattern detected — includes predicted feedback frequencies (early warning) */
+  onCombPatternDetected?: (pattern: CombPatternResult) => void
   // Legacy callbacks kept for compatibility — now driven by worker results in useAudioAnalyzer
   onAdvisory?: (advisory: Advisory) => void
   onAdvisoryCleared?: (advisoryId: string) => void
@@ -67,6 +70,10 @@ export class AudioAnalyzer {
       },
       onPeakCleared: (peak) => {
         this.callbacks.onPeakCleared?.(peak)
+      },
+      // Comb filter pattern detection — early warning for predicted feedback frequencies
+      onCombPatternDetected: (pattern) => {
+        this.callbacks.onCombPatternDetected?.(pattern)
       },
     })
 

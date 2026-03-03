@@ -1,6 +1,8 @@
 // KillTheRing2 Types - Full type definitions for the feedback detection system
 
 export type ThresholdMode = 'absolute' | 'relative' | 'hybrid'
+export type AlgorithmMode = 'auto' | 'msd' | 'phase' | 'combined' | 'all'
+export type ContentType = 'speech' | 'music' | 'compressed' | 'unknown'
 // Unified operation mode type - use 'vocalRing' everywhere (not 'vocalRingAssist')
 export type OperationMode = 'feedbackHunt' | 'vocalRing' | 'musicAware' | 'aggressive' | 'calibration'
 export type Preset = 'surgical' | 'heavy'
@@ -214,6 +216,12 @@ export interface SpectrumData {
   fftSize: number
   timestamp: number
   peak: number // Peak level in dB for metering
+  // Algorithm status fields (populated by DSP worker)
+  algorithmMode?: AlgorithmMode // Which detection algorithm is active
+  contentType?: ContentType // Detected content type (speech, music, compressed, unknown)
+  msdFrameCount?: number // Number of frames accumulated for MSD calculation
+  isCompressed?: boolean // Whether compressed/limited audio is detected
+  compressionRatio?: number // Estimated compression ratio (1.0 = no compression, higher = more compressed)
 }
 
 export interface AnalyzerState {
@@ -321,6 +329,9 @@ export interface DetectorSettings {
   roomWidthM: number // Room width in meters
   roomHeightM: number // Room height in meters
   roomDimensionsUnit: 'meters' | 'feet' // Unit for dimension input
+  // Algorithm mode and scoring display
+  algorithmMode: AlgorithmMode // Which detection algorithm to use (auto, msd, phase, combined, all)
+  showAlgorithmScores: boolean // Show the algorithm status bar with live scoring metrics
 }
 
 // Default configuration - optimized for Corporate/Conference PA with Vocal Focus (200Hz-8kHz)

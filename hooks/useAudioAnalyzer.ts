@@ -13,6 +13,20 @@ import type {
 } from '@/types/advisory'
 import { DEFAULT_SETTINGS } from '@/lib/dsp/constants'
 
+/** Early warning for predicted feedback frequencies based on comb pattern detection */
+export interface EarlyWarning {
+  /** Predicted frequencies that may develop feedback (Hz) */
+  predictedFrequencies: number[]
+  /** Detected fundamental spacing (Hz) */
+  fundamentalSpacing: number | null
+  /** Estimated acoustic path length (meters) */
+  estimatedPathLength: number | null
+  /** Confidence in prediction (0-1) */
+  confidence: number
+  /** Timestamp of detection */
+  timestamp: number
+}
+
 export interface UseAudioAnalyzerState {
   isRunning: boolean
   hasPermission: boolean
@@ -23,6 +37,8 @@ export interface UseAudioAnalyzerState {
   spectrum: SpectrumData | null
   tracks: TrackedPeak[]
   advisories: Advisory[]
+  /** Early warning predictions for upcoming feedback frequencies */
+  earlyWarning: EarlyWarning | null
 }
 
 export interface UseAudioAnalyzerReturn extends UseAudioAnalyzerState {
@@ -51,6 +67,7 @@ export function useAudioAnalyzer(
     spectrum: null,
     tracks: [],
     advisories: [],
+    earlyWarning: null,
   })
 
   const analyzerRef = useRef<AudioAnalyzer | null>(null)
@@ -122,6 +139,24 @@ export function useAudioAnalyzer(
       onPeakCleared: (peak) => {
         dspWorker.clearPeak(peak.binIndex, peak.frequencyHz, peak.timestamp)
       },
+      // Early warning: comb filter pattern detected with predicted frequencies
+      onCombPatternDetected: (pattern) => {
+        if (pattern.hasPattern && pattern.predictedFrequencies.length > 0) {
+          setState(prev => ({
+            ...prev,
+            earlyWarning: {
+              predictedFrequencies: pattern.predictedFrequencies,
+              fundamentalSpacing: pattern.fundamentalSpacing,
+              estimatedPathLength: pattern.estimatedPathLength,
+              confidence: pattern.confidence,
+              timestamp: Date.now(),
+            },
+          }))
+        } else {
+          // Clear early warning when pattern is no longer detected
+          setState(prev => prev.earlyWarning ? { ...prev, earlyWarning: null } : prev)
+        }
+      },
       onError: (error) => {
         setState(prev => ({
           ...prev,
@@ -158,7 +193,7 @@ export function useAudioAnalyzer(
     
     try {
       // Clear previous advisories + worker state when starting fresh analysis
-      setState(prev => ({ ...prev, advisories: [], tracks: [] }))
+      setState(prev => ({ ...prev, advisories: [], tracks: [], earlyWarning: null }))
       dspWorkerRef.current.reset()
       
       await analyzerRef.current.start()

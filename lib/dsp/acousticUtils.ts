@@ -161,6 +161,164 @@ export function classifyModalOverlap(modalOverlap: number): {
 }
 
 // ============================================================================
+// HOPKINS MODAL DENSITY  n(f)  —  "Sound Insulation" §1.2.6.4 (Eq. 1.77)
+// ============================================================================
+
+/**
+ * Speed of sound in air at 20 °C (m/s).
+ * Hopkins uses c₀ = 343 m/s throughout Chapter 1.
+ */
+const C0 = 343
+
+/**
+ * Calculate the statistical modal density of a rectangular room (modes/Hz)
+ * using the full Hopkins three-term formula (Eq. 1.77):
+ *
+ *   n(f) = 4π f² V / c₀³  +  π f S / (2 c₀²)  +  L / (8 c₀)
+ *
+ * - Term 1 (volume):  dominant above the Schroeder frequency
+ * - Term 2 (surface): significant at mid-low frequencies
+ * - Term 3 (edges):   relevant only at very low frequencies
+ *
+ * @param frequencyHz  - Frequency in Hz
+ * @param roomVolume   - Room volume in m³    (e.g. 500 for a medium hall)
+ * @param surfaceArea  - Total surface area m² (default: estimated from volume)
+ * @param edgeLength   - Total edge length m   (default: estimated from volume)
+ * @returns Modal density in modes/Hz
+ */
+export function calculateModalDensity(
+  frequencyHz: number,
+  roomVolume: number,
+  surfaceArea?: number,
+  edgeLength?: number
+): number {
+  if (frequencyHz <= 0 || roomVolume <= 0) return 0
+
+  // Estimate geometry from volume if not supplied.
+  // Assume a roughly cuboid room: V = a·b·c.
+  // For a cube: a = V^(1/3), S = 6a², L = 12a.
+  // Scale factor 1.2 accounts for non-cubic rooms (Hopkins recommends using
+  // measured geometry when available, estimated otherwise).
+  const sideLen = Math.pow(roomVolume, 1 / 3) * 1.2
+  const S = surfaceArea ?? 6 * sideLen * sideLen
+  const L = edgeLength  ?? 12 * sideLen
+
+  const f   = frequencyHz
+  const c   = C0
+  const c2  = c * c
+  const c3  = c2 * c
+
+  const term1 = (4 * Math.PI * f * f * roomVolume) / c3           // volume term
+  const term2 = (Math.PI * f * S)                  / (2 * c2)     // surface term
+  const term3 = L                                  / (8 * c)      // edge term
+
+  return term1 + term2 + term3   // modes / Hz
+}
+
+/**
+ * Frequency-dependent feedback probability modifier derived from modal density.
+ *
+ * Hopkins §1.2.6: Below the Schroeder frequency individual modes dominate.
+ * At a given frequency the expected number of modes per Hz tells us how
+ * likely a spectral peak is to be a room resonance vs. acoustic feedback.
+ *
+ *   - n(f) < 0.5  modes/Hz → modal field is sparse → peaks *may* be room modes
+ *     but feedback is still possible (cannot distinguish on density alone).
+ *   - n(f) 0.5–2  modes/Hz → transitional → neutral
+ *   - n(f) > 2    modes/Hz → dense modal field → sharp peaks MORE likely
+ *     feedback (a room mode would blend in, only feedback stands out).
+ *
+ * @returns delta to apply to pFeedback, plus a human-readable note.
+ */
+export function modalDensityFeedbackAdjustment(
+  frequencyHz: number,
+  roomVolume: number,
+  measuredQ: number
+): { delta: number; note: string | null } {
+  const nf = calculateModalDensity(frequencyHz, roomVolume)
+
+  if (nf < 0.5) {
+    // Very sparse modes — a peak here is ambiguous; slight reduction
+    return {
+      delta: -0.08,
+      note: `Sparse modal field at ${frequencyHz.toFixed(0)} Hz (n(f)=${nf.toFixed(2)} modes/Hz) — ambiguous`,
+    }
+  }
+
+  if (nf > 2) {
+    // Dense modal field — feedback peaks stand out above the modal bath
+    // Only apply boost when Q is also high (i.e. the peak is genuinely narrow)
+    if (measuredQ > 15) {
+      return {
+        delta: +0.08,
+        note: `Dense modal field (n(f)=${nf.toFixed(1)} modes/Hz) with high Q=${measuredQ.toFixed(0)} — sharp peak above modal bath`,
+      }
+    }
+  }
+
+  return { delta: 0, note: null }
+}
+
+// ============================================================================
+// REVERBERATION-AWARE Q ADJUSTMENT  (Hopkins §1.2.6.3)
+// ============================================================================
+
+/**
+ * Compare a measured peak Q against the room's natural reverberation Q.
+ *
+ * A room mode at frequency f with reverberation time T₆₀ has a natural
+ * 3 dB bandwidth of:  Δf = 6.9 / (π · T₆₀)
+ * and a corresponding "room Q":  Q_room = π · f · T₆₀ / 6.9
+ *
+ * Interpretation (Hopkins §1.2.6.3):
+ *   - measuredQ ≤ Q_room : The peak is no sharper than expected for this room's
+ *     decay — it is more likely a room mode than feedback.  Reduce pFeedback.
+ *   - measuredQ ≫ Q_room : The peak is far sharper than the room can sustain —
+ *     something external (i.e. the PA loop) is sustaining it.  Boost pFeedback.
+ *
+ * @param measuredQ   - Q factor of the detected peak
+ * @param frequencyHz - Centre frequency of the peak (Hz)
+ * @param rt60        - Room reverberation time T₆₀ (seconds)
+ * @returns { delta, reason } — delta to add to pFeedback, optional reason string
+ */
+export function reverberationQAdjustment(
+  measuredQ: number,
+  frequencyHz: number,
+  rt60: number
+): { delta: number; reason: string | null } {
+  if (measuredQ <= 0 || frequencyHz <= 0 || rt60 <= 0) {
+    return { delta: 0, reason: null }
+  }
+
+  // Q_room = π · f · T₆₀ / 6.9
+  const qRoom = (Math.PI * frequencyHz * rt60) / 6.9
+
+  const ratio = measuredQ / qRoom
+
+  if (ratio <= 1.0) {
+    // Peak is at or below the room's natural decay sharpness — likely a room mode
+    return {
+      delta: -0.10,
+      reason: `Q=${measuredQ.toFixed(0)} ≤ Q_room=${qRoom.toFixed(0)} — consistent with room decay (RT60=${rt60}s)`,
+    }
+  }
+
+  if (ratio >= 3.0) {
+    // Peak is ≥3× sharper than the room can naturally sustain — strong feedback indicator
+    return {
+      delta: +0.12,
+      reason: `Q=${measuredQ.toFixed(0)} >> Q_room=${qRoom.toFixed(0)} (×${ratio.toFixed(1)}) — unusually sharp, likely feedback loop`,
+    }
+  }
+
+  // Transitional range (1–3×): small positive nudge
+  return {
+    delta: +0.04,
+    reason: null,
+  }
+}
+
+// ============================================================================
 // CUMULATIVE GROWTH TRACKING
 // ============================================================================
 

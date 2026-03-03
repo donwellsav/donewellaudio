@@ -10,9 +10,8 @@ import type {
   IssueLabel, 
   TrackedPeak, 
   DetectorSettings,
-  AlgorithmScores,
-  FusedDetectionResult,
 } from '@/types/advisory'
+import type { AlgorithmScores, FusedDetectionResult } from './advancedDetection'
 import {
   calculateSchroederFrequency,
   getFrequencyBand,
@@ -21,6 +20,8 @@ import {
   analyzeCumulativeGrowth,
   calculateCalibratedConfidence,
   analyzeVibrato,
+  reverberationQAdjustment,
+  modalDensityFeedbackAdjustment,
 } from './acousticUtils'
 
 // Type union for track input
@@ -163,6 +164,18 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings): C
     reasons.push(`Narrow Q: ${features.minQ.toFixed(1)} (band: ${freqBand.band})`)
   }
 
+  // 6a. Reverberation-aware Q adjustment (Hopkins §1.2.6.3)
+  // Rooms with high RT60 produce naturally high-Q room modes.
+  // A peak Q ≤ Q_room = π·f·T₆₀/6.9 is more likely a room mode than feedback.
+  // A peak Q >> Q_room is unusually sharp → boost pFeedback.
+  {
+    const rt60Adj = reverberationQAdjustment(features.minQ, features.frequencyHz, roomRT60)
+    if (rt60Adj.delta !== 0) {
+      pFeedback += rt60Adj.delta
+      if (rt60Adj.reason) reasons.push(rt60Adj.reason)
+    }
+  }
+
   // 7. Persistence without modulation
   const persistenceThreshold = 1000 * freqBand.sustainMultiplier
   if (features.persistenceMs > persistenceThreshold && features.modulationScore < 0.2) {
@@ -170,13 +183,28 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings): C
     reasons.push(`Sustained without modulation: ${(features.persistenceMs / 1000).toFixed(1)}s`)
   }
 
-  // 8. NEW: Modal overlap analysis (from textbook)
+  // 8. Modal overlap analysis (from textbook)
   // Isolated modes (M < 0.3) are more likely feedback
   pFeedback += modalAnalysis.feedbackProbabilityBoost
   if (modalAnalysis.classification === 'ISOLATED') {
     reasons.push(`Isolated mode (M=${modalOverlap.toFixed(2)}) - high feedback risk`)
   } else if (modalAnalysis.classification === 'DIFFUSE') {
     reasons.push(`Diffuse field (M=${modalOverlap.toFixed(2)}) - likely room noise`)
+  }
+
+  // 8a. Hopkins n(f) modal density adjustment (Eq. 1.77)
+  // Sparse modal fields make peaks ambiguous; dense modal fields make sharp
+  // peaks stand out as feedback.  Derives from room volume + frequency.
+  {
+    const nfAdj = modalDensityFeedbackAdjustment(
+      features.frequencyHz,
+      roomVolume,
+      features.minQ
+    )
+    if (nfAdj.delta !== 0) {
+      pFeedback += nfAdj.delta
+      if (nfAdj.note) reasons.push(nfAdj.note)
+    }
   }
 
   // 9. NEW: Cumulative growth analysis (slow-building feedback)
@@ -193,12 +221,21 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings): C
     }
   }
 
-  // 10. NEW: Frequency band context
-  if (freqBand.band === 'LOW' && features.frequencyHz < schroederFreq) {
-    // Below Schroeder frequency - more likely room mode than feedback
-    pFeedback -= 0.1
-    pInstrument += 0.05
-    reasons.push(`Below Schroeder freq (${schroederFreq.toFixed(0)}Hz) - possible room mode`)
+  // 10. Frequency band context — Schroeder room-mode penalty
+  // BUG FIX: Previously gated on `band === 'LOW' && freq < schroederHz`
+  // but getFrequencyBand() already sets band = 'LOW' for freq < max(schroederHz, 300 Hz).
+  // The redundant freq < schroederHz sub-condition caused the penalty to never
+  // fire in typical rooms where schroederHz ≤ 200 Hz.
+  //
+  // PHYSICS (Hopkins §1.2.6): Below the Schroeder frequency individual room
+  // modes dominate.  Modal density n(f) ≈ 4π f² V / c³ → very sparse below
+  // ~200 Hz.  A sharp peak in this range is far more likely to be a room mode
+  // than acoustic feedback.  Penalty increased to -0.25 (was -0.1).
+  if (freqBand.band === 'LOW') {
+    // Below Schroeder boundary: very likely a room mode, not feedback
+    pFeedback   -= 0.25
+    pInstrument += 0.10
+    reasons.push(`Below Schroeder boundary (${schroederFreq.toFixed(0)} Hz) — probable room mode`)
   }
 
   // ==================== Normalization ====================
@@ -444,11 +481,19 @@ export function classifyTrackWithAlgorithms(
     }
   }
   
-  // Phase Coherence Analysis - DISABLED
-  // NOTE: Web Audio API AnalyserNode.getFloatFrequencyData() only returns magnitude, not phase.
-  // The phaseBuffer exists but is never populated. Phase analysis is kept here for future
-  // implementation if we add AudioWorklet-based phase extraction.
-  // if (algorithmScores.phase) { ... } // DISABLED - no data available
+  // Phase Coherence Analysis
+  if (algorithmScores.phase) {
+    const phase = algorithmScores.phase
+    if (phase.isFeedbackLikely) {
+      // High phase coherence - strong feedback indicator
+      pFeedback = Math.min(1, pFeedback + phase.feedbackScore * 0.15)
+      reasons.push(`Phase coherence: ${(phase.coherence * 100).toFixed(0)}%`)
+    } else if (phase.coherence < 0.4) {
+      // Low coherence - likely music/noise
+      pFeedback = Math.max(0, pFeedback - 0.1)
+      reasons.push(`Random phase (${(phase.coherence * 100).toFixed(0)}%) - likely music`)
+    }
+  }
   
   // Spectral Flatness Analysis
   if (algorithmScores.spectral) {
@@ -554,8 +599,10 @@ export function getAlgorithmSummary(scores: AlgorithmScores): string[] {
     summary.push(`MSD: ${status} (${(scores.msd.feedbackScore * 100).toFixed(0)}%)`)
   }
   
-  // Phase is disabled - no data from Web Audio API
-  // if (scores.phase) { ... }
+  if (scores.phase) {
+    const status = scores.phase.isFeedbackLikely ? 'LOCKED' : 'RANDOM'
+    summary.push(`Phase: ${status} (${(scores.phase.coherence * 100).toFixed(0)}%)`)
+  }
   
   if (scores.spectral) {
     const status = scores.spectral.isFeedbackLikely ? 'PURE' : 'BROAD'

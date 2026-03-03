@@ -278,7 +278,7 @@ export function HelpMenu() {
 
             <Section title="Algorithm Settings (Algo Tab)">
               <ul className="space-y-2">
-                <li><strong>Algorithm Mode:</strong> Auto, MSD Only (recommended), or All (phase is disabled)</li>
+                <li><strong>Algorithm Mode:</strong> Auto, MSD Only, Phase Only, Combined (MSD+Phase), or All</li>
                 <li><strong>MSD History Buffer:</strong> Number of frames (7-50). More = accurate but slower</li>
                 <li><strong>Phase Coherence Threshold:</strong> 40-95%. Higher = stricter, fewer false positives</li>
                 <li><strong>Fusion Feedback Threshold:</strong> 40-90%. Combined probability needed for positive detection</li>
@@ -295,7 +295,7 @@ export function HelpMenu() {
                 <li>Start with <strong>Calibration</strong> mode during initial system setup</li>
                 <li>Enable <strong>Show Algorithm Scores</strong> to see what each algorithm is detecting</li>
                 <li>Watch the <strong>MSD frame count</strong> - wait for 15+ frames before trusting results</li>
-                <li>If you see <strong>COMPRESSED</strong> in the status bar, MSD accuracy is lower (22% per DAFx-16)</li>
+                <li>If you see <strong>COMPRESSED</strong> in the status bar, phase coherence is most reliable</li>
                 <li>Use <strong>Comb Pattern</strong> predictions to preemptively address upcoming feedback frequencies</li>
                 <li>Switch to <strong>Feedback Hunt</strong> for general PA monitoring</li>
                 <li>Enable <strong>Auto Music-Aware</strong> so sensitivity adjusts automatically during shows</li>
@@ -319,7 +319,7 @@ export function HelpMenu() {
                 <li><strong>Phase LOCKED:</strong> Consistent phase relationship - strong feedback indicator</li>
                 <li><strong>Spectral PURE:</strong> Very low flatness - single tone present</li>
                 <li><strong>Comb PATTERN:</strong> Regular frequency spacing - feedback loop identified</li>
-                <li><strong>COMPRESSED:</strong> Dynamic compression detected - MSD less reliable, use longer buffer</li>
+                <li><strong>COMPRESSED:</strong> Dynamic compression detected - phase is most reliable</li>
               </ul>
             </Section>
 
@@ -358,11 +358,11 @@ export function HelpMenu() {
 
             <Section title="Missing Feedback Detection">
               <ul className="space-y-2">
-                <li>Lower <strong>Threshold</strong> in sidebar (try 2-4 dB)</li>
-                <li>Increase <strong>Input Gain</strong> if signal level is low (default is +15 dB)</li>
+                <li>Lower <strong>Threshold</strong> in sidebar (try 4-6 dB)</li>
+                <li>Increase <strong>Input Gain</strong> if signal level is low</li>
                 <li>Switch to <strong>Aggressive</strong> or <strong>Calibration</strong> mode</li>
-                <li>In the <strong>Algo tab</strong>: Lower Fusion Feedback Threshold to 40-50%</li>
-                <li>Reduce <strong>MSD History Buffer</strong> to 7 frames for fastest detection</li>
+                <li>In the <strong>Algo tab</strong>: Lower Phase Coherence Threshold to 60-65%</li>
+                <li>In the <strong>Algo tab</strong>: Lower Fusion Feedback Threshold to 50-55%</li>
                 <li>Increase <strong>FFT Size</strong> to 16384 for better low-frequency resolution</li>
               </ul>
             </Section>
@@ -370,23 +370,21 @@ export function HelpMenu() {
             <Section title="Compressed Music False Positives">
               <p className="mb-2">
                 Dynamically compressed music (rock, pop, EDM) can trigger false positives because 
-                sustained notes have flat amplitude curves similar to early feedback. Per DAFx-16 
-                research, MSD achieves only 22% accuracy for heavily compressed content.
+                sustained notes have flat amplitude curves similar to early feedback.
               </p>
               <ul className="space-y-2">
-                <li>Enable <strong>Compression Detection</strong> in the Algo tab (on by default)</li>
-                <li>Increase <strong>MSD History Buffer</strong> to 40-50 frames for better accuracy</li>
-                <li>Watch the Algorithm Status Bar - when it shows COMPRESSED, expect lower accuracy</li>
-                <li>Use <strong>All Algorithms</strong> mode to combine MSD + Spectral + Comb pattern</li>
-                <li>Note: Phase coherence is disabled (Web Audio API limitation)</li>
+                <li>Enable <strong>Compression Detection</strong> in the Algo tab</li>
+                <li>Increase <strong>MSD History Buffer</strong> to 40-50 frames</li>
+                <li>Watch the Algorithm Status Bar - when it shows COMPRESSED, phase coherence is most reliable</li>
+                <li>Use <strong>Phase Only</strong> algorithm mode for heavily compressed content</li>
               </ul>
             </Section>
 
             <Section title="Slow or Laggy Display">
               <ul className="space-y-2">
                 <li>Reduce <strong>FFT Size</strong> to 4096 in Settings</li>
-                <li>Reduce <strong>MSD History Buffer</strong> to 7-10 frames</li>
-                <li>Disable <strong>Show Algorithm Scores</strong> in Algo tab</li>
+                <li>Reduce <strong>MSD History Buffer</strong> to 15-20 frames</li>
+                <li>Disable <strong>Show Algorithm Scores</strong> and <strong>Show Phase Display</strong></li>
                 <li>Close other browser tabs to free CPU resources</li>
               </ul>
             </Section>
@@ -496,14 +494,7 @@ export function HelpMenu() {
               </p>
             </Section>
 
-            <Section title="Phase Coherence (Nyquist Criterion) - DISABLED">
-              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded p-2 mb-3">
-                <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
-                  Note: Phase coherence is currently DISABLED. The Web Audio API AnalyserNode only 
-                  provides magnitude data, not phase. This would require AudioWorklet implementation 
-                  for future support.
-                </p>
-              </div>
+            <Section title="Phase Coherence (Nyquist Criterion)">
               <p className="mb-2">
                 True feedback occurs when the <strong>Nyquist stability criterion</strong> is met:
               </p>
@@ -586,26 +577,23 @@ export function HelpMenu() {
                 <p>Compressed: DR &lt; 8 dB</p>
               </div>
               <p className="mt-2 text-xs">
-                When compression is detected, MSD reliability drops (sustained notes look like feedback). 
-                Per DAFx-16 paper, MSD achieves only 22% accuracy for heavily compressed rock/pop content.
+                When compression is detected, MSD reliability drops (sustained notes look like feedback), 
+                so phase coherence gets more weight in the fusion algorithm.
               </p>
             </Section>
 
             <Section title="Algorithm Fusion">
               <p className="mb-2">
-                Active algorithms vote together with content-aware weighting. <strong>Note: Phase is 
-                disabled (Web Audio API limitation)</strong>, so weights are redistributed:
+                All algorithms vote together with content-aware weighting:
               </p>
               <div className="bg-muted p-3 rounded font-mono text-xs space-y-1">
-                <p><strong>P_feedback = w1*S_msd + w2*S_spectral + w3*S_comb + w4*S_legacy</strong></p>
-                <p className="text-muted-foreground">(Phase weight = 0, redistributed to other algorithms)</p>
+                <p><strong>P_feedback = w1*S_msd + w2*S_phase + w3*S_spectral + w4*S_comb + w5*S_legacy</strong></p>
               </div>
-              <p className="mt-2 text-xs">Current weights by content type [MSD, Phase(0), Spectral, Comb, Legacy]:</p>
+              <p className="mt-2 text-xs">Default weights by content type:</p>
               <div className="bg-muted p-3 rounded font-mono text-xs space-y-1 mt-2">
-                <p>Default: [0.50, 0.00, 0.25, 0.15, 0.10]</p>
-                <p>Speech:  [0.55, 0.00, 0.25, 0.10, 0.10]</p>
-                <p>Music:   [0.35, 0.00, 0.30, 0.20, 0.15]</p>
-                <p>Compressed: [0.30, 0.00, 0.35, 0.20, 0.15]</p>
+                <p>Speech: [0.45, 0.25, 0.15, 0.05, 0.10]</p>
+                <p>Music: [0.20, 0.40, 0.15, 0.10, 0.15]</p>
+                <p>Compressed: [0.15, 0.45, 0.20, 0.10, 0.10]</p>
               </div>
               <p className="mt-2 text-xs">
                 Verdict thresholds:

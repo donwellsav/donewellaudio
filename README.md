@@ -629,15 +629,15 @@ Where RT60 is reverberation time in seconds and Volume is in cubic meters.
 // lib/dsp/constants.ts - DEFAULT_SETTINGS
 
 {
-  // Core detection - AGGRESSIVE for catching feedback early
-  mode: 'vocalRing',                  // UPDATED: was 'feedbackHunt' - optimized for speech
+  // Core detection
+  mode: 'feedbackHunt',
   fftSize: 8192,
-  smoothingTimeConstant: 0.4,         // UPDATED: was 0.5 - faster response
-  minFrequency: 150,                  // UPDATED: was 200 - catches male vocal fundamental
-  maxFrequency: 10000,                // UPDATED: was 8000 - catches sibilance
-  feedbackThresholdDb: 4,             // UPDATED: was 6 - more aggressive
-  ringThresholdDb: 3,                 // UPDATED: was 4 - more aggressive
-  growthRateThreshold: 1.2,           // UPDATED: was 1.5 - faster detection
+  smoothingTimeConstant: 0.5,
+  minFrequency: 200,
+  maxFrequency: 8000,
+  feedbackThresholdDb: 6,
+  ringThresholdDb: 4,
+  growthRateThreshold: 1.5,
   
   // Timing
   holdTimeMs: 3000,
@@ -649,21 +649,21 @@ Where RT60 is reverberation time in seconds and Volume is in cubic meters.
   graphFontSize: 15,
   
   // Input
-  inputGainDb: 15,
+  inputGainDb: 15,                    // UPDATED: was 12
   
   // Filtering
-  confidenceThreshold: 0.40,
+  confidenceThreshold: 0.40,          // UPDATED: was 0.55
   aWeightingEnabled: true,
   
-  // Advanced algorithms - NOTE: Phase coherence DISABLED (no Web Audio API support)
-  algorithmMode: 'msd',               // UPDATED: was 'combined' - phase disabled
-  msdMinFrames: 7,                    // UPDATED: was 15 - optimal for speech per DAFx-16
-  phaseCoherenceThreshold: 0.75,      // Kept for future use
+  // Advanced algorithms
+  algorithmMode: 'combined',
+  msdMinFrames: 15,
+  phaseCoherenceThreshold: 0.75,
   enableCompressionDetection: true,
   enableCombPatternDetection: true,
-  fusionFeedbackThreshold: 0.55,      // UPDATED: was 0.65 - more aggressive
+  fusionFeedbackThreshold: 0.65,
   showAlgorithmScores: false,
-  showPhaseDisplay: false,            // Phase is disabled anyway
+  showPhaseDisplay: false,
   
   // Room acoustics
   roomRT60: 0.7,

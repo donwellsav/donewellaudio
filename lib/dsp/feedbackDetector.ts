@@ -48,6 +48,18 @@ export class FeedbackDetector {
   private activeBins: Uint32Array | null = null
   private activeBinPos: Int32Array | null = null
   private activeCount: number = 0
+  
+  // ---- Phase extraction: dual-snapshot phase-difference estimator ----
+  // We keep two consecutive time-domain snapshots and derive per-bin phase
+  // via the instantaneous frequency estimate:
+  //   Δφ_k = arg( X_k(t) · conj(X_k(t-1)) )
+  // where X_k is the analytic DFT bin computed from getFloatTimeDomainData.
+  // This avoids a manual FFT entirely and matches the AnalyserNode's own
+  // windowing so there is no normalization mismatch.
+  private tdBufA: Float32Array | null = null   // current frame time-domain
+  private tdBufB: Float32Array | null = null   // previous frame time-domain
+  private phaseData: Float32Array | null = null // extracted phase per bin (radians)
+  private tdBufSwap: boolean = false            // ping-pong flag
 
   // MSD (Magnitude Slope Deviation) buffers - DAFx-16 algorithm
   // Stores magnitude history per frequency bin for growth analysis

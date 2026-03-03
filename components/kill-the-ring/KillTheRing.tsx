@@ -46,6 +46,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
     fftSize,
     spectrum,
     advisories,
+    earlyWarning,
     settings,
     start,
     stop,
@@ -247,17 +248,8 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                 >
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.31-2.5-4.06v8.12c1.48-.75 2.5-2.29 2.5-4.06zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
-                {!isRunning && (
-                  <div 
-                    className="absolute bottom-0 left-1/2 transform -translate-x-1/2"
-                    style={{ translateY: 'calc(100% + 12px)' }}
-                  >
-                    <span className="font-black whitespace-nowrap text-white leading-none" style={{ fontSize: '13px' }}>
-                      START
-                    </span>
-                  </div>
-                )}
               </button>
+
             </div>
 
             <div className="flex flex-col justify-center gap-[3px]">
@@ -604,7 +596,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
               </div>
               <div className="relative flex-1 min-h-0">
                 <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'rta' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-                  <SpectrumCanvas spectrum={spectrum} advisories={advisories} isRunning={isRunning} graphFontSize={settings.graphFontSize} />
+                  <SpectrumCanvas spectrum={spectrum} advisories={advisories} isRunning={isRunning} graphFontSize={settings.graphFontSize} onStart={!isRunning ? start : undefined} earlyWarning={earlyWarning} />
                 </div>
                 <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'geq' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                   <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} />
@@ -655,7 +647,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                 </div>
               </div>
               <div className="flex-1 min-h-0 pointer-events-none">
-                {bottomLeftGraph === 'rta' && <SpectrumCanvas spectrum={spectrum} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
+                {bottomLeftGraph === 'rta' && <SpectrumCanvas spectrum={spectrum} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} earlyWarning={earlyWarning} />}
                 {bottomLeftGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
                 {bottomLeftGraph === 'waterfall' && <WaterfallCanvas spectrum={spectrum} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
               </div>
@@ -680,7 +672,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                 </div>
               </div>
               <div className="flex-1 min-h-0 pointer-events-none">
-                {bottomRightGraph === 'rta' && <SpectrumCanvas spectrum={spectrum} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
+                {bottomRightGraph === 'rta' && <SpectrumCanvas spectrum={spectrum} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} earlyWarning={earlyWarning} />}
                 {bottomRightGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
                 {bottomRightGraph === 'waterfall' && <WaterfallCanvas spectrum={spectrum} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
               </div>

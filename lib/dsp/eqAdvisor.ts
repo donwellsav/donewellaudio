@@ -1,6 +1,8 @@
 // KillTheRing2 EQ Advisor - GEQ/PEQ recommendations with pitch translation
+// Enhanced with MINDS (MSD-Inspired Notch Depth Setting) from DAFx-16 paper
 
 import { ISO_31_BANDS, EQ_PRESETS, SPECTRAL_TRENDS } from './constants'
+import { calculateMINDS } from './advancedDetection'
 import { hzToPitch, formatPitch } from '@/lib/utils/pitchUtils'
 import { clamp } from '@/lib/utils/mathHelpers'
 import type { 
@@ -12,8 +14,9 @@ import type {
   PEQRecommendation, 
   ShelfRecommendation,
   EQAdvisory,
-  PitchInfo 
+  PitchInfo,
 } from '@/types/advisory'
+import type { MINDSResult } from './advancedDetection'
 
 // Track input type that works with both Track and TrackedPeak
 type TrackInput = Track | TrackedPeak
@@ -71,6 +74,35 @@ export function calculateCutDepth(severity: SeverityLevel, preset: Preset): numb
     default:
       return presetConfig.lightCut
   }
+}
+
+/**
+ * Calculate dynamic notch depth using MINDS algorithm
+ * This uses the magnitude history to determine optimal cut depth
+ * 
+ * @param magnitudeHistory - Array of recent magnitude values in dB (oldest to newest)
+ * @param severity - Current severity classification
+ * @param preset - EQ preset (surgical/heavy)
+ * @param currentDepthDb - Current applied notch depth (if any)
+ */
+export function calculateMINDSCutDepth(
+  magnitudeHistory: number[],
+  severity: SeverityLevel,
+  preset: Preset,
+  currentDepthDb: number = 0
+): { depth: number; minds: MINDSResult } {
+  // Get MINDS recommendation
+  const minds = calculateMINDS(magnitudeHistory, currentDepthDb)
+  
+  // Get preset-based recommendation
+  const presetDepth = calculateCutDepth(severity, preset)
+  
+  // Use the more aggressive of the two (more negative)
+  // MINDS is dynamic and responds to growth rate
+  // Preset is based on severity classification
+  const depth = Math.min(minds.suggestedDepthDb, presetDepth)
+  
+  return { depth, minds }
 }
 
 /**

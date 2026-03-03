@@ -36,7 +36,7 @@ const CONTENT_TYPE_LABELS: Record<ContentType, { label: string; color: string }>
 }
 
 export const AlgorithmStatusBar = memo(function AlgorithmStatusBar({
-  algorithmMode = 'msd', // Default changed from 'combined' - phase is disabled
+  algorithmMode = 'combined',
   contentType = 'unknown',
   msdFrameCount = 0,
   isCompressed = false,
@@ -45,8 +45,8 @@ export const AlgorithmStatusBar = memo(function AlgorithmStatusBar({
   showDetailed = false,
 }: AlgorithmStatusBarProps) {
   const contentInfo = CONTENT_TYPE_LABELS[contentType]
-  const msdReady = msdFrameCount >= 7 // Minimum for speech per DAFx paper (100% accuracy)
-  const msdProgress = Math.min(msdFrameCount / 7, 1) * 100 // Progress to optimal (7 frames for speech)
+  const msdReady = msdFrameCount >= 7 // Minimum for speech per DAFx paper
+  const msdProgress = Math.min(msdFrameCount / 15, 1) * 100 // Progress to optimal
 
   if (!isRunning) {
     return (
@@ -71,11 +71,11 @@ export const AlgorithmStatusBar = memo(function AlgorithmStatusBar({
           <TooltipContent side="bottom" className="text-xs max-w-[200px]">
             <p className="font-semibold">Algorithm Mode: {algorithmMode}</p>
             <p className="text-muted-foreground mt-1">
-              {algorithmMode === 'combined' && 'MSD only (phase disabled - no Web Audio API support)'}
-              {algorithmMode === 'msd' && 'Magnitude Slope Deviation - 100% accuracy for speech (RECOMMENDED)'}
-              {algorithmMode === 'phase' && 'DISABLED - Web Audio API limitation'}
-              {algorithmMode === 'all' && 'MSD + Spectral + Comb (phase disabled)'}
-              {algorithmMode === 'auto' && 'Auto-selects based on content (primarily MSD)'}
+              {algorithmMode === 'combined' && 'MSD + Phase coherence (recommended)'}
+              {algorithmMode === 'msd' && 'Magnitude Slope Deviation only'}
+              {algorithmMode === 'phase' && 'Phase coherence only'}
+              {algorithmMode === 'all' && 'All algorithms active'}
+              {algorithmMode === 'auto' && 'Auto-selects based on content'}
             </p>
           </TooltipContent>
         </Tooltip>
