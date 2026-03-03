@@ -10,9 +10,8 @@ import type {
   IssueLabel, 
   TrackedPeak, 
   DetectorSettings,
-  AlgorithmScores,
-  FusedDetectionResult,
 } from '@/types/advisory'
+import type { AlgorithmScores, FusedDetectionResult } from './advancedDetection'
 import {
   calculateSchroederFrequency,
   getFrequencyBand,
