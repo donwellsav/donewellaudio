@@ -52,6 +52,7 @@ export type WorkerInboundMessage =
 
 export type WorkerOutboundMessage =
   | { type: 'advisory'; advisory: Advisory }
+  | { type: 'advisoryReplaced'; replacedId: string; advisory: Advisory }
   | { type: 'advisoryCleared'; advisoryId: string }
   | { type: 'tracksUpdate'; tracks: TrackedPeak[] }
   | { type: 'ready' }
