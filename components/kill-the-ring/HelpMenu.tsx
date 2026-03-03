@@ -82,8 +82,8 @@ export function HelpMenu() {
 
             <Section title="Display Areas">
               <ul className="space-y-2">
-                <li><strong>Large Panel (top):</strong> Selected graph enlarged for detail. Switch between RTA Spectrum, 31-Band GEQ, and Waterfall.</li>
-                <li><strong>Small Panels (bottom row):</strong> The two non-active graphs, live and clickable.</li>
+                <li><strong>Large Panel (top):</strong> Selected graph enlarged for detail. Switch between RTA Spectrum, 31-Band GEQ, and Controls.</li>
+                <li><strong>Small Panels (bottom row):</strong> Two configurable panels - choose RTA, GEQ, or Controls for each.</li>
                 <li><strong>Left Sidebar - Issues tab:</strong> Active detected issues with Apply buttons. RUNAWAY issues pulse red.</li>
                 <li><strong>Left Sidebar - EQ Notepad tab:</strong> Accumulates applied cuts for easy reference and export.</li>
                 <li><strong>Algorithm Status Bar:</strong> Shows current algorithm mode, content type, MSD buffer status, and compression detection (enable in Settings).</li>

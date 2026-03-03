@@ -425,7 +425,7 @@ export const MSD_SETTINGS = {
 } as const
 
 // Peak Persistence Scoring - Phase 2 Enhancement
-// Feedback is persistent (vertical streak in waterfall), transients are short-lived
+// Feedback is persistent over time, transients are short-lived
 export const PERSISTENCE_SCORING = {
   /** Maximum frames to track persistence (ring buffer size) */
   HISTORY_FRAMES: 32,

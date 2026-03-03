@@ -818,7 +818,7 @@ export function SettingsPanel({
             <Section 
               title="Graph Label Size" 
               showTooltip={settings.showTooltips}
-              tooltip="Font size for frequency, dB, and annotation labels inside the RTA, GEQ, and Waterfall graphs. Increase for high-DPI displays or viewing from a distance."
+              tooltip="Font size for frequency, dB, and annotation labels inside the RTA and GEQ graphs. Increase for high-DPI displays or viewing from a distance."
             >
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
