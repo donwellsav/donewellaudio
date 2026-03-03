@@ -419,8 +419,9 @@ export function calculateSpectralFlatness(
   peakBin: number,
   bandwidth?: number
 ): SpectralFlatnessResult {
-  const startBin = Math.max(0, peakBin - bandwidth)
-  const endBin   = Math.min(spectrum.length - 1, peakBin + bandwidth)
+  const bw = bandwidth ?? 5
+  const startBin = Math.max(0, peakBin - bw)
+  const endBin   = Math.min(spectrum.length - 1, peakBin + bw)
   const region: number[] = []
 
   for (let i = startBin; i <= endBin; i++) {
