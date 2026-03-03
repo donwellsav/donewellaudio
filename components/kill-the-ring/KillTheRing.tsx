@@ -602,23 +602,6 @@ export const KillTheRing = memo(function KillTheRingComponent() {
           <div className="hidden landscape:flex flex-[2] min-h-0 gap-1.5 landscape:gap-2 p-1.5 landscape:p-3 pt-0.5 landscape:pt-1">
             {/* Bottom-Left Graph */}
             <div className="flex-1 bg-card/60 rounded-lg border border-border overflow-hidden flex flex-col min-w-0">
-              <div className="flex-shrink-0 px-2 py-1 border-b border-border bg-muted/20 flex items-center gap-1">
-                <div className="flex items-center gap-1 flex-wrap">
-                  {GRAPH_CHIPS.map((chip) => (
-                    <button
-                      key={`bottom-left-${chip.value}`}
-                      onClick={() => setBottomLeftGraph(chip.value)}
-                      className={`px-2 py-0.5 rounded-full text-[9px] font-medium border transition-colors whitespace-nowrap ${
-                        bottomLeftGraph === chip.value
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
-                      }`}
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
               <div className="flex-1 min-h-0 pointer-events-none">
                 {bottomLeftGraph === 'rta' && <SpectrumCanvas spectrum={spectrum} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} earlyWarning={earlyWarning} />}
                 {bottomLeftGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
@@ -631,23 +614,6 @@ export const KillTheRing = memo(function KillTheRingComponent() {
             </div>
             {/* Bottom-Right Graph */}
             <div className="flex-1 bg-card/60 rounded-lg border border-border overflow-hidden flex flex-col min-w-0">
-              <div className="flex-shrink-0 px-2 py-1 border-b border-border bg-muted/20 flex items-center gap-1">
-                <div className="flex items-center gap-1 flex-wrap">
-                  {GRAPH_CHIPS.map((chip) => (
-                    <button
-                      key={`bottom-right-${chip.value}`}
-                      onClick={() => setBottomRightGraph(chip.value)}
-                      className={`px-2 py-0.5 rounded-full text-[9px] font-medium border transition-colors whitespace-nowrap ${
-                        bottomRightGraph === chip.value
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
-                      }`}
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
               <div className="flex-1 min-h-0 pointer-events-none">
                 {bottomRightGraph === 'rta' && <SpectrumCanvas spectrum={spectrum} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} earlyWarning={earlyWarning} />}
                 {bottomRightGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
