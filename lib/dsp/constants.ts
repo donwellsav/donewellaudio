@@ -398,8 +398,11 @@ export const VIZ_COLORS = {
 
 // MSD (Magnitude Slope Deviation) from DAFx-16 paper
 export const MSD_SETTINGS = {
-  /** Default MSD threshold (dB²/frame²) - values below indicate feedback */
-  THRESHOLD: 0.5,
+  /** Default MSD threshold (dB²/frame²) - values below indicate feedback
+   *  DAFx-16 paper gives 1.0 dB²/frame² for 16-frame window.
+   *  After normalizing by numTerms (frameCount - 2), threshold ≈ 1.0/14 ≈ 0.071.
+   *  We use 0.1 (slightly loose) for robustness. */
+  THRESHOLD: 0.1,
   /** Minimum frames for speech detection (100% accuracy per paper) */
   MIN_FRAMES_SPEECH: 7,
   /** Minimum frames for classical music (100% accuracy per paper) */
