@@ -7,8 +7,6 @@ export type AlgorithmMode = 'auto' | 'msd' | 'phase' | 'combined' | 'all'
 export type ContentType = 'speech' | 'music' | 'compressed' | 'unknown'
 
 export type ThresholdMode = 'absolute' | 'relative' | 'hybrid'
-export type AlgorithmMode = 'auto' | 'msd' | 'phase' | 'combined' | 'all'
-export type ContentType = 'speech' | 'music' | 'compressed' | 'unknown'
 // Unified operation mode type - use 'vocalRing' everywhere (not 'vocalRingAssist')
 export type OperationMode = 'feedbackHunt' | 'vocalRing' | 'musicAware' | 'aggressive' | 'calibration'
 export type Preset = 'surgical' | 'heavy'
