@@ -562,89 +562,164 @@ export function applyFrequencyDependentThreshold(
 }
 
 // ============================================================================
-// REVERBERATION-AWARE Q THRESHOLD
+// UNIT CONVERSIONS
 // ============================================================================
 
 /**
- * Calculate a reverberation-aware Q threshold.
- *
- * PHYSICS (Hopkins §1.2.6.3 — modal Q in rooms):
- *   Q_room ≈ π · f · T₆₀ / 6.9
- *
- * This is the Q factor of a room mode at frequency f with RT60 seconds of
- * decay.  A reverberant room produces naturally high-Q apparent resonances
- * from room modes — we must not confuse them with feedback peaks.
- *
- * Strategy: If a measured peak Q is below Q_room(f, RT60) it is *likely*
- * a room mode; above it the mode is unusually sharp — more likely feedback.
- *
- * The returned threshold is the Q value that a peak must exceed before we
- * treat it as potentially feedback-driven (i.e., Q_room + safety margin).
- *
- * @param frequencyHz  - Frequency of the peak in Hz
- * @param rt60         - Room RT60 in seconds (0.2 – 5.0 typical)
- * @param baseQThresh  - Classifier's base HIGH_Q threshold (default from constants)
- * @returns            - Adjusted Q threshold to use for this peak at this frequency
+ * Convert feet to meters
  */
-export function getReverberationAwareQThreshold(
-  frequencyHz: number,
-  rt60: number,
-  baseQThresh: number
-): number {
-  if (rt60 <= 0 || frequencyHz <= 0) return baseQThresh
+export function feetToMeters(feet: number): number {
+  return feet * 0.3048
+}
 
-  // Q of a room mode at this frequency and RT60
-  // Derived from Sabine: T₆₀ = 6.9 / (π · f · η)  →  η = 6.9 / (π · f · T₆₀)
-  // Q = 1/η  →  Q_room = π · f · T₆₀ / 6.9
-  const qRoom = (Math.PI * frequencyHz * rt60) / 6.9
+// ============================================================================
+// ROOM MODE CALCULATION
+// ============================================================================
 
-  // Safety margin: a feedback peak must be measurably sharper than a room mode.
-  // We require the peak Q to be at least 1.5× Q_room before calling it feedback.
-  const adjustedThresh = Math.max(baseQThresh, qRoom * 1.5)
+export interface RoomMode {
+  frequency: number   // Hz
+  label: string       // e.g. "1,0,0"
+  type: 'axial' | 'tangential' | 'oblique'
+}
 
-  // Cap at 400 to avoid absurd thresholds at high frequencies with long RT60
-  return Math.min(adjustedThresh, 400)
+export interface RoomModesResult {
+  all: RoomMode[]
+  axial: RoomMode[]
+  tangential: RoomMode[]
+  oblique: RoomMode[]
+}
+
+export interface FormattedRoomMode {
+  hz: string
+  label: string
+}
+
+export interface FormattedRoomModesResult {
+  all: FormattedRoomMode[]
+  axial: FormattedRoomMode[]
+  tangential: FormattedRoomMode[]
+  oblique: FormattedRoomMode[]
 }
 
 /**
- * Compute the RT60-dependent contribution to feedback probability.
+ * Calculate axial, tangential, and oblique room modes up to 300 Hz.
+ * Uses the standard formula: f = (c/2) * sqrt((nx/L)² + (ny/W)² + (nz/H)²)
+ * where c = 343 m/s (speed of sound).
  *
- * For a given peak Q:
- *  - If Q < Q_room → likely room mode           → penalty on pFeedback
- *  - If Q > Q_room × 1.5 → sharper than expected → boost to pFeedback
- *  - Otherwise → neutral
- *
- * @param measuredQ    - Q factor measured from the spectrum
- * @param frequencyHz  - Frequency in Hz
- * @param rt60         - Room RT60 in seconds
- * @returns delta to add to pFeedback (can be negative)
+ * @param lengthM - Room length in meters
+ * @param widthM  - Room width in meters
+ * @param heightM - Room height in meters
+ * @param maxHz   - Upper frequency limit (default 300 Hz)
  */
-export function reverberationQAdjustment(
-  measuredQ: number,
-  frequencyHz: number,
-  rt60: number
-): { delta: number; reason: string | null } {
-  if (rt60 <= 0) return { delta: 0, reason: null }
+export function calculateRoomModes(
+  lengthM: number,
+  widthM: number,
+  heightM: number,
+  maxHz = 300
+): RoomModesResult {
+  const c = 343 // speed of sound m/s
+  const MAX_ORDER = 6 // check modes up to 6th order per dimension
+  const modes: RoomMode[] = []
 
-  const qRoom = (Math.PI * frequencyHz * rt60) / 6.9
+  for (let nx = 0; nx <= MAX_ORDER; nx++) {
+    for (let ny = 0; ny <= MAX_ORDER; ny++) {
+      for (let nz = 0; nz <= MAX_ORDER; nz++) {
+        if (nx === 0 && ny === 0 && nz === 0) continue
 
-  if (measuredQ < qRoom) {
-    // Peak no sharper than a typical room mode for this RT60 — reduce pFeedback
-    const ratio = measuredQ / Math.max(qRoom, 1)
-    const penalty = -0.15 * (1 - ratio)  // up to -0.15 for very broad peaks
-    return {
-      delta: penalty,
-      reason: `Q (${measuredQ.toFixed(0)}) ≤ Q_room (${qRoom.toFixed(0)}) at RT60=${rt60}s — probable room mode`,
-    }
-  } else if (measuredQ > qRoom * 1.5) {
-    // Peak significantly sharper than a room mode — boost pFeedback
-    const excess = Math.min((measuredQ - qRoom * 1.5) / (qRoom * 1.5), 1)
-    const boost = 0.10 * excess  // up to +0.10
-    return {
-      delta: boost,
-      reason: `Q (${measuredQ.toFixed(0)}) >> Q_room (${qRoom.toFixed(0)}) — unusually sharp for RT60=${rt60}s`,
+        const term = (nx / lengthM) ** 2 + (ny / widthM) ** 2 + (nz / heightM) ** 2
+        const freq = (c / 2) * Math.sqrt(term)
+
+        if (freq > maxHz) continue
+
+        // Classify mode type by number of non-zero indices
+        const nonZero = (nx > 0 ? 1 : 0) + (ny > 0 ? 1 : 0) + (nz > 0 ? 1 : 0)
+        const type: RoomMode['type'] =
+          nonZero === 1 ? 'axial' : nonZero === 2 ? 'tangential' : 'oblique'
+
+        modes.push({
+          frequency: freq,
+          label: `${nx},${ny},${nz}`,
+          type,
+        })
+      }
     }
   }
 
-  return { delta: 0, reason: null }
+  // Sort by frequency
+  modes.sort((a, b) => a.frequency - b.frequency)
+
+  return {
+    all: modes,
+    axial: modes.filter((m) => m.type === 'axial'),
+    tangential: modes.filter((m) => m.type === 'tangential'),
+    oblique: modes.filter((m) => m.type === 'oblique'),
+  }
+}
+
+/**
+ * Format room modes for display in the UI
+ */
+export function formatRoomModesForDisplay(modes: RoomModesResult): FormattedRoomModesResult {
+  const fmt = (m: RoomMode): FormattedRoomMode => ({
+    hz: m.frequency.toFixed(1),
+    label: m.label,
+  })
+  return {
+    all: modes.all.map(fmt),
+    axial: modes.axial.map(fmt),
+    tangential: modes.tangential.map(fmt),
+    oblique: modes.oblique.map(fmt),
+  }
+}
+
+// ============================================================================
+// ROOM PARAMETER ESTIMATION FROM DIMENSIONS
+// ============================================================================
+
+export interface RoomParameters {
+  volume: number    // m³
+  rt60: number      // seconds (estimated)
+  schroederHz: number
+}
+
+/**
+ * Estimate RT60 and calculate room volume from physical dimensions.
+ * Uses a simplified Sabine approximation with preset absorption coefficients.
+ *
+ * @param lengthM        - Room length in meters
+ * @param widthM         - Room width in meters
+ * @param heightM        - Room height in meters
+ * @param absorptionType - Acoustic treatment level
+ */
+export function getRoomParametersFromDimensions(
+  lengthM: number,
+  widthM: number,
+  heightM: number,
+  absorptionType: 'untreated' | 'typical' | 'treated' | 'studio' = 'typical'
+): RoomParameters {
+  // Average absorption coefficient by treatment type (broadband estimate)
+  const absorptionCoeff: Record<typeof absorptionType, number> = {
+    untreated: 0.07,
+    typical:   0.15,
+    treated:   0.25,
+    studio:    0.45,
+  }
+
+  const alpha = absorptionCoeff[absorptionType]
+  const volume = lengthM * widthM * heightM
+
+  // Total surface area
+  const surface =
+    2 * (lengthM * widthM + lengthM * heightM + widthM * heightM)
+
+  // Sabine's formula: RT60 = 0.161 * V / (alpha * S)
+  const rt60 = surface > 0 ? (0.161 * volume) / (alpha * surface) : 1.0
+
+  const schroederHz = calculateSchroederFrequency(rt60, volume)
+
+  return {
+    volume: Math.round(volume * 10) / 10,
+    rt60: Math.round(rt60 * 10) / 10,
+    schroederHz,
+  }
 }

@@ -289,25 +289,7 @@ export function SpectrumCanvas({ spectrum, advisories, isRunning, graphFontSize 
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
-      <canvas ref={canvasRef} className="w-full h-full" />
-      
-      {/* Early Warning Badge - shows when comb pattern predictions are active */}
-      {earlyWarning && earlyWarning.predictedFrequencies.length > 0 && !showPlaceholder && (
-        <div className="absolute top-2 right-2 flex items-center gap-2 px-2 py-1 rounded bg-amber-500/20 border border-amber-500/40 backdrop-blur-sm">
-          <svg className="w-4 h-4 text-amber-400 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <span className="text-xs font-medium text-amber-300">
-            {earlyWarning.predictedFrequencies.length} predicted
-          </span>
-          {earlyWarning.estimatedPathLength && (
-            <span className="text-xs text-amber-400/70">
-              ~{earlyWarning.estimatedPathLength.toFixed(1)}m path
-            </span>
-          )}
-        </div>
-      )}
-      
+      <canvas ref={canvasRef} className="w-full h-full" role="img" aria-label="Real-time audio frequency spectrum display" />
       {showPlaceholder && (
         <div className="absolute inset-0">
           <Image
