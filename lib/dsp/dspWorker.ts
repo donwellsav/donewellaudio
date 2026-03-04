@@ -95,6 +95,10 @@ const trackToAdvisoryId = new Map<string, string>()
 // Suppresses re-triggering the same band for BAND_COOLDOWN_MS after an advisory is cleared via clearPeak.
 const bandClearedAt = new Map<number, number>()
 
+// Global advisory rate limiter — max 1 NEW advisory per second (updates to existing still allowed)
+let lastAdvisoryCreatedAt = 0
+const ADVISORY_RATE_LIMIT_MS = 1000
+
 // ─── Advanced algorithm buffers (previously dormant, now active) ────────────
 
 /** Full-spectrum MSD history — provides per-bin MSD scores to the fusion engine.
@@ -468,6 +472,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       advisories.clear()
       trackToAdvisoryId.clear()
       bandClearedAt.clear()
+      lastAdvisoryCreatedAt = 0
       self.postMessage({ type: 'ready' } satisfies WorkerOutboundMessage)
       break
     }
@@ -489,6 +494,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       advisories.clear()
       trackToAdvisoryId.clear()
       bandClearedAt.clear()
+      lastAdvisoryCreatedAt = 0
       msdBuffer?.reset()
       phaseBuffer?.reset()
       ampBuffer.reset()
@@ -652,6 +658,11 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       let mergedClusterCount = 1
 
       if (!existingId) {
+        // Check -1: global rate limiter — max 1 new advisory per second
+        if (peak.timestamp - lastAdvisoryCreatedAt < ADVISORY_RATE_LIMIT_MS) {
+          break
+        }
+
         // Check 0: band cooldown — suppress if this band was recently cleared
         const geqBandIndex = eqAdvisory.geq.bandIndex
         const lastCleared = bandClearedAt.get(geqBandIndex)
@@ -712,7 +723,10 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       }
 
       advisories.set(advisoryId, advisory)
-      if (!existingId) trackToAdvisoryId.set(track.id, advisoryId)
+      if (!existingId) {
+        trackToAdvisoryId.set(track.id, advisoryId)
+        lastAdvisoryCreatedAt = peak.timestamp
+      }
 
       self.postMessage({ type: 'advisory', advisory } satisfies WorkerOutboundMessage)
       self.postMessage({ type: 'tracksUpdate', tracks: trackManager.getActiveTracks() } satisfies WorkerOutboundMessage)
