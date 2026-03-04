@@ -1,10 +1,13 @@
-// When building for Electron, export a fully static bundle.
-const isElectronBuild = process.env.NEXT_ELECTRON_BUILD === '1'
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  ...(isElectronBuild ? { output: 'export' } : {}),
-  // Silence transitive webpack config warnings under Turbopack
   turbopack: {},
   env: {
     NEXT_PUBLIC_APP_VERSION: '1.0.0',
@@ -18,5 +21,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
-
+export default withSerwist(nextConfig)

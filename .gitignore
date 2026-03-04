@@ -7,4 +7,10 @@ __v0_jsx-dev-runtime.ts
 node_modules/
 .next/
 .env*.local
-.DS_Storenul
+.DS_Store
+
+# Serwist generated service worker
+public/sw*
+public/swe-worker*
+
+nul

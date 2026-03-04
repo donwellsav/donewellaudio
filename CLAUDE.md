@@ -13,18 +13,16 @@
 - **Visualization:** HTML5 Canvas
 - **State:** React 19 hooks (no external state library)
 - **Database:** Neon PostgreSQL (serverless, for session history)
-- **Desktop:** Electron 33 + electron-builder
+- **PWA:** Serwist (service worker, offline caching, installable)
 - **Package Manager:** pnpm
 
 ## Commands
 
 ```bash
-pnpm dev              # Start Next.js dev server on :3000
-pnpm build            # Production build
+pnpm dev              # Start Next.js dev server on :3000 (Turbopack, no SW)
+pnpm build            # Production build (webpack, generates SW)
 pnpm start            # Start production server
 pnpm lint             # Run ESLint (Next.js defaults)
-pnpm export           # Static export for Electron
-pnpm electron:dev     # Start Electron dev mode
 ```
 
 ## Project Structure
