@@ -1,7 +1,7 @@
 'use client'
 
 // Help menu for Kill The Ring application
-// 5-tab layout: Guide, Modes & Tips, Algorithms, The Math, Reference
+// 7-tab layout: Guide, Modes, Algorithms, The Math, Reference, About, Changes
 // Updated with all 7 detection algorithms (MSD, Phase, Spectral, Comb, IHR, PTMR, Compression)
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,15 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { HelpCircle } from 'lucide-react'
+import { CHANGELOG, type ChangeType } from '@/lib/changelog'
+
+const TYPE_STYLES: Record<ChangeType, { label: string; className: string }> = {
+  feat: { label: 'Feature', className: 'bg-emerald-500/15 text-emerald-400' },
+  fix: { label: 'Fix', className: 'bg-orange-500/15 text-orange-400' },
+  perf: { label: 'Perf', className: 'bg-cyan-500/15 text-cyan-400' },
+  refactor: { label: 'Refactor', className: 'bg-violet-500/15 text-violet-400' },
+  ui: { label: 'UI', className: 'bg-pink-500/15 text-pink-400' },
+}
 
 export function HelpMenu() {
   const [open, setOpen] = useState(false)
@@ -32,13 +41,14 @@ export function HelpMenu() {
         </DialogHeader>
 
         <Tabs defaultValue="guide" className="mt-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="guide">Guide</TabsTrigger>
             <TabsTrigger value="modes">Modes</TabsTrigger>
             <TabsTrigger value="algorithms">Algorithms</TabsTrigger>
             <TabsTrigger value="math">The Math</TabsTrigger>
             <TabsTrigger value="reference">Reference</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
+            <TabsTrigger value="changes">Changes</TabsTrigger>
           </TabsList>
 
           {/* ═══════════════════════════════════════════════════════════════
@@ -835,6 +845,29 @@ export function HelpMenu() {
                 Algorithm research: DAFx-16, KU Leuven (2025), DBX, Hopkins (2007), IEC 61672-1
               </p>
             </Section>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════════════════════
+              TAB 7: CHANGES
+              ═══════════════════════════════════════════════════════════════ */}
+          <TabsContent value="changes" className="mt-4 space-y-4">
+            {CHANGELOG.map((entry) => (
+              <Section key={entry.version} title={`v${entry.version} — ${entry.date}${entry.highlights ? ` · ${entry.highlights}` : ''}`}>
+                <ul className="space-y-1.5">
+                  {entry.changes.map((change) => {
+                    const style = TYPE_STYLES[change.type]
+                    return (
+                      <li key={change.description} className="flex items-start gap-2">
+                        <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium leading-none shrink-0 mt-0.5 ${style.className}`}>
+                          {style.label}
+                        </span>
+                        <span>{change.description}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </Section>
+            ))}
           </TabsContent>
         </Tabs>
       </DialogContent>
