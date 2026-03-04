@@ -179,6 +179,7 @@ export class AudioAnalyzer {
           msdFrameCount: undefined,
           isCompressed: undefined,
           compressionRatio: undefined,
+          isSignalPresent: state.isSignalPresent,
         }
 
         this.callbacks.onSpectrum?.(spectrumData)

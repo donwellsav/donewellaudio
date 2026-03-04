@@ -1,7 +1,7 @@
 // KillTheRing2 Feedback Detector - Core DSP engine for peak detection
 // Adapted from FeedbackDetector.js with TypeScript and enhancements
 
-import { A_WEIGHTING, LN10_OVER_10, HARMONIC_SETTINGS, MSD_SETTINGS, PERSISTENCE_SCORING } from './constants'
+import { A_WEIGHTING, LN10_OVER_10, HARMONIC_SETTINGS, MSD_SETTINGS, PERSISTENCE_SCORING, SIGNAL_GATE, HYSTERESIS } from './constants'
 import { 
   medianInPlace, 
   buildPrefixSum, 
@@ -30,6 +30,7 @@ export interface FeedbackDetectorState {
   autoGainEnabled: boolean
   autoGainDb: number // Current auto-computed gain in dB
   rawPeakDb: number // Pre-gain peak level in dBFS
+  isSignalPresent: boolean // True when pre-gain signal is above silence threshold
   // Advanced algorithm state (populated by DSP pipeline)
   algorithmMode?: AlgorithmMode
   contentType?: ContentType
@@ -120,6 +121,13 @@ export class FeedbackDetector {
   private _autoGainMaxDb: number = 30 // Max auto gain
   private _autoGainAttackCoeff: number = 0 // EMA attack (computed from sample rate)
   private _autoGainReleaseCoeff: number = 0 // EMA release (computed from sample rate)
+
+  // Signal presence gate — prevents auto-gain from amplifying silence into phantom peaks
+  private _isSignalPresent: boolean = false
+  private _silenceThresholdDb: number = SIGNAL_GATE.DEFAULT_SILENCE_THRESHOLD_DB
+
+  // Hysteresis — recently cleared bins need extra dB to re-trigger (prevents flicker duplicates)
+  private _recentlyClearedBins: Map<number, number> = new Map() // bin -> cleared timestamp
 
   // Advanced algorithm state — set externally by DSP pipeline, returned via getState()
   private _algorithmMode: AlgorithmMode | undefined = undefined
@@ -303,6 +311,9 @@ export class FeedbackDetector {
     if (settings.mode !== undefined) {
       // Direct assignment - OperationMode now matches AnalysisConfig['mode']
       mappedConfig.mode = settings.mode
+      // Update signal presence gate threshold for this mode
+      this._silenceThresholdDb = SIGNAL_GATE.MODE_SILENCE_THRESHOLDS[settings.mode]
+        ?? SIGNAL_GATE.DEFAULT_SILENCE_THRESHOLD_DB
     }
     if (settings.inputGainDb !== undefined) {
       mappedConfig.inputGainDb = settings.inputGainDb
@@ -406,6 +417,7 @@ export class FeedbackDetector {
       autoGainEnabled: this._autoGainEnabled,
       autoGainDb: Math.round(this._autoGainDb),
       rawPeakDb: this._rawPeakDb,
+      isSignalPresent: this._isSignalPresent,
       algorithmMode: this._algorithmMode,
       contentType: this._contentType,
       msdFrameCount: this._msdFrameCount,
@@ -514,6 +526,9 @@ export class FeedbackDetector {
     // Reset persistence scoring
     if (this.persistenceCount) this.persistenceCount.fill(0)
     if (this.persistenceLastDb) this.persistenceLastDb.fill(-200)
+
+    // Reset hysteresis state
+    this._recentlyClearedBins.clear()
   }
 
   private computeAWeightingTable(): void {
@@ -679,6 +694,12 @@ export class FeedbackDetector {
       }
       this._rawPeakDb = rawPeak
 
+      // ── Signal presence gate ──────────────────────────────────────────
+      // If the raw (pre-gain) signal is below silence threshold, there is
+      // no meaningful audio. Skip all peak detection to prevent auto-gain
+      // from amplifying noise floor artifacts into phantom feedback peaks.
+      this._isSignalPresent = rawPeak >= this._silenceThresholdDb
+
       // Desired gain: shift rawPeak to target (-12 dBFS)
       // e.g. raw peak at -40 → desired gain = -12 - (-40) = +28 dB
       // e.g. raw peak at -5  → desired gain = -12 - (-5) = -7 dB
@@ -694,6 +715,22 @@ export class FeedbackDetector {
         ? this._autoGainReleaseCoeff  // gain needs to go up (quiet signal) — slow
         : this._autoGainAttackCoeff   // gain needs to go down (loud signal) — fast
       this._autoGainDb += coeff * (desiredGain - this._autoGainDb)
+
+      // When no signal present, auto-gain EMA still updates (recovers when signal
+      // returns) but skip all peak detection below. Noise floor continues tracking.
+      if (!this._isSignalPresent) return
+    } else {
+      // Manual gain mode — still check signal presence via raw peak scan
+      let rawPeak = -100
+      const mgStart = this.startBin > 0 ? this.startBin : 1
+      const mgEnd = this.endBin > 0 ? this.endBin : n - 1
+      for (let i = mgStart; i <= mgEnd; i++) {
+        const v = freqDb[i]
+        if (Number.isFinite(v) && v > rawPeak) rawPeak = v
+      }
+      this._rawPeakDb = rawPeak
+      this._isSignalPresent = rawPeak >= this._silenceThresholdDb
+      if (!this._isSignalPresent) return
     }
 
     // Use auto-gain when enabled, otherwise manual setting
@@ -754,6 +791,22 @@ export class FeedbackDetector {
       const isLocalMax = peakDb >= leftDb && peakDb >= rightDb && (peakDb > leftDb || peakDb > rightDb)
       let valid = isLocalMax && peakDb >= effectiveThresholdDb
       let prominence = -Infinity
+
+      // Hysteresis: recently cleared bins need extra dB to re-trigger (prevents flicker duplicates)
+      if (valid && active[i] === 0) {
+        const clearedAt = this._recentlyClearedBins.get(i)
+        if (clearedAt !== undefined) {
+          if ((now - clearedAt) < this.config.clearMs) {
+            // Within cooldown — require extra dB
+            if (peakDb < effectiveThresholdDb + HYSTERESIS.RE_TRIGGER_DB) {
+              valid = false
+            }
+          } else {
+            // Cooldown expired — clean up
+            this._recentlyClearedBins.delete(i)
+          }
+        }
+      }
 
       if (valid) {
         // ±2 bin Blackman exclusion for neighborhood averaging
@@ -926,6 +979,9 @@ export class FeedbackDetector {
             
             // Reset MSD history for this bin
             this.resetMsdForBin(i)
+
+            // Record for hysteresis — recently cleared bins need extra dB to re-trigger
+            this._recentlyClearedBins.set(i, now)
 
             this.callbacks.onPeakCleared?.({
               binIndex: i,

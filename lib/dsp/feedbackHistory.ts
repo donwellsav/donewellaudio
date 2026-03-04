@@ -11,6 +11,7 @@
  */
 
 import { hzToCents } from '@/lib/utils/pitchUtils'
+import { HOTSPOT_COOLDOWN_MS } from '@/lib/dsp/constants'
 
 // ============================================================================
 // TYPES
@@ -44,6 +45,7 @@ export interface FrequencyHotspot {
   avgConfidence: number
   suggestedCutDb: number
   isRepeatOffender: boolean // 3+ occurrences
+  lastEventTime: number // Timestamp of last event (for cooldown)
 }
 
 export interface SessionSummary {
@@ -66,7 +68,7 @@ export interface SessionSummary {
 // ============================================================================
 
 const STORAGE_KEY = 'killTheRing_feedbackHistory'
-const FREQUENCY_GROUPING_CENTS = 50 // Group frequencies within 50 cents
+const FREQUENCY_GROUPING_CENTS = 100 // Group frequencies within 100 cents (match track association tolerance)
 const REPEAT_OFFENDER_THRESHOLD = 3 // 3+ occurrences = repeat offender
 const MAX_EVENTS_PER_SESSION = 500 // Limit memory usage
 
@@ -269,7 +271,7 @@ export class FeedbackHistory {
   private updateHotspot(event: FeedbackEvent): void {
     // Find existing hotspot or create new one
     let hotspot = this.findHotspotForFrequency(event.frequencyHz)
-    
+
     if (!hotspot) {
       // Create new hotspot
       hotspot = {
@@ -283,14 +285,21 @@ export class FeedbackHistory {
         avgConfidence: event.confidence,
         suggestedCutDb: Math.min(event.prominenceDb * 1.5, 12), // 1.5x prominence, max 12dB
         isRepeatOffender: false,
+        lastEventTime: 0,
       }
       // Use rounded frequency as key for grouping
       const key = Math.round(event.frequencyHz / 10) * 10
       this.hotspots.set(key, hotspot)
     }
-    
+
+    // Cooldown — skip if same hotspot fired too recently (prevents inflated counts)
+    if (hotspot.lastEventTime > 0 && (event.timestamp - hotspot.lastEventTime) < HOTSPOT_COOLDOWN_MS) {
+      return
+    }
+
     // Update hotspot statistics
     hotspot.occurrences++
+    hotspot.lastEventTime = event.timestamp
     hotspot.events.push(event)
     hotspot.lastSeen = event.timestamp
     hotspot.maxAmplitudeDb = Math.max(hotspot.maxAmplitudeDb, event.amplitudeDb)

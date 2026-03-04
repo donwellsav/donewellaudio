@@ -410,7 +410,7 @@ export const OPERATION_MODES: Record<string, ModePreset> = {
     fftSize: 4096,           // Fastest time response for instant detection
     minFrequency: 200,       // Monitor feedback typically mid-range
     maxFrequency: 6000,      // Most monitor feedback is mid-range
-    sustainMs: 150,          // Ultra-fast confirmation
+    sustainMs: 200,          // Fast confirmation — raised from 150ms to reduce transient false positives
     clearMs: 300,            // Fast clearing
     holdTimeMs: 2000,        // Short hold — monitor engineer works fast
     confidenceThreshold: 0.40, // Aggressive — better false positives than missed feedback
@@ -440,7 +440,7 @@ export const OPERATION_MODES: Record<string, ModePreset> = {
     fftSize: 16384,          // Maximum frequency resolution (2.93 Hz at 48 kHz)
     minFrequency: 60,        // Full range analysis
     maxFrequency: 16000,     // Full range
-    sustainMs: 150,          // Fast confirmation
+    sustainMs: 200,          // Fast confirmation — raised from 150ms to reduce noise false positives
     clearMs: 300,            // Fast clearing
     holdTimeMs: 5000,        // Long hold for reference during EQ adjustments
     confidenceThreshold: 0.30, // Surface everything
@@ -531,7 +531,7 @@ export const DEFAULT_SETTINGS = {
   growthRateThreshold: 1.0, // FAST — detect growing peaks immediately
   holdTimeMs: 3000, // Long hold for EQ reference during adjustments
   noiseFloorDecay: 0.98, // Fast adaptation for dynamic conference environments
-  peakMergeCents: 100, // 1 semitone — prevents near-duplicate advisories from frequency jitter
+  peakMergeCents: 150, // 1.5 semitones — wider merge window reduces same-band duplicate advisories
   maxDisplayedIssues: 8, // Show more issues — don't hide potential problems
   eqPreset: 'surgical' as const, // Precise narrow cuts preserve speech clarity
   musicAware: false, // Disabled — no music in corporate/conference
@@ -697,7 +697,7 @@ export const MSD_SETTINGS = {
   /** Minimum frames for rock/pop (22% accuracy - use with compression detection) */
   MIN_FRAMES_ROCK: 50,
   /** Default minimum frames */
-  DEFAULT_MIN_FRAMES: 15,
+  DEFAULT_MIN_FRAMES: 20, // ~333ms at 60fps — increased from 15 for better statistical confidence
   /** Maximum frames (balance accuracy vs latency) */
   MAX_FRAMES: 50,
   /** Ring buffer size for MSD magnitude history per bin */
@@ -730,6 +730,32 @@ export const PERSISTENCE_SCORING = {
   /** Confidence penalty for transient peaks */
   LOW_PERSISTENCE_PENALTY: 0.05,
 } as const
+
+// Signal presence gate — prevents auto-gain from amplifying silence into phantom peaks
+export const SIGNAL_GATE = {
+  /** Default silence threshold in dBFS (pre-gain). Below this, no detection runs. */
+  DEFAULT_SILENCE_THRESHOLD_DB: -65,
+  /** Per-mode overrides (quieter venues need lower thresholds) */
+  MODE_SILENCE_THRESHOLDS: {
+    speech: -65,
+    worship: -60,
+    liveMusic: -55,
+    theater: -68,
+    monitors: -55,
+    ringOut: -70,      // ring-out wants maximum sensitivity
+    broadcast: -70,    // studio is very quiet
+    outdoor: -55,
+  } as Record<string, number>,
+} as const
+
+// Hysteresis for peak re-detection — prevents on-off-on flickering
+export const HYSTERESIS = {
+  /** Extra dB above threshold required to re-trigger a recently cleared peak */
+  RE_TRIGGER_DB: 3,
+} as const
+
+// Hotspot event cooldown — prevents inflated occurrence counts from rapid re-triggers
+export const HOTSPOT_COOLDOWN_MS = 2000
 
 // Phase coherence from KU Leuven/Nyquist analysis
 export const PHASE_SETTINGS = {

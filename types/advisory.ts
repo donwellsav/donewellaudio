@@ -145,6 +145,7 @@ export interface ClassificationResult {
   cumulativeGrowthDb?: number // Total dB growth since onset
   frequencyBand?: 'LOW' | 'MID' | 'HIGH' // Which frequency band this falls into
   confidenceLabel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH' // Human-readable confidence
+  prominenceDb?: number // Carried through for downstream filtering
 }
 
 export interface PitchInfo {
@@ -230,6 +231,7 @@ export interface SpectrumData {
   msdFrameCount?: number // Number of frames accumulated for MSD calculation
   isCompressed?: boolean // Whether compressed/limited audio is detected
   compressionRatio?: number // Estimated compression ratio (1.0 = no compression, higher = more compressed)
+  isSignalPresent?: boolean // True when pre-gain signal is above silence threshold
 }
 
 export interface AnalyzerState {

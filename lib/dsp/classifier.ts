@@ -347,6 +347,7 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings): C
     cumulativeGrowthDb: cumulativeGrowth.totalGrowthDb,
     frequencyBand: freqBand.band,
     confidenceLabel: calibratedResult.confidenceLabel,
+    prominenceDb: features.prominenceDb,
   }
 }
 
@@ -377,6 +378,12 @@ export function shouldReportIssue(
 
   // Filter by confidence threshold (reduces low-confidence alerts)
   if (confidence < confidenceThreshold) {
+    return false
+  }
+
+  // Prominence floor — noise bursts rarely sustain 8 dB above neighbors
+  // This eliminates broadband noise spikes that pass threshold checks
+  if (classification.prominenceDb !== undefined && classification.prominenceDb < 8) {
     return false
   }
 
