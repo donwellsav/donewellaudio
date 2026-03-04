@@ -32,12 +32,13 @@ export function HelpMenu() {
         </DialogHeader>
 
         <Tabs defaultValue="guide" className="mt-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="guide">Guide</TabsTrigger>
             <TabsTrigger value="modes">Modes</TabsTrigger>
             <TabsTrigger value="algorithms">Algorithms</TabsTrigger>
             <TabsTrigger value="math">The Math</TabsTrigger>
             <TabsTrigger value="reference">Reference</TabsTrigger>
+            <TabsTrigger value="about">About</TabsTrigger>
           </TabsList>
 
           {/* ═══════════════════════════════════════════════════════════════
@@ -704,24 +705,24 @@ export function HelpMenu() {
               </ul>
             </Section>
 
-            <Section title="Default Configuration">
+            <Section title="Default Configuration (Speech Mode)">
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                <span className="text-muted-foreground">Mode</span><span>Feedback Hunt</span>
-                <span className="text-muted-foreground">Frequency range</span><span>200 Hz – 8 kHz</span>
+                <span className="text-muted-foreground">Mode</span><span>Speech — Corporate &amp; Conference</span>
+                <span className="text-muted-foreground">Frequency range</span><span>150 Hz – 8 kHz</span>
                 <span className="text-muted-foreground">FFT size</span><span>8192 (5.86 Hz/bin @ 48 kHz)</span>
                 <span className="text-muted-foreground">Smoothing</span><span>50%</span>
                 <span className="text-muted-foreground">Feedback threshold</span><span>6 dB</span>
-                <span className="text-muted-foreground">Ring threshold</span><span>4 dB</span>
-                <span className="text-muted-foreground">Growth rate</span><span>1.5 dB/s</span>
+                <span className="text-muted-foreground">Ring threshold</span><span>3 dB</span>
+                <span className="text-muted-foreground">Growth rate</span><span>1.0 dB/s</span>
                 <span className="text-muted-foreground">Hold time</span><span>3 s</span>
                 <span className="text-muted-foreground">Input gain</span><span>+15 dB</span>
-                <span className="text-muted-foreground">Confidence threshold</span><span>40%</span>
+                <span className="text-muted-foreground">Confidence threshold</span><span>35%</span>
                 <span className="text-muted-foreground">Algorithm mode</span><span>Combined (MSD + Phase)</span>
                 <span className="text-muted-foreground">A-weighting</span><span>Enabled</span>
-                <span className="text-muted-foreground">Sustain time</span><span>250 ms</span>
-                <span className="text-muted-foreground">Clear time</span><span>400 ms</span>
+                <span className="text-muted-foreground">Sustain time</span><span>200 ms</span>
+                <span className="text-muted-foreground">Clear time</span><span>350 ms</span>
                 <span className="text-muted-foreground">Threshold mode</span><span>Hybrid</span>
-                <span className="text-muted-foreground">Prominence</span><span>12 dB</span>
+                <span className="text-muted-foreground">Prominence</span><span>10 dB</span>
                 <span className="text-muted-foreground">Max tracks</span><span>64</span>
                 <span className="text-muted-foreground">Track timeout</span><span>1000 ms</span>
               </div>
@@ -789,6 +790,50 @@ export function HelpMenu() {
                 <li><strong>Sample rate:</strong> System default (typically 44.1 kHz or 48 kHz)</li>
                 <li><strong>HTTPS:</strong> Required for microphone access in production</li>
               </ul>
+            </Section>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════════════════════
+              TAB 6: ABOUT
+              ═══════════════════════════════════════════════════════════════ */}
+          <TabsContent value="about" className="mt-4 space-y-4">
+            <div className="flex flex-col items-center text-center py-4 space-y-3">
+              <div className="text-3xl font-black tracking-tight">
+                KILL THE <span className="text-primary">RING</span>
+              </div>
+              <div className="text-sm text-muted-foreground">Real-Time Acoustic Feedback Detection</div>
+              <div className="font-mono text-xs bg-muted px-3 py-1.5 rounded-md">
+                v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0'}
+              </div>
+            </div>
+
+            <Section title="About">
+              <p>
+                Kill The Ring is a professional real-time acoustic feedback detection and analysis tool
+                for live sound engineers. It uses 7 detection algorithms from peer-reviewed acoustic
+                research to identify feedback frequencies and deliver EQ recommendations with pitch translation.
+              </p>
+              <p className="mt-2">
+                The app is <strong>analysis-only</strong> — it never outputs or modifies audio.
+                All processing happens locally in your browser via Web Audio API and Web Workers.
+              </p>
+            </Section>
+
+            <Section title="Tech">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                <span className="text-muted-foreground">Platform</span><span>Progressive Web App</span>
+                <span className="text-muted-foreground">Framework</span><span>Next.js + React 19</span>
+                <span className="text-muted-foreground">Audio</span><span>Web Audio API + Web Workers</span>
+                <span className="text-muted-foreground">Algorithms</span><span>7 (MSD, Phase, Spectral, Comb, IHR, PTMR, Compression)</span>
+                <span className="text-muted-foreground">Offline</span><span>Service worker cached</span>
+              </div>
+            </Section>
+
+            <Section title="Credits">
+              <p>Built by <strong>Don Wells AV</strong></p>
+              <p className="mt-1 text-xs">
+                Algorithm research: DAFx-16, KU Leuven (2025), DBX, Hopkins (2007), IEC 61672-1
+              </p>
             </Section>
           </TabsContent>
         </Tabs>

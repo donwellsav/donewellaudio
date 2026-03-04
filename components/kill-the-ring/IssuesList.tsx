@@ -66,10 +66,15 @@ interface IssueCardProps {
 function IssueCard({ advisory, rank, isApplied, onApply, onDismiss }: IssueCardProps) {
   const severityColor = getSeverityColor(advisory.severity)
   const pitchStr = advisory.advisory?.pitch ? formatPitch(advisory.advisory.pitch) : null
-  const freqStr = advisory.trueFrequencyHz != null ? formatFrequency(advisory.trueFrequencyHz) : '---'
+  const exactFreqStr = advisory.trueFrequencyHz != null ? formatFrequency(advisory.trueFrequencyHz) : '---'
 
   const geq = advisory.advisory?.geq
   const peq = advisory.advisory?.peq
+
+  // Primary display: GEQ band frequency (what the engineer pulls on the fader)
+  // Secondary: exact analyzed frequency + pitch
+  const bandHz = geq?.bandHz
+  const bandStr = bandHz != null ? formatFrequency(bandHz) : exactFreqStr
 
   const velocity = advisory.velocityDbPerSec ?? 0
   const isRunaway = velocity >= RUNAWAY_VELOCITY_THRESHOLD || advisory.isRunaway
@@ -110,11 +115,16 @@ function IssueCard({ advisory, rank, isApplied, onApply, onDismiss }: IssueCardP
         {/* Row 1: frequency + pitch + repeat offender + dismiss */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-baseline gap-1.5 min-w-0">
-            <span className="font-mono text-sm font-semibold text-foreground leading-none">
-              {freqStr}<span className="text-[0.625rem] font-normal text-muted-foreground ml-0.5">Hz</span>
+            <span className="font-mono text-base font-bold text-foreground leading-none tracking-tight">
+              {bandStr}
             </span>
+            {bandHz != null && advisory.trueFrequencyHz != null && (
+              <span className="text-[0.5625rem] font-mono text-muted-foreground/70 leading-none">
+                {exactFreqStr}Hz
+              </span>
+            )}
             {pitchStr && (
-              <span className="text-[0.625rem] font-mono text-muted-foreground leading-none">{pitchStr}</span>
+              <span className="text-[0.5625rem] font-mono text-muted-foreground leading-none">{pitchStr}</span>
             )}
             {/* Cluster count badge — shows when multiple peaks merged into this advisory */}
             {(advisory.clusterCount ?? 1) > 1 && (
@@ -189,7 +199,7 @@ function IssueCard({ advisory, rank, isApplied, onApply, onDismiss }: IssueCardP
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => onDismiss(advisory.id)}
-                      aria-label={`Dismiss ${freqStr}Hz issue`}
+                      aria-label={`Dismiss ${bandStr} issue`}
                       className="w-4 h-4 flex items-center justify-center rounded text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted/60 transition-colors"
                     >
                       <X className="w-2.5 h-2.5" />
@@ -258,7 +268,7 @@ function IssueCard({ advisory, rank, isApplied, onApply, onDismiss }: IssueCardP
                     <button
                       onClick={() => onApply(advisory)}
                       disabled={isApplied}
-                      aria-label={isApplied ? 'Cut sent to EQ Notepad' : `Send cut to EQ Notepad (${freqStr}Hz)`}
+                      aria-label={isApplied ? 'Cut sent to EQ Notepad' : `Send cut to EQ Notepad (${bandStr})`}
                       className={`flex items-center gap-1 text-[0.625rem] px-1.5 py-0.5 rounded transition-colors ${
                         isApplied
                           ? 'text-primary cursor-default'
