@@ -14,6 +14,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.68',
+    date: '2026-03-05',
+    changes: [
+      { type: 'feat', description: 'Raised PEQ Q values to match dbx AFS conventions (surgical Q60, heavy Q30)' },
+      { type: 'feat', description: 'Added ERB-scaled cut depth — shallower below 500 Hz to protect warmth, deeper above 2 kHz where notches are psychoacoustically transparent' },
+      { type: 'feat', description: 'Implemented PHPR (Peak-to-Harmonic Power Ratio) detection — feedback is sinusoidal (no harmonics), music has rich harmonics; used as soft confidence boost in classifier' },
+      { type: 'feat', description: 'Added bandwidth data to PEQ recommendation data model for future detail views' },
+      { type: 'feat', description: '[ ] Verify feedback detection still works in Speech mode with new Q values' },
+      { type: 'feat', description: '[ ] Check that low-frequency feedback recommendations are shallower than before' },
+      { type: 'feat', description: '[ ] Check that high-frequency feedback recommendations are deeper than before' },
+      { type: 'feat', description: '[ ] Verify PHPR appears in advisory `why` reasons when detecting feedback vs. music' },
+      { type: 'feat', description: '[ ] Confirm HelpMenu shows updated Q values (30/60 surgical, 16/30 heavy)' },
+      { type: 'feat', description: '[ ] Test that pure tones (feedback) get "Pure tone (PHPR X dB)" in reasons' },
+      { type: 'feat', description: '[ ] Test that music/speech gets "Harmonics present (PHPR X dB)" in reasons' },
+    ],
+  },
+  {
     version: '1.0.67',
     date: '2026-03-05',
     highlights: 'Pro convention EQ recommendations',
