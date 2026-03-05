@@ -829,6 +829,16 @@ export class FeedbackDetector {
       let valid = isLocalMax && peakDb >= effectiveThresholdDb
       let prominence = -Infinity
 
+      // MSD early detection: if peak is just below threshold but MSD confirms
+      // a howl pattern (consistent growth), lower the threshold to catch it early.
+      // This lets quiet feedback through before it becomes obvious.
+      if (!valid && isLocalMax && peakDb >= effectiveThresholdDb - MSD_SETTINGS.THRESHOLD_REDUCTION_DB) {
+        const msdResult = this.calculateMsd(i)
+        if (msdResult.isHowl || msdResult.fastConfirm) {
+          valid = true
+        }
+      }
+
       // Hysteresis: recently cleared bins need extra dB to re-trigger (prevents flicker duplicates)
       if (valid && active[i] === 0) {
         const clearedAt = this._recentlyClearedBins.get(i)

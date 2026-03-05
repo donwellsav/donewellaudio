@@ -300,7 +300,7 @@ export interface DetectorSettings {
   showTooltips: boolean // Show/hide all help tooltips throughout the UI
   aWeightingEnabled: boolean // Apply A-weighting curve to analysis (per IEC 61672-1)
   // Confidence and filtering
-  confidenceThreshold: number // Minimum confidence to display (0.0-1.0, default 0.40)
+  confidenceThreshold: number // Minimum confidence to display (0.0-1.0, default 0.35)
   // Room acoustics for Schroeder frequency calculation
   roomRT60: number // Reverberation time in seconds (0.3-3.0, default 0.7)
   roomVolume: number // Room volume in m³ (50-5000, default 250)
@@ -347,7 +347,7 @@ export const DEFAULT_CONFIG: AnalysisConfig = {
   thresholdMode: 'hybrid',
   thresholdDb: -40, // More sensitive absolute threshold
   relativeThresholdDb: 18, // Headroom above noise floor in quiet rooms
-  prominenceDb: 10, // Requires real peak standing out from neighbors
+  prominenceDb: 8, // Lowered to catch quieter peaks with MSD confirmation
   neighborhoodBins: 8, // ±2 exclusion means effective 6 each side
   maxIssues: 12, // Show more issues for comprehensive tuning
   ignoreWhistle: true,

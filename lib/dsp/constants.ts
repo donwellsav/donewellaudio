@@ -284,7 +284,7 @@ export const OPERATION_MODES: Record<string, ModePreset> = {
     description: 'Corporate & Conference',
     feedbackThresholdDb: 8,
     ringThresholdDb: 5,
-    growthRateThreshold: 1.5,
+    growthRateThreshold: 1.0,
     musicAware: false,
     autoMusicAware: false,
     fftSize: 8192,           // 5.9 Hz resolution, 170 ms time constant at 48 kHz
@@ -293,8 +293,8 @@ export const OPERATION_MODES: Record<string, ModePreset> = {
     sustainMs: 350,          // Filters speech plosives (~100 ms) while catching sustained feedback
     clearMs: 400,            // Slightly longer decay reduces display flicker
     holdTimeMs: 4000,        // Long hold — time to walk to EQ rack during load-in
-    confidenceThreshold: 0.40, // Balanced — surfaces real issues without noise floor artifacts
-    prominenceDb: 10,        // Requires real peak standing out from neighbors
+    confidenceThreshold: 0.35, // Catches early quiet feedback while filtering noise
+    prominenceDb: 8,         // Lowered to catch quieter peaks with MSD confirmation
     relativeThresholdDb: 18, // Headroom above noise floor in quiet conference rooms
     eqPreset: 'surgical',   // Narrow cuts preserve speech clarity
     aWeightingEnabled: true, // Prioritizes 2–5 kHz speech intelligibility band
@@ -531,7 +531,7 @@ export const DEFAULT_SETTINGS = {
   maxFrequency: 10000, // Condenser sibilance feedback upper bound (extends beyond intelligibility band)
   feedbackThresholdDb: 8, // Balanced — catch feedback while filtering room resonances
   ringThresholdDb: 5, // Balanced — genuine resonances only, not HVAC/ambient
-  growthRateThreshold: 1.5, // Moderate — filters transient plosives from actual growth
+  growthRateThreshold: 1.0, // Allows MSD analysis on slower-growing early feedback
   holdTimeMs: 4000, // Long hold — time to walk to EQ rack during load-in
   noiseFloorDecay: 0.98, // Fast adaptation for dynamic conference environments
   peakMergeCents: 200, // 2 semitones — synced with ASSOCIATION_TOLERANCE_CENTS to prevent merge gap
@@ -546,8 +546,8 @@ export const DEFAULT_SETTINGS = {
   harmonicToleranceCents: 200, // ±200 cents for harmonic matching; synced with ASSOCIATION_TOLERANCE_CENTS
   showTooltips: true, // Show help tooltips (useful for AV techs)
   aWeightingEnabled: true, // A-WEIGHTING ON — prioritizes speech intelligibility band (2–5 kHz)
-  // Confidence filtering — balanced for both soundcheck and live
-  confidenceThreshold: 0.40, // 40% — reduces noise while still catching early feedback
+  // Confidence filtering — catches early quiet feedback while filtering noise
+  confidenceThreshold: 0.35, // 35% — compromise: catches early feedback, filters artifacts
   // Room acoustics — defaults to large ballroom / exhibit hall
   roomRT60: 1.0, // Large ballroom (hard floors, high ceilings, 0.8–1.5 s typical)
   roomVolume: 1000, // ~1000 m³ ballroom (50×40×20 ft, seats ~200 people)
@@ -572,7 +572,7 @@ export const DEFAULT_SETTINGS = {
   // Threshold control
   thresholdMode: 'hybrid' as const,
   relativeThresholdDb: 18, // Headroom above noise floor in quiet conference rooms
-  prominenceDb: 10, // Requires real peak standing out from neighbors
+  prominenceDb: 8, // Lowered to catch quieter peaks with MSD confirmation
   // Noise floor timing
   noiseFloorAttackMs: 200, // Fast attack for dynamic conference environments
   noiseFloorReleaseMs: 1000, // Moderate release
@@ -707,6 +707,8 @@ export const MSD_SETTINGS = {
   HISTORY_SIZE: 64,
   /** Minimum energy above noise floor (dB) required to run MSD analysis on a bin */
   MIN_ENERGY_ABOVE_NOISE_DB: 6,
+  /** Threshold reduction (dB) when MSD confirms howl pattern — lets quiet feedback through earlier */
+  THRESHOLD_REDUCTION_DB: 4,
 } as const
 
 // Peak Persistence Scoring - Phase 2 Enhancement
