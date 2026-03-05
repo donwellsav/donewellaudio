@@ -104,6 +104,7 @@ const ADVISORY_RATE_LIMIT_MS = 1000
 // Room modes decay exponentially (following RT60); feedback drops instantly (Hopkins §1.2.6.3)
 const recentDecays = new Map<number, { lastAmplitudeDb: number; clearTime: number; frequencyHz: number }>()
 const DECAY_ANALYSIS_WINDOW_MS = 500
+let peakProcessCount = 0
 
 // ─── Advanced algorithm buffers (previously dormant, now active) ────────────
 
@@ -129,7 +130,13 @@ let lastFrameTimestamp: number = -1
 // before changing a track's label. Safety-critical RUNAWAY/GROWING bypass this.
 
 const CLASSIFICATION_SMOOTHING_FRAMES = 3
-const classificationLabelHistory = new Map<string, string[]>()
+interface LabelRingBuffer {
+  labels: string[]
+  idx: number
+  count: number
+}
+const LABEL_HISTORY_CAPACITY = CLASSIFICATION_SMOOTHING_FRAMES * 3
+const classificationLabelHistory = new Map<string, LabelRingBuffer>()
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -285,32 +292,30 @@ function smoothClassificationLabel(
     return newLabel
   }
 
-  const history = classificationLabelHistory.get(trackId) ?? []
-  history.push(newLabel)
-
-  // Keep bounded (3x smoothing window)
-  if (history.length > CLASSIFICATION_SMOOTHING_FRAMES * 3) {
-    history.splice(0, history.length - CLASSIFICATION_SMOOTHING_FRAMES * 3)
-  }
-  classificationLabelHistory.set(trackId, history)
-
-  if (history.length < CLASSIFICATION_SMOOTHING_FRAMES) {
-    return newLabel // First few frames, accept whatever comes
+  let ring = classificationLabelHistory.get(trackId)
+  if (!ring) {
+    ring = { labels: new Array<string>(LABEL_HISTORY_CAPACITY), idx: 0, count: 0 }
+    classificationLabelHistory.set(trackId, ring)
   }
 
-  // Check if last N frames are all the same label
-  const recent = history.slice(-CLASSIFICATION_SMOOTHING_FRAMES)
-  if (recent.every(l => l === newLabel)) {
-    return newLabel // Consistent for N frames → accept change
+  ring.labels[ring.idx] = newLabel
+  ring.idx = (ring.idx + 1) % LABEL_HISTORY_CAPACITY
+  ring.count = Math.min(ring.count + 1, LABEL_HISTORY_CAPACITY)
+
+  if (ring.count < CLASSIFICATION_SMOOTHING_FRAMES) {
+    return newLabel
   }
 
-  // Not consistent — use the most common label in the recent window
+  // Count occurrences of each label in the filled portion
   const counts = new Map<string, number>()
-  for (const l of recent) {
-    counts.set(l, (counts.get(l) ?? 0) + 1)
+  for (let i = 0; i < ring.count; i++) {
+    const label = ring.labels[i]
+    counts.set(label, (counts.get(label) ?? 0) + 1)
   }
-  let maxCount = 0
+
+  // Return most frequent label (majority vote)
   let maxLabel = newLabel
+  let maxCount = 0
   for (const [label, count] of counts) {
     if (count > maxCount) {
       maxCount = count
@@ -480,6 +485,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       bandClearedAt.clear()
       lastAdvisoryCreatedAt = 0
       recentDecays.clear()
+      peakProcessCount = 0
       self.postMessage({ type: 'ready' } satisfies WorkerOutboundMessage)
       break
     }
@@ -504,6 +510,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       bandClearedAt.clear()
       lastAdvisoryCreatedAt = 0
       recentDecays.clear()
+      peakProcessCount = 0
       msdBuffer?.reset()
       phaseBuffer?.reset()
       ampBuffer.reset()
@@ -543,19 +550,28 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
         const rmsDb = validBins > 0 ? 10 * Math.log10(sumLinearPower / validBins) : -100
         ampBuffer.addSample(specMax, rmsDb)
 
-        // Phase coherence: extract phase angles from time-domain waveform via FFT
-        // and feed to PhaseHistoryBuffer (KU Leuven 2025 algorithm)
+        // Phase coherence: conditionally extract phase angles via FFT
+        // Skip expensive O(N log N) computation unless a track shows feedback signatures
         if (msg.timeDomain && phaseBuffer) {
-          const phases = computePhaseAngles(msg.timeDomain)
-          if (phases) {
-            phaseBuffer.addFrame(phases)
+          const activeTracks = trackManager.getRawTracks()
+          const needsPhase = activeTracks.length > 0 && activeTracks.some(t =>
+            t.velocityDbPerSec > 3 || t.qEstimate > 30
+          )
+          if (needsPhase) {
+            const phases = computePhaseAngles(msg.timeDomain)
+            if (phases) {
+              phaseBuffer.addFrame(phases)
+            }
           }
         }
 
-        // ── Decay rate analysis — check recently cleared bins ──────────────
-        // Room modes decay exponentially (following RT60); feedback drops instantly.
-        // If a recently cleared bin is decaying at the RT60 rate, extend band cooldown.
-        {
+        peakProcessCount++
+
+        // Decay rate analysis — only run every 50 peaks to reduce overhead
+        if (peakProcessCount % 50 === 0) {
+          // ── Decay rate analysis — check recently cleared bins ──────────────
+          // Room modes decay exponentially (following RT60); feedback drops instantly.
+          // If a recently cleared bin is decaying at the RT60 rate, extend band cooldown.
           const rt60 = settings?.roomRT60 ?? 1.2
           const roomVol = settings?.roomVolume ?? 250
           const now = peak.timestamp
