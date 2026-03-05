@@ -71,7 +71,7 @@ export const HelpMenu = memo(function HelpMenu() {
                 <li>Tap <strong>Apply</strong> on a card to log the cut to the <strong>EQ Notepad</strong></li>
                 <li>Enable <strong>Show Algorithm Scores</strong> in Settings → Algorithms to see live detection status</li>
                 <li>Use the sidebar sliders to tune detection sensitivity in real time</li>
-                <li>Export session logs for post-event analysis</li>
+                <li>Review <strong>Feedback History</strong> to track repeat offender frequencies</li>
               </ol>
             </Section>
 
@@ -90,7 +90,7 @@ export const HelpMenu = memo(function HelpMenu() {
                 <li><strong>Start / Stop:</strong> Begin or pause audio analysis. LIVE indicator appears while running.</li>
                 <li><strong>Input Gain:</strong> Digital boost before analysis (-40 to +40 dB, default +15 dB).</li>
                 <li><strong>Mode:</strong> Detection sensitivity preset (see Modes tab).</li>
-                <li><strong>Logs / Sessions / Settings:</strong> Access session data, history, and configuration.</li>
+                <li><strong>Settings / Help / History:</strong> Access configuration, documentation, and feedback history.</li>
               </ul>
             </Section>
 
@@ -104,12 +104,12 @@ export const HelpMenu = memo(function HelpMenu() {
               </ul>
             </Section>
 
-            <Section title="Settings Panel">
+            <Section title="Settings Panel (4 Tabs)">
               <ul className="space-y-2">
                 <li><strong>Detection:</strong> FFT size, smoothing, thresholds, A-weighting, harmonic filter, noise floor, peak detection, room acoustics.</li>
                 <li><strong>Algorithms:</strong> Algorithm mode, algorithm scores display, music-aware, max tracks, track timeout, whistle suppression.</li>
-                <li><strong>Display:</strong> Tooltips, graph font size, max issues, EQ style, RTA dB range, spectrum line width, save/load defaults.</li>
-                <li><strong>Export:</strong> Session log export in CSV, JSON, or plain text formats.</li>
+                <li><strong>Display:</strong> Tooltips, graph font size, max issues, EQ style, RTA dB range, spectrum line width.</li>
+                <li><strong>Advanced:</strong> Save/load defaults, reset to factory settings.</li>
               </ul>
             </Section>
           </TabsContent>
@@ -149,10 +149,13 @@ export const HelpMenu = memo(function HelpMenu() {
 
             <Section title="Choosing a Mode">
               <ul className="space-y-2">
-                <li>General soundcheck → <strong>Feedback Hunt</strong></li>
-                <li>Initial system ring-out → <strong>Calibration</strong> or <strong>Aggressive</strong></li>
-                <li>Monitor tuning / corporate speech → <strong>Vocal Ring</strong></li>
-                <li>During live performance → <strong>Music-Aware</strong> or enable <strong>Auto Music-Aware</strong></li>
+                <li>Corporate conference / lecture → <strong>Speech</strong> (default)</li>
+                <li>Initial system ring-out / sound check → <strong>Ring Out</strong></li>
+                <li>Stage wedge tuning → <strong>Monitors</strong></li>
+                <li>Church / reverberant space → <strong>Worship</strong></li>
+                <li>Concert / festival → <strong>Live Music</strong> or <strong>Outdoor</strong></li>
+                <li>Drama / musical / body mics → <strong>Theater</strong></li>
+                <li>Studio / podcast / radio → <strong>Broadcast</strong></li>
               </ul>
             </Section>
 
@@ -166,12 +169,12 @@ export const HelpMenu = memo(function HelpMenu() {
 
             <Section title="Workflow Best Practices">
               <ol className="list-decimal list-inside space-y-2">
-                <li>Start with <strong>Calibration</strong> mode during initial system setup</li>
+                <li>Start with <strong>Ring Out</strong> mode during initial system setup</li>
                 <li>Enable <strong>Show Algorithm Scores</strong> to see what each algorithm detects</li>
                 <li>Watch the <strong>MSD frame count</strong> — wait for 15+ frames before trusting results</li>
                 <li>If status bar shows <strong>COMPRESSED</strong>, phase coherence is most reliable</li>
                 <li>Use <strong>Comb Pattern</strong> predictions to preemptively address upcoming feedback frequencies</li>
-                <li>Switch to <strong>Feedback Hunt</strong> for general PA monitoring</li>
+                <li>Switch to <strong>Speech</strong> for general PA monitoring</li>
                 <li>Enable <strong>Auto Music-Aware</strong> so sensitivity adjusts automatically during shows</li>
                 <li>Apply cuts conservatively — start with 3 dB and increase only if needed</li>
               </ol>
@@ -696,6 +699,7 @@ export const HelpMenu = memo(function HelpMenu() {
                 <li><strong>Grandke, T. (1983):</strong> Interpolation algorithms for discrete Fourier transforms of sinusoidal signals. <em>IEEE Trans. Instrum. Meas.</em>, 32(2), 112–116.</li>
                 <li><strong>IEC 61672-1:2013:</strong> Electroacoustics — Sound level meters — Part 1: Specifications. A-weighting frequency response curve.</li>
                 <li><strong>Nyquist, H. (1932):</strong> Regeneration theory. <em>Bell System Technical Journal</em>, 11(1), 126–147. Stability criterion for feedback systems.</li>
+                <li><strong>Everest, F.A.:</strong> <em>Master Handbook of Acoustics.</em> Reverberation time effects on feedback, room mode behavior, and standing wave patterns.</li>
               </ul>
             </Section>
           </TabsContent>
@@ -724,15 +728,15 @@ export const HelpMenu = memo(function HelpMenu() {
                 <span className="text-muted-foreground">Feedback threshold</span><span>6 dB</span>
                 <span className="text-muted-foreground">Ring threshold</span><span>3 dB</span>
                 <span className="text-muted-foreground">Growth rate</span><span>1.0 dB/s</span>
-                <span className="text-muted-foreground">Hold time</span><span>3 s</span>
+                <span className="text-muted-foreground">Hold time</span><span>4 s</span>
                 <span className="text-muted-foreground">Input gain</span><span>+15 dB</span>
-                <span className="text-muted-foreground">Confidence threshold</span><span>35%</span>
+                <span className="text-muted-foreground">Confidence threshold</span><span>30%</span>
                 <span className="text-muted-foreground">Algorithm mode</span><span>Combined (MSD + Phase)</span>
                 <span className="text-muted-foreground">A-weighting</span><span>Enabled</span>
-                <span className="text-muted-foreground">Sustain time</span><span>200 ms</span>
+                <span className="text-muted-foreground">Sustain time</span><span>250 ms</span>
                 <span className="text-muted-foreground">Clear time</span><span>350 ms</span>
                 <span className="text-muted-foreground">Threshold mode</span><span>Hybrid</span>
-                <span className="text-muted-foreground">Prominence</span><span>10 dB</span>
+                <span className="text-muted-foreground">Prominence</span><span>8 dB</span>
                 <span className="text-muted-foreground">Max tracks</span><span>64</span>
                 <span className="text-muted-foreground">Track timeout</span><span>1000 ms</span>
               </div>
@@ -779,16 +783,24 @@ export const HelpMenu = memo(function HelpMenu() {
             <Section title="Room Presets">
               <div className="space-y-2 text-xs">
                 <div>
-                  <strong>Small Boardroom:</strong> RT60 0.5s, Volume 80m³, Schroeder 158 Hz.
-                  10-20 people, huddle rooms.
+                  <strong>Small Room:</strong> RT60 0.4s, Volume 80m³, Schroeder 141 Hz.
+                  Boardrooms, huddle rooms, podcast booths (10–20 people).
                 </div>
                 <div>
-                  <strong>Medium Conference:</strong> RT60 0.7s, Volume 250m³, Schroeder 106 Hz.
-                  20-50 people, standard conference/training rooms.
+                  <strong>Medium Room:</strong> RT60 0.7s, Volume 300m³, Schroeder 97 Hz.
+                  Conference rooms, classrooms, training rooms (20–80 people).
                 </div>
                 <div>
-                  <strong>Large Auditorium:</strong> RT60 1.0s, Volume 1000m³, Schroeder 63 Hz.
-                  50-200 people, ballrooms, town halls.
+                  <strong>Large Venue:</strong> RT60 1.0s, Volume 1000m³, Schroeder 63 Hz.
+                  Ballrooms, auditoriums, theaters, town halls (80–500 people).
+                </div>
+                <div>
+                  <strong>Arena / Hall:</strong> RT60 1.8s, Volume 5000m³, Schroeder 38 Hz.
+                  Concert halls, arenas, convention centers (500+ people).
+                </div>
+                <div>
+                  <strong>Worship Space:</strong> RT60 2.0s, Volume 2000m³, Schroeder 63 Hz.
+                  Churches, cathedrals, temples (highly reverberant).
                 </div>
               </div>
             </Section>
