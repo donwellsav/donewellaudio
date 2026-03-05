@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useCallback, useState, memo } from 'react'
+import React, { useRef, useEffect, useCallback, useState, memo } from 'react'
 import Image from 'next/image'
 import { useAnimationFrame } from '@/hooks/useAnimationFrame'
 import { freqToLogPosition, clamp } from '@/lib/utils/mathHelpers'
@@ -11,27 +11,25 @@ import type { SpectrumData, Advisory } from '@/types/advisory'
 import type { EarlyWarning } from '@/hooks/useAudioAnalyzer'
 
 interface SpectrumCanvasProps {
-  spectrum: SpectrumData | null
-  advisories: Advisory[]
+  spectrumRef: React.RefObject<SpectrumData | null>
+  advisories: Advisory[]  // Keep as prop — changes infrequently, drives markers
   isRunning: boolean
   graphFontSize?: number
   onStart?: () => void
-  /** Early warning predictions for upcoming feedback frequencies */
   earlyWarning?: EarlyWarning | null
-  /** Override RTA display dB minimum (default from CANVAS_SETTINGS) */
   rtaDbMin?: number
-  /** Override RTA display dB maximum (default from CANVAS_SETTINGS) */
   rtaDbMax?: number
-  /** Override spectrum line width in pixels (default 1.5) */
   spectrumLineWidth?: number
 }
 
 const FREQ_LABELS = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]
 
-export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrum, advisories, isRunning, graphFontSize = 11, onStart, earlyWarning, rtaDbMin: rtaDbMinProp, rtaDbMax: rtaDbMaxProp, spectrumLineWidth: spectrumLineWidthProp }: SpectrumCanvasProps) {
+export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, advisories, isRunning, graphFontSize = 11, onStart, earlyWarning, rtaDbMin: rtaDbMinProp, rtaDbMax: rtaDbMaxProp, spectrumLineWidth: spectrumLineWidthProp }: SpectrumCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const dimensionsRef = useRef({ width: 0, height: 0 })
+  const advisoriesRef = useRef(advisories)
+  advisoriesRef.current = advisories
 
   // Track whether analysis has ever started; once true the placeholder is gone for good
   const [hasEverStarted, setHasEverStarted] = useState(false)
@@ -67,6 +65,8 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrum, advisorie
   }, [])
 
   const render = useCallback(() => {
+    const spectrum = spectrumRef.current
+
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -237,7 +237,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrum, advisorie
     }
 
     // Draw peak markers for advisories
-    for (const advisory of advisories) {
+    for (const advisory of advisoriesRef.current) {
       const freq = advisory.trueFrequencyHz
       const db = advisory.trueAmplitudeDb
       const x = freqToLogPosition(freq, RTA_FREQ_MIN, RTA_FREQ_MAX) * plotWidth
@@ -301,9 +301,9 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrum, advisorie
     ctx.textAlign = 'center'
     ctx.fillText('Hz', width / 2, height - 2)
 
-  }, [spectrum, advisories, graphFontSize, earlyWarning, rtaDbMinProp, rtaDbMaxProp, spectrumLineWidthProp])
+  }, [graphFontSize, earlyWarning, rtaDbMinProp, rtaDbMaxProp, spectrumLineWidthProp])
 
-  useAnimationFrame(render, isRunning || spectrum !== null)
+  useAnimationFrame(render, isRunning || hasEverStarted)
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
