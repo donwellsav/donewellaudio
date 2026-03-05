@@ -71,6 +71,7 @@ const STORAGE_KEY = 'killTheRing_feedbackHistory'
 const FREQUENCY_GROUPING_CENTS = 100 // Group frequencies within 100 cents (match track association tolerance)
 const REPEAT_OFFENDER_THRESHOLD = 3 // 3+ occurrences = repeat offender
 const MAX_EVENTS_PER_SESSION = 500 // Limit memory usage
+const MAX_EVENTS_PER_HOTSPOT = 50 // Rolling window for per-hotspot stats
 
 // ============================================================================
 // FEEDBACK HISTORY CLASS
@@ -301,6 +302,10 @@ export class FeedbackHistory {
     hotspot.occurrences++
     hotspot.lastEventTime = event.timestamp
     hotspot.events.push(event)
+    // Cap events per hotspot to prevent unbounded growth
+    if (hotspot.events.length > MAX_EVENTS_PER_HOTSPOT) {
+      hotspot.events = hotspot.events.slice(-MAX_EVENTS_PER_HOTSPOT)
+    }
     hotspot.lastSeen = event.timestamp
     hotspot.maxAmplitudeDb = Math.max(hotspot.maxAmplitudeDb, event.amplitudeDb)
     hotspot.isRepeatOffender = hotspot.occurrences >= REPEAT_OFFENDER_THRESHOLD
