@@ -14,6 +14,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.70',
+    date: '2026-03-05',
+    changes: [
+      { type: 'feat', description: '**Low-frequency detection restored**: Removed erroneous 400 Hz hard floor, use actual peak frequency in prominence gate instead of worst-case 150 Hz proxy, reduced LOW band multipliers (prominence 1.4x→1.15x, sustain 1.5x→1.2x) to prevent triple-stacking penalties' },
+      { type: 'feat', description: '**Advisory card dedup**: Frequency-proximity matching (200 cents) in React handler replaces same-frequency cards instead of accumulating duplicates; cards persist on clear as requested' },
+      { type: 'feat', description: '[ ] Start analysis with a mic near a monitor speaker — verify feedback below 400 Hz is detected and shown' },
+      { type: 'feat', description: '[ ] Verify no duplicate advisory cards appear for the same frequency' },
+      { type: 'feat', description: '[ ] Verify advisory cards persist (don\'t disappear) when feedback stops momentarily' },
+    ],
+  },
+  {
     version: '1.0.69',
     date: '2026-03-05',
     changes: [
