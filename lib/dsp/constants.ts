@@ -197,6 +197,24 @@ export const ERB_SETTINGS = {
   HIGH_FREQ_SCALE: 1.2,
 } as const
 
+// PHPR (Peak-to-Harmonic Power Ratio) settings
+// Van Waterschoot & Moonen (2011): feedback is sinusoidal (no harmonics),
+// music/speech always has harmonics. High PHPR = likely feedback.
+export const PHPR_SETTINGS = {
+  /** Number of harmonics to check (2nd, 3rd, 4th) */
+  NUM_HARMONICS: 3,
+  /** Bin tolerance for FFT leakage (±1 bin around harmonic) */
+  BIN_TOLERANCE: 1,
+  /** PHPR above this (dB) → boost feedback confidence */
+  FEEDBACK_THRESHOLD_DB: 15,
+  /** PHPR below this (dB) → penalize feedback confidence */
+  MUSIC_THRESHOLD_DB: 8,
+  /** Confidence boost for high PHPR (pure tone) */
+  CONFIDENCE_BOOST: 0.10,
+  /** Confidence penalty for low PHPR (rich harmonics) */
+  CONFIDENCE_PENALTY: 0.10,
+} as const
+
 // Vocal ring assist mode settings - optimized for speech/corporate PA
 export const VOCAL_RING_SETTINGS = {
   BASELINE_EMA_ALPHA: 0.02, // Slow LTAS baseline adaptation

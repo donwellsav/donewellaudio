@@ -74,6 +74,8 @@ export interface DetectedPeak {
   // Q and bandwidth from -3dB analysis
   qEstimate?: number // Estimated Q factor
   bandwidthHz?: number // -3dB bandwidth in Hz
+  /** PHPR (Peak-to-Harmonic Power Ratio) in dB — high = pure tone (feedback), low = harmonics (music) */
+  phpr?: number
 }
 
 export interface TrackFeatures {
