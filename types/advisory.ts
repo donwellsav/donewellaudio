@@ -166,6 +166,8 @@ export interface PEQRecommendation {
   hz: number
   q: number
   gainDb: number
+  /** -3dB bandwidth in Hz (from measured peak analysis) */
+  bandwidthHz?: number
 }
 
 export interface ShelfRecommendation {

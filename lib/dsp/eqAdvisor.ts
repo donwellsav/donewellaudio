@@ -218,10 +218,12 @@ export function generatePEQRecommendation(
   const baseCut = calculateCutDepth(severity, preset)
   const suggestedDb = Math.round(baseCut * erbDepthScale(freqHz))
   const q = calculateQ(severity, preset, getTrackQ(track))
+  // Pass through measured bandwidth from detector (if available)
+  const measuredBandwidth = 'bandwidthHz' in track ? track.bandwidthHz : undefined
 
   // Determine filter type
   let type: PEQRecommendation['type'] = 'bell'
-  
+
   if (severity === 'RUNAWAY') {
     // Use notch for runaway (very narrow, deep cut)
     type = 'notch'
@@ -238,6 +240,7 @@ export function generatePEQRecommendation(
     hz: freqHz,
     q,
     gainDb: suggestedDb,
+    bandwidthHz: measuredBandwidth,
   }
 }
 
