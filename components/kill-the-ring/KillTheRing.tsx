@@ -145,61 +145,16 @@ export const KillTheRing = memo(function KillTheRingComponent() {
 
   const loggerRef = useRef(getEventLogger())
   const logger = loggerRef.current
-  const sessionIdRef = useRef<string | null>(null)
-  const lastFlushedRef = useRef<number>(0)
 
-  const flushEventsToDB = useCallback(async (sessionId: string) => {
-    const allLogs = loggerRef.current.getLogs()
-    const newLogs = allLogs.slice(lastFlushedRef.current)
-    if (newLogs.length === 0) return
-    lastFlushedRef.current = allLogs.length
-    try {
-      await fetch(`/api/sessions/${sessionId}/events`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ events: newLogs }),
-      })
-    } catch {
-      // Non-fatal: events remain in-memory
-    }
-  }, [])
-
-  // Session start/stop effect - only depends on isRunning to prevent orphan sessions
-  // Settings changes while running should NOT create new sessions
+  // Log analysis start/stop
   useEffect(() => {
     if (isRunning) {
       logger.logAnalysisStarted({ mode: settings.mode, fftSize: settings.fftSize })
-      const newId = crypto.randomUUID()
-      lastFlushedRef.current = 0
-      // Only register the session ID once the server confirms the session exists,
-      // so flush and stop handlers never write events to a non-existent session.
-      fetch('/api/sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: newId, mode: settings.mode, fftSize: settings.fftSize }),
-      })
-        .then((res) => { if (res.ok) sessionIdRef.current = newId })
-        .catch(() => {})
     } else {
       logger.logAnalysisStopped()
-      const sid = sessionIdRef.current
-      if (sid) {
-        flushEventsToDB(sid).then(() => {
-          fetch(`/api/sessions/${sid}`, { method: 'PATCH' }).catch(() => {})
-        })
-        sessionIdRef.current = null
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only react to isRunning
   }, [isRunning])
-
-  useEffect(() => {
-    if (!isRunning) return
-    const interval = setInterval(() => {
-      if (sessionIdRef.current) flushEventsToDB(sessionIdRef.current)
-    }, 30_000)
-    return () => clearInterval(interval)
-  }, [isRunning, flushEventsToDB])
 
   useAdvisoryLogging(advisories)
 
