@@ -1,24 +1,19 @@
 import { useEffect, useRef } from 'react'
-import { getEventLogger } from '@/lib/logging/eventLogger'
 import { recordFeedbackFromAdvisory } from '@/lib/dsp/feedbackHistory'
 import type { Advisory } from '@/types/advisory'
 
 /**
- * Hook to automatically log detected advisories
- * Prevents duplicate logging of the same advisory
- * Also records to feedback history for repeat offender tracking
+ * Hook to record detected advisories into feedback history
+ * Prevents duplicate recording of the same advisory
+ * Records to feedback history for repeat offender tracking
  */
 export function useAdvisoryLogging(advisories: Advisory[]) {
   const loggedIdsRef = useRef(new Set<string>())
-  const logger = getEventLogger()
 
   useEffect(() => {
     advisories.forEach(advisory => {
-      // Only log if we haven't logged this advisory ID before
+      // Only record if we haven't seen this advisory ID before
       if (!loggedIdsRef.current.has(advisory.id)) {
-        // Log to event logger
-        logger.logIssueDetected(advisory)
-        
         // Record to feedback history for repeat offender tracking
         // Only record high-confidence feedback/ring events, not instruments or whistles
         if (
@@ -27,12 +22,12 @@ export function useAdvisoryLogging(advisories: Advisory[]) {
         ) {
           recordFeedbackFromAdvisory(advisory)
         }
-        
+
         loggedIdsRef.current.add(advisory.id)
       }
     })
 
-    // Clean up logged IDs for advisories that are no longer in the list
+    // Clean up IDs for advisories that are no longer in the list
     const currentIds = new Set(advisories.map(a => a.id))
     const idsToRemove: string[] = []
     loggedIdsRef.current.forEach(id => {
@@ -41,5 +36,5 @@ export function useAdvisoryLogging(advisories: Advisory[]) {
       }
     })
     idsToRemove.forEach(id => loggedIdsRef.current.delete(id))
-  }, [advisories, logger])
+  }, [advisories])
 }

@@ -12,4 +12,3 @@ export { FeedbackHistoryPanel } from "./FeedbackHistoryPanel";
 export { AlgorithmStatusBar } from "./AlgorithmStatusBar";
 export { EQNotepad } from "./EQNotepad";
 export { ErrorBoundary } from "./ErrorBoundary";
-export { LogsViewer } from "./LogsViewer";

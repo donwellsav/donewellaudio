@@ -14,6 +14,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.6',
+    date: '2026-03-04',
+    highlights: 'Codebase hardening & cleanup',
+    changes: [
+      { type: 'refactor', description: 'Removed Neon PostgreSQL database layer and session persistence' },
+      { type: 'refactor', description: 'Removed in-memory EventLogger and log export UI' },
+      { type: 'refactor', description: 'Extracted getSeverityUrgency to shared DSP module' },
+      { type: 'fix', description: 'Capped hotspot events to 50 to prevent unbounded localStorage growth' },
+      { type: 'refactor', description: 'Added ErrorBoundary, memo(), useCallback across components' },
+      { type: 'refactor', description: 'Removed 8 unused dependencies, migrated to ESLint flat config' },
+    ],
+  },
+  {
     version: '1.0.5',
     date: '2026-03-04',
     highlights: 'Acoustic physics engine',
@@ -70,7 +83,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       { type: 'ui', description: 'Settings panel redesign with GEQ band labels' },
       { type: 'feat', description: '7-algorithm fusion: MSD, Phase, Spectral, Comb, IHR, PTMR, Compression' },
       { type: 'feat', description: 'Acoustic classifier with RT60-aware Q adjustments' },
-      { type: 'feat', description: 'Session history with Neon PostgreSQL' },
+      { type: 'feat', description: 'Feedback history with repeat offender tracking' },
       { type: 'feat', description: 'Real-time spectrum, GEQ, and amplitude visualization' },
     ],
   },

@@ -24,7 +24,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { RotateCcw, LayoutGrid, AlertTriangle, BarChart3, Settings2 } from 'lucide-react'
 import type { Advisory, OperationMode } from '@/types/advisory'
 import { OPERATION_MODES } from '@/lib/dsp/constants'
-import { getEventLogger } from '@/lib/logging/eventLogger'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 
 type GraphView = 'rta' | 'geq' | 'controls'
@@ -143,19 +142,6 @@ export const KillTheRing = memo(function KillTheRingComponent() {
     }
   }, [spectrum?.peak, noiseFloorDb, settings.autoMusicAware, settings.musicAware, settings.autoMusicAwareHysteresisDb, isRunning, updateSettings])
 
-  const loggerRef = useRef(getEventLogger())
-  const logger = loggerRef.current
-
-  // Log analysis start/stop
-  useEffect(() => {
-    if (isRunning) {
-      logger.logAnalysisStarted({ mode: settings.mode, fftSize: settings.fftSize })
-    } else {
-      logger.logAnalysisStopped()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only react to isRunning
-  }, [isRunning])
-
   useAdvisoryLogging(advisories)
 
   // Load saved graph assignments from localStorage
@@ -214,12 +200,10 @@ export const KillTheRing = memo(function KillTheRingComponent() {
       inputGainDb: preset.inputGainDb,
       ignoreWhistle: preset.ignoreWhistle,
     })
-    logger.logSettingsChanged({ mode, reason: 'mode_changed' })
-  }, [updateSettings, logger])
+  }, [updateSettings])
 
   const handleSettingsChange = useCallback((newSettings: Partial<typeof settings>) => {
     updateSettings(newSettings)
-    loggerRef.current.logSettingsChanged(newSettings)
   }, [updateSettings])
 
   const inputLevel = spectrum?.peak ?? -60
@@ -344,7 +328,6 @@ export const KillTheRing = memo(function KillTheRingComponent() {
             onModeChange={handleModeChange}
             onReset={() => {
               resetSettings()
-              logger.logSettingsChanged({ action: 'reset_to_defaults' })
             }}
           />
 
@@ -485,7 +468,6 @@ export const KillTheRing = memo(function KillTheRingComponent() {
               <ResetConfirmDialog
                 onConfirm={() => {
                   resetSettings()
-                  logger.logSettingsChanged({ action: 'reset_to_defaults' })
                 }}
                 trigger={
                   <Button variant="outline" className="w-full h-11 text-sm font-medium">
