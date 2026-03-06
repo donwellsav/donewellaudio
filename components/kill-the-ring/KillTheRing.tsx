@@ -766,28 +766,12 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                       <div className="h-full p-1.5 pt-0.5">
                         <div className="h-full bg-card/60 rounded-lg border border-border overflow-hidden flex flex-col min-w-0">
                           <div className="flex-shrink-0 flex items-center px-2 py-0.5 border-b border-border bg-muted/20">
-                            <div className="flex items-center gap-1">
-                              <GraphChipRow value={bottomRightGraph} onChange={setBottomRightGraph} />
-                              {bottomRightGraph === 'rta' && hasActiveRTAMarkers && (
-                                <button onClick={handleClearRTA} className="px-1.5 py-0.5 rounded text-[0.5rem] font-medium text-muted-foreground hover:text-foreground transition-colors">
-                                  Clear
-                                </button>
-                              )}
-                              {bottomRightGraph === 'geq' && hasActiveGEQBars && (
-                                <button onClick={handleClearGEQ} className="px-1.5 py-0.5 rounded text-[0.5rem] font-medium text-muted-foreground hover:text-foreground transition-colors">
-                                  Clear
-                                </button>
-                              )}
-                            </div>
+                            <span className="text-[0.5rem] font-medium text-muted-foreground">Controls</span>
                           </div>
-                          <div className="flex-1 min-h-0 pointer-events-none">
-                            {bottomRightGraph === 'rta' && <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} />}
-                            {bottomRightGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} clearedIds={geqClearedIds} />}
-                            {bottomRightGraph === 'controls' && (
-                              <div className="h-full p-3 overflow-y-auto pointer-events-auto">
-                                <DetectionControls settings={settings} onModeChange={handleModeChange} onSettingsChange={handleSettingsChange} />
-                              </div>
-                            )}
+                          <div className="flex-1 min-h-0">
+                            <div className="h-full p-3 overflow-y-auto pointer-events-auto">
+                              <DetectionControls settings={settings} onModeChange={handleModeChange} onSettingsChange={handleSettingsChange} />
+                            </div>
                           </div>
                         </div>
                       </div>
