@@ -103,6 +103,14 @@ export const KillTheRing = memo(function KillTheRingComponent() {
     setDismissedIds(new Set(advisories.map(a => a.id)))
   }, [advisories])
 
+  const handleClearResolvedIssues = useCallback(() => {
+    setDismissedIds(prev => {
+      const next = new Set(prev)
+      advisories.forEach(a => { if (a.resolved) next.add(a.id) })
+      return next
+    })
+  }, [advisories])
+
   // Auto-expire dismissed IDs once the advisory is no longer in the live list
   useEffect(() => {
     if (dismissedIds.size === 0) return
@@ -415,6 +423,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                   onApply={handleApply}
                   onDismiss={handleDismiss}
                   onClearAll={handleClearAllIssues}
+                  onClearResolved={handleClearResolvedIssues}
                 />
               </div>
             </div>

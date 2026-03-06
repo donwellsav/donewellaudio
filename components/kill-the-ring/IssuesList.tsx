@@ -21,9 +21,10 @@ interface IssuesListProps {
   onApply?: (advisory: Advisory) => void
   onDismiss?: (id: string) => void
   onClearAll?: () => void
+  onClearResolved?: () => void
 }
 
-export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, appliedIds, dismissedIds, onApply, onDismiss, onClearAll }: IssuesListProps) {
+export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, appliedIds, dismissedIds, onApply, onDismiss, onClearAll, onClearResolved }: IssuesListProps) {
   // Filter dismissed, sort by frequency (low -> high), then slice to max
   const sorted = useMemo(() =>
     [...advisories]
@@ -36,6 +37,8 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
     [advisories, dismissedIds, maxIssues]
   )
 
+  const hasResolved = sorted.some(a => a.resolved)
+
   return (
     <div className="flex flex-col gap-2">
       {sorted.length === 0 ? (
@@ -45,6 +48,26 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
         </div>
       ) : (
         <>
+          {sorted.length > 1 && (
+            <div className="flex items-center justify-end gap-2">
+              {onClearResolved && hasResolved && (
+                <button
+                  onClick={onClearResolved}
+                  className="text-[0.625rem] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wide"
+                >
+                  Clear Resolved
+                </button>
+              )}
+              {onClearAll && (
+                <button
+                  onClick={onClearAll}
+                  className="text-[0.625rem] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wide"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
+          )}
           {sorted.map((advisory, index) => (
             <IssueCard
               key={advisory.id}
@@ -55,14 +78,6 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               onDismiss={onDismiss}
             />
           ))}
-          {onClearAll && sorted.length > 1 && (
-            <button
-              onClick={onClearAll}
-              className="text-[0.625rem] text-muted-foreground hover:text-foreground transition-colors py-1.5 uppercase tracking-wide"
-            >
-              Clear All
-            </button>
-          )}
         </>
       )}
     </div>
