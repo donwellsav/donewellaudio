@@ -9,6 +9,7 @@ export { InputMeterSlider } from "./InputMeterSlider";
 export { ResetConfirmDialog } from "./ResetConfirmDialog";
 export { DetectionControls } from "./DetectionControls";
 export { FeedbackHistoryPanel } from "./FeedbackHistoryPanel";
+export { FullscreenOverlay } from "./FullscreenOverlay";
 export { AlgorithmStatusBar } from "./AlgorithmStatusBar";
 export { EQNotepad } from "./EQNotepad";
 export { ErrorBoundary } from "./ErrorBoundary";

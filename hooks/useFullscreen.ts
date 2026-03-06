@@ -1,0 +1,110 @@
+'use client'
+
+import { useState, useEffect, useCallback, useRef, type RefObject } from 'react'
+
+const OVERLAY_TIMEOUT_MS = 3000
+
+export interface UseFullscreenReturn {
+  isFullscreen: boolean
+  isOverlayVisible: boolean
+  toggle: () => void
+  exit: () => void
+}
+
+export function useFullscreen(elementRef: RefObject<HTMLDivElement | null>): UseFullscreenReturn {
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Fullscreen API helpers ──────────────────────────────
+  const isApiSupported = typeof document !== 'undefined' && !!document.documentElement?.requestFullscreen
+
+  const enter = useCallback(() => {
+    const el = elementRef.current
+    if (!el) return
+
+    if (isApiSupported) {
+      el.requestFullscreen().catch(() => {
+        // iOS Safari fallback — hide header/nav only
+        setIsFullscreen(true)
+      })
+    } else {
+      // No Fullscreen API (iOS PWA) — app-level fullscreen
+      setIsFullscreen(true)
+    }
+  }, [elementRef, isApiSupported])
+
+  const exit = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {
+        setIsFullscreen(false)
+      })
+    } else {
+      setIsFullscreen(false)
+    }
+  }, [])
+
+  const toggle = useCallback(() => {
+    if (isFullscreen) {
+      exit()
+    } else {
+      enter()
+    }
+  }, [isFullscreen, enter, exit])
+
+  // ── Sync with browser fullscreen events ─────────────────
+  useEffect(() => {
+    const onChange = () => {
+      const active = !!document.fullscreenElement
+      setIsFullscreen(active)
+      if (active) setIsOverlayVisible(true)
+    }
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
+
+  // ── Keyboard shortcut: F key ────────────────────────────
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'f' || e.key === 'F') {
+        const tag = (e.target as HTMLElement)?.tagName
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target as HTMLElement)?.isContentEditable) return
+        e.preventDefault()
+        toggle()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [toggle])
+
+  // ── Auto-hide overlay after inactivity ──────────────────
+  const resetHideTimer = useCallback(() => {
+    setIsOverlayVisible(true)
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    hideTimerRef.current = setTimeout(() => setIsOverlayVisible(false), OVERLAY_TIMEOUT_MS)
+  }, [])
+
+  useEffect(() => {
+    if (!isFullscreen) {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+      setIsOverlayVisible(true)
+      return
+    }
+
+    resetHideTimer()
+    const onActivity = () => resetHideTimer()
+
+    window.addEventListener('mousemove', onActivity)
+    window.addEventListener('touchstart', onActivity)
+    window.addEventListener('keydown', onActivity)
+
+    return () => {
+      window.removeEventListener('mousemove', onActivity)
+      window.removeEventListener('touchstart', onActivity)
+      window.removeEventListener('keydown', onActivity)
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    }
+  }, [isFullscreen, resetHideTimer])
+
+  return { isFullscreen, isOverlayVisible, toggle, exit }
+}

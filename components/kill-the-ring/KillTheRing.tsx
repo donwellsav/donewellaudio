@@ -21,7 +21,9 @@ import { FeedbackHistoryPanel } from './FeedbackHistoryPanel'
 import { AlgorithmStatusBar } from './AlgorithmStatusBar'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { RotateCcw, LayoutGrid, AlertTriangle, BarChart3, Settings2, ClipboardList } from 'lucide-react'
+import { FullscreenOverlay } from './FullscreenOverlay'
+import { useFullscreen } from '@/hooks/useFullscreen'
+import { RotateCcw, LayoutGrid, AlertTriangle, BarChart3, Settings2, ClipboardList, Maximize2 } from 'lucide-react'
 import type { Advisory, OperationMode } from '@/types/advisory'
 import { OPERATION_MODES } from '@/lib/dsp/constants'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
@@ -87,6 +89,10 @@ export const KillTheRing = memo(function KillTheRingComponent() {
   const [mobileTab, setMobileTab] = useState<'issues' | 'graph' | 'settings' | 'notepad'>('issues')
   const [activeSidebarTab, setActiveSidebarTab] = useState<'issues' | 'notepad'>('issues')
   const [layoutKey, setLayoutKey] = useState(0)
+
+  // Fullscreen
+  const rootRef = useRef<HTMLDivElement>(null)
+  const { isFullscreen, isOverlayVisible, toggle: toggleFullscreen, exit: exitFullscreen } = useFullscreen(rootRef)
 
   // Applied cuts state (EQ Notepad)
   const [pinnedCuts, setPinnedCuts] = useState<PinnedCut[]>([])
@@ -280,7 +286,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
 
 
   return (
-    <div className="flex flex-col h-screen">
+    <div ref={rootRef} className="flex flex-col h-screen bg-background">
       {/* ─── KILL THE RING v2.1 ─────────────────────────────────────────────────
           Buildtime: 2026-02-28 | Bundler cache: invalidated
           Layout: Header + Mobile/Desktop content + Reset confirmation
@@ -290,6 +296,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
       {/* ── Header ─────────────────────────────────────────────── */}
       {/* Mobile: two-row stacked layout with full-height circle button */}
       {/* Desktop (sm:): single-row layout, logo left, actions right    */}
+      {!isFullscreen && (
       <header className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border bg-card/80 backdrop-blur-sm sm:px-4 sm:py-2 sm:gap-4">
 
         {/* ── MOBILE Row 1: Logo wordmark (right-aligned, above icons) ── */}
@@ -390,6 +397,25 @@ export const KillTheRing = memo(function KillTheRingComponent() {
             </Tooltip>
           </TooltipProvider>
 
+          <TooltipProvider delayDuration={400}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleFullscreen}
+                  className="hidden landscape:flex h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                  aria-label="Toggle fullscreen"
+                >
+                  <Maximize2 className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Fullscreen
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           <FeedbackHistoryPanel />
           <HelpMenu />
           <SettingsPanel
@@ -431,11 +457,25 @@ export const KillTheRing = memo(function KillTheRingComponent() {
           </Tooltip>
         </TooltipProvider>
       </header>
+      )}
+
+      {/* ── Fullscreen overlay ─────────────────────────────────── */}
+      {isFullscreen && (
+        <FullscreenOverlay
+          isRunning={isRunning}
+          activeAdvisoryCount={activeAdvisoryCount}
+          isOverlayVisible={isOverlayVisible}
+          onStartStop={isRunning ? stop : start}
+          onExitFullscreen={exitFullscreen}
+        />
+      )}
 
       {/* ── Error banner ───────────────────────────────────────── */}
       {error && (
-        <div className="px-4 py-1.5 bg-destructive/10 border-b border-destructive/20">
-          <span className="text-xs text-destructive">{error}</span>
+        <div className={isFullscreen ? 'fixed top-0 left-0 right-0 z-40' : ''}>
+          <div className="px-4 py-1.5 bg-destructive/10 border-b border-destructive/20">
+            <span className="text-xs text-destructive">{error}</span>
+          </div>
         </div>
       )}
 
@@ -778,6 +818,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
       </div>
 
       {/* ── Mobile bottom tab bar (portrait only) ──────────────── */}
+      {!isFullscreen && (
       <nav className="landscape:hidden flex-shrink-0 border-t border-border bg-card/80 backdrop-blur-sm" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="flex items-stretch">
           {([
@@ -810,6 +851,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
           ))}
         </div>
       </nav>
+      )}
     </div>
   )
 })
