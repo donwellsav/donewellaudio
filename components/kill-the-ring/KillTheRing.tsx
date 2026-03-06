@@ -111,16 +111,28 @@ export const KillTheRing = memo(function KillTheRingComponent() {
     })
   }, [advisories])
 
-  // Auto-expire dismissed IDs once the advisory is no longer in the live list
+  // GEQ-specific cleared IDs — independent from issue card dismissals
+  const [geqClearedIds, setGeqClearedIds] = useState<Set<string>>(new Set())
+
+  const handleClearGEQ = useCallback(() => {
+    setGeqClearedIds(new Set(advisories.map(a => a.id)))
+  }, [advisories])
+
+  // Auto-expire dismissed/cleared IDs once the advisory is no longer in the live list
   useEffect(() => {
-    if (dismissedIds.size === 0) return
+    if (dismissedIds.size === 0 && geqClearedIds.size === 0) return
     const liveIds = new Set(advisories.map((a) => a.id))
     setDismissedIds((prev) => {
       const next = new Set<string>()
       prev.forEach((id) => { if (liveIds.has(id)) next.add(id) })
       return next.size === prev.size ? prev : next
     })
-  }, [advisories, dismissedIds.size])
+    setGeqClearedIds((prev) => {
+      const next = new Set<string>()
+      prev.forEach((id) => { if (liveIds.has(id)) next.add(id) })
+      return next.size === prev.size ? prev : next
+    })
+  }, [advisories, dismissedIds.size, geqClearedIds.size])
 
   const handleApply = useCallback((advisory: Advisory) => {
     if (appliedIdsRef.current.has(advisory.id)) return
@@ -439,7 +451,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                       <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} graphFontSize={settings.graphFontSize} onStart={!isRunning ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} />
                     </div>
                     <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'geq' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-                      <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} />
+                      <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} onClear={handleClearGEQ} />
                     </div>
                     <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'controls' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                       <div className="h-full p-4 overflow-y-auto">
@@ -596,7 +608,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                           <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} graphFontSize={settings.graphFontSize} onStart={!isRunning ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} />
                         </div>
                         <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'geq' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-                          <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} />
+                          <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} onClear={handleClearGEQ} />
                         </div>
                         <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'controls' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                           <div className="h-full p-4 overflow-y-auto">
@@ -622,7 +634,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                           </div>
                           <div className="flex-1 min-h-0 pointer-events-none">
                             {bottomLeftGraph === 'rta' && <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} />}
-                            {bottomLeftGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
+                            {bottomLeftGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} clearedIds={geqClearedIds} onClear={handleClearGEQ} />}
                             {bottomLeftGraph === 'controls' && (
                               <div className="h-full p-3 overflow-y-auto pointer-events-auto">
                                 <DetectionControls settings={settings} onModeChange={handleModeChange} onSettingsChange={handleSettingsChange} />
@@ -644,7 +656,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                           </div>
                           <div className="flex-1 min-h-0 pointer-events-none">
                             {bottomRightGraph === 'rta' && <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} graphFontSize={Math.max(10, settings.graphFontSize - 4)} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} />}
-                            {bottomRightGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} />}
+                            {bottomRightGraph === 'geq' && <GEQBarView advisories={advisories} graphFontSize={Math.max(10, settings.graphFontSize - 4)} clearedIds={geqClearedIds} onClear={handleClearGEQ} />}
                             {bottomRightGraph === 'controls' && (
                               <div className="h-full p-3 overflow-y-auto pointer-events-auto">
                                 <DetectionControls settings={settings} onModeChange={handleModeChange} onSettingsChange={handleSettingsChange} />
