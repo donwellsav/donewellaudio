@@ -214,7 +214,7 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
 
   }, [bandRecommendations, graphFontSize])
 
-  useAnimationFrame(render, bandRecommendations.size > 0)
+  useAnimationFrame(render)
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
