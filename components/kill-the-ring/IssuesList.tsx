@@ -22,9 +22,10 @@ interface IssuesListProps {
   onDismiss?: (id: string) => void
   onClearAll?: () => void
   onClearResolved?: () => void
+  touchFriendly?: boolean
 }
 
-export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, appliedIds, dismissedIds, onApply, onDismiss, onClearAll, onClearResolved }: IssuesListProps) {
+export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, appliedIds, dismissedIds, onApply, onDismiss, onClearAll, onClearResolved, touchFriendly }: IssuesListProps) {
   // Filter dismissed, sort by frequency (low -> high), then slice to max
   const sorted = useMemo(() =>
     [...advisories]
@@ -76,6 +77,7 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               isApplied={appliedIds?.has(advisory.id) ?? false}
               onApply={onApply}
               onDismiss={onDismiss}
+              touchFriendly={touchFriendly}
             />
           ))}
         </>
@@ -90,9 +92,10 @@ interface IssueCardProps {
   isApplied: boolean
   onApply?: (advisory: Advisory) => void
   onDismiss?: (id: string) => void
+  touchFriendly?: boolean
 }
 
-function IssueCard({ advisory, rank, isApplied, onApply, onDismiss }: IssueCardProps) {
+function IssueCard({ advisory, rank, isApplied, onApply, onDismiss, touchFriendly }: IssueCardProps) {
   // Precompute occurrence count once per render instead of calling in JSX render path
   const occurrenceCount = useMemo(
     () => getFeedbackHistory().getOccurrenceCount(advisory.trueFrequencyHz),
@@ -236,9 +239,11 @@ function IssueCard({ advisory, rank, isApplied, onApply, onDismiss }: IssueCardP
                     <button
                       onClick={() => onDismiss(advisory.id)}
                       aria-label={`Dismiss ${exactFreqStr} issue`}
-                      className="w-4 h-4 flex items-center justify-center rounded text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted/60 transition-colors"
+                      className={`flex items-center justify-center rounded text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted/60 transition-colors ${
+                        touchFriendly ? 'w-7 h-7' : 'w-4 h-4'
+                      }`}
                     >
-                      <X className="w-2.5 h-2.5" />
+                      <X className={touchFriendly ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-xs">

@@ -21,7 +21,7 @@ import { FeedbackHistoryPanel } from './FeedbackHistoryPanel'
 import { AlgorithmStatusBar } from './AlgorithmStatusBar'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { RotateCcw, LayoutGrid, AlertTriangle, BarChart3, Settings2 } from 'lucide-react'
+import { RotateCcw, LayoutGrid, AlertTriangle, BarChart3, Settings2, ClipboardList } from 'lucide-react'
 import type { Advisory, OperationMode } from '@/types/advisory'
 import { OPERATION_MODES } from '@/lib/dsp/constants'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
@@ -84,7 +84,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
   const [activeGraph, setActiveGraph] = useState<GraphView>('rta')
   const [bottomLeftGraph, setBottomLeftGraph] = useState<GraphView>('geq')
   const [bottomRightGraph, setBottomRightGraph] = useState<GraphView>('controls')
-  const [mobileTab, setMobileTab] = useState<'issues' | 'graph' | 'settings'>('issues')
+  const [mobileTab, setMobileTab] = useState<'issues' | 'graph' | 'settings' | 'notepad'>('issues')
   const [activeSidebarTab, setActiveSidebarTab] = useState<'issues' | 'notepad'>('issues')
   const [layoutKey, setLayoutKey] = useState(0)
 
@@ -196,6 +196,13 @@ export const KillTheRing = memo(function KillTheRingComponent() {
       if (autoMusicDebounceRef.current) clearTimeout(autoMusicDebounceRef.current)
     }
   }, [spectrumStatus?.peak, noiseFloorDb, settings.autoMusicAware, settings.musicAware, settings.autoMusicAwareHysteresisDb, isRunning, updateSettings])
+
+  // Mobile: if graph tab is showing but activeGraph is 'controls' (removed on mobile), fall back to RTA
+  useEffect(() => {
+    if (mobileTab === 'graph' && activeGraph === 'controls') {
+      setActiveGraph('rta')
+    }
+  }, [mobileTab, activeGraph])
 
   useAdvisoryLogging(advisories)
 
@@ -460,6 +467,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                   onDismiss={handleDismiss}
                   onClearAll={handleClearAllIssues}
                   onClearResolved={handleClearResolvedIssues}
+                  touchFriendly
                 />
               </div>
             </div>
@@ -468,8 +476,8 @@ export const KillTheRing = memo(function KillTheRingComponent() {
           {/* Graph tab */}
           {mobileTab === 'graph' && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 min-h-0 p-1.5 pb-0.5">
-                <div className="h-full bg-card/60 rounded-lg border border-border overflow-hidden flex flex-col">
+              <div className="flex-1 min-h-0 p-0.5 pb-0">
+                <div className="h-full bg-card/60 rounded-md border border-border overflow-hidden flex flex-col">
                   <div className="relative flex-1 min-h-0">
                     <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'rta' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                       <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} graphFontSize={settings.graphFontSize} onStart={!isRunning ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} />
@@ -477,17 +485,12 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                     <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'geq' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                       <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
                     </div>
-                    <div className={`absolute inset-0 transition-opacity duration-200 ${activeGraph === 'controls' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-                      <div className="h-full p-4 overflow-y-auto">
-                        <DetectionControls settings={settings} onModeChange={handleModeChange} onSettingsChange={handleSettingsChange} />
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
-              {/* Graph type pills */}
-              <div className="flex items-center gap-2 px-2 pb-1.5 pt-0.5 flex-shrink-0">
-                {GRAPH_CHIPS.map((chip) => (
+              {/* Graph type pills (RTA/GEQ only — controls live in Settings tab on mobile) */}
+              <div className="flex items-center gap-1.5 px-1.5 pb-1 pt-0.5 flex-shrink-0">
+                {GRAPH_CHIPS.filter(chip => chip.value !== 'controls').map((chip) => (
                   <button
                     key={chip.value}
                     onClick={() => setActiveGraph(chip.value)}
@@ -552,6 +555,23 @@ export const KillTheRing = memo(function KillTheRingComponent() {
                     Reset to Defaults
                   </Button>
                 }
+              />
+            </div>
+          )}
+
+          {/* Notepad tab */}
+          {mobileTab === 'notepad' && (
+            <div className="flex-1 overflow-y-auto p-3 bg-background">
+              <h2 className="text-[0.625rem] text-muted-foreground uppercase tracking-wide mb-2 flex items-center justify-between">
+                <span>EQ Notepad</span>
+                {pinnedCuts.length > 0 && (
+                  <span className="text-primary font-mono">{pinnedCuts.length}</span>
+                )}
+              </h2>
+              <EQNotepad
+                pins={pinnedCuts}
+                onRemove={handleRemovePin}
+                onClear={handleClearPins}
               />
             </div>
           )}
@@ -757,6 +777,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
           {([
             { id: 'issues' as const, label: 'Issues', Icon: AlertTriangle, badge: activeAdvisoryCount },
             { id: 'graph' as const, label: 'Graph', Icon: BarChart3, badge: 0 },
+            { id: 'notepad' as const, label: 'Notepad', Icon: ClipboardList, badge: pinnedCuts.length },
             { id: 'settings' as const, label: 'Settings', Icon: Settings2, badge: 0 },
           ]).map((tab) => (
             <button

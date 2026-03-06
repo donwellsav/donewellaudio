@@ -85,7 +85,7 @@ export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
           <History className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px] bg-background border-border">
+      <SheetContent side="right" className="w-full sm:w-[400px] lg:w-[540px] bg-background border-border">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
