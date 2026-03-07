@@ -474,6 +474,7 @@ function computePhaseAngles(timeDomain: Float32Array): Float32Array | null {
 self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
   const msg = event.data
 
+  try {
   switch (msg.type) {
     case 'init': {
       settings = { ...DEFAULT_SETTINGS, ...msg.settings }
@@ -879,6 +880,9 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       self.postMessage({ type: 'tracksUpdate', tracks: trackManager.getActiveTracks() } satisfies WorkerOutboundMessage)
       break
     }
+  }
+  } catch (err) {
+    self.postMessage({ type: 'error', message: `[${msg.type}] ${err instanceof Error ? err.message : String(err)}` } satisfies WorkerOutboundMessage)
   }
 }
 

@@ -76,14 +76,8 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
     callbacksRef.current = callbacks
   }, [callbacks])
 
-  // Instantiate worker once on mount
-  useEffect(() => {
-    // Next.js/Turbopack bundles the worker at the URL import site
-    const worker = new Worker(
-      new URL('../lib/dsp/dspWorker.ts', import.meta.url),
-      { type: 'module' }
-    )
-
+  // Attach message + error handlers to a worker instance
+  const setupWorkerHandlers = useCallback((worker: Worker) => {
     worker.onmessage = (event: MessageEvent<WorkerOutboundMessage>) => {
       const msg = event.data
       switch (msg.type) {
@@ -105,6 +99,7 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
           callbacksRef.current.onTracksUpdate?.(msg.tracks)
           break
         case 'error':
+          busyRef.current = false  // Unblock pipeline so analysis continues after soft error
           callbacksRef.current.onError?.(msg.message)
           break
       }
@@ -118,7 +113,16 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
       worker.terminate()
       workerRef.current = null
     }
+  }, [])
 
+  // Instantiate worker once on mount
+  useEffect(() => {
+    // Next.js/Turbopack bundles the worker at the URL import site
+    const worker = new Worker(
+      new URL('../lib/dsp/dspWorker.ts', import.meta.url),
+      { type: 'module' }
+    )
+    setupWorkerHandlers(worker)
     workerRef.current = worker
 
     return () => {
@@ -126,7 +130,7 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
       workerRef.current = null
       isReadyRef.current = false
     }
-  }, []) // Create once
+  }, [setupWorkerHandlers])
 
   const postMessage = useCallback((msg: WorkerInboundMessage) => {
     if (crashedRef.current) return  // Worker is dead — drop messages
@@ -139,10 +143,19 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
     (settings: DetectorSettings, sampleRate: number, fftSize: number) => {
       isReadyRef.current = false
       busyRef.current = false
+      // Re-create worker if it died (onerror terminates + nulls workerRef)
+      if (!workerRef.current) {
+        const w = new Worker(
+          new URL('../lib/dsp/dspWorker.ts', import.meta.url),
+          { type: 'module' }
+        )
+        setupWorkerHandlers(w)
+        workerRef.current = w
+      }
       crashedRef.current = false
       postMessage({ type: 'init', settings, sampleRate, fftSize })
     },
-    [postMessage]
+    [postMessage, setupWorkerHandlers]
   )
 
   const updateSettings = useCallback(

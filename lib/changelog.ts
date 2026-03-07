@@ -14,6 +14,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.74',
+    date: '2026-03-07',
+    changes: [
+      { type: 'fix', description: '**Worker stability**: Wrap DSP worker message handler in try/catch — soft errors no longer crash the worker' },
+      { type: 'fix', description: '**Crash recovery**: Worker auto-recreated on next Start press after a hard crash — no more page reloads' },
+    ],
+  },
+  {
     version: '1.0.73',
     date: '2026-03-07',
     changes: [
