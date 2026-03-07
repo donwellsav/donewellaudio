@@ -29,8 +29,9 @@ import {
   fuseAlgorithmResults,
   detectContentType,
   MSD_CONSTANTS,
+  DEFAULT_FUSION_CONFIG,
 } from './advancedDetection'
-import type { AlgorithmScores, FusedDetectionResult } from './advancedDetection'
+import type { AlgorithmScores, FusedDetectionResult, FusionConfig } from './advancedDetection'
 import { generateId } from '@/lib/utils/mathHelpers'
 import type {
   Advisory,
@@ -702,11 +703,17 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       // Build enriched existing score from multiple feature dimensions
       const existingScore = computeExistingScore(peak)
 
-      // Fuse algorithm results
+      // Fuse algorithm results — pass user-selected algorithm mode + enabled set
+      const fusionConfig: FusionConfig = {
+        ...DEFAULT_FUSION_CONFIG,
+        mode: settings?.algorithmMode ?? 'auto',
+        enabledAlgorithms: settings?.enabledAlgorithms,
+      }
       const fusionResult: FusedDetectionResult = fuseAlgorithmResults(
         algorithmScores,
         contentType,
-        existingScore
+        existingScore,
+        fusionConfig
       )
 
       // Enhanced classification with algorithm scores + active frequencies for mode clustering

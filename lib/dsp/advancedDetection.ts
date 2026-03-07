@@ -882,6 +882,7 @@ export type { AlgorithmMode, ContentType } from '@/types/advisory'
 
 export interface FusionConfig {
   mode: AlgorithmMode
+  enabledAlgorithms?: string[] // Active algorithms when mode === 'custom'
   customWeights?: Partial<typeof FUSION_WEIGHTS.DEFAULT>
   msdMinFrames: number
   phaseThreshold: number
@@ -952,6 +953,9 @@ export function fuseAlgorithmResults(
       } else {
         activeAlgorithms = ['phase', 'spectral', 'comb', 'ihr', 'ptmr', 'existing']
       }
+      break
+    case 'custom':
+      activeAlgorithms = [...(config.enabledAlgorithms ?? ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr']), 'existing']
       break
   }
 

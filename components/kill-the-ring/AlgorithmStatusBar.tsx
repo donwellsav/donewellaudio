@@ -22,6 +22,7 @@ interface AlgorithmStatusBarProps {
 
 const ALGORITHM_MODE_LABELS: Record<AlgorithmMode, string> = {
   auto: 'AUTO',
+  custom: 'CUSTOM',
   msd: 'MSD',
   phase: 'PHASE',
   combined: 'MSD+PH',

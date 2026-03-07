@@ -33,7 +33,7 @@ import { Settings, RotateCcw, HelpCircle, BarChart3, Monitor, Download, FileJson
 import { getRoomParametersFromDimensions, feetToMeters, calculateSchroederFrequency } from '@/lib/dsp/acousticUtils'
 import { ROOM_PRESETS } from '@/lib/dsp/constants'
 import type { RoomPresetKey } from '@/lib/dsp/constants'
-import type { DetectorSettings, AlgorithmMode, OperationMode, ThresholdMode } from '@/types/advisory'
+import type { DetectorSettings, AlgorithmMode, Algorithm, OperationMode, ThresholdMode } from '@/types/advisory'
 
 interface SettingsPanelProps {
   settings: DetectorSettings
@@ -222,6 +222,18 @@ export const SettingsPanel = memo(function SettingsPanel({
         delete defaults.roomModesEnabled
         if (!defaults.roomTreatment) defaults.roomTreatment = 'typical'
         if (!defaults.roomPreset) defaults.roomPreset = 'none'
+        // Migrate legacy algorithm modes to custom + enabledAlgorithms
+        if (defaults.algorithmMode && defaults.algorithmMode !== 'auto' && defaults.algorithmMode !== 'custom') {
+          const allAlgos: Algorithm[] = ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr']
+          const modeMap: Record<string, Algorithm[]> = {
+            msd: ['msd'],
+            phase: ['phase'],
+            combined: allAlgos,
+            all: allAlgos,
+          }
+          defaults.enabledAlgorithms = modeMap[defaults.algorithmMode] ?? allAlgos
+          defaults.algorithmMode = 'custom'
+        }
         onSettingsChange(defaults)
       } catch {
         alert('Failed to load saved defaults')
@@ -516,23 +528,69 @@ export const SettingsPanel = memo(function SettingsPanel({
             <Section
               title="Algorithm Mode"
               showTooltip={settings.showTooltips}
-              tooltip="Auto: selects best combo based on content. MSD: Magnitude Slope Deviation (DAFx-16). Phase: Phase Coherence (KU Leuven). Combined: MSD + Phase. All: every algorithm including IHR, PTMR, Comb, Spectral."
+              tooltip="Auto: content-adaptive selection. Custom: toggle individual algorithms on/off. MSD: growth detection. Phase: coherence. Spectral: flatness. Comb: feedback-loop harmonics. IHR: inter-harmonic ratio. PTMR: peak sharpness."
             >
-              <Select
-                value={settings.algorithmMode}
-                onValueChange={(v) => onSettingsChange({ algorithmMode: v as AlgorithmMode })}
-              >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="auto">Auto - Content Adaptive</SelectItem>
-                  <SelectItem value="msd">MSD Only - Magnitude Slope</SelectItem>
-                  <SelectItem value="phase">Phase Only - Coherence</SelectItem>
-                  <SelectItem value="combined">Combined - MSD + Phase</SelectItem>
-                  <SelectItem value="all">All Algorithms</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                {/* Auto toggle */}
+                <button
+                  onClick={() => {
+                    if (settings.algorithmMode !== 'auto') {
+                      onSettingsChange({ algorithmMode: 'auto' as AlgorithmMode })
+                    } else {
+                      onSettingsChange({ algorithmMode: 'custom' as AlgorithmMode })
+                    }
+                  }}
+                  className={`w-full px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    settings.algorithmMode === 'auto'
+                      ? 'bg-primary/20 border border-primary/50 text-primary'
+                      : 'bg-muted/50 border border-transparent text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  Auto — Content Adaptive
+                </button>
+
+                {/* Individual algorithm toggles */}
+                <div className={`grid grid-cols-3 gap-1.5 ${settings.algorithmMode === 'auto' ? 'opacity-40 pointer-events-none' : ''}`}>
+                  {([
+                    ['msd', 'MSD', 'Magnitude Slope'],
+                    ['phase', 'Phase', 'Coherence'],
+                    ['spectral', 'Spectral', 'Flatness'],
+                    ['comb', 'Comb', 'Loop Pattern'],
+                    ['ihr', 'IHR', 'Harmonics'],
+                    ['ptmr', 'PTMR', 'Peak Shape'],
+                  ] as const).map(([key, label, desc]) => {
+                    const enabled = settings.enabledAlgorithms?.includes(key) ?? true
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          const current = settings.enabledAlgorithms ?? ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr']
+                          let next: Algorithm[]
+                          if (enabled) {
+                            next = current.filter(a => a !== key)
+                            // If all toggled off, force back to auto
+                            if (next.length === 0) {
+                              onSettingsChange({ algorithmMode: 'auto' as AlgorithmMode })
+                              return
+                            }
+                          } else {
+                            next = [...current, key]
+                          }
+                          onSettingsChange({ enabledAlgorithms: next })
+                        }}
+                        className={`flex flex-col items-center px-1 py-1.5 rounded-md transition-colors ${
+                          enabled
+                            ? 'bg-primary/20 border border-primary/50 text-primary'
+                            : 'bg-muted/50 border border-transparent text-muted-foreground hover:bg-muted'
+                        }`}
+                      >
+                        <span className="text-xs font-medium">{label}</span>
+                        <span className="text-[0.5rem] text-muted-foreground">{desc}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             </Section>
 
             <Section

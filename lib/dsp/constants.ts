@@ -590,7 +590,8 @@ export const DEFAULT_SETTINGS = {
   // ==================== ADVANCED ALGORITHM SETTINGS ====================
   // Based on DAFx-16, DBX, and KU Leuven research papers
   // TUNED FOR FAST DETECTION (accepts more false positives for speed)
-  algorithmMode: 'combined' as const, // MSD + Phase for best accuracy
+  algorithmMode: 'auto' as const, // Content-adaptive algorithm selection
+  enabledAlgorithms: ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr'] as ('msd' | 'phase' | 'spectral' | 'comb' | 'ihr' | 'ptmr')[], // All on for custom mode
   showAlgorithmScores: false, // Hide advanced scores by default
   // Harmonic filter and room mode settings
   harmonicFilterEnabled: true, // Enable harmonic series detection to filter instruments
