@@ -8,16 +8,23 @@ export interface AnimationFrameCallback {
 
 export function useAnimationFrame(
   callback: AnimationFrameCallback,
-  enabled: boolean = true
+  enabled: boolean = true,
+  targetFps?: number,
 ): void {
   const callbackRef = useRef<AnimationFrameCallback>(callback)
   const rafIdRef = useRef<number>(0)
   const lastTimeRef = useRef<number>(0)
+  const lastInvokeRef = useRef<number>(0)
+  const targetFpsRef = useRef(targetFps)
 
-  // Update callback ref on each render
+  // Update refs on each render (avoids re-subscribing RAF)
   useEffect(() => {
     callbackRef.current = callback
   }, [callback])
+
+  useEffect(() => {
+    targetFpsRef.current = targetFps
+  }, [targetFps])
 
   useEffect(() => {
     if (!enabled) {
@@ -26,14 +33,22 @@ export function useAnimationFrame(
         rafIdRef.current = 0
       }
       lastTimeRef.current = 0
+      lastInvokeRef.current = 0
       return
     }
 
     const loop = (timestamp: number) => {
-      const deltaTime = lastTimeRef.current === 0 ? 0 : timestamp - lastTimeRef.current
-      lastTimeRef.current = timestamp
+      const fps = targetFpsRef.current
+      const interval = fps ? 1000 / fps : 0
 
-      callbackRef.current(deltaTime, timestamp)
+      // Gate callback behind elapsed-time check when targetFps is set
+      if (!fps || timestamp - lastInvokeRef.current >= interval) {
+        const deltaTime = lastTimeRef.current === 0 ? 0 : timestamp - lastTimeRef.current
+        lastTimeRef.current = timestamp
+        lastInvokeRef.current = timestamp
+
+        callbackRef.current(deltaTime, timestamp)
+      }
 
       rafIdRef.current = requestAnimationFrame(loop)
     }
@@ -46,6 +61,7 @@ export function useAnimationFrame(
         rafIdRef.current = 0
       }
       lastTimeRef.current = 0
+      lastInvokeRef.current = 0
     }
   }, [enabled])
 }

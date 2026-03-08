@@ -605,6 +605,7 @@ export const DEFAULT_SETTINGS = {
   rtaDbMax: 0,
   spectrumLineWidth: 1.5,
   showThresholdLine: true,
+  canvasTargetFps: 30, // 30 fps halves GPU/CPU canvas work vs 60 fps; no perceptible quality loss
 }
 
 // Room size presets — covers common professional venue types

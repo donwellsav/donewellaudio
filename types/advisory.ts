@@ -348,6 +348,7 @@ export interface DetectorSettings {
   rtaDbMax: number // RTA display range maximum (-20 to 0, default 0)
   spectrumLineWidth: number // RTA line width in pixels (0.5-4, default 1.5)
   showThresholdLine: boolean // Show effective threshold line on RTA graph
+  canvasTargetFps: number // Target FPS for canvas rendering (15-60, default 30)
 }
 
 // Default configuration - optimized for Corporate/Conference PA (Speech mode)

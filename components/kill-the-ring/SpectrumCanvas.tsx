@@ -375,13 +375,14 @@ interface SpectrumCanvasProps {
   showThresholdLine?: boolean
   feedbackThresholdDb?: number
   isFrozen?: boolean
+  canvasTargetFps?: number
 }
 
 const FREQ_LABELS = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]
 
 const GRAB_THRESHOLD_PX = 22 // 44px total touch target per line
 
-export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, advisories, isRunning, graphFontSize = 11, onStart, earlyWarning, rtaDbMin: rtaDbMinProp, rtaDbMax: rtaDbMaxProp, spectrumLineWidth: spectrumLineWidthProp, clearedIds, minFrequency = 20, maxFrequency = 20000, onFreqRangeChange, showThresholdLine = false, feedbackThresholdDb, isFrozen = false }: SpectrumCanvasProps) {
+export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, advisories, isRunning, graphFontSize = 11, onStart, earlyWarning, rtaDbMin: rtaDbMinProp, rtaDbMax: rtaDbMaxProp, spectrumLineWidth: spectrumLineWidthProp, clearedIds, minFrequency = 20, maxFrequency = 20000, onFreqRangeChange, showThresholdLine = false, feedbackThresholdDb, isFrozen = false, canvasTargetFps }: SpectrumCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const dimensionsRef = useRef({ width: 0, height: 0 })
@@ -560,7 +561,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
 
   }, [spectrumRef, graphFontSize, earlyWarning, rtaDbMinProp, rtaDbMaxProp, spectrumLineWidthProp, showThresholdLine, feedbackThresholdDb])
 
-  useAnimationFrame(render, isRunning || hasEverStarted)
+  useAnimationFrame(render, isRunning || hasEverStarted, canvasTargetFps)
 
   // Mark dirty when display props change (triggers redraw on next rAF tick)
   // eslint-disable-next-line react-hooks/immutability -- rAF dirty-bit optimization

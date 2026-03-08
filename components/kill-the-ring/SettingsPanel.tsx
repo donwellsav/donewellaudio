@@ -794,6 +794,27 @@ export const SettingsPanel = memo(function SettingsPanel({
             </Section>
 
             <Section
+              title="Canvas FPS"
+              showTooltip={settings.showTooltips}
+              tooltip="Target frame rate for spectrum display. Lower values reduce CPU/GPU usage and help with stuttering on older devices."
+            >
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">FPS</span>
+                  <span className="text-xs font-mono">{settings.canvasTargetFps}</span>
+                </div>
+                <Slider
+                  value={[settings.canvasTargetFps]}
+                  onValueChange={([v]) => onSettingsChange({ canvasTargetFps: v })}
+                  min={15} max={60} step={5}
+                />
+                <div className="flex justify-between text-[0.5625rem] text-muted-foreground">
+                  <span>Battery saver</span><span>Smooth</span>
+                </div>
+              </div>
+            </Section>
+
+            <Section
               title="Graph Label Size"
               showTooltip={settings.showTooltips}
               tooltip="Font size for labels inside RTA and GEQ graphs. Increase for high-DPI displays or distance viewing."
