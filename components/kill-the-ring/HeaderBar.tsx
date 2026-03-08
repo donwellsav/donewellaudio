@@ -45,7 +45,7 @@ export const HeaderBar = memo(function HeaderBar({
   devices, selectedDeviceId, onDeviceChange,
 }: HeaderBarProps) {
   return (
-    <header className="relative flex items-center justify-between gap-2 px-3 py-3 border-b border-border bg-card/80 backdrop-blur-sm sm:px-4 sm:py-2 sm:gap-4">
+    <header className="relative flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/80 backdrop-blur-sm sm:px-4 sm:py-2 sm:gap-4">
 
       {/* ── DESKTOP: Logo + button group (left side) ───────────────── */}
       <div className="flex items-center gap-1.5 sm:gap-3 sm:flex-shrink-0">
@@ -85,18 +85,18 @@ export const HeaderBar = memo(function HeaderBar({
         </div>
 
         {/* Mobile-only: inline start button + wordmark */}
-        <div className="flex sm:hidden items-center gap-3 min-w-0">
+        <div className="flex sm:hidden items-center gap-2 min-w-0">
           <button
             onClick={isRunning ? stop : start}
             aria-label={isRunning ? 'Stop analysis' : 'Start analysis'}
-            className="relative w-16 h-16 flex items-center justify-center flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+            className="relative w-12 h-12 flex items-center justify-center flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
           >
-            <div className={`absolute inset-2.5 rounded-full border-2 transition-colors duration-300 ${isRunning ? 'border-primary' : 'border-primary/50'}`} />
+            <div className={`absolute inset-1 rounded-full border-2 transition-colors duration-300 ${isRunning ? 'border-primary' : 'border-primary/50'}`} />
             {isRunning && (
-              <div className="absolute inset-2.5 rounded-full border-2 border-primary animate-ping opacity-30" />
+              <div className="absolute inset-1 rounded-full border-2 border-primary animate-ping opacity-30" />
             )}
             <svg
-              className={`w-8 h-8 relative z-10 transition-colors duration-300 ${isRunning ? 'text-primary' : 'text-primary/60 hover:text-primary'}`}
+              className={`w-6 h-6 relative z-10 transition-colors duration-300 ${isRunning ? 'text-primary' : 'text-primary/60 hover:text-primary'}`}
               viewBox="0 0 24 24"
               fill="currentColor"
             >
@@ -105,10 +105,10 @@ export const HeaderBar = memo(function HeaderBar({
           </button>
           <div className="flex flex-col justify-center gap-0 min-w-0">
             <div className="flex items-baseline gap-1 leading-none">
-              <span className="text-xl font-black tracking-tight text-foreground">KILL THE</span>
-              <span className="text-2xl font-black tracking-tight text-primary">RING</span>
+              <span className="text-base font-black tracking-tight text-foreground">KILL THE</span>
+              <span className="text-lg font-black tracking-tight text-primary">RING</span>
             </div>
-            <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase leading-none">
+            <span className="text-[0.5625rem] font-semibold tracking-wider text-muted-foreground uppercase leading-none">
               Don Wells AV{' '}
               <span className="font-mono">v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0'}</span>
             </span>

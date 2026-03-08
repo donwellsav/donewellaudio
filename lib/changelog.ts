@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.88',
+    date: '2026-03-08',
+    changes: [
+      { type: 'fix', description: 'Fix mobile header logo alignment — shrink button/text to match desktop proportions' },
+    ],
+  },
+  {
     version: '1.0.87',
     date: '2026-03-08',
     changes: [
