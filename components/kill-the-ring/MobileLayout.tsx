@@ -1,6 +1,6 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useRef, useCallback } from 'react'
 import { IssuesList } from './IssuesList'
 import { EarlyWarningPanel } from './EarlyWarningPanel'
 import { SpectrumCanvas } from './SpectrumCanvas'
@@ -58,10 +58,41 @@ export const MobileLayout = memo(function MobileLayout({
   hasActiveRTAMarkers, hasActiveGEQBars,
   onClearRTA, onClearGEQ, onFreqRangeChange,
 }: MobileLayoutProps) {
+  // ── Swipe navigation ─────────────────────────────────────────
+  const TAB_ORDER = ['issues', 'graph', 'settings'] as const
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+  }, [])
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    const start = touchStartRef.current
+    if (!start) return
+    touchStartRef.current = null
+
+    const touch = e.changedTouches[0]
+    const deltaX = touch.clientX - start.x
+    const deltaY = touch.clientY - start.y
+
+    // Only trigger if horizontal swipe is dominant and exceeds threshold
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY)) return
+
+    const currentIndex = TAB_ORDER.indexOf(mobileTab)
+    if (deltaX < 0 && currentIndex < TAB_ORDER.length - 1) {
+      // Swipe left → next tab
+      setMobileTab(TAB_ORDER[currentIndex + 1])
+    } else if (deltaX > 0 && currentIndex > 0) {
+      // Swipe right → previous tab
+      setMobileTab(TAB_ORDER[currentIndex - 1])
+    }
+  }, [mobileTab, setMobileTab])
+
   return (
     <>
       {/* ── Mobile: 3-tab content area (portrait only) ────────── */}
-      <div className="landscape:hidden flex-1 flex flex-col overflow-hidden">
+      <div className="landscape:hidden flex-1 flex flex-col overflow-hidden" style={{ touchAction: 'pan-y' }} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {/* Issues tab */}
         {mobileTab === 'issues' && (
           <div className="flex-1 flex flex-col overflow-hidden bg-background">
@@ -203,7 +234,7 @@ export const MobileLayout = memo(function MobileLayout({
                   </span>
                 )}
               </div>
-              <span className="text-[0.5625rem] font-medium leading-none">{tab.label}</span>
+              <span className="text-[0.6875rem] font-medium leading-none">{tab.label}</span>
             </button>
           ))}
         </div>

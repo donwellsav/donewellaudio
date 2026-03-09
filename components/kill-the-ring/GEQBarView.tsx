@@ -132,12 +132,14 @@ function drawGEQAxisLabels(
   width: number,
   height: number,
 ) {
-  // Band labels (rotated vertical to fit)
-  const labelFontSize = Math.min(Math.max(Math.floor(barSpacing * 0.85), 8), 13)
+  // Band labels (rotated vertical to fit) — shadow for stage-light readability
+  const labelFontSize = Math.min(Math.max(Math.floor(barSpacing * 0.85), 9), 13)
   ctx.fillStyle = VIZ_COLORS.AXIS_LABEL
   ctx.font = `${labelFontSize}px monospace`
   ctx.textAlign = 'right'
   ctx.textBaseline = 'middle'
+  ctx.shadowColor = 'rgba(0,0,0,0.7)'
+  ctx.shadowBlur = 3
 
   for (let i = 0; i < numBands; i++) {
     const x = padding.left + i * barSpacing + barSpacing / 2
@@ -157,6 +159,10 @@ function drawGEQAxisLabels(
   ctx.fillText('0', padding.left - 5, padding.top + centerY)
   ctx.fillText('-12', padding.left - 5, padding.top + centerY + (12 / 18) * (plotHeight / 2))
   ctx.fillText('+12', padding.left - 5, padding.top + centerY - (12 / 18) * (plotHeight / 2))
+
+  // Reset shadow after axis labels
+  ctx.shadowColor = 'transparent'
+  ctx.shadowBlur = 0
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────────
