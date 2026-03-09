@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, memo } from 'react'
-import { Mic, BarChart3, AlertTriangle, SlidersHorizontal, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Mic, BarChart3, AlertTriangle, SlidersHorizontal, Keyboard, ChevronRight, ChevronLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
 
@@ -17,13 +17,13 @@ const STEPS: Step[] = [
   {
     title: 'Welcome to Kill The Ring',
     description:
-      'Kill The Ring detects acoustic feedback in real time and tells you exactly where to cut. Walk through these 4 steps to get started.',
+      'Kill The Ring detects acoustic feedback in real time and tells you exactly where to cut. Walk through these 5 steps to get started.',
     icon: SlidersHorizontal,
   },
   {
     title: 'Start Monitoring',
     description:
-      'Press the mic button (bottom-right) or hit Space to begin. Pick a venue pill — Quiet, Med, or Loud — to auto-calibrate gain for your environment.',
+      'Press the mic button or hit Space to begin. Pick a venue pill — Quiet, Med, or Loud — to auto-calibrate gain for your environment. Press F for fullscreen RTA.',
     icon: Mic,
   },
   {
@@ -37,6 +37,12 @@ const STEPS: Step[] = [
     description:
       'Issue cards show the problem frequency, severity, and exact EQ cuts — both GEQ band and PEQ Q value. Apply cuts on your mixer to kill the ring.',
     icon: AlertTriangle,
+  },
+  {
+    title: 'Keyboard Shortcuts',
+    description:
+      'Space — start/stop monitoring. F — toggle fullscreen RTA. Click a graph marker to dismiss it. Swipe left/right on mobile to switch tabs.',
+    icon: Keyboard,
   },
 ]
 

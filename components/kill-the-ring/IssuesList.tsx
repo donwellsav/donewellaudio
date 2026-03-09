@@ -1,11 +1,11 @@
 'use client'
 
-import { useMemo, memo } from 'react'
+import { useMemo, useState, useCallback, memo } from 'react'
 import { formatFrequency, formatPitch } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { getSeverityText } from '@/lib/dsp/classifier'
 import { getFeedbackHistory } from '@/lib/dsp/feedbackHistory'
-import { AlertTriangle, CheckCircle2, X, TrendingUp } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, X, TrendingUp, Copy, Check } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Advisory } from '@/types/advisory'
 
@@ -128,6 +128,26 @@ const IssueCard = memo(function IssueCard({ advisory, onDismiss, touchFriendly }
   const timeToClipStr = timeToClipMs != null && timeToClipMs < 5000
     ? `~${(timeToClipMs / 1000).toFixed(1)}s`
     : null
+
+  // Copy-to-clipboard state
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(() => {
+    const parts: string[] = [exactFreqStr]
+    if (pitchStr) parts.push(`(${pitchStr})`)
+    if (hasEq) {
+      parts.push('—')
+      if (geq) parts.push(`GEQ: ${formatFrequency(geq.bandHz)} ${geq.suggestedDb}dB`)
+      if (geq && peq) parts.push('|')
+      if (peq) parts.push(`PEQ: Q${(peq.q ?? 1).toFixed(0)} ${peq.gainDb ?? 0}dB`)
+    }
+    navigator.clipboard.writeText(parts.join(' ')).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    }).catch(() => {
+      // Clipboard API not available (insecure context, etc.)
+    })
+  }, [exactFreqStr, pitchStr, hasEq, geq, peq])
 
   // Build tooltip detail string for niche metadata
   const detailParts: string[] = []
@@ -267,18 +287,36 @@ const IssueCard = memo(function IssueCard({ advisory, onDismiss, touchFriendly }
             </div>
           </div>
 
-          {/* RIGHT: Dismiss ✕ */}
-          {onDismiss && (
-            <button
-              onClick={() => onDismiss(advisory.id)}
-              aria-label={`Dismiss ${exactFreqStr} issue`}
-              className={`flex-shrink-0 self-center rounded text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/60 transition-colors flex items-center justify-center ${
-                touchFriendly ? 'w-9 h-9' : 'w-5 h-5'
-              }`}
-            >
-              <X className={touchFriendly ? 'w-4 h-4' : 'w-3 h-3'} />
-            </button>
-          )}
+          {/* RIGHT: Copy + Dismiss */}
+          <div className="flex items-center gap-0.5 flex-shrink-0 self-center">
+            {hasEq && (
+              <button
+                onClick={handleCopy}
+                aria-label={`Copy ${exactFreqStr} EQ recommendation`}
+                className={`rounded transition-colors flex items-center justify-center ${
+                  copied
+                    ? 'text-emerald-400'
+                    : 'text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/60'
+                } ${touchFriendly ? 'w-9 h-9' : 'w-5 h-5'}`}
+              >
+                {copied
+                  ? <Check className={touchFriendly ? 'w-4 h-4' : 'w-3 h-3'} />
+                  : <Copy className={touchFriendly ? 'w-4 h-4' : 'w-3 h-3'} />
+                }
+              </button>
+            )}
+            {onDismiss && (
+              <button
+                onClick={() => onDismiss(advisory.id)}
+                aria-label={`Dismiss ${exactFreqStr} issue`}
+                className={`rounded text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/60 transition-colors flex items-center justify-center ${
+                  touchFriendly ? 'w-9 h-9' : 'w-5 h-5'
+                }`}
+              >
+                <X className={touchFriendly ? 'w-4 h-4' : 'w-3 h-3'} />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Velocity + age — full-width below */}
