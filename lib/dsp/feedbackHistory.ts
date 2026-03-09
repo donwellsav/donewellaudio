@@ -32,6 +32,11 @@ export interface FeedbackEvent {
   wasActedOn: boolean // Did the engineer apply a cut?
   cutAppliedDb?: number // How much cut was applied
   label: string
+  // EQ recommendations (captured at detection time for export)
+  geqBandHz?: number // Nearest GEQ band center frequency
+  geqSuggestedDb?: number // GEQ cut recommendation (negative = cut)
+  peqQ?: number // PEQ Q factor
+  peqGainDb?: number // PEQ gain recommendation (negative = cut)
 }
 
 export interface FrequencyHotspot {
@@ -197,10 +202,14 @@ export class FeedbackHistory {
       'Cumulative Growth (dB)',
       'Frequency Band',
       'Label',
+      'GEQ Band (Hz)',
+      'GEQ Cut (dB)',
+      'PEQ Q',
+      'PEQ Gain (dB)',
       'Was Acted On',
       'Cut Applied (dB)',
     ].join(',')
-    
+
     const rows = this.events.map(e => [
       new Date(e.timestamp).toISOString(),
       e.frequencyHz.toFixed(1),
@@ -213,6 +222,10 @@ export class FeedbackHistory {
       e.cumulativeGrowthDb?.toFixed(1) ?? '',
       e.frequencyBand ?? '',
       e.label,
+      e.geqBandHz?.toFixed(0) ?? '',
+      e.geqSuggestedDb?.toFixed(1) ?? '',
+      e.peqQ?.toFixed(1) ?? '',
+      e.peqGainDb?.toFixed(1) ?? '',
       e.wasActedOn ? 'Yes' : 'No',
       e.cutAppliedDb?.toFixed(1) ?? '',
     ].join(','))
@@ -433,6 +446,10 @@ export function recordFeedbackFromAdvisory(advisory: {
   cumulativeGrowthDb?: number
   frequencyBand?: 'LOW' | 'MID' | 'HIGH'
   label: string
+  advisory?: {
+    geq?: { bandHz?: number; suggestedDb?: number }
+    peq?: { q?: number; gainDb?: number }
+  }
 }): FeedbackEvent {
   return getFeedbackHistory().recordEvent({
     timestamp: Date.now(),
@@ -447,5 +464,10 @@ export function recordFeedbackFromAdvisory(advisory: {
     frequencyBand: advisory.frequencyBand,
     label: advisory.label,
     wasActedOn: false,
+    // Capture EQ recommendations at detection time
+    geqBandHz: advisory.advisory?.geq?.bandHz,
+    geqSuggestedDb: advisory.advisory?.geq?.suggestedDb,
+    peqQ: advisory.advisory?.peq?.q,
+    peqGainDb: advisory.advisory?.peq?.gainDb,
   })
 }

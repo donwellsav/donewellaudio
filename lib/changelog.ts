@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.116',
+    date: '2026-03-09',
+    changes: [
+      { type: 'feat', description: 'EQ recommendations (GEQ band/cut, PEQ Q/gain) now included in CSV and JSON exports' },
+    ],
+  },
+  {
     version: '1.0.115',
     date: '2026-03-09',
     changes: [
