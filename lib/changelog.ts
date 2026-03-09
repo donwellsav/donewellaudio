@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.90',
+    date: '2026-03-08',
+    changes: [
+      { type: 'refactor', description: 'Decompose SettingsPanel (1,226 lines) into modular tab components — Detection, Algorithms, Display, Advanced, Room' },
+    ],
+  },
+  {
     version: '1.0.89',
     date: '2026-03-08',
     changes: [
