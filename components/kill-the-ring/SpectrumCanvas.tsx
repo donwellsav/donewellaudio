@@ -613,9 +613,9 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
     const plotHeight = height - padding.top - padding.bottom
 
     // Scale font size proportionally to canvas width, clamped to readable range
-    const scaledFontSize = Math.max(9, Math.min(16, Math.round(width * 0.01)))
+    const scaledFontSize = Math.max(10, Math.min(16, Math.round(width * 0.015)))
     const fontSize = Math.round((graphFontSize + scaledFontSize) / 2)
-    const peakMarkerRadius = Math.max(3, Math.round(width * 0.005))
+    const peakMarkerRadius = Math.max(4, Math.round(width * 0.005))
 
     const range: DbRange = {
       dbMin: rtaDbMinProp ?? CANVAS_SETTINGS.RTA_DB_MIN,

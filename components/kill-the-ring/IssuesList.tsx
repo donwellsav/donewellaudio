@@ -187,10 +187,10 @@ const IssueCard = memo(function IssueCard({ advisory, onDismiss, touchFriendly }
               onClick={() => onDismiss(advisory.id)}
               aria-label={`Dismiss ${exactFreqStr} issue`}
               className={`flex-shrink-0 flex items-center justify-center rounded text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/60 transition-colors ${
-                touchFriendly ? 'w-7 h-7' : 'w-4 h-4'
+                touchFriendly ? 'w-9 h-9' : 'w-4 h-4'
               }`}
             >
-              <X className={touchFriendly ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'} />
+              <X className={touchFriendly ? 'w-4 h-4' : 'w-2.5 h-2.5'} />
             </button>
           )}
         </div>

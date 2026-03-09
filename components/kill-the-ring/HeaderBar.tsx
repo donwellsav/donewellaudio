@@ -129,10 +129,10 @@ export const HeaderBar = memo(function HeaderBar({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                       aria-label="Select audio input"
                     >
-                      <Mic className="w-3 h-3" />
+                      <Mic className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
                 </TooltipTrigger>
@@ -169,10 +169,10 @@ export const HeaderBar = memo(function HeaderBar({
                 variant="ghost"
                 size="sm"
                 onClick={resetLayout}
-                className="hidden landscape:flex h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                className="hidden landscape:flex h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                 aria-label="Reset layout"
               >
-                <LayoutGrid className="w-3 h-3" />
+                <LayoutGrid className="w-4 h-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
@@ -188,10 +188,10 @@ export const HeaderBar = memo(function HeaderBar({
                 variant="ghost"
                 size="sm"
                 onClick={toggleFullscreen}
-                className="hidden landscape:flex h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                className="hidden landscape:flex h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                 aria-label="Toggle fullscreen"
               >
-                {isFullscreen ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
@@ -208,13 +208,13 @@ export const HeaderBar = memo(function HeaderBar({
                   variant="ghost"
                   size="sm"
                   onClick={toggleFreeze}
-                  className={`hidden landscape:flex h-6 w-6 p-0 ${
+                  className={`hidden landscape:flex h-8 w-8 p-0 ${
                     isFrozen ? 'text-blue-400' : 'text-muted-foreground hover:text-foreground'
                   }`}
                   aria-label={isFrozen ? 'Unfreeze spectrum' : 'Freeze spectrum'}
                   aria-pressed={isFrozen}
                 >
-                  {isFrozen ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+                  {isFrozen ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-xs">
