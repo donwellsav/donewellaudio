@@ -18,6 +18,7 @@ import type { SpectrumStatus, EarlyWarning } from '@/hooks/useAudioAnalyzer'
 interface DesktopLayoutProps {
   layoutKey: number
   isRunning: boolean
+  error: string | null
   start: () => void
   stop: () => void
   isFrozen: boolean
@@ -55,7 +56,7 @@ interface DesktopLayoutProps {
 }
 
 export const DesktopLayout = memo(function DesktopLayout({
-  layoutKey, isRunning, start, stop, isFrozen, toggleFreeze,
+  layoutKey, isRunning, error, start, stop, isFrozen, toggleFreeze,
   advisories, activeAdvisoryCount,
   settings, onSettingsChange, onModeChange,
   spectrumRef, spectrumStatus, earlyWarning, noiseFloorDb,
@@ -227,7 +228,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                     </span>
                   </div>
                   <div className="flex-1 min-h-0">
-                    <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} graphFontSize={settings.graphFontSize} onStart={!isRunning ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={onFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} />
+                    <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={onFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} />
                   </div>
                 </div>
               </div>

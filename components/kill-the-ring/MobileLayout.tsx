@@ -16,6 +16,7 @@ interface MobileLayoutProps {
   mobileTab: 'issues' | 'graph' | 'settings'
   setMobileTab: (tab: 'issues' | 'graph' | 'settings') => void
   isRunning: boolean
+  error: string | null
   start: () => void
   isFrozen: boolean
   toggleFreeze: () => void
@@ -46,7 +47,7 @@ interface MobileLayoutProps {
 
 export const MobileLayout = memo(function MobileLayout({
   mobileTab, setMobileTab,
-  isRunning, start, isFrozen, toggleFreeze,
+  isRunning, error, start, isFrozen, toggleFreeze,
   advisories, activeAdvisoryCount,
   settings, onSettingsChange, onModeChange, onReset,
   dismissedIds, onDismiss, onClearAll, onClearResolved,
@@ -120,7 +121,7 @@ export const MobileLayout = memo(function MobileLayout({
                   Clear
                 </button>
               )}
-              <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} graphFontSize={settings.graphFontSize} onStart={!isRunning ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={onFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} />
+              <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={onFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} />
             </div>
             {/* GEQ — bottom half */}
             <div className="flex-1 min-h-0 bg-card/60 rounded-md border border-border overflow-hidden relative">

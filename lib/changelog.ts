@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.91',
+    date: '2026-03-08',
+    changes: [
+      { type: 'ui', description: 'Graceful mic error handling — rich error banner with contextual guidance, retry button, and dismiss; error-aware canvas placeholder' },
+    ],
+  },
+  {
     version: '1.0.90',
     date: '2026-03-08',
     changes: [

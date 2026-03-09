@@ -13,6 +13,22 @@ import { PortalContainerProvider } from '@/contexts/PortalContainerContext'
 import type { OperationMode } from '@/types/advisory'
 import { OPERATION_MODES } from '@/lib/dsp/constants'
 import type { ImperativePanelHandle } from 'react-resizable-panels'
+import { AlertTriangle, RotateCcw, X } from 'lucide-react'
+
+// ── Error guidance ──────────────────────────────────────────────────────────────
+
+function getErrorGuidance(error: string): string {
+  const lower = error.toLowerCase()
+  if (lower.includes('permission') || lower.includes('not allowed'))
+    return 'Check your browser address bar for a mic icon and click it to allow access.'
+  if (lower.includes('not found') || lower.includes('no microphone'))
+    return 'Connect a microphone to your device and try again.'
+  if (lower.includes('in use') || lower.includes('not readable'))
+    return 'Close the other app using your microphone, then try again.'
+  if (lower.includes('overconstrained'))
+    return 'Your mic may not support the requested audio format. Try a different device.'
+  return 'Check your microphone connection and browser permissions.'
+}
 
 export const KillTheRing = memo(function KillTheRingComponent() {
   const {
@@ -46,6 +62,10 @@ export const KillTheRing = memo(function KillTheRingComponent() {
   const toggleFreeze = useCallback(() => setIsFrozen(prev => !prev), [])
   const issuesPanelRef = useRef<ImperativePanelHandle>(null)
 
+  // Error dismiss state — resets whenever error value changes
+  const [isErrorDismissed, setIsErrorDismissed] = useState(false)
+  useEffect(() => { setIsErrorDismissed(false) }, [error])
+
   // Fullscreen
   const rootRef = useRef<HTMLDivElement>(null)
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef)
@@ -54,6 +74,11 @@ export const KillTheRing = memo(function KillTheRingComponent() {
   const startWithDevice = useCallback(() => {
     start({ deviceId: selectedDeviceId || undefined })
   }, [start, selectedDeviceId])
+
+  const handleRetry = useCallback(() => {
+    setIsErrorDismissed(false)
+    startWithDevice()
+  }, [startWithDevice])
 
   // Auto-unfreeze when stopping analysis
   useEffect(() => {
@@ -265,9 +290,33 @@ export const KillTheRing = memo(function KillTheRingComponent() {
         onDeviceChange={handleDeviceChange}
       />
 
-      {error && (
-        <div className="px-4 py-1.5 bg-destructive/10 border-b border-destructive/20">
-          <span className="text-xs text-destructive">{error}</span>
+      {error && !isErrorDismissed && (
+        <div className="px-3 py-2 sm:px-4 sm:py-2.5 bg-destructive/10 border-b border-destructive/20">
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0 space-y-1">
+              <p className="text-xs font-medium text-destructive">{error}</p>
+              <p className="text-[0.6875rem] text-muted-foreground leading-snug">
+                {getErrorGuidance(error)}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <button
+                onClick={handleRetry}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[0.6875rem] font-medium bg-destructive/15 text-destructive hover:bg-destructive/25 transition-colors"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Try Again
+              </button>
+              <button
+                onClick={() => setIsErrorDismissed(true)}
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                aria-label="Dismiss error"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -275,6 +324,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
         mobileTab={mobileTab}
         setMobileTab={setMobileTab}
         isRunning={isRunning}
+        error={error}
         start={startWithDevice}
         isFrozen={isFrozen}
         toggleFreeze={toggleFreeze}
@@ -306,6 +356,7 @@ export const KillTheRing = memo(function KillTheRingComponent() {
       <DesktopLayout
         layoutKey={layoutKey}
         isRunning={isRunning}
+        error={error}
         start={startWithDevice}
         stop={stop}
         isFrozen={isFrozen}
