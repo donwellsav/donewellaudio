@@ -2,6 +2,7 @@
 
 import { memo } from 'react'
 import { IssuesList } from './IssuesList'
+import { EarlyWarningPanel } from './EarlyWarningPanel'
 import { SpectrumCanvas } from './SpectrumCanvas'
 import { GEQBarView } from './GEQBarView'
 import { DetectionControls } from './DetectionControls'
@@ -90,6 +91,7 @@ export const MobileLayout = memo(function MobileLayout({
                 onClearResolved={onClearResolved}
                 touchFriendly
               />
+              <EarlyWarningPanel earlyWarning={earlyWarning} />
             </div>
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { memo } from 'react'
 import { IssuesList } from './IssuesList'
+import { EarlyWarningPanel } from './EarlyWarningPanel'
 import { SpectrumCanvas } from './SpectrumCanvas'
 import { GEQBarView } from './GEQBarView'
 import { DetectionControls } from './DetectionControls'
@@ -137,13 +138,16 @@ export const DesktopLayout = memo(function DesktopLayout({
             <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto p-3">
                 {activeSidebarTab === 'issues' && !issuesPanelOpen && (
-                  <IssuesList
-                    advisories={advisories}
-                    maxIssues={settings.maxDisplayedIssues}
-                    dismissedIds={dismissedIds}
-                    onDismiss={onDismiss}
-                    onClearAll={onClearAll}
-                  />
+                  <>
+                    <IssuesList
+                      advisories={advisories}
+                      maxIssues={settings.maxDisplayedIssues}
+                      dismissedIds={dismissedIds}
+                      onDismiss={onDismiss}
+                      onClearAll={onClearAll}
+                    />
+                    <EarlyWarningPanel earlyWarning={earlyWarning} />
+                  </>
                 )}
                 {activeSidebarTab === 'controls' && (
                   <DetectionControls settings={settings} onModeChange={onModeChange} onSettingsChange={onSettingsChange} />
@@ -194,6 +198,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                 onDismiss={onDismiss}
                 onClearAll={onClearAll}
               />
+              <EarlyWarningPanel earlyWarning={earlyWarning} />
             </div>
           </div>
         </ResizablePanel>

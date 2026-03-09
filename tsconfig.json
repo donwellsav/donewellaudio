@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    // Both "dom" and "webworker" are included because the project shares type
-    // files between the main thread (DOM) and Web Worker (lib/dsp/dspWorker.ts).
-    // Ideally these would be separate tsconfig projects, but the shared @/types
-    // imports make a single config the pragmatic choice for now.
+    // Both "dom" and "webworker" are included because multiple files need
+    // WebWorker types: lib/dsp/dspWorker.ts (DSP web worker) and app/sw.ts
+    // (Serwist service worker). Splitting into project references requires
+    // composite builds that add complexity without proportional benefit.
     "lib": [
       "dom",
       "dom.iterable",

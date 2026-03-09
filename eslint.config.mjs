@@ -11,6 +11,13 @@ const eslintConfig = [
   {
     ignores: ['.claude/**'],
   },
+  {
+    rules: {
+      'no-console': 'warn',
+      'prefer-const': 'error',
+      '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports' }],
+    },
+  },
 ]
 
 export default eslintConfig
