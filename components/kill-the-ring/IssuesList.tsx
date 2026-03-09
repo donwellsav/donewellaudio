@@ -106,6 +106,10 @@ const IssueCard = memo(function IssueCard({ advisory, onDismiss, touchFriendly }
   const pitchStr = advisory.advisory?.pitch ? formatPitch(advisory.advisory.pitch) : null
   const exactFreqStr = advisory.trueFrequencyHz != null ? formatFrequency(advisory.trueFrequencyHz) : '---'
 
+  // Issue age: how long this advisory has been active
+  const ageSec = Math.max(0, Math.round((Date.now() - advisory.timestamp) / 1000))
+  const ageStr = ageSec < 5 ? 'just now' : ageSec < 60 ? `${ageSec}s` : `${Math.floor(ageSec / 60)}m`
+
   const geq = advisory.advisory?.geq
   const peq = advisory.advisory?.peq
   const bandHz = geq?.bandHz
@@ -172,24 +176,25 @@ const IssueCard = memo(function IssueCard({ advisory, onDismiss, touchFriendly }
                 )}
               </Tooltip>
             </TooltipProvider>
-            {(pitchStr || (bandHz != null && bandHz !== advisory.trueFrequencyHz) || hasEq) && (
-              <div className="flex items-baseline gap-x-2 gap-y-0.5 flex-wrap mt-0.5">
-                {pitchStr && (
-                  <span className="text-xs font-mono text-muted-foreground leading-none">{pitchStr}</span>
-                )}
-                {bandHz != null && bandHz !== advisory.trueFrequencyHz && (
-                  <span className="text-xs font-mono text-muted-foreground/50 leading-none">
-                    → {formatFrequency(bandHz)}
-                  </span>
-                )}
-                {hasEq && (
-                  <span className="text-xs font-mono text-muted-foreground leading-none">
-                    GEQ <span className="text-foreground font-medium">{geq?.suggestedDb}dB</span>
-                    {' '}PEQ <span className="text-foreground font-medium">Q{(peq?.q ?? 1).toFixed(0)} {peq?.gainDb ?? 0}dB</span>
-                  </span>
-                )}
-              </div>
-            )}
+            <div className="flex items-baseline gap-x-2 gap-y-0.5 flex-wrap mt-0.5">
+              {pitchStr && (
+                <span className="text-xs font-mono text-muted-foreground leading-none">{pitchStr}</span>
+              )}
+              {bandHz != null && bandHz !== advisory.trueFrequencyHz && (
+                <span className="text-xs font-mono text-muted-foreground/50 leading-none">
+                  → {formatFrequency(bandHz)}
+                </span>
+              )}
+              {hasEq && (
+                <span className="text-xs font-mono text-muted-foreground leading-none">
+                  GEQ <span className="text-foreground font-medium">{geq?.suggestedDb}dB</span>
+                  {' '}PEQ <span className="text-foreground font-medium">Q{(peq?.q ?? 1).toFixed(0)} {peq?.gainDb ?? 0}dB</span>
+                </span>
+              )}
+              {!isResolved && (
+                <span className="text-[0.625rem] text-muted-foreground/40 leading-none font-mono">{ageStr}</span>
+              )}
+            </div>
           </div>
 
           {/* MIDDLE: Badges in 2 rows */}
@@ -276,14 +281,20 @@ const IssueCard = memo(function IssueCard({ advisory, onDismiss, touchFriendly }
           )}
         </div>
 
-        {/* Runaway / warning alert — full-width below (rare, urgent) */}
-        {(isRunaway || isWarning) && !isResolved && (
+        {/* Velocity + age — full-width below */}
+        {velocity > 0 && !isResolved && (
           <div className={`flex items-center gap-1 text-xs font-bold uppercase tracking-wide ${
-            isRunaway ? 'text-red-400' : 'text-amber-400'
+            isRunaway ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-muted-foreground/60'
           }`}>
-            <AlertTriangle className={`w-2.5 h-2.5 flex-shrink-0 ${isRunaway ? 'animate-pulse' : ''}`} />
-            <span>{isRunaway ? 'Runaway feedback' : 'Growing — act now'}</span>
-            {timeToClipStr && <span className="font-mono opacity-80 ml-0.5">{timeToClipStr}</span>}
+            {(isRunaway || isWarning) ? (
+              <>
+                <AlertTriangle className={`w-2.5 h-2.5 flex-shrink-0 ${isRunaway ? 'animate-pulse' : ''}`} />
+                <span>{isRunaway ? 'Runaway feedback' : 'Growing — act now'}</span>
+                {timeToClipStr && <span className="font-mono opacity-80 ml-0.5">{timeToClipStr}</span>}
+              </>
+            ) : (
+              <span className="font-normal normal-case tracking-normal">↑ building</span>
+            )}
             <span className="font-mono ml-auto opacity-60">+{velocity.toFixed(0)} dB/s</span>
           </div>
         )}

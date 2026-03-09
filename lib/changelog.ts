@@ -14,6 +14,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.114',
+    date: '2026-03-09',
+    changes: [
+      { type: 'feat', description: 'Velocity shown on all active issue cards — "↑ building" for slow growth, amber/red for warnings' },
+      { type: 'feat', description: 'Issue age indicator shows how long each issue has been active (just now, Xs, Xm)' },
+    ],
+  },
+  {
     version: '1.0.113',
     date: '2026-03-09',
     changes: [
