@@ -14,6 +14,26 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.74',
+    date: '2026-03-09',
+    changes: [
+      { type: 'feat', description: 'Full codebase quality audit: **27 of 42 findings fixed** across 23 files (1 deleted)' },
+      { type: 'feat', description: '**4 Critical**: GEQ band formula, prominence gate bypass, security headers, duplicate key handler' },
+      { type: 'feat', description: '**9 High**: Worker buffer transfer, stale refs/closures, stddev correction, ERB discontinuity, hotspot collisions' },
+      { type: 'feat', description: '**5 Important**: Dead CSS cleanup, controlled SW activation, ARIA accessibility, object URL leaks' },
+      { type: 'feat', description: '**6 Medium**: Typed constants, ESLint strict-any rule, metadata API migration, linear-power dB averaging' },
+      { type: 'feat', description: '**3 Low**: Dead code removal, memo wrappers, comment accuracy' },
+      { type: 'feat', description: '[x] `tsc --noEmit` passes (zero errors)' },
+      { type: 'feat', description: '[x] `pnpm build` succeeds (static pages + SW generated)' },
+      { type: 'feat', description: '[x] Dev server starts, app loads, no console errors' },
+      { type: 'feat', description: '[x] Onboarding overlay has ARIA dialog attributes' },
+      { type: 'feat', description: '[x] Settings panel renders all 5 tabs' },
+      { type: 'feat', description: '[x] Main UI: spectrum analyzer, GEQ, controls, issues panel all functional' },
+      { type: 'feat', description: '[ ] Manual mic test: verify feedback detection still works end-to-end' },
+      { type: 'feat', description: '[ ] PWA install + offline mode test' },
+    ],
+  },
+  {
     version: '1.0.117',
     date: '2026-03-09',
     highlights: 'Quick controls, custom presets, mobile polish',
