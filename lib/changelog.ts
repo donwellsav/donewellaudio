@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.76.4',
+    date: '2026-03-10',
+    changes: [
+      { type: 'feat', description: 'feat: font size bump (12→14px), wider panels, unified responsive logo' },
+    ],
+  },
+  {
     version: '0.76.2',
     date: '2026-03-10',
     changes: [
