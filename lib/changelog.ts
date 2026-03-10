@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.76.5',
+    date: '2026-03-10',
+    changes: [
+      { type: 'fix', description: 'fix: compact mobile header — normalize buttons to 44px, hide version' },
+    ],
+  },
+  {
     version: '0.76.4',
     date: '2026-03-10',
     changes: [
