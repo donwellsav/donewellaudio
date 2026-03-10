@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.76.11',
+    date: '2026-03-10',
+    changes: [
+      { type: 'fix', description: 'fix: switch CSP to report-only mode — unblock app while diagnosing violations' },
+    ],
+  },
+  {
     version: '0.76.10',
     date: '2026-03-10',
     changes: [
