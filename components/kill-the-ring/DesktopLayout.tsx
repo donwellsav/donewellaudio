@@ -98,7 +98,7 @@ export const DesktopLayout = memo(function DesktopLayout({
               {!issuesPanelOpen && (
                 <button
                   onClick={() => setActiveSidebarTab('issues')}
-                  className={`flex-1 py-1.5 text-xs font-medium uppercase tracking-wide transition-colors ${
+                  className={`flex-1 py-1.5 text-xs font-medium uppercase tracking-wide transition-all duration-200 ${
                     activeSidebarTab === 'issues'
                       ? 'text-foreground border-b-2 border-primary'
                       : 'text-muted-foreground hover:text-foreground'
@@ -112,7 +112,7 @@ export const DesktopLayout = memo(function DesktopLayout({
               )}
               <button
                 onClick={() => setActiveSidebarTab('controls')}
-                className={`flex-1 py-1.5 text-xs font-medium uppercase tracking-wide transition-colors ${
+                className={`flex-1 py-1.5 text-xs font-medium uppercase tracking-wide transition-all duration-200 ${
                   activeSidebarTab === 'controls'
                     ? 'text-foreground border-b-2 border-primary'
                     : 'text-muted-foreground hover:text-foreground'
@@ -143,7 +143,7 @@ export const DesktopLayout = memo(function DesktopLayout({
             <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto p-3">
                 {activeSidebarTab === 'issues' && !issuesPanelOpen && (
-                  <>
+                  <div className="animate-in fade-in-0 duration-150">
                     <IssuesList
                       advisories={advisories}
                       maxIssues={settings.maxDisplayedIssues}
@@ -152,10 +152,12 @@ export const DesktopLayout = memo(function DesktopLayout({
                       onClearAll={onClearAll}
                     />
                     <EarlyWarningPanel earlyWarning={earlyWarning} />
-                  </>
+                  </div>
                 )}
                 {activeSidebarTab === 'controls' && (
-                  <DetectionControls settings={settings} onModeChange={onModeChange} onSettingsChange={onSettingsChange} />
+                  <div className="animate-in fade-in-0 duration-150">
+                    <DetectionControls settings={settings} onModeChange={onModeChange} onSettingsChange={onSettingsChange} />
+                  </div>
                 )}
               </div>
             </div>
@@ -177,7 +179,7 @@ export const DesktopLayout = memo(function DesktopLayout({
           onExpand={() => setIssuesPanelOpen(true)}
         >
           <div className="flex flex-col h-full bg-card/50 overflow-hidden">
-            <div className="flex-shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-border bg-muted/20">
+            <div className="flex-shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-border bg-gradient-to-b from-muted/25 to-transparent">
               <h2 className="text-xs text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-1.5">
                 <AlertTriangle className="w-3 h-3" />
                 Issues
@@ -216,8 +218,8 @@ export const DesktopLayout = memo(function DesktopLayout({
             {/* Top graph */}
             <ResizablePanel defaultSize={60} minSize={20} collapsible>
               <div className="h-full p-1.5 pb-0.5">
-                <div className="h-full bg-card/60 rounded-lg border border-border overflow-hidden flex flex-col">
-                  <div className="flex-shrink-0 flex items-center justify-between px-2 py-1 border-b border-border bg-muted/20">
+                <div className="h-full bg-card/60 rounded-lg border border-border/60 overflow-hidden flex flex-col panel-recessed hover:border-border/80 transition-colors duration-300">
+                  <div className="flex-shrink-0 flex items-center justify-between px-2 py-1 border-b border-border bg-gradient-to-b from-muted/25 to-transparent">
                     <div className="flex items-center gap-1">
                       <span className="text-xs font-medium text-primary">RTA</span>
                       {isRunning && (
@@ -249,8 +251,8 @@ export const DesktopLayout = memo(function DesktopLayout({
             {/* Bottom row */}
             <ResizablePanel defaultSize={40} minSize={15} collapsible>
               <div className="h-full p-1.5 pt-0.5">
-                <div className="h-full bg-card/60 rounded-lg border border-border overflow-hidden flex flex-col min-w-0">
-                  <div className="flex-shrink-0 flex items-center px-2 py-0.5 border-b border-border bg-muted/20">
+                <div className="h-full bg-card/60 rounded-lg border border-border/60 overflow-hidden flex flex-col min-w-0 panel-recessed hover:border-border/80 transition-colors duration-300">
+                  <div className="flex-shrink-0 flex items-center px-2 py-0.5 border-b border-border bg-gradient-to-b from-muted/25 to-transparent">
                     <div className="flex items-center gap-1">
                       <span className="text-xs font-medium text-primary">GEQ</span>
                       {hasActiveGEQBars && (

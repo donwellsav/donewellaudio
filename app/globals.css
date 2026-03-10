@@ -109,6 +109,18 @@
     background-attachment: fixed;
     min-height: 100vh;
   }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.025;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
 }
 
 @layer components {
@@ -125,5 +137,22 @@
 
   .animate-flash-slow {
     animation: flash-slow 2s ease-in-out infinite;
+  }
+
+  /* Recessed instrument panel effect */
+  .panel-recessed {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  /* Breathing glow for runaway feedback cards */
+  @keyframes emergency-glow {
+    0%, 100% { box-shadow: 0 0 12px rgba(239, 68, 68, 0.45), 0 0 4px rgba(239, 68, 68, 0.15); }
+    50% { box-shadow: 0 0 18px rgba(239, 68, 68, 0.6), 0 0 6px rgba(239, 68, 68, 0.3); }
+  }
+
+  .animate-emergency-glow {
+    animation: emergency-glow 1.5s ease-in-out infinite;
   }
 }

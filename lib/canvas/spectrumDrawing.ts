@@ -61,6 +61,16 @@ export function drawGrid(
   ctx.fillStyle = '#0c0c0c'
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
+  // Radial vignette — subtle depth from center to edges
+  const vg = ctx.createRadialGradient(
+    plotWidth / 2, plotHeight / 2, plotWidth * 0.25,
+    plotWidth / 2, plotHeight / 2, plotWidth * 0.75,
+  )
+  vg.addColorStop(0, 'transparent')
+  vg.addColorStop(1, 'rgba(0, 0, 0, 0.3)')
+  ctx.fillStyle = vg
+  ctx.fillRect(0, 0, plotWidth, plotHeight)
+
   // Minor dB grid (subtle, drawn first)
   ctx.strokeStyle = '#161616'
   ctx.lineWidth = 0.5
@@ -241,20 +251,30 @@ export function drawSpectrum(
   fillPath.lineTo(lastX, plotHeight)
   fillPath.closePath()
 
-  // Draw fill then stroke (with glow)
+  // Draw fill then stroke (with layered glow)
   ctx.fillStyle = gradient
   ctx.fill(fillPath)
 
-  // Glow pass — wider, semi-transparent
   ctx.strokeStyle = VIZ_COLORS.SPECTRUM
-  ctx.globalAlpha = 0.15
-  ctx.lineWidth = spectrumLineWidth + 2
+
+  // Deep halo — wide, barely visible
+  ctx.globalAlpha = 0.06
+  ctx.lineWidth = spectrumLineWidth + 8
   ctx.stroke(strokePath)
 
-  // Sharp pass — crisp line on top
+  // Mid glow — semi-transparent
+  ctx.globalAlpha = 0.15
+  ctx.lineWidth = spectrumLineWidth + 3
+  ctx.stroke(strokePath)
+
+  // Sharp pass — crisp line with shadow bloom
   ctx.globalAlpha = 1
   ctx.lineWidth = spectrumLineWidth
+  ctx.shadowColor = 'rgba(59, 130, 246, 0.3)'
+  ctx.shadowBlur = 6
   ctx.stroke(strokePath)
+  ctx.shadowColor = 'transparent'
+  ctx.shadowBlur = 0
 
   // ── Peak hold trace — thin white line above spectrum ──────────
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)'
@@ -377,6 +397,14 @@ export function drawMarkers(
     ctx.moveTo(x, y)
     ctx.lineTo(x, plotHeight)
     ctx.stroke()
+    ctx.globalAlpha = 1
+
+    // Peak halo — soft glow ring behind dot
+    ctx.fillStyle = color
+    ctx.globalAlpha = 0.15
+    ctx.beginPath()
+    ctx.arc(x, y, peakMarkerRadius * 2.5, 0, Math.PI * 2)
+    ctx.fill()
     ctx.globalAlpha = 1
 
     // Peak dot
@@ -508,12 +536,25 @@ export function drawPlaceholder(
   ctx.fill(fillPath)
 
   ctx.strokeStyle = VIZ_COLORS.SPECTRUM
-  ctx.globalAlpha = 0.15
-  ctx.lineWidth = 3.5
+
+  // Deep halo
+  ctx.globalAlpha = 0.06
+  ctx.lineWidth = 9.5
   ctx.stroke(strokePath)
+
+  // Mid glow
+  ctx.globalAlpha = 0.15
+  ctx.lineWidth = 4.5
+  ctx.stroke(strokePath)
+
+  // Sharp line with bloom
   ctx.globalAlpha = 1
   ctx.lineWidth = 1.5
+  ctx.shadowColor = 'rgba(59, 130, 246, 0.3)'
+  ctx.shadowBlur = 6
   ctx.stroke(strokePath)
+  ctx.shadowColor = 'transparent'
+  ctx.shadowBlur = 0
 
   ctx.restore()
 

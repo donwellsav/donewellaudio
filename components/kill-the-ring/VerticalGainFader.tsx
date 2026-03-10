@@ -377,7 +377,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
           <button
             key={db}
             onClick={() => onAutoGainTargetChange(db)}
-            className={`w-full px-1 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors ${
+            className={`w-full px-1 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-95 ${
               autoGainEnabled && autoGainTargetDb === db
                 ? 'bg-primary/20 border border-primary/50 text-primary'
                 : 'bg-muted/50 border border-transparent text-muted-foreground hover:bg-muted'

@@ -160,19 +160,19 @@ const IssueCard = memo(function IssueCard({ advisory, onDismiss, touchFriendly }
 
   return (
     <div
-      className={`relative flex flex-col rounded-md border bg-card transition-all overflow-hidden ${
+      className={`relative flex flex-col rounded-md border bg-card transition-all overflow-hidden animate-in fade-in-0 slide-in-from-left-2 duration-200 ${
         isResolved
           ? 'border-border/50'
           : isRunaway
-              ? 'border-red-500/70 shadow-[0_0_8px_rgba(239,68,68,0.35)] animate-pulse'
+              ? 'border-red-500/70 animate-emergency-glow'
               : isWarning
-                ? 'border-amber-500/60 shadow-[0_0_4px_rgba(245,158,11,0.25)]'
+                ? 'border-amber-500/60 shadow-[0_0_8px_rgba(245,158,11,0.3)] ring-1 ring-amber-500/15'
                 : 'border-border hover:border-border/80'
       }`}
     >
       {/* Left severity accent */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1 rounded-r-sm"
+        className="absolute left-0 top-0 bottom-0 w-1.5 rounded-r-sm"
         style={{ backgroundColor: isResolved ? 'hsl(var(--muted))' : severityColor }}
       />
 
@@ -263,7 +263,7 @@ const IssueCard = memo(function IssueCard({ advisory, onDismiss, touchFriendly }
             <div className="flex items-center gap-1 justify-end">
               <span
                 className="inline-flex items-center text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm leading-none"
-                style={{ backgroundColor: `${severityColor}22`, color: severityColor, border: `1px solid ${severityColor}44` }}
+                style={{ backgroundColor: `${severityColor}30`, color: severityColor, border: `1px solid ${severityColor}55`, boxShadow: `0 0 6px ${severityColor}20` }}
               >
                 {getSeverityText(advisory.severity)}
               </span>

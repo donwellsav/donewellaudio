@@ -44,7 +44,7 @@ export const HeaderBar = memo(function HeaderBar({
   devices, selectedDeviceId, onDeviceChange,
 }: HeaderBarProps) {
   return (
-    <header className="relative flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/80 backdrop-blur-sm sm:px-4 sm:py-2 sm:gap-4">
+    <header className="relative flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/80 backdrop-blur-sm shadow-[0_1px_8px_rgba(0,0,0,0.3),0_1px_0_rgba(59,130,246,0.06)] sm:px-4 sm:py-2 sm:gap-4">
 
       {/* ── DESKTOP: Logo + button group (left side) ───────────────── */}
       <div className="flex items-center gap-1.5 sm:gap-3 sm:flex-shrink-0">
@@ -55,7 +55,7 @@ export const HeaderBar = memo(function HeaderBar({
             <button
               onClick={isRunning ? stop : start}
               aria-label={isRunning ? 'Stop analysis' : 'Start analysis'}
-              className="relative w-12 h-12 flex items-center justify-center flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+              className="relative w-12 h-12 flex items-center justify-center flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full ring-2 ring-primary/10"
             >
               <div className={`absolute inset-1 rounded-full border-2 transition-colors duration-300 ${isRunning ? 'border-primary' : 'border-primary/50'}`} />
               {isRunning && (
@@ -74,7 +74,7 @@ export const HeaderBar = memo(function HeaderBar({
           <div className="flex flex-col justify-center gap-[3px]">
             <div className="flex items-baseline gap-1.5 leading-none">
               <span className="text-lg font-black tracking-tight text-foreground">KILL THE</span>
-              <span className="text-xl font-black tracking-tight text-primary">RING</span>
+              <span className="text-xl font-black tracking-tight text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">RING</span>
             </div>
             <span className="text-[0.625rem] font-semibold tracking-wider text-muted-foreground uppercase leading-none">
               Don Wells AV{' '}
@@ -105,7 +105,7 @@ export const HeaderBar = memo(function HeaderBar({
           <div className="flex flex-col justify-center gap-0 min-w-0">
             <div className="flex items-baseline gap-1 leading-none">
               <span className="text-base font-black tracking-tight text-foreground">KILL THE</span>
-              <span className="text-lg font-black tracking-tight text-primary">RING</span>
+              <span className="text-lg font-black tracking-tight text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">RING</span>
             </div>
             <span className="text-[0.5625rem] font-semibold tracking-wider text-muted-foreground uppercase leading-none">
               Don Wells AV{' '}
@@ -127,7 +127,7 @@ export const HeaderBar = memo(function HeaderBar({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 text-muted-foreground hover:text-foreground"
+                    className="h-10 w-10 text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95"
                     aria-label="Select audio input"
                   >
                     <Mic className="size-6" />
@@ -159,7 +159,7 @@ export const HeaderBar = memo(function HeaderBar({
               variant="ghost"
               size="icon"
               onClick={resetLayout}
-              className="hidden landscape:flex h-10 w-10 text-muted-foreground hover:text-foreground"
+              className="hidden landscape:flex h-10 w-10 text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95"
               aria-label="Reset layout"
             >
               <LayoutGrid className="size-6" />
@@ -176,7 +176,7 @@ export const HeaderBar = memo(function HeaderBar({
               variant="ghost"
               size="icon"
               onClick={toggleFullscreen}
-              className="hidden landscape:flex h-10 w-10 text-muted-foreground hover:text-foreground"
+              className="hidden landscape:flex h-10 w-10 text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95"
               aria-label="Toggle fullscreen"
             >
               {isFullscreen ? <Minimize2 className="size-6" /> : <Maximize2 className="size-6" />}

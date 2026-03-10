@@ -29,6 +29,16 @@ function drawGEQGrid(
   ctx.fillStyle = '#0c0c0c'
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
+  // Radial vignette
+  const vg = ctx.createRadialGradient(
+    plotWidth / 2, plotHeight / 2, plotWidth * 0.25,
+    plotWidth / 2, plotHeight / 2, plotWidth * 0.75,
+  )
+  vg.addColorStop(0, 'transparent')
+  vg.addColorStop(1, 'rgba(0, 0, 0, 0.3)')
+  ctx.fillStyle = vg
+  ctx.fillRect(0, 0, plotWidth, plotHeight)
+
   // Grid lines at ±6, ±12 dB (drawn first, underneath)
   ctx.strokeStyle = '#1e1e1e'
   ctx.lineWidth = 0.5
@@ -79,16 +89,24 @@ function drawBars(
       ctx.lineWidth = 4
       ctx.strokeRect(x - 1, y - 1, barWidth + 2, barHeight + 2)
 
-      // Bar fill
+      // Bar fill (rounded)
       ctx.fillStyle = recommendation.color
       ctx.globalAlpha = 0.8
-      ctx.fillRect(x, y, barWidth, barHeight)
+      ctx.beginPath()
+      ctx.roundRect(x, y, barWidth, barHeight, 2)
+      ctx.fill()
       ctx.globalAlpha = 1
+
+      // Inner highlight strip (simulated light reflection)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
+      ctx.fillRect(x + 1, y + 1, 1, barHeight - 2)
 
       // Bar outline (sharp, on top of glow)
       ctx.strokeStyle = recommendation.color
       ctx.lineWidth = 2
-      ctx.strokeRect(x, y, barWidth, barHeight)
+      ctx.beginPath()
+      ctx.roundRect(x, y, barWidth, barHeight, 2)
+      ctx.stroke()
 
       // Cut value label
       ctx.fillStyle = recommendation.color
