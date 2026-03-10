@@ -150,6 +150,8 @@ export const DesktopLayout = memo(function DesktopLayout({
                       dismissedIds={dismissedIds}
                       onDismiss={onDismiss}
                       onClearAll={onClearAll}
+                      isRunning={isRunning}
+                      onStart={start}
                     />
                     <EarlyWarningPanel earlyWarning={earlyWarning} />
                   </div>
@@ -204,6 +206,8 @@ export const DesktopLayout = memo(function DesktopLayout({
                 dismissedIds={dismissedIds}
                 onDismiss={onDismiss}
                 onClearAll={onClearAll}
+                isRunning={isRunning}
+                onStart={start}
               />
               <EarlyWarningPanel earlyWarning={earlyWarning} />
             </div>

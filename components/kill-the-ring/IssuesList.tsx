@@ -21,9 +21,11 @@ interface IssuesListProps {
   onClearAll?: () => void
   onClearResolved?: () => void
   touchFriendly?: boolean
+  isRunning?: boolean
+  onStart?: () => void
 }
 
-export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onDismiss, onClearAll, onClearResolved, touchFriendly }: IssuesListProps) {
+export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onDismiss, onClearAll, onClearResolved, touchFriendly, isRunning, onStart }: IssuesListProps) {
   // Filter dismissed, sort repeat offenders to top by hit count, then slice to max
   const sorted = useMemo(() => {
     const history = getFeedbackHistory()
@@ -50,11 +52,38 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
   return (
     <div className="flex flex-col gap-1.5">
       {sorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 min-h-[120px] text-muted-foreground py-8">
-          <CheckCircle2 className="w-5 h-5 text-primary/30 mb-2" />
-          <div className="font-mono text-sm font-bold tracking-[0.15em] uppercase">Standby</div>
-          <div className="font-mono text-sm mt-1 text-muted-foreground tracking-wide">Monitoring</div>
-        </div>
+        !isRunning && onStart ? (
+          <div className="flex flex-col items-center justify-center flex-1 min-h-[180px] py-6 gap-4">
+            <button
+              onClick={onStart}
+              aria-label="Start analysis"
+              className="group relative flex flex-col items-center justify-center gap-3 w-full max-w-[240px] py-6 px-6 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all duration-300 cursor-pointer animate-start-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <div className="relative w-16 h-16 flex items-center justify-center rounded-full border-2 border-primary/50 group-hover:border-primary transition-colors duration-300">
+                <svg
+                  className="w-8 h-8 text-primary drop-shadow-[0_0_6px_rgba(75,146,255,0.4)]"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.31-2.5-4.06v8.12c1.48-.75 2.5-2.29 2.5-4.06zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-mono text-sm font-black tracking-[0.15em] text-foreground/90">KILL THE</span>
+                <span className="font-mono text-base font-black tracking-[0.15em] text-primary drop-shadow-[0_0_10px_rgba(75,146,255,0.4)]">RING</span>
+              </div>
+              <span className="font-mono text-sm font-bold tracking-[0.2em] uppercase text-muted-foreground group-hover:text-foreground transition-colors">
+                Start Analysis
+              </span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center flex-1 min-h-[120px] text-muted-foreground py-8">
+            <CheckCircle2 className="w-5 h-5 text-primary/30 mb-2" />
+            <div className="font-mono text-sm font-bold tracking-[0.15em] uppercase">Standby</div>
+            <div className="font-mono text-sm mt-1 text-muted-foreground tracking-wide">Monitoring</div>
+          </div>
+        )
       ) : (
         <>
           {sorted.length > 1 && (

@@ -189,4 +189,14 @@
   .animate-led-blink {
     animation: led-blink 2s ease-in-out infinite;
   }
+
+  /* Breathing glow for start button CTA */
+  @keyframes start-glow {
+    0%, 100% { box-shadow: 0 0 12px rgba(75,146,255,0.15), 0 0 4px rgba(75,146,255,0.08); }
+    50% { box-shadow: 0 0 20px rgba(75,146,255,0.3), 0 0 8px rgba(75,146,255,0.15); }
+  }
+
+  .animate-start-glow {
+    animation: start-glow 3s ease-in-out infinite;
+  }
 }

@@ -148,6 +148,8 @@ export const MobileLayout = memo(function MobileLayout({
                 onClearAll={onClearAll}
                 onClearResolved={onClearResolved}
                 touchFriendly
+                isRunning={isRunning}
+                onStart={start}
               />
               <EarlyWarningPanel earlyWarning={earlyWarning} />
             </div>
