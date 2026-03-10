@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.76.6',
+    date: '2026-03-10',
+    changes: [
+      { type: 'feat', description: 'feat: two-row mobile header with bigger buttons and branding row' },
+    ],
+  },
+  {
     version: '0.76.5',
     date: '2026-03-10',
     changes: [
