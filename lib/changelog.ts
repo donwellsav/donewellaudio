@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.76.18',
+    date: '2026-03-11',
+    changes: [
+      { type: 'fix', description: 'style: visual DNA alignment + docs audit to match codebase' },
+    ],
+  },
+  {
     version: '0.76.17',
     date: '2026-03-10',
     changes: [
