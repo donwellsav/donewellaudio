@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.77.1',
+    date: '2026-03-12',
+    changes: [
+      { type: 'fix', description: 'fix: add unsafe-inline to production CSP script-src' },
+    ],
+  },
+  {
     version: '0.77.0',
     date: '2026-03-12',
     changes: [
