@@ -748,8 +748,8 @@ export const MSD_SETTINGS = {
   MIN_FRAMES_ROCK: 50,
   /** Default minimum frames */
   DEFAULT_MIN_FRAMES: 12, // ~200ms at 60fps — balanced between early detection and statistical confidence
-  /** Maximum frames (balance accuracy vs latency) */
-  MAX_FRAMES: 50,
+  /** Maximum frames — must match HISTORY_SIZE so both MSD paths use the same depth */
+  MAX_FRAMES: 64,
   /** Ring buffer size for MSD magnitude history per bin */
   HISTORY_SIZE: 64,
   /** Minimum energy above noise floor (dB) required to run MSD analysis on a bin */

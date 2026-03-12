@@ -232,7 +232,6 @@ export interface AlgorithmResult {
  */
 export class AlgorithmEngine {
   private msdBuffer: MSDHistoryBuffer | null = null
-  private msdDownsampleBuf: Float32Array | null = null
   private phaseBuffer: PhaseHistoryBuffer | null = null
   private ampBuffer = new AmplitudeHistoryBuffer()
   private lastFrameTimestamp: number = -1
@@ -242,10 +241,9 @@ export class AlgorithmEngine {
   /** Allocate buffers for the given FFT size. */
   init(fftSize: number): void {
     const numBins = Math.floor(fftSize / 2)
-    this.msdBuffer = new MSDHistoryBuffer(numBins >> 1)
+    this.msdBuffer = new MSDHistoryBuffer(numBins)
     this.phaseBuffer = new PhaseHistoryBuffer(numBins, 12)
     this.ampBuffer.reset()
-    this.msdDownsampleBuf = null
     ensureFftBuffers(fftSize)
     this.lastFrameTimestamp = -1
   }
@@ -268,16 +266,9 @@ export class AlgorithmEngine {
     const isNewFrame = timestamp !== this.lastFrameTimestamp
     if (!isNewFrame) return false
 
-    // MSD: max-pool spectrum to half resolution before storing
+    // MSD: feed full-resolution spectrum (must match feedbackDetector.ts per-bin tracking)
     if (this.msdBuffer) {
-      const halfLen = spectrum.length >> 1
-      if (!this.msdDownsampleBuf || this.msdDownsampleBuf.length !== halfLen) {
-        this.msdDownsampleBuf = new Float32Array(halfLen)
-      }
-      for (let i = 0; i < halfLen; i++) {
-        this.msdDownsampleBuf[i] = Math.max(spectrum[i << 1], spectrum[(i << 1) + 1])
-      }
-      this.msdBuffer.addFrame(this.msdDownsampleBuf)
+      this.msdBuffer.addFrame(spectrum)
     }
 
     // Compression: compute frame-level peak and RMS from spectrum
@@ -333,9 +324,9 @@ export class AlgorithmEngine {
     const crestFactor = this.specMax - this.rmsDb
     const contentType = detectContentType(spectrum, crestFactor, spectralResult.flatness)
 
-    // MSD from half-resolution history buffer
+    // MSD from full-resolution history buffer (matches feedbackDetector.ts per-bin tracking)
     const msdMinFrames = getMsdMinFrames(contentType)
-    const msdResult = this.msdBuffer?.calculateMSD(binIndex >> 1, msdMinFrames) ?? null
+    const msdResult = this.msdBuffer?.calculateMSD(binIndex, msdMinFrames, peak.noiseFloorDb) ?? null
 
     // Compression detection
     const compressionResult = this.ampBuffer.detectCompression()
@@ -369,7 +360,6 @@ export class AlgorithmEngine {
 
   reset(): void {
     this.msdBuffer?.reset()
-    this.msdDownsampleBuf = null
     this.phaseBuffer?.reset()
     this.ampBuffer.reset()
     this.lastFrameTimestamp = -1

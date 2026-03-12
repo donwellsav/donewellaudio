@@ -59,10 +59,19 @@ export class MSDHistoryBuffer {
   /**
    * Calculate MSD for a specific frequency bin.
    *
-   * FLAW 2 FIX: Energy gate — silent bins return feedbackScore = 0.
-   * FLAW 3 FIX: Threshold is 0.1 (paper-correct), not 0.8.
+   * Energy gate: when noiseFloorDb is provided, uses relative gate (6 dB above
+   * noise floor) matching feedbackDetector.ts. Falls back to absolute -70 dB
+   * gate when noiseFloorDb is unavailable.
+   *
+   * SYNC: The second-derivative loop must produce identical results to
+   * feedbackDetector.ts:calculateMsd() for identical input data.
+   * See __tests__/msdConsistency.test.ts
    */
-  calculateMSD(binIndex: number, minFrames: number = MSD_CONSTANTS.MIN_FRAMES_SPEECH): MSDResult {
+  calculateMSD(
+    binIndex: number,
+    minFrames: number = MSD_CONSTANTS.MIN_FRAMES_SPEECH,
+    noiseFloorDb: number | null = null,
+  ): MSDResult {
     const count = this.frameCount
     if (count < minFrames) {
       return {
@@ -79,24 +88,46 @@ export class MSDHistoryBuffer {
     const hist = this.history
     const max = this.maxFrames
 
-    // Energy gate: compute mean magnitude over the history window
+    // Compute mean magnitude over history window (used for absolute fallback gate)
     let sum = 0
     for (let i = 0; i < count; i++) {
       sum += hist[(start + i) % max][binIndex]
     }
     const meanMagnitudeDb = sum / count
-    if (meanMagnitudeDb < MSD_CONSTANTS.SILENCE_FLOOR_DB) {
-      return {
-        msd: Infinity,
-        feedbackScore: 0,
-        secondDerivative: 0,
-        isFeedbackLikely: false,
-        framesAnalyzed: count,
-        meanMagnitudeDb,
+
+    // Energy gate: prevent MSD from triggering on noise-floor fluctuations
+    if (noiseFloorDb !== null) {
+      // Relative gate (matches feedbackDetector.ts): current bin must be
+      // MIN_ENERGY_ABOVE_NOISE_DB (6 dB) above the noise floor
+      const latestFrameIdx = (this.frameIndex - 1 + this.maxFrames) % this.maxFrames
+      const currentBinDb = hist[latestFrameIdx][binIndex]
+      if (currentBinDb - noiseFloorDb < MSD_SETTINGS.MIN_ENERGY_ABOVE_NOISE_DB) {
+        return {
+          msd: Infinity,
+          feedbackScore: 0,
+          secondDerivative: 0,
+          isFeedbackLikely: false,
+          framesAnalyzed: count,
+          meanMagnitudeDb,
+        }
+      }
+    } else {
+      // Absolute fallback gate for standalone usage (no noise floor available)
+      if (meanMagnitudeDb < MSD_CONSTANTS.SILENCE_FLOOR_DB) {
+        return {
+          msd: Infinity,
+          feedbackScore: 0,
+          secondDerivative: 0,
+          isFeedbackLikely: false,
+          framesAnalyzed: count,
+          meanMagnitudeDb,
+        }
       }
     }
 
-    // Compute MSD in a single pass over the ring buffer
+    // SYNC: MSD second-derivative computation — identical math to
+    // feedbackDetector.ts:calculateMsd() lines 1444-1454.
+    // secondDeriv = v[n] - 2*v[n-1] + v[n-2] (3-point stencil form)
     let sumSquaredSecondDeriv = 0
     let lastSecondDeriv = 0
     for (let n = 2; n < count; n++) {

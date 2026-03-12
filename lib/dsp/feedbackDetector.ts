@@ -75,6 +75,7 @@ export class FeedbackDetector {
   private msdHistoryIndex: Uint8Array | null = null // Current write index per bin
   private msdFrameCount: Uint16Array | null = null // How many frames we have per bin
   private msdConfirmFrames: Uint8Array | null = null // Frames below fast confirm threshold
+  private msdMinFrames: number = MSD_SETTINGS.DEFAULT_MIN_FRAMES // Content-adaptive (synced with worker)
 
   // Peak Persistence Scoring - Phase 2 Enhancement
   // Tracks consecutive frames where a peak persists at the same frequency
@@ -158,6 +159,7 @@ export class FeedbackDetector {
     this.config = { ...DEFAULT_CONFIG, ...config }
     this.callbacks = callbacks
     this.maxAnalysisGapMs = Math.max(2 * this.config.analysisIntervalMs, 120)
+    this.updateMsdMinFrames()
     this.rafLoop = this.rafLoop.bind(this)
   }
 
@@ -363,6 +365,10 @@ export class FeedbackDetector {
       this.recomputeAnalysisDbBounds()
       this.noiseFloorDb = null
       this.resetHistory()
+    }
+
+    if (config.mode !== undefined) {
+      this.updateMsdMinFrames()
     }
   }
 
@@ -1357,7 +1363,24 @@ export class FeedbackDetector {
   }
 
   // ==================== MSD Algorithm (DAFx-16) ====================
-  
+
+  /**
+   * Update msdMinFrames based on operation mode.
+   * Maps detector modes to DAFx-16 content categories so the main-thread
+   * min frames stay ≤ the worker's content-adaptive min frames.
+   * Called from constructor and updateConfig/updateSettings when mode changes.
+   */
+  private updateMsdMinFrames(): void {
+    const mode = this.config.mode
+    if (mode === 'speech' || mode === 'broadcast') {
+      this.msdMinFrames = MSD_SETTINGS.MIN_FRAMES_SPEECH  // 7
+    } else if (mode === 'liveMusic' || mode === 'worship' || mode === 'outdoor') {
+      this.msdMinFrames = MSD_SETTINGS.MIN_FRAMES_MUSIC   // 13
+    } else {
+      this.msdMinFrames = MSD_SETTINGS.DEFAULT_MIN_FRAMES  // 12
+    }
+  }
+
   /**
    * Update MSD history for a frequency bin
    * Called every analysis frame to track magnitude over time
@@ -1401,7 +1424,7 @@ export class FeedbackDetector {
     }
 
     const frameCount = this.msdFrameCount[binIndex]
-    if (frameCount < MSD_SETTINGS.DEFAULT_MIN_FRAMES) {
+    if (frameCount < this.msdMinFrames) {
       return { msd: -1, growthRate: 0, isHowl: false, fastConfirm: false }
     }
 
@@ -1439,7 +1462,9 @@ export class FeedbackDetector {
     // Growth rate is tracked but does not gate MSD evaluation.
     // Stable feedback at GBF equilibrium (not growing) must still be detected.
 
-    // Compute MSD (second derivative RMS) inline — no array allocations
+    // SYNC: MSD second-derivative computation — identical math to
+    // msdAnalysis.ts:MSDHistoryBuffer.calculateMSD() (3-point stencil form).
+    // See __tests__/msdConsistency.test.ts
     // Second derivative = d1[i] - d1[i-1] where d1[i] = ordered[i+1] - ordered[i]
     let sumSquaredSecondDeriv = 0
     let prevD1 = history[(currentIdx - frameCount + 1 + historySize) % historySize]
