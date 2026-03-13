@@ -83,17 +83,26 @@ export function useDataCollection(): DataCollectionHandle {
 
   const enableCollection = useCallback(async (fftSize: number, sampleRate: number) => {
     const worker = workerRef.current
-    if (!worker) return
+    if (!worker) {
+      console.warn('[DataCollection] enableCollection called but workerRef is null')
+      return
+    }
 
+    console.log('[DataCollection] Enabling collection, sessionId=' + sessionIdRef.current.slice(0, 8) + '...')
     worker.enableCollection(sessionIdRef.current, fftSize, sampleRate)
     setIsCollecting(true)
 
     // Lazy-load uploader
     if (!uploaderRef.current) {
-      const { SnapshotUploader } = await import('@/lib/data/uploader')
-      uploaderRef.current = new SnapshotUploader()
-      // Retry any batches from previous sessions
-      uploaderRef.current.retryQueued().catch(() => {})
+      try {
+        const { SnapshotUploader } = await import('@/lib/data/uploader')
+        uploaderRef.current = new SnapshotUploader()
+        console.log('[DataCollection] Uploader created')
+        // Retry any batches from previous sessions
+        uploaderRef.current.retryQueued().catch(() => {})
+      } catch (err) {
+        console.error('[DataCollection] Failed to load uploader:', err)
+      }
     }
   }, [])
 
@@ -158,7 +167,11 @@ export function useDataCollection(): DataCollectionHandle {
   // ─── Batch handler (wired to useDSPWorker callback) ────────────────────
 
   const handleSnapshotBatch = useCallback((batch: SnapshotBatch) => {
-    uploaderRef.current?.enqueue(batch)
+    if (!uploaderRef.current) {
+      console.warn('[DataCollection] handleSnapshotBatch called but uploader not ready — batch dropped')
+      return
+    }
+    uploaderRef.current.enqueue(batch)
   }, [])
 
   // ─── Cleanup on unmount ────────────────────────────────────────────────

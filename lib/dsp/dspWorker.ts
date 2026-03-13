@@ -29,7 +29,7 @@ import type {
   TrackedPeak,
 } from '@/types/advisory'
 import type { SnapshotWorkerInbound, SnapshotWorkerOutbound } from '@/types/data'
-import type { SnapshotCollector } from '@/lib/data/snapshotCollector'
+import { SnapshotCollector } from '@/lib/data/snapshotCollector'
 import { DEFAULT_SETTINGS } from './constants'
 
 // ─── Message types ──────────────────────────────────────────────────────────
@@ -210,24 +210,16 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
     // ── Snapshot collection (free tier only) ──────────────────────────────
 
     case 'enableCollection': {
-      // Dynamic import — only loads the module when free-tier user consents.
-      // Webpack/Turbopack code-splits this into a separate chunk that premium
-      // tier bundles never request.
-      import('../data/snapshotCollector').then(({ SnapshotCollector: Collector }) => {
-        snapshotCollector = new Collector(msg.sessionId, msg.fftSize, msg.sampleRate)
-        const stats = snapshotCollector.getStats()
-        self.postMessage({
-          type: 'collectionStats',
-          bufferSize: stats.bufferSize,
-          taggedEvents: stats.taggedEvents,
-          bytesCollected: stats.bytesCollected,
-        } satisfies WorkerOutboundMessage)
-      }).catch(err => {
-        self.postMessage({
-          type: 'error',
-          message: `[enableCollection] Failed to load collector: ${err instanceof Error ? err.message : String(err)}`,
-        } satisfies WorkerOutboundMessage)
-      })
+      console.log('[DSP Worker] enableCollection received, creating SnapshotCollector')
+      snapshotCollector = new SnapshotCollector(msg.sessionId, msg.fftSize, msg.sampleRate)
+      console.log('[DSP Worker] SnapshotCollector created successfully')
+      const stats = snapshotCollector.getStats()
+      self.postMessage({
+        type: 'collectionStats',
+        bufferSize: stats.bufferSize,
+        taggedEvents: stats.taggedEvents,
+        bytesCollected: stats.bytesCollected,
+      } satisfies WorkerOutboundMessage)
       break
     }
 
@@ -344,6 +336,9 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
         )
         if (snapshotCollector.hasPendingBatches) {
           const batch = snapshotCollector.extractBatch()
+          if (batch) {
+            console.log(`[DSP Worker] Posting snapshot batch: ${batch.snapshots.length} snapshots, event=${batch.event.frequencyHz.toFixed(0)}Hz`)
+          }
           self.postMessage({ type: 'snapshotBatch', batch } satisfies WorkerOutboundMessage)
         }
       }
