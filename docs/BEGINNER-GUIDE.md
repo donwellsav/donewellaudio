@@ -44,7 +44,7 @@ Key concepts:
 
 ### First-Time Setup
 ```bash
-cd C:\ktr\v0sucks-killthering2
+cd C:\ktr\killthering
 pnpm install          # Install all dependencies
 pnpm dev              # Start dev server on http://localhost:3000
 ```
@@ -69,7 +69,7 @@ There's no test suite — the build IS the test. If it compiles, TypeScript caug
 ## 3. Project Map — Where Everything Lives
 
 ```
-C:\ktr\v0sucks-killthering2\
+C:\ktr\killthering\
 │
 ├── app/                          # ENTRY POINT — Next.js pages
 │   ├── layout.tsx                #   HTML wrapper (fonts, metadata, PWA config)

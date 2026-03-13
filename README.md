@@ -115,8 +115,8 @@ Built by [Don Wells AV](https://donwellsav.com).
 
 ```bash
 # Clone the repository
-git clone https://github.com/donwellsav/v0sucks-killthering2.git
-cd v0sucks-killthering2
+git clone https://github.com/donwellsav/killthering.git
+cd killthering
 
 # Install dependencies
 pnpm install
