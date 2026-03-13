@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import withSerwistInit from "@serwist/next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, "package.json"), "utf-8"));
@@ -21,7 +22,7 @@ const cspValue = [
   isDev ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'" : "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "worker-src 'self' blob:",
-  isDev ? "connect-src 'self' ws:" : "connect-src 'self'",
+  isDev ? "connect-src 'self' ws: https://*.ingest.us.sentry.io" : "connect-src 'self' https://*.ingest.us.sentry.io",
   "img-src 'self' data: blob:",
   "media-src 'self' blob: mediastream:",
   "font-src 'self'",
@@ -58,4 +59,22 @@ const nextConfig = {
   },
 }
 
-export default withSerwist(nextConfig)
+export default withSentryConfig(withSerwist(nextConfig), {
+  // Suppress Sentry CLI source map upload warnings when no auth token is set
+  silent: !process.env.SENTRY_AUTH_TOKEN,
+
+  // Disable source map upload until SENTRY_AUTH_TOKEN is configured
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+
+  // Don't widen the existing Webpack config unnecessarily
+  hideSourceMaps: true,
+
+  // Tree-shake Sentry debug logging in production
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
+})
