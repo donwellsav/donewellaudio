@@ -19,6 +19,7 @@
 'use client'
 
 import { useRef, useEffect, useCallback } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import type {
   Advisory,
   DetectorSettings,
@@ -137,6 +138,7 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
           break
         case 'error':
           busyRef.current = false  // Unblock pipeline so analysis continues after soft error
+          Sentry.captureMessage(`DSP worker soft error: ${msg.message}`, 'warning')
           callbacksRef.current.onError?.(msg.message)
           break
       }
@@ -146,6 +148,7 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
       crashedRef.current = true
       isReadyRef.current = false
       busyRef.current = false
+      Sentry.captureMessage(`DSP worker crashed: ${err.message ?? 'unknown'}`, 'error')
       callbacksRef.current.onError?.(err.message ?? 'DSP worker crashed')
       worker.terminate()
       workerRef.current = null
