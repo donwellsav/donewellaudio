@@ -11,8 +11,8 @@
  * Users who don't want to participate toggle it off in Settings → Advanced.
  *
  * This hook does NOT import any data collection code at the top level.
- * The worker uses dynamic import() for snapshotCollector, and the uploader
- * is only instantiated when collection is active.
+ * The uploader is lazy-loaded via dynamic import() and must be ready
+ * BEFORE the worker is told to start collecting (to prevent batch drops).
  *
  * The DSP worker handle is passed via a mutable ref to avoid circular
  * dependency with useAudioAnalyzer (which provides the handle).
@@ -88,11 +88,9 @@ export function useDataCollection(): DataCollectionHandle {
       return
     }
 
-    console.log('[DataCollection] Enabling collection, sessionId=' + sessionIdRef.current.slice(0, 8) + '...')
-    worker.enableCollection(sessionIdRef.current, fftSize, sampleRate)
-    setIsCollecting(true)
-
-    // Lazy-load uploader
+    // Ensure uploader is ready BEFORE telling worker to start —
+    // otherwise batches arrive at handleSnapshotBatch while uploaderRef is null
+    // and get silently dropped.
     if (!uploaderRef.current) {
       try {
         const { SnapshotUploader } = await import('@/lib/data/uploader')
@@ -101,9 +99,14 @@ export function useDataCollection(): DataCollectionHandle {
         // Retry any batches from previous sessions
         uploaderRef.current.retryQueued().catch(() => {})
       } catch (err) {
-        console.error('[DataCollection] Failed to load uploader:', err)
+        console.error('[DataCollection] Failed to load uploader — aborting collection:', err)
+        return
       }
     }
+
+    console.log('[DataCollection] Enabling collection, sessionId=' + sessionIdRef.current.slice(0, 8) + '...')
+    worker.enableCollection(sessionIdRef.current, fftSize, sampleRate)
+    setIsCollecting(true)
   }, [])
 
   const disableCollection = useCallback(() => {

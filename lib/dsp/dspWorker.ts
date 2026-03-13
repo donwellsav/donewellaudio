@@ -64,7 +64,7 @@ export type WorkerInboundMessage =
   | {
       type: 'reset'
     }
-  // Snapshot collection messages (free tier only, dynamically loaded)
+  // Snapshot collection messages (free tier only)
   | SnapshotWorkerInbound
 
 export type WorkerOutboundMessage =
@@ -85,10 +85,10 @@ let sampleRate = 48000
 let fftSize = 8192
 let peakProcessCount = 0
 
-// ─── Snapshot collection (free tier only, dynamically loaded) ────────────────
-// The SnapshotCollector module is NEVER statically imported — it is loaded via
-// dynamic import() only when the main thread sends 'enableCollection'. This
-// ensures premium-tier bundles never include data collection code.
+// ─── Snapshot collection (free tier only) ────────────────────────────────────
+// SnapshotCollector is statically imported (line 32) but only instantiated when
+// the main thread sends 'enableCollection'. Dynamic import() was removed because
+// it silently fails in Webpack worker contexts (PR #89).
 
 let snapshotCollector: SnapshotCollector | null = null
 
@@ -210,16 +210,30 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
     // ── Snapshot collection (free tier only) ──────────────────────────────
 
     case 'enableCollection': {
-      console.log('[DSP Worker] enableCollection received, creating SnapshotCollector')
-      snapshotCollector = new SnapshotCollector(msg.sessionId, msg.fftSize, msg.sampleRate)
-      console.log('[DSP Worker] SnapshotCollector created successfully')
-      const stats = snapshotCollector.getStats()
-      self.postMessage({
-        type: 'collectionStats',
-        bufferSize: stats.bufferSize,
-        taggedEvents: stats.taggedEvents,
-        bytesCollected: stats.bytesCollected,
-      } satisfies WorkerOutboundMessage)
+      try {
+        // Guard against double-enable (avoids leaking previous instance)
+        if (snapshotCollector) {
+          console.log('[DSP Worker] enableCollection: resetting existing collector')
+          snapshotCollector.reset()
+        } else {
+          snapshotCollector = new SnapshotCollector(msg.sessionId, msg.fftSize, msg.sampleRate)
+        }
+        console.log('[DSP Worker] SnapshotCollector ready')
+        const stats = snapshotCollector.getStats()
+        self.postMessage({
+          type: 'collectionStats',
+          bufferSize: stats.bufferSize,
+          taggedEvents: stats.taggedEvents,
+          bytesCollected: stats.bytesCollected,
+        } satisfies WorkerOutboundMessage)
+      } catch (err) {
+        console.error('[DSP Worker] Failed to create SnapshotCollector:', err)
+        snapshotCollector = null
+        self.postMessage({
+          type: 'error',
+          message: `SnapshotCollector init failed: ${err instanceof Error ? err.message : String(err)}`,
+        } satisfies WorkerOutboundMessage)
+      }
       break
     }
 
