@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-
-const STORAGE_KEY = 'ktr-audio-device'
+import { deviceStorage } from '@/lib/storage/ktrStorage'
 
 export interface AudioDevice {
   deviceId: string
@@ -33,14 +32,14 @@ export function useAudioDevices() {
   // Load saved device + initial enumerate
   useEffect(() => {
     mountedRef.current = true
-    const saved = localStorage.getItem(STORAGE_KEY) ?? ''
+    const saved = deviceStorage.load()
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: restore saved device preference from localStorage on mount
     setSelectedDeviceIdState(saved)
     enumerate().then(inputs => {
       // If saved device is gone, fall back to default
       if (saved && inputs.length > 0 && !inputs.some(d => d.deviceId === saved)) {
         setSelectedDeviceIdState('')
-        localStorage.removeItem(STORAGE_KEY)
+        deviceStorage.clear()
       }
     })
     return () => { mountedRef.current = false }
@@ -56,9 +55,9 @@ export function useAudioDevices() {
   const setSelectedDeviceId = useCallback((id: string) => {
     setSelectedDeviceIdState(id)
     if (id) {
-      localStorage.setItem(STORAGE_KEY, id)
+      deviceStorage.save(id)
     } else {
-      localStorage.removeItem(STORAGE_KEY)
+      deviceStorage.clear()
     }
   }, [])
 

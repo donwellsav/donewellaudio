@@ -63,6 +63,8 @@ lib/
   canvas/                   # Pure canvas drawing helpers (no React dependency)
     spectrumDrawing.ts      #   Spectrum/GEQ canvas render functions
   changelog.ts              # Version history (auto-updated by CI, rendered in About tab)
+  storage/                  # Typed localStorage abstraction:
+    ktrStorage.ts           #   Generic factories (typedStorage, stringStorage, flagStorage) + domain accessors
   data/                     # Anonymous spectral data collection (4 files):
     consent.ts              #   Opt-out consent management (localStorage)
     snapshotCollector.ts    #   Spectrum snapshot ring buffer

@@ -8,32 +8,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import type { DetectorSettings, OperationMode, AlgorithmMode, Algorithm } from '@/types/advisory'
 import { FREQ_RANGE_PRESETS } from '@/lib/dsp/constants'
 import { roundFreqToNice } from '@/lib/utils/mathHelpers'
+import { presetStorage } from '@/lib/storage/ktrStorage'
 
 // ── Custom Presets ─────────────────────────────────────────────────────────────
-const PRESETS_STORAGE_KEY = 'ktr-custom-presets'
 const MAX_CUSTOM_PRESETS = 5
-
-interface CustomPreset {
-  name: string
-  settings: Partial<DetectorSettings>
-}
-
-function loadCustomPresets(): CustomPreset[] {
-  try {
-    const raw = localStorage.getItem(PRESETS_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-function saveCustomPresets(presets: CustomPreset[]) {
-  try {
-    localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(presets))
-  } catch {
-    // Ignore storage errors
-  }
-}
 
 /** Keys captured by custom presets — excludes display/graph settings */
 const PRESET_KEYS: (keyof DetectorSettings)[] = [
@@ -69,7 +47,7 @@ export const DetectionControls = memo(function DetectionControls({ settings, onM
   }, [onSettingsChange])
 
   // ── Custom preset state ──────────────────────────────────────────────
-  const [customPresets, setCustomPresets] = useState<CustomPreset[]>(loadCustomPresets)
+  const [customPresets, setCustomPresets] = useState(() => presetStorage.load())
   const [presetName, setPresetName] = useState('')
   const [showSaveInput, setShowSaveInput] = useState(false)
 
@@ -81,7 +59,7 @@ export const DetectionControls = memo(function DetectionControls({ settings, onM
     ) as Partial<DetectorSettings>
     const updated = [...customPresets.filter(p => p.name !== name), { name, settings: snap }].slice(-MAX_CUSTOM_PRESETS)
     setCustomPresets(updated)
-    saveCustomPresets(updated)
+    presetStorage.save(updated)
     setPresetName('')
     setShowSaveInput(false)
   }, [presetName, settings, customPresets])
@@ -89,10 +67,10 @@ export const DetectionControls = memo(function DetectionControls({ settings, onM
   const handleDeletePreset = useCallback((name: string) => {
     const updated = customPresets.filter(p => p.name !== name)
     setCustomPresets(updated)
-    saveCustomPresets(updated)
+    presetStorage.save(updated)
   }, [customPresets])
 
-  const handleLoadPreset = useCallback((preset: CustomPreset) => {
+  const handleLoadPreset = useCallback((preset: { name: string; settings: Partial<DetectorSettings> }) => {
     onSettingsChange(preset.settings)
   }, [onSettingsChange])
 

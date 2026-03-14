@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback, memo } from 'react'
 import { Mic, BarChart3, AlertTriangle, SlidersHorizontal, Keyboard, ChevronRight, ChevronLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
-
-const STORAGE_KEY = 'ktr-onboarding-seen'
+import { onboardingStorage } from '@/lib/storage/ktrStorage'
 
 interface Step {
   title: string
@@ -52,23 +51,15 @@ export const OnboardingOverlay = memo(function OnboardingOverlay() {
 
   useEffect(() => {
     // Only show on first visit
-    try {
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init from localStorage
-        setVisible(true)
-      }
-    } catch {
-      // localStorage unavailable (incognito, etc.) — skip onboarding
+    if (!onboardingStorage.isSet()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init from localStorage
+      setVisible(true)
     }
   }, [])
 
   const dismiss = useCallback(() => {
     setVisible(false)
-    try {
-      localStorage.setItem(STORAGE_KEY, 'true')
-    } catch {
-      // Ignore storage errors
-    }
+    onboardingStorage.set()
   }, [])
 
   const next = useCallback(() => {

@@ -12,6 +12,7 @@ import {
 } from 'react'
 import { useFullscreen } from '@/hooks/useFullscreen'
 import { useAudio } from '@/contexts/AudioAnalyzerContext'
+import { clearPanelLayouts } from '@/lib/storage/ktrStorage'
 
 // ── Context value ───────────────────────────────────────────────────────────
 
@@ -64,14 +65,7 @@ export function UIProvider({ rootRef, children }: UIProviderProps) {
   const [layoutKey, setLayoutKey] = useState(0)
 
   const resetLayout = useCallback(() => {
-    try {
-      localStorage.removeItem('react-resizable-panels:ktr-layout-main')
-      localStorage.removeItem('react-resizable-panels:ktr-layout-main-v2')
-      localStorage.removeItem('react-resizable-panels:ktr-layout-main-v3')
-      localStorage.removeItem('react-resizable-panels:ktr-layout-main-v4')
-      localStorage.removeItem('react-resizable-panels:ktr-layout-vertical')
-      localStorage.removeItem('react-resizable-panels:ktr-layout-bottom')
-    } catch { /* ignore */ }
+    clearPanelLayouts()
     setLayoutKey(k => k + 1)
   }, [])
 

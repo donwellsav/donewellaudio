@@ -11,23 +11,9 @@ import type {
 } from '@/types/calibration'
 import { EMPTY_ROOM_PROFILE } from '@/types/calibration'
 import { downsampleSpectrum } from '@/lib/calibration'
+import { roomStorage } from '@/lib/storage/ktrStorage'
 
-const STORAGE_KEY = 'ktr-calibration-room'
 const SAMPLE_INTERVAL_MS = 60_000 // 60 seconds
-
-function loadRoom(): RoomProfile {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return { ...EMPTY_ROOM_PROFILE, ...JSON.parse(raw) }
-  } catch { /* ignore */ }
-  return { ...EMPTY_ROOM_PROFILE }
-}
-
-function saveRoom(room: RoomProfile): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(room))
-  } catch { /* quota */ }
-}
 
 export interface UseCalibrationSessionReturn {
   // State
@@ -57,7 +43,7 @@ export function useCalibrationSession(
   settings: DetectorSettings,
 ): UseCalibrationSessionReturn {
   const [calibrationEnabled, setCalibrationEnabled] = useState(false)
-  const [room, setRoom] = useState<RoomProfile>(loadRoom)
+  const [room, setRoom] = useState<RoomProfile>(() => ({ ...EMPTY_ROOM_PROFILE, ...roomStorage.load() }))
   const [ambientCapture, setAmbientCapture] = useState<AmbientCapture | null>(null)
   const [isCapturingAmbient, setIsCapturingAmbient] = useState(false)
   const [stats, setStats] = useState<CalibrationStats>({
@@ -137,14 +123,14 @@ export function useCalibrationSession(
       const next = partial.dimensions
         ? { ...prev, ...partial, dimensions: { ...prev.dimensions, ...partial.dimensions } }
         : { ...prev, ...partial }
-      saveRoom(next)
+      roomStorage.save(next)
       return next
     })
   }, [])
 
   const clearRoom = useCallback(() => {
     setRoom({ ...EMPTY_ROOM_PROFILE })
-    saveRoom(EMPTY_ROOM_PROFILE)
+    roomStorage.save(EMPTY_ROOM_PROFILE)
   }, [])
 
   const captureAmbient = useCallback((specRef: React.RefObject<SpectrumData | null>) => {

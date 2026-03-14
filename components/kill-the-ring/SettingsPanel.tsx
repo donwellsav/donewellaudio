@@ -21,6 +21,7 @@ import { RoomTab } from './settings/RoomTab'
 import { CalibrationTab } from './settings/CalibrationTab'
 import type { DetectorSettings, Algorithm, OperationMode } from '@/types/advisory'
 import type { CalibrationTabProps } from './settings/CalibrationTab'
+import { customDefaultsStorage } from '@/lib/storage/ktrStorage'
 
 /** Data collection props forwarded to AdvancedTab */
 export type DataCollectionTabProps = Pick<AdvancedTabProps, 'consentStatus' | 'isCollecting' | 'onEnableCollection' | 'onDisableCollection'>
@@ -45,42 +46,37 @@ export const SettingsPanel = memo(function SettingsPanel({
   const [hasSavedDefaults, setHasSavedDefaults] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('ktr-custom-defaults')
+    const saved = customDefaultsStorage.load()
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init from localStorage
-    setHasSavedDefaults(!!saved)
+    setHasSavedDefaults(saved !== null)
   }, [])
 
   const handleSaveAsDefaults = () => {
-    localStorage.setItem('ktr-custom-defaults', JSON.stringify(settings))
+    customDefaultsStorage.save(settings)
     setHasSavedDefaults(true)
   }
 
   const handleLoadDefaults = () => {
-    const saved = localStorage.getItem('ktr-custom-defaults')
-    if (saved) {
-      try {
-        const defaults = JSON.parse(saved)
-        // Backward compat: strip removed fields, add new ones
-        delete defaults.roomModesEnabled
-        if (!defaults.roomTreatment) defaults.roomTreatment = 'typical'
-        if (!defaults.roomPreset) defaults.roomPreset = 'none'
-        // Migrate legacy algorithm modes to custom + enabledAlgorithms
-        if (defaults.algorithmMode && defaults.algorithmMode !== 'auto' && defaults.algorithmMode !== 'custom') {
-          const allAlgos: Algorithm[] = ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr']
-          const modeMap: Record<string, Algorithm[]> = {
-            msd: ['msd'],
-            phase: ['phase'],
-            combined: allAlgos,
-            all: allAlgos,
-          }
-          defaults.enabledAlgorithms = modeMap[defaults.algorithmMode] ?? allAlgos
-          defaults.algorithmMode = 'custom'
+    const defaults = customDefaultsStorage.load()
+    if (defaults) {
+      // Backward compat: strip removed fields, add new ones
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (defaults as any).roomModesEnabled
+      if (!defaults.roomTreatment) defaults.roomTreatment = 'typical'
+      if (!defaults.roomPreset) defaults.roomPreset = 'none'
+      // Migrate legacy algorithm modes to custom + enabledAlgorithms
+      if (defaults.algorithmMode && defaults.algorithmMode !== 'auto' && defaults.algorithmMode !== 'custom') {
+        const allAlgos: Algorithm[] = ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr']
+        const modeMap: Record<string, Algorithm[]> = {
+          msd: ['msd'],
+          phase: ['phase'],
+          combined: allAlgos,
+          all: allAlgos,
         }
-        onSettingsChange(defaults)
-      } catch {
-        // eslint-disable-next-line no-console -- legitimate error for corrupt localStorage data
-        console.error('Failed to load saved defaults from localStorage')
+        defaults.enabledAlgorithms = modeMap[defaults.algorithmMode] ?? allAlgos
+        defaults.algorithmMode = 'custom'
       }
+      onSettingsChange(defaults)
     }
   }
 

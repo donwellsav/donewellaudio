@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { GraduationCap } from 'lucide-react'
 import { Section, SettingsGrid, type TabSettingsProps } from './SettingsShared'
+import { onboardingStorage } from '@/lib/storage/ktrStorage'
 
 export const DisplayTab = memo(function DisplayTab({
   settings,
@@ -180,7 +181,7 @@ export const DisplayTab = memo(function DisplayTab({
           size="sm"
           className="w-full"
           onClick={() => {
-            try { localStorage.removeItem('ktr-onboarding-seen') } catch {}
+            onboardingStorage.clear()
             window.location.reload()
           }}
         >
