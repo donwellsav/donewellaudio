@@ -1,26 +1,40 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
   <style>
+    .dark-scheme { display: block; }
+    .light-scheme { display: none; }
     @media (prefers-color-scheme: light) {
-      .background { fill: black; }
-      .foreground { fill: white; }
-    }
-    @media (prefers-color-scheme: dark) {
-      .background { fill: white; }
-      .foreground { fill: black; }
+      .dark-scheme { display: none; }
+      .light-scheme { display: block; }
     }
   </style>
-  <g clip-path="url(#clip0_7960_43945)">
-    <rect class="background" width="180" height="180" rx="37" />
-    <g style="transform: scale(95%); transform-origin: center">
-      <path class="foreground"
-        d="M101.141 53H136.632C151.023 53 162.689 64.6662 162.689 79.0573V112.904H148.112V79.0573C148.112 78.7105 148.098 78.3662 148.072 78.0251L112.581 112.898C112.701 112.902 112.821 112.904 112.941 112.904H148.112V126.672H112.941C98.5504 126.672 86.5638 114.891 86.5638 100.5V66.7434H101.141V100.5C101.141 101.15 101.191 101.792 101.289 102.422L137.56 66.7816C137.255 66.7563 136.945 66.7434 136.632 66.7434H101.141V53Z" />
-      <path class="foreground"
-        d="M65.2926 124.136L14 66.7372H34.6355L64.7495 100.436V66.7372H80.1365V118.47C80.1365 126.278 70.4953 129.958 65.2926 124.136Z" />
-    </g>
-  </g>
-  <defs>
-    <clipPath id="clip0_7960_43945">
-      <rect width="180" height="180" fill="white" />
-    </clipPath>
-  </defs>
+  <g class="dark-scheme">
+    <rect width="180" height="180" fill="#111214"/>
+    <defs><radialGradient id="glow-dark" cx="90" cy="54.3" r="42.3" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="rgba(75,146,255,0.25)"/>
+      <stop offset="1" stop-color="rgba(75,146,255,0)"/>
+    </radialGradient></defs>
+    <rect width="180" height="180" fill="url(#glow-dark)"/>
+    <rect x="28.0" y="110.6" width="2.4" height="6.7" rx="1.1" fill="rgba(75,146,255,0.54)"/><rect x="34.1" y="107.2" width="2.4" height="10.0" rx="1.1" fill="rgba(75,146,255,0.56)"/><rect x="40.2" y="104.7" width="2.4" height="12.5" rx="1.1" fill="rgba(75,146,255,0.57)"/><rect x="46.3" y="100.6" width="2.4" height="16.6" rx="1.1" fill="rgba(75,146,255,0.60)"/><rect x="52.3" y="102.2" width="2.4" height="15.0" rx="1.1" fill="rgba(75,146,255,0.59)"/><rect x="58.4" y="96.4" width="2.4" height="20.8" rx="1.1" fill="rgba(75,146,255,0.63)"/><rect x="64.5" y="92.3" width="2.4" height="24.9" rx="1.1" fill="rgba(75,146,255,0.65)"/><rect x="70.6" y="85.6" width="2.4" height="31.6" rx="1.1" fill="rgba(75,146,255,0.69)"/><rect x="76.7" y="75.6" width="2.4" height="41.6" rx="1.1" fill="rgba(75,146,255,0.75)"/><rect x="82.7" y="63.2" width="2.4" height="54.1" rx="1.1" fill="rgba(75,146,255,0.82)"/><rect x="88.8" y="34.1" width="2.4" height="83.2" rx="1.1" fill="rgba(75,146,255,1.00)"/><rect x="94.9" y="65.7" width="2.4" height="51.6" rx="1.1" fill="rgba(75,146,255,0.81)"/><rect x="101.0" y="77.3" width="2.4" height="39.9" rx="1.1" fill="rgba(75,146,255,0.74)"/><rect x="107.1" y="88.1" width="2.4" height="29.1" rx="1.1" fill="rgba(75,146,255,0.68)"/><rect x="113.1" y="93.9" width="2.4" height="23.3" rx="1.1" fill="rgba(75,146,255,0.64)"/><rect x="119.2" y="98.9" width="2.4" height="18.3" rx="1.1" fill="rgba(75,146,255,0.61)"/><rect x="125.3" y="102.2" width="2.4" height="15.0" rx="1.1" fill="rgba(75,146,255,0.59)"/><rect x="131.4" y="105.6" width="2.4" height="11.6" rx="1.1" fill="rgba(75,146,255,0.57)"/><rect x="137.5" y="108.1" width="2.4" height="9.1" rx="1.1" fill="rgba(75,146,255,0.56)"/><rect x="143.5" y="109.7" width="2.4" height="7.5" rx="1.1" fill="rgba(75,146,255,0.55)"/><rect x="149.6" y="112.2" width="2.4" height="5.0" rx="1.1" fill="rgba(75,146,255,0.53)"/>
+    <line x1="22.0" y1="117.2" x2="158.0" y2="117.2" stroke="rgba(75,146,255,0.25)" stroke-width="1.0"/>
+    <circle cx="90.0" cy="46.5" r="19.7" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+    <line x1="90.0" y1="20.8" x2="90.0" y2="39.7" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+    <line x1="90.0" y1="53.4" x2="90.0" y2="72.2" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+    <line x1="64.3" y1="46.5" x2="83.1" y2="46.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+    <line x1="96.9" y1="46.5" x2="115.7" y2="46.5" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+    <circle cx="90.0" cy="46.5" r="1.5" fill="rgba(255,255,255,0.55)"/></g>
+  <g class="light-scheme">
+    <rect width="180" height="180" fill="#f0f0f0"/>
+    <defs><radialGradient id="glow-light" cx="90" cy="54.3" r="42.3" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="rgba(26,42,74,0.25)"/>
+      <stop offset="1" stop-color="rgba(26,42,74,0)"/>
+    </radialGradient></defs>
+    <rect width="180" height="180" fill="url(#glow-light)"/>
+    <rect x="28.0" y="110.6" width="2.4" height="6.7" rx="1.1" fill="rgba(26,42,74,0.54)"/><rect x="34.1" y="107.2" width="2.4" height="10.0" rx="1.1" fill="rgba(26,42,74,0.56)"/><rect x="40.2" y="104.7" width="2.4" height="12.5" rx="1.1" fill="rgba(26,42,74,0.57)"/><rect x="46.3" y="100.6" width="2.4" height="16.6" rx="1.1" fill="rgba(26,42,74,0.60)"/><rect x="52.3" y="102.2" width="2.4" height="15.0" rx="1.1" fill="rgba(26,42,74,0.59)"/><rect x="58.4" y="96.4" width="2.4" height="20.8" rx="1.1" fill="rgba(26,42,74,0.63)"/><rect x="64.5" y="92.3" width="2.4" height="24.9" rx="1.1" fill="rgba(26,42,74,0.65)"/><rect x="70.6" y="85.6" width="2.4" height="31.6" rx="1.1" fill="rgba(26,42,74,0.69)"/><rect x="76.7" y="75.6" width="2.4" height="41.6" rx="1.1" fill="rgba(26,42,74,0.75)"/><rect x="82.7" y="63.2" width="2.4" height="54.1" rx="1.1" fill="rgba(26,42,74,0.82)"/><rect x="88.8" y="34.1" width="2.4" height="83.2" rx="1.1" fill="rgba(26,42,74,1.00)"/><rect x="94.9" y="65.7" width="2.4" height="51.6" rx="1.1" fill="rgba(26,42,74,0.81)"/><rect x="101.0" y="77.3" width="2.4" height="39.9" rx="1.1" fill="rgba(26,42,74,0.74)"/><rect x="107.1" y="88.1" width="2.4" height="29.1" rx="1.1" fill="rgba(26,42,74,0.68)"/><rect x="113.1" y="93.9" width="2.4" height="23.3" rx="1.1" fill="rgba(26,42,74,0.64)"/><rect x="119.2" y="98.9" width="2.4" height="18.3" rx="1.1" fill="rgba(26,42,74,0.61)"/><rect x="125.3" y="102.2" width="2.4" height="15.0" rx="1.1" fill="rgba(26,42,74,0.59)"/><rect x="131.4" y="105.6" width="2.4" height="11.6" rx="1.1" fill="rgba(26,42,74,0.57)"/><rect x="137.5" y="108.1" width="2.4" height="9.1" rx="1.1" fill="rgba(26,42,74,0.56)"/><rect x="143.5" y="109.7" width="2.4" height="7.5" rx="1.1" fill="rgba(26,42,74,0.55)"/><rect x="149.6" y="112.2" width="2.4" height="5.0" rx="1.1" fill="rgba(26,42,74,0.53)"/>
+    <line x1="22.0" y1="117.2" x2="158.0" y2="117.2" stroke="rgba(26,42,74,0.25)" stroke-width="1.0"/>
+    <circle cx="90.0" cy="46.5" r="19.7" fill="none" stroke="rgba(26,42,74,0.55)" stroke-width="1.5"/>
+    <line x1="90.0" y1="20.8" x2="90.0" y2="39.7" stroke="rgba(26,42,74,0.55)" stroke-width="1.5"/>
+    <line x1="90.0" y1="53.4" x2="90.0" y2="72.2" stroke="rgba(26,42,74,0.55)" stroke-width="1.5"/>
+    <line x1="64.3" y1="46.5" x2="83.1" y2="46.5" stroke="rgba(26,42,74,0.55)" stroke-width="1.5"/>
+    <line x1="96.9" y1="46.5" x2="115.7" y2="46.5" stroke="rgba(26,42,74,0.55)" stroke-width="1.5"/>
+    <circle cx="90.0" cy="46.5" r="1.5" fill="rgba(26,42,74,0.55)"/></g>
 </svg>
