@@ -61,7 +61,13 @@ export const SettingsPanel = memo(function SettingsPanel({
     if (defaults) {
       // Backward compat: strip removed fields, add new ones
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (defaults as any).roomModesEnabled
+      const d = defaults as any
+      delete d.roomModesEnabled
+      // Migrate boolean micCalibrationEnabled → profile selector
+      if (d.micCalibrationEnabled !== undefined) {
+        d.micCalibrationProfile = d.micCalibrationEnabled ? 'ecm8000' : 'none'
+        delete d.micCalibrationEnabled
+      }
       if (!defaults.roomTreatment) defaults.roomTreatment = 'typical'
       if (!defaults.roomPreset) defaults.roomPreset = 'none'
       // Migrate legacy algorithm modes to custom + enabledAlgorithms

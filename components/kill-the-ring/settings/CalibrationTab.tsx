@@ -307,18 +307,29 @@ export const CalibrationTab = memo(function CalibrationTab({
           )}
         </Section>
 
-        <Section title="Mic Calibration" tooltip="Applies inverse frequency response compensation for the Behringer ECM8000 measurement mic (CSL calibration #746). Flattens the mic's +4.7 dB rise at 10–16 kHz so the RTA shows true SPL.">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label className="text-sm font-mono">ECM8000 Compensation</Label>
+        <Section title="Mic Calibration" tooltip="Applies inverse frequency response compensation for a measurement mic. Flattens the mic's coloration so the RTA shows true SPL. Select your mic model or 'None' to disable.">
+          <div className="space-y-1">
+            <Label className="text-sm font-mono">Measurement Mic</Label>
+            <Select
+              value={settings.micCalibrationProfile}
+              onValueChange={(value) => onSettingsChange({ micCalibrationProfile: value as 'none' | 'ecm8000' | 'rta-m' })}
+            >
+              <SelectTrigger className="h-8 text-sm font-mono">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="ecm8000">Behringer ECM8000 (CSL 746)</SelectItem>
+                <SelectItem value="rta-m">dbx RTA-M</SelectItem>
+              </SelectContent>
+            </Select>
+            {settings.micCalibrationProfile !== 'none' && (
               <p className="text-[11px] text-muted-foreground font-mono leading-tight">
-                Behringer ECM8000 · CSL 746
+                {settings.micCalibrationProfile === 'ecm8000'
+                  ? 'Compensates +4.7 dB HF rise (10–16 kHz)'
+                  : 'Compensates ±1.5 dB LF/HF roll-off'}
               </p>
-            </div>
-            <PillToggle
-              checked={settings.micCalibrationEnabled}
-              onChange={(checked) => onSettingsChange({ micCalibrationEnabled: checked })}
-            />
+            )}
           </div>
         </Section>
       </SectionGroup>
@@ -368,10 +379,12 @@ export const CalibrationTab = memo(function CalibrationTab({
                     <span className="text-muted-foreground">Snapshots</span>
                     <span className="text-foreground">{stats.snapshotCount}</span>
                   </div>
-                  {settings.micCalibrationEnabled && (
+                  {settings.micCalibrationProfile !== 'none' && (
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Mic Cal</span>
-                      <span className="text-emerald-400 text-xs font-mono">ECM8000 compensated</span>
+                      <span className="text-emerald-400 text-xs font-mono">
+                        {settings.micCalibrationProfile === 'ecm8000' ? 'ECM8000' : 'RTA-M'} compensated
+                      </span>
                     </div>
                   )}
                 </>

@@ -742,7 +742,7 @@ Where RT60 is reverberation time in seconds and Volume is in cubic meters.
   // Filtering
   confidenceThreshold: 0.35,          // 35% — catches early feedback, filters artifacts
   aWeightingEnabled: true,
-  micCalibrationEnabled: false,       // ECM8000 mic compensation — off by default
+  micCalibrationProfile: 'none',      // Measurement mic compensation ('none' | 'ecm8000' | 'rta-m')
 
   // Advanced algorithms
   algorithmMode: 'auto',              // Content-adaptive algorithm selection

@@ -144,6 +144,46 @@ export const ECM8000_CALIBRATION: readonly [number, number][] = [
   [16000, 4.72], [20000, 2.26], [25000, -2.86],
 ] as const
 
+// ── Mic Calibration: dbx RTA-M ──────────────────────────────────────────────
+// Digitized from published frequency response graph (cut sheet)
+// Omni-directional flat measurement mic for DriveRack series
+// Format: [frequency Hz, response dB relative to 1 kHz]
+export const RTA_M_CALIBRATION: readonly [number, number][] = [
+  [20, -1.5], [25, -1.0], [31.5, -0.7], [40, -0.4], [50, -0.2],
+  [63, -0.1], [80, 0.0], [100, 0.0], [125, 0.0], [160, 0.0],
+  [200, 0.0], [250, 0.0], [315, 0.0], [400, 0.0], [500, 0.0],
+  [630, 0.0], [800, 0.0], [1000, 0.0], [1250, 0.0], [1600, 0.0],
+  [2000, 0.0], [2500, 0.0], [3150, 0.0], [4000, 0.1], [5000, 0.2],
+  [6300, 0.3], [8000, 0.5], [10000, 0.7], [12500, 1.0], [16000, 0.8],
+  [20000, -1.0],
+] as const
+
+// ── Mic Calibration Profiles ─────────────────────────────────────────────────
+
+import type { MicCalibrationProfile } from '@/types/advisory'
+
+export interface MicProfileData {
+  label: string
+  model: string
+  calibrationId: string
+  curve: readonly [number, number][]
+}
+
+export const MIC_CALIBRATION_PROFILES: Record<Exclude<MicCalibrationProfile, 'none'>, MicProfileData> = {
+  ecm8000: {
+    label: 'Behringer ECM8000',
+    model: 'Behringer ECM8000',
+    calibrationId: 'CSL 746',
+    curve: ECM8000_CALIBRATION,
+  },
+  'rta-m': {
+    label: 'dbx RTA-M',
+    model: 'dbx RTA-M',
+    calibrationId: 'Cut Sheet Rev A',
+    curve: RTA_M_CALIBRATION,
+  },
+} as const
+
 // FFT size options
 export const FFT_SIZE_OPTIONS = [2048, 4096, 8192, 16384, 32768] as const
 
@@ -601,7 +641,7 @@ export const DEFAULT_SETTINGS: DetectorSettings = {
   harmonicToleranceCents: 200, // ±200 cents for harmonic matching; synced with ASSOCIATION_TOLERANCE_CENTS
   showTooltips: true, // Show help tooltips (useful for AV techs)
   aWeightingEnabled: true, // A-WEIGHTING ON — prioritizes speech intelligibility band (2–5 kHz)
-  micCalibrationEnabled: false, // Mic frequency response compensation (ECM8000 CSL 746) — dev only
+  micCalibrationProfile: 'none' as const, // Measurement mic compensation profile ('none' | 'ecm8000' | 'rta-m')
   // Confidence filtering — catches early quiet feedback while filtering noise
   confidenceThreshold: 0.35, // 35% — compromise: catches early feedback, filters artifacts
   // Room acoustics — defaults to large ballroom / exhibit hall

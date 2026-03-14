@@ -1,7 +1,7 @@
 // KillTheRing2 Feedback Detector - Core DSP engine for peak detection
 // Adapted from FeedbackDetector.js with TypeScript and enhancements
 
-import { A_WEIGHTING, ECM8000_CALIBRATION, EXP_LUT, HARMONIC_SETTINGS, MSD_SETTINGS, PERSISTENCE_SCORING, SIGNAL_GATE, HYSTERESIS, PHPR_SETTINGS } from './constants'
+import { A_WEIGHTING, MIC_CALIBRATION_PROFILES, EXP_LUT, HARMONIC_SETTINGS, MSD_SETTINGS, PERSISTENCE_SCORING, SIGNAL_GATE, HYSTERESIS, PHPR_SETTINGS } from './constants'
 import { 
   medianInPlace, 
   buildPrefixSum, 
@@ -403,7 +403,10 @@ export class FeedbackDetector {
       this.resetHistory()
     }
 
-    if (config.aWeightingEnabled !== undefined || config.micCalibrationEnabled !== undefined) {
+    if (config.aWeightingEnabled !== undefined || config.micCalibrationProfile !== undefined) {
+      if (config.micCalibrationProfile !== undefined) {
+        this.computeMicCalibrationTable()
+      }
       this.recomputeAnalysisDbBounds()
       this.noiseFloorDb = null
       this.resetHistory()
@@ -747,10 +750,20 @@ export class FeedbackDetector {
     const table = this.micCalibrationTable
     if (!table) return
 
+    const profile = this.config.micCalibrationProfile
+    const profileData = profile !== 'none' ? MIC_CALIBRATION_PROFILES[profile] : null
+    const cal = profileData?.curve
+
+    if (!cal) {
+      table.fill(0)
+      this.micCalMinDb = 0
+      this.micCalMaxDb = 0
+      return
+    }
+
     const sr = this.getSampleRate()
     const fft = this.config.fftSize
     const hzPerBin = sr / fft
-    const cal = ECM8000_CALIBRATION
 
     let min = Infinity
     let max = -Infinity
@@ -795,7 +808,7 @@ export class FeedbackDetector {
       minOffset += this.aWeightingMinDb
       maxOffset += this.aWeightingMaxDb
     }
-    if (this.config.micCalibrationEnabled) {
+    if (this.config.micCalibrationProfile !== 'none') {
       minOffset += this.micCalMinDb
       maxOffset += this.micCalMaxDb
     }
@@ -912,7 +925,7 @@ export class FeedbackDetector {
 
     const useAWeighting = this.config.aWeightingEnabled && !!this.aWeightingTable
     const aTable = this.aWeightingTable
-    const useMicCalibration = this.config.micCalibrationEnabled && !!this.micCalibrationTable
+    const useMicCalibration = this.config.micCalibrationProfile !== 'none' && !!this.micCalibrationTable
     const micCalTable = this.micCalibrationTable
 
     // ── Auto-gain: measure raw peak BEFORE applying gain ──────────────────
