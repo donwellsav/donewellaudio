@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useRef, useCallback } from 'react'
+import { memo, useRef, useCallback, useMemo } from 'react'
 import { IssuesList } from './IssuesList'
 import { EarlyWarningPanel } from './EarlyWarningPanel'
 import { SpectrumCanvas } from './SpectrumCanvas'
@@ -15,6 +15,7 @@ import { useUI } from '@/contexts/UIContext'
 import { Button } from '@/components/ui/button'
 import { RotateCcw, AlertTriangle, BarChart3, Settings2, Maximize2, Minimize2 } from 'lucide-react'
 import type { DetectorSettings } from '@/types/advisory'
+import { MOBILE_MAX_DISPLAYED_ISSUES } from '@/lib/dsp/constants'
 
 const TAB_ORDER = ['issues', 'graph', 'settings'] as const
 
@@ -42,6 +43,12 @@ export const MobileLayout = memo(function MobileLayout({
     onClearRTA, onClearGEQ,
     onFalsePositive, falsePositiveIds,
   } = useAdvisories()
+
+  // Limit advisories to top 5 most problematic on mobile (already sorted by urgency + amplitude)
+  const mobileAdvisories = useMemo(
+    () => advisories.slice(0, MOBILE_MAX_DISPLAYED_ISSUES),
+    [advisories]
+  )
 
   // ── Tab navigation ──────────────────────────────────────────
   const tabIndex = TAB_ORDER.indexOf(mobileTab)
@@ -143,8 +150,8 @@ export const MobileLayout = memo(function MobileLayout({
                 <span className="text-primary font-mono">{activeAdvisoryCount}</span>
               </h2>
               <IssuesList
-                advisories={advisories}
-                maxIssues={settings.maxDisplayedIssues}
+                advisories={mobileAdvisories}
+                maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
                 dismissedIds={dismissedIds}
                 onDismiss={onDismiss}
                 onClearAll={onClearAll}
@@ -202,7 +209,7 @@ export const MobileLayout = memo(function MobileLayout({
                   Clear
                 </button>
               )}
-              <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning && !isStarting ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} />
+              <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning && !isStarting ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} />
             </div>
             {/* GEQ — bottom half */}
             <div className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
@@ -215,7 +222,7 @@ export const MobileLayout = memo(function MobileLayout({
                   Clear
                 </button>
               )}
-              <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
+              <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
             </div>
           </div>
 
@@ -290,8 +297,8 @@ export const MobileLayout = memo(function MobileLayout({
               <span className="text-primary font-mono">{activeAdvisoryCount}</span>
             </h2>
             <IssuesList
-              advisories={advisories}
-              maxIssues={settings.maxDisplayedIssues}
+              advisories={mobileAdvisories}
+              maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
               dismissedIds={dismissedIds}
               onDismiss={onDismiss}
               onClearAll={onClearAll}
@@ -341,7 +348,7 @@ export const MobileLayout = memo(function MobileLayout({
                 Clear
               </button>
             )}
-            <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning && !isStarting ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} />
+            <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning && !isStarting ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} />
           </div>
           {/* GEQ — bottom half */}
           <div className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
@@ -354,7 +361,7 @@ export const MobileLayout = memo(function MobileLayout({
                 Clear
               </button>
             )}
-            <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
+            <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
           </div>
         </div>
         {/* Right fader sidecar — 5% */}
