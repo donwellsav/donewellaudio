@@ -45,7 +45,7 @@ export const DesktopLayout = memo(function DesktopLayout({
     inputLevel, isAutoGain, autoGainDb, autoGainLocked,
   } = useAudio()
 
-  const { isFrozen, toggleFreeze, layoutKey } = useUI()
+  const { isFrozen, toggleFreeze, layoutKey, rtaContainerRef } = useUI()
 
   const {
     advisories, activeAdvisoryCount, earlyWarning,
@@ -211,7 +211,7 @@ export const DesktopLayout = memo(function DesktopLayout({
             {/* Top graph */}
             <ResizablePanel defaultSize={60} minSize={20} collapsible>
               <div className="h-full p-1 pb-0.5">
-                <div className="h-full bg-card/40 rounded border border-border/40 overflow-hidden flex flex-col panel-recessed hover:border-border/60 transition-colors duration-300">
+                <div ref={rtaContainerRef} className="h-full bg-card/40 rounded border border-border/40 overflow-hidden flex flex-col panel-recessed hover:border-border/60 transition-colors duration-300">
                   <div className="flex-shrink-0 flex items-center justify-between px-2 py-0.5 border-b border-border bg-card/60 panel-groove">
                     <div className="flex items-center gap-1">
                       <span className="text-sm font-mono font-bold tracking-[0.15em] text-primary">RTA</span>
