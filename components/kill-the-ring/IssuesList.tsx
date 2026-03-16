@@ -323,8 +323,8 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, onDismiss
           </div>
 
           {/* RIGHT: Copy / Dismiss + FALSE+ below */}
-          <div className="flex flex-col items-end gap-0.5 flex-shrink-0 self-center">
-            <div className="flex items-center gap-0.5">
+          <div className="flex flex-col items-end gap-0 flex-shrink-0 self-center">
+            <div className="flex items-center gap-0">
               <button
                   onClick={handleCopy}
                   aria-label={`Copy ${exactFreqStr} frequency info`}
@@ -332,11 +332,11 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, onDismiss
                     copied
                       ? 'text-emerald-400'
                       : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
-                  } ${touchFriendly ? 'w-11 h-11' : 'w-5 h-5'}`}
+                  } ${touchFriendly ? 'w-8 h-8' : 'w-5 h-5'}`}
                 >
                   {copied
-                    ? <Check className={touchFriendly ? 'w-4 h-4' : 'w-3 h-3'} />
-                    : <Copy className={touchFriendly ? 'w-4 h-4' : 'w-3 h-3'} />
+                    ? <Check className={touchFriendly ? 'w-5 h-5' : 'w-3.5 h-3.5'} />
+                    : <Copy className={touchFriendly ? 'w-5 h-5' : 'w-3.5 h-3.5'} />
                   }
                 </button>
               {copied && (
@@ -347,10 +347,10 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, onDismiss
                   onClick={() => onDismiss(advisory.id)}
                   aria-label={`Dismiss ${exactFreqStr} issue`}
                   className={`rounded text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60 transition-colors flex items-center justify-center ${
-                    touchFriendly ? 'w-11 h-11' : 'w-5 h-5'
+                    touchFriendly ? 'w-8 h-8' : 'w-5 h-5'
                   }`}
                 >
-                  <X className={touchFriendly ? 'w-4 h-4' : 'w-3 h-3'} />
+                  <X className={touchFriendly ? 'w-5 h-5' : 'w-3.5 h-3.5'} />
                 </button>
               )}
             </div>
@@ -358,11 +358,11 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, onDismiss
               <button
                 onClick={() => onFalsePositive(advisory.id)}
                 aria-label={`${isFalsePositive ? 'Unflag' : 'Flag'} ${exactFreqStr} as false positive`}
-                className={`rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1.5 ${
+                className={`rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1 ${
                   isFalsePositive
                     ? 'text-red-400 bg-red-500/20 border border-red-500/40'
                     : 'text-muted-foreground/50 hover:text-red-400 hover:bg-red-500/10 border border-transparent'
-                } ${touchFriendly ? 'h-11 min-w-[44px]' : 'h-5'}`}
+                } ${touchFriendly ? 'h-7 min-w-[36px]' : 'h-5'}`}
               >
                 FALSE+
               </button>
