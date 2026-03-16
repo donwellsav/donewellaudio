@@ -7,6 +7,7 @@ import {
   useCallback,
   useMemo,
   useEffect,
+  useRef,
   type ReactNode,
   type RefObject,
 } from 'react'
@@ -25,6 +26,10 @@ export interface UIContextValue {
   toggleFullscreen: () => void
   layoutKey: number
   resetLayout: () => void
+  /** Callback ref to attach to RTA container div(s) for element-level fullscreen */
+  rtaContainerRef: (node: HTMLDivElement | null) => void
+  isRtaFullscreen: boolean
+  toggleRtaFullscreen: () => void
 }
 
 const UIContext = createContext<UIContextValue | null>(null)
@@ -60,6 +65,51 @@ export function UIProvider({ rootRef, children }: UIProviderProps) {
 
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(rootRef)
 
+  // ── RTA fullscreen ───────────────────────────────────────────────────
+
+  const rtaContainerRefs = useRef<Set<HTMLDivElement>>(new Set())
+  const [isRtaFullscreen, setIsRtaFullscreen] = useState(false)
+
+  /** Callback ref for RTA containers — multiple layouts can register their RTA div */
+  const rtaContainerRef = useCallback((node: HTMLDivElement | null) => {
+    // React calls with null on unmount, node on mount
+    if (node) {
+      rtaContainerRefs.current.add(node)
+    }
+    // Cleanup stale refs on each call
+    for (const el of rtaContainerRefs.current) {
+      if (!el.isConnected) rtaContainerRefs.current.delete(el)
+    }
+  }, [])
+
+  const toggleRtaFullscreen = useCallback(() => {
+    if (isRtaFullscreen) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => setIsRtaFullscreen(false))
+      } else {
+        setIsRtaFullscreen(false)
+      }
+    } else {
+      // Find the first visible RTA container
+      for (const el of rtaContainerRefs.current) {
+        if (el.offsetParent !== null && el.requestFullscreen) {
+          el.requestFullscreen().catch(() => {})
+          break
+        }
+      }
+    }
+  }, [isRtaFullscreen])
+
+  // Sync RTA fullscreen state with browser events
+  useEffect(() => {
+    const onChange = () => {
+      const fsEl = document.fullscreenElement
+      setIsRtaFullscreen(!!fsEl && rtaContainerRefs.current.has(fsEl as HTMLDivElement))
+    }
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
+
   // ── Layout key (forces re-mount of resizable panels on reset) ─────────
 
   const [layoutKey, setLayoutKey] = useState(0)
@@ -80,6 +130,9 @@ export function UIProvider({ rootRef, children }: UIProviderProps) {
     toggleFullscreen,
     layoutKey,
     resetLayout,
+    rtaContainerRef,
+    isRtaFullscreen,
+    toggleRtaFullscreen,
   }), [
     mobileTab,
     setMobileTab,
@@ -89,6 +142,8 @@ export function UIProvider({ rootRef, children }: UIProviderProps) {
     toggleFullscreen,
     layoutKey,
     resetLayout,
+    isRtaFullscreen,
+    toggleRtaFullscreen,
   ])
 
   return (

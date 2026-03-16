@@ -38,7 +38,7 @@ export const HeaderBar = memo(function HeaderBar({
     settings, handleModeChange, resetSettings,
     devices, selectedDeviceId, handleDeviceChange,
   } = useAudio()
-  const { resetLayout, isFullscreen, toggleFullscreen, isFrozen, toggleFreeze } = useUI()
+  const { resetLayout, isFullscreen, toggleFullscreen, isFrozen, toggleFreeze, isRtaFullscreen, toggleRtaFullscreen } = useUI()
   const { advisories, dismissedIds, onClearAll, onClearGEQ, onClearRTA, hasActiveGEQBars, hasActiveRTAMarkers } = useAdvisories()
   const hasClearableContent = advisories.some(a => !dismissedIds.has(a.id)) || hasActiveGEQBars || hasActiveRTAMarkers
 
@@ -144,15 +144,15 @@ export const HeaderBar = memo(function HeaderBar({
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleFullscreen}
-              className="hidden md:landscape:flex h-10 w-10 text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95"
-              aria-label="Toggle fullscreen"
+              onClick={toggleRtaFullscreen}
+              className="flex h-10 w-10 text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95"
+              aria-label={isRtaFullscreen ? 'Exit RTA fullscreen' : 'RTA fullscreen'}
             >
-              {isFullscreen ? <Minimize2 className="size-6" /> : <Maximize2 className="size-6" />}
+              {isRtaFullscreen ? <Minimize2 className="size-6" /> : <Maximize2 className="size-6" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-sm">
-            {isFullscreen ? 'Exit fullscreen (F)' : 'Fullscreen (F)'}
+            {isRtaFullscreen ? 'Exit RTA fullscreen' : 'RTA fullscreen'}
           </TooltipContent>
         </Tooltip>
 

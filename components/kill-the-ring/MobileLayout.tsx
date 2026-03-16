@@ -32,7 +32,7 @@ export const MobileLayout = memo(function MobileLayout({
     noiseFloorDb,
   } = useAudio()
 
-  const { isFrozen, toggleFreeze, mobileTab, setMobileTab } = useUI()
+  const { isFrozen, toggleFreeze, mobileTab, setMobileTab, rtaContainerRef } = useUI()
 
   const {
     advisories, activeAdvisoryCount, earlyWarning,
@@ -173,7 +173,7 @@ export const MobileLayout = memo(function MobileLayout({
             inert={mobileTab !== 'graph' || undefined}
           >
             {/* RTA — top half */}
-            <div className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
+            <div ref={rtaContainerRef} className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
               <span className="absolute top-1 left-1.5 z-20 text-sm text-muted-foreground font-mono font-bold uppercase tracking-[0.2em] pointer-events-none">RTA</span>
               {isRunning && (
                 <button
