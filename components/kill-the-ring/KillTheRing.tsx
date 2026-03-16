@@ -184,10 +184,36 @@ const KillTheRingInner = memo(function KillTheRingInner({
 
   // ── Calibration settings wrapper ────────────────────────────────────────
 
+  // Debounce settings updates (100ms) to prevent per-frame calls during slider drag.
+  // Accumulates partial updates so no intermediate values are lost.
+  const settingsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingSettingsRef = useRef<Partial<typeof settings>>({})
+
   const handleSettingsChange = useCallback((newSettings: Partial<typeof settings>) => {
-    updateSettings(newSettings)
-    calibration.onSettingsChange(newSettings)
+    // Merge into pending so rapid calls don't drop keys
+    pendingSettingsRef.current = { ...pendingSettingsRef.current, ...newSettings }
+
+    if (settingsDebounceRef.current !== null) {
+      clearTimeout(settingsDebounceRef.current)
+    }
+
+    settingsDebounceRef.current = setTimeout(() => {
+      const merged = pendingSettingsRef.current
+      pendingSettingsRef.current = {}
+      settingsDebounceRef.current = null
+      updateSettings(merged)
+      calibration.onSettingsChange(merged)
+    }, 100)
   }, [updateSettings, calibration])
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (settingsDebounceRef.current !== null) {
+        clearTimeout(settingsDebounceRef.current)
+      }
+    }
+  }, [])
 
   // ── Panel management ────────────────────────────────────────────────────
 

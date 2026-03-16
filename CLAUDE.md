@@ -1,6 +1,6 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated from 10-phase deep audit, March 2026. 30,920 lines, 132 files, 335 tests.**
+> **Last updated March 2026. 119 TypeScript/TSX files, 373 tests (368 pass, 4 skip, 1 todo), 15 suites.**
 
 ## CRITICAL RULES
 
@@ -10,7 +10,7 @@
 
 ## Project Overview
 
-**Kill The Ring** (killthering.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.95.0. Repository: github.com/donwellsav/killthering.
+**Kill The Ring** (killthering.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.98.0. Repository: github.com/donwellsav/killthering.
 
 ## Tech Stack
 
@@ -23,7 +23,7 @@
 | DSP Offload | Web Worker (dspWorker.ts, ~430 lines) |
 | Visualization | HTML5 Canvas at 30fps |
 | State | React 19 hooks + 4 context providers (no external state library) |
-| Testing | Vitest (368 tests, 15 suites, under 10s) |
+| Testing | Vitest (373 tests, 15 suites, under 2s) |
 | Error Reporting | Sentry (browser + server + worker runtimes) |
 | PWA | Serwist (service worker, offline caching, installable) |
 | Package Manager | pnpm |
@@ -35,7 +35,7 @@ pnpm dev              # Dev server on :3000 (Turbopack, no SW)
 pnpm build            # Production build (webpack, generates SW)
 pnpm start            # Production server
 pnpm lint             # ESLint (flat config)
-pnpm test             # Vitest (335 DSP unit tests)
+pnpm test             # Vitest (373 tests: 368 pass + 4 skip + 1 todo)
 pnpm test:watch       # Vitest watch mode
 pnpm test:coverage    # Vitest with V8 coverage
 npx tsc --noEmit      # Type-check (run BEFORE pnpm build)
@@ -68,7 +68,7 @@ Mic -> getUserMedia -> GainNode -> AnalyserNode (8192 FFT)
 
 ### Context Providers (top to bottom)
 
-1. `AudioAnalyzerContext` — Engine lifecycle, settings, devices, spectrum, detection (25 fields — **KNOWN ISSUE: god context, should split into 3**)
+1. `AudioAnalyzerContext` — Engine lifecycle, settings, devices, spectrum, detection (28 fields — **KNOWN ISSUE: god context, should split into 3-4**)
 2. `AdvisoryContext` — Advisory state, dismiss/clear/false-positive, derived booleans
 3. `UIContext` — Mobile tab, freeze, fullscreen, layout reset
 4. `PortalContainerContext` — Portal mount for mobile overlays
@@ -93,51 +93,58 @@ MUSIC:      MSD=0.08  Phase=0.35  Spectral=0.10  Comb=0.08  IHR=0.24  PTMR=0.15
 COMPRESSED: MSD=0.12  Phase=0.30  Spectral=0.18  Comb=0.08  IHR=0.18  PTMR=0.14
 ```
 
-### Multiplicative Gates (post-fusion)
+### Multiplicative Gates (post-fusion and classifier)
 
-- **IHR gate:** When harmonicsFound>=3 AND IHR>0.35, feedbackProbability *= 0.65 (instrument suppression)
-- **PTMR gate:** When PTMR feedbackScore under 0.2, feedbackProbability *= 0.80 (broad peak suppression)
+- **IHR gate:** When harmonicsFound>=3 AND IHR>0.35, feedbackProbability *= 0.65 (instrument suppression). File: `algorithmFusion.ts`
+- **PTMR gate:** When PTMR feedbackScore under 0.2, feedbackProbability *= 0.80 (broad peak suppression). File: `algorithmFusion.ts`
+- **Formant gate:** When 2+ active peaks fall in distinct vocal formant bands (F1/F2/F3) AND current peak Q is 3–20, pFeedback *= 0.65. Suppresses sustained vowel FP. File: `classifier.ts`
+- **Chromatic quantization gate:** When peak frequency snaps to 12-TET semitone grid (±5 cents) AND phase coherence > 0.80, phase score contribution scaled by 0.60 (40% reduction). Suppresses Auto-Tune FP. File: `classifier.ts`
+- **Comb stability gate:** CombStabilityTracker monitors fundamentalSpacing CV across 16 frames. When CV > 0.05 (sweeping), comb confidence *= 0.25. Suppresses flanger/phaser FP. File: `algorithmFusion.ts`
 
 ## Known Bugs (Priority Order)
 
-### Critical (P0)
+### Recently Fixed
 
-1. **Auto-gain EMA coefficients stale.** Computed in `start()` but NOT recomputed in `updateConfig()` when `analysisIntervalMs` changes mid-session. File: `feedbackDetector.ts` ~line 250, 320.
-2. **Confidence formula floors at 0.5.** Makes UNCERTAIN verdict unreachable. File: `algorithmFusion.ts` line 571.
-3. **Post-override normalization.** RUNAWAY forces pFeedback=0.85, then divides by postTotal>1.0, reducing to ~0.56. File: `classifier.ts`.
+| Bug | Fix | Version |
+|-----|-----|---------|
+| Auto-gain EMA coefficients stale in `updateConfig()` | `_recomputeEmaCoefficients()` called from both `start()` and `updateConfig()` | v0.98.0+ |
+| Confidence formula floors at 0.5 (UNCERTAIN unreachable) | Changed to `prob * (0.5 + 0.5 * agreement)` | v0.98.0+ |
+| Post-override normalization undoes RUNAWAY pFeedback=0.85 | Normalization before overrides; overrides are final | v0.98.0+ |
+| `existing` weight (0.04) double-counts features | Removed from all profiles, redistributed to IHR+PTMR | v0.98.0+ |
+| Comb weight doubling dilutes others by 7.4% | Doubled weight in numerator only, base weight in denominator | v0.98.0+ |
+| No worker crash recovery | Auto-restart: 500ms debounce, max 3 retries, Sentry logging | v0.98.0+ |
+| SpectrumCanvas missing devicePixelRatio (blurry on Retina) | Full DPR scaling: buffer, CSS style, `ctx.scale(dpr, dpr)` | v0.98.0+ |
+| Dual MSD implementations | Consolidated into single `MSDPool` class in `msdPool.ts` | v0.98.0 |
+| Only axial room modes (tangential + oblique missing) | `calculateRoomModes()` now handles all three mode types | v0.98.0+ |
+| PRIOR_PROBABILITY = 0.33 (uniform priors) | Per-class priors: feedback=0.45, whistle=0.27, instrument=0.27 | v0.98.0+ |
+| Settings slider fires per-frame (no debounce) | 100ms debounce with merge accumulation in `KillTheRing.tsx` | v0.98.0+ |
+| TS2688: Missing @serwist/next type definition | Types declared in `tsconfig.json` | v0.98.0+ |
+| Persistence thresholds frame-count-based (FUTURE-002) | ms-based thresholds with runtime `Math.ceil(ms / intervalMs)` | v0.98.0+ |
 
 ### High (P1)
 
-4. **Comb weight doubling dilutes others by 7.4%.** Extra weight added to totalWeight denominator. Fix: add extra only to numerator. File: `algorithmFusion.ts` ~line 470.
-5. **No worker crash recovery.** `onerror` handler logs to Sentry but does not restart. File: `useDSPWorker.ts`.
-6. **SpectrumCanvas missing devicePixelRatio.** Blurry on Retina/high-DPI. File: `SpectrumCanvas.tsx`.
-7. **Zero tests for hooks, components, contexts, exports, storage.** 368 tests cover DSP only.
+1. **Zero tests for hooks, components, contexts, exports, storage.** 373 tests cover DSP only.
 
 ### Medium (P2)
 
-8. `analyze()` is 180+ lines monolith — decompose into 4-5 methods.
-9. ~~Dual MSD implementations~~ — **FIXED v0.98.0:** Consolidated into single `MSDPool` class in `msdPool.ts`.
-10. `AudioAnalyzerContext` is god-context mixing engine/settings/detection (25 fields).
-11. Only axial room modes implemented (tangential + oblique missing).
-12. No shelf overlap validation in eqAdvisor.
-13. PRIOR_PROBABILITY = 0.33 assumes equal priors; should favor feedback (0.45).
-14. `HelpMenu.tsx` is 1,018 lines doing 3 things — split.
-15. Settings slider fires per-frame (no debounce during drag).
-16. No tablet responsive breakpoint between mobile and desktop.
+2. `analyze()` is ~420 lines — decompose into `_detectPeaks()`, `_updateAutoGain()`, `_computeSpectrum()`, etc.
+3. `AudioAnalyzerContext` is god-context mixing engine/settings/detection (28 fields). Split into 3-4 focused contexts.
+4. No shelf overlap validation in eqAdvisor.
+5. `HelpMenu.tsx` is 991 lines doing 3+ things — split.
+6. No tablet responsive breakpoint (CSS var `--breakpoint-tablet: 600px` defined but not wired to components).
 
 ### Low (P3)
 
-17. TS2688: Missing @serwist/next type definition (build succeeds anyway).
-18. `unsafe-inline` in production script-src CSP (needed by Next.js).
-19. No security scanning in CI (Snyk/Dependabot/npm audit).
+7. `unsafe-inline` in production script-src CSP (required by Next.js).
+8. No security scanning in CI (Snyk/Dependabot/npm audit).
 
 ## Known False Positives
 
-| Scenario | Mode | Probability | Root Cause | Fix |
-|----------|------|-------------|------------|-----|
-| Sustained vowel | Speech | 0.703 | IHR gate needs >=3 harmonics; vowels have only 2 (F1+F2) | Add formant structure detector |
-| Auto-Tuned vocal | Compressed | 0.785 | Pitch correction creates artificially high phase coherence | Chromatic quantization detector + reduce phase weight |
-| Flanger/phaser pedal | Music | 0.681 | Time-based effects create real comb patterns | Temporal comb stability tracking (static vs sweeping) |
+| Scenario | Mode | Original Prob | Mitigation | Status |
+|----------|------|--------------|------------|--------|
+| Sustained vowel | Speech | 0.703 | Formant gate: pFeedback *= 0.65 when 2+ formant bands active + Q 3–20 (`classifier.ts`) | **MITIGATED** |
+| Auto-Tuned vocal | Compressed | 0.785 | Chromatic quantization gate: phase boost *= 0.60 when frequency on 12-TET grid ±5 cents + coherence > 0.80 (`classifier.ts`) | **MITIGATED** |
+| Flanger/phaser pedal | Music | 0.681 | CombStabilityTracker: comb confidence *= 0.25 when spacing CV > 0.05 over 16 frames (`algorithmFusion.ts`) | **MITIGATED** |
 
 ## Project Structure
 
@@ -156,11 +163,11 @@ contexts/ (4 files)           # React context providers
 hooks/ (11 files)             # Custom hooks
 lib/
   dsp/ (17 modules)           # DSP engine (8,057 lines):
-    feedbackDetector.ts (1798)#   Core: peak detection, MSD pool, auto-gain, persistence
-    constants.ts (897)        #   All tuning constants, 8 mode presets, ECM8000 cal curve
+    feedbackDetector.ts (1662)#   Core: peak detection, MSD pool, auto-gain, persistence
+    constants.ts (959)        #   All tuning constants, 8 mode presets, ECM8000 cal curve
     acousticUtils.ts (861)    #   Room modes, Schroeder, RT60, vibrato, cumulative growth
-    classifier.ts (747)       #   10-feature Bayesian classification
-    algorithmFusion.ts (745)  #   6-algo fusion, comb, IHR, PTMR, MINDS, content detection
+    classifier.ts (850)       #   11-feature Bayesian classification + formant/chromatic gates
+    algorithmFusion.ts (823)  #   6-algo fusion, comb, IHR, PTMR, MINDS, CombStabilityTracker
     feedbackHistory.ts (467)  #   Session history, repeat offenders, hotspot tracking
     trackManager.ts (466)     #   Track lifecycle, cents-based association (100-cent tolerance)
     dspWorker.ts (434)        #   Worker orchestrator, temporal smoothing
@@ -243,7 +250,7 @@ tests/
 - **Permissions-Policy:** `microphone=(self), camera=(), geolocation=()`
 - **Zero XSS vectors:** No direct HTML injection, no dynamic code execution
 - **API:** Ingest endpoint validates schema, rate-limits (6/60s per session), caps payload (512KB), strips IP
-- **Worker:** postMessage has no type validation (KNOWN ISSUE — add Set of valid types)
+- **Worker:** Inbound messages type-validated via `WorkerOutboundMessage` switch; outbound postMessage lacks compile-time Set validation (minor gap)
 - **localStorage:** 37 touchpoints, all via ktrStorage.ts abstraction with try/catch
 
 ## Accessibility Notes
@@ -251,8 +258,8 @@ tests/
 - **MobileLayout:** Exemplary WAI-ARIA tabs (roving tabindex, ArrowLeft/Right/Home/End)
 - **Color contrast:** All combinations pass WCAG AA (lowest: 5.1:1 destructive red on dark bg)
 - **Canvas:** NOT accessible to screen readers (KNOWN ISSUE — add aria-live region for peak announcements)
-- **Touch targets:** Most >=44x44px. Advisory dismiss button is 32px (KNOWN ISSUE — increase)
-- **Focus indicators:** Inconsistent on custom components (KNOWN ISSUE — add focus-visible:ring-2)
+- **Touch targets:** Most >=44x44px. Advisory dismiss is 44px on mobile (`touchFriendly`), 20px on desktop (KNOWN ISSUE — increase desktop size)
+- **Focus indicators:** Partially applied (`focus-visible:ring-2` on some components, inconsistent on others)
 - **Reduced motion:** `prefers-reduced-motion` block exists in globals.css
 
 ## Data Privacy

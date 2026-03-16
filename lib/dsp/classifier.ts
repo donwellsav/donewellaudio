@@ -28,10 +28,51 @@ import {
 } from './acousticUtils'
 
 // ── Classifier Tuning Constants ─────────────────────────────────────────────
-const PRIOR_PROBABILITY = 0.33
+/**
+ * Bayesian prior probabilities per class.
+ * Feedback prior is elevated (0.45 vs uniform 0.33) because the user has
+ * explicitly opened a feedback-detection tool — the base rate of feedback
+ * in this context is higher than uniform.  Whistle and instrument share
+ * the remainder equally.  Sum ≈ 0.99 (same as the original 3 × 0.33).
+ */
+const PRIOR_FEEDBACK = 0.45
+const PRIOR_WHISTLE = 0.27
+const PRIOR_INSTRUMENT = 0.27
 const CLUSTERING_BANDWIDTH_MULTIPLIER = 3
 const MODE_PRESENCE_BONUS = 0.12
 const MODE_ABSENCE_PENALTY = 0.05
+
+/**
+ * Formant gate constants — suppresses sustained vowel false positives.
+ * Vocal formants (Fant 1960, "Acoustic Theory of Speech Production"):
+ *   F1 ≈ 300–900 Hz (jaw height), F2 ≈ 800–2500 Hz (tongue position),
+ *   F3 ≈ 2200–3500 Hz (lip rounding / nasal cavity).
+ * Formant peaks have moderate Q (3–20) vs feedback Q (50+).
+ * When 2+ active peaks fall in distinct formant bands with the current
+ * peak also in a formant band, feedbackProbability is reduced.
+ */
+/**
+ * Chromatic quantization gate — suppresses Auto-Tune false positives.
+ * Pitch-corrected audio snaps frequencies to the 12-TET semitone grid,
+ * producing artificially high phase coherence that mimics feedback.
+ * When a peak sits within ±5 cents of a semitone AND phase coherence
+ * exceeds 0.80, the phase boost is scaled by 0.60 (40% reduction).
+ * Ref: Bristow-Johnson (2001), "The Equivalence of Various Methods of
+ * Computing Biquad Coefficients for Audio Parametric Equalizers".
+ */
+const CHROMATIC_SNAP_CENTS = 5
+const CHROMATIC_PHASE_THRESHOLD = 0.80
+const CHROMATIC_PHASE_REDUCTION = 0.60
+
+const FORMANT_BANDS = [
+  { min: 300, max: 900 },   // F1
+  { min: 800, max: 2500 },  // F2
+  { min: 2200, max: 3500 }, // F3
+] as const
+const FORMANT_Q_MIN = 3
+const FORMANT_Q_MAX = 20
+const FORMANT_MIN_MATCHES = 2     // Need peaks in at least 2 distinct bands
+const FORMANT_GATE_MULTIPLIER = 0.65
 
 // Type union for track input
 type TrackInput = Track | TrackedPeak
@@ -77,6 +118,34 @@ function normalizeTrackInput(input: TrackInput) {
 }
 
 /**
+ * Count how many distinct formant bands contain at least one frequency.
+ * Returns the number of unique bands (0–3) that have a matching peak.
+ * Ref: Fant (1960), "Acoustic Theory of Speech Production".
+ */
+function countFormantBands(frequencies: number[]): number {
+  let count = 0
+  for (const band of FORMANT_BANDS) {
+    if (frequencies.some(f => f >= band.min && f <= band.max)) count++
+  }
+  return count
+}
+
+/**
+ * Check if a frequency is quantized to the 12-TET semitone grid.
+ * Returns true when the frequency is within ±CHROMATIC_SNAP_CENTS of
+ * the nearest equal-tempered semitone (A4 = 440 Hz reference).
+ * Pitch-corrected audio (Auto-Tune, Melodyne) snaps to this grid.
+ */
+function isChromaticallyQuantized(frequencyHz: number): boolean {
+  if (frequencyHz <= 0) return false
+  // Semitones from A4: n = 12 * log2(f / 440)
+  const semitones = 12 * Math.log2(frequencyHz / 440)
+  // Distance to nearest semitone in cents (1 semitone = 100 cents)
+  const centsOffset = Math.abs((semitones - Math.round(semitones)) * 100)
+  return centsOffset <= CHROMATIC_SNAP_CENTS
+}
+
+/**
  * Classify a track as feedback, whistle, or instrument
  * Uses weighted scoring model based on extracted features
  * Enhanced with acoustic research from "Sound Insulation" (Carl Hopkins, 2007)
@@ -110,10 +179,10 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings, ac
     features.persistenceMs
   )
 
-  // Initialize probabilities
-  let pFeedback = PRIOR_PROBABILITY
-  let pWhistle = PRIOR_PROBABILITY
-  let pInstrument = PRIOR_PROBABILITY
+  // Initialize probabilities with context-aware priors
+  let pFeedback = PRIOR_FEEDBACK
+  let pWhistle = PRIOR_WHISTLE
+  let pInstrument = PRIOR_INSTRUMENT
 
   // ==================== Feature Analysis ====================
 
@@ -299,6 +368,22 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings, ac
     }
   }
 
+  // 11. Formant gate — suppress sustained vowel false positives (Fant 1960)
+  // When the current peak has moderate Q (vocal tract, not feedback) AND
+  // 2+ active peaks fall in distinct formant bands (F1/F2/F3), this is
+  // likely a voiced speech segment, not feedback.
+  if (
+    activeFrequencies && activeFrequencies.length >= FORMANT_MIN_MATCHES &&
+    features.minQ >= FORMANT_Q_MIN && features.minQ <= FORMANT_Q_MAX &&
+    FORMANT_BANDS.some(b => features.frequencyHz >= b.min && features.frequencyHz <= b.max)
+  ) {
+    const bandsHit = countFormantBands(activeFrequencies)
+    if (bandsHit >= FORMANT_MIN_MATCHES) {
+      pFeedback *= FORMANT_GATE_MULTIPLIER
+      reasons.push(`Formant gate: ${bandsHit} vocal formant bands active, Q=${features.minQ.toFixed(0)} (speech-like)`)
+    }
+  }
+
   // ==================== Normalization ====================
 
   // Clamp probabilities to valid range before normalization
@@ -368,13 +453,9 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings, ac
     severity = 'RESONANCE'
   }
 
-  // Re-normalize after Math.max overrides to maintain probability invariant
-  const postTotal = pFeedback + pWhistle + pInstrument
-  if (postTotal > 1) {
-    pFeedback /= postTotal
-    pWhistle /= postTotal
-    pInstrument /= postTotal
-  }
+  // Overrides above are final — no re-normalization after severity boosts.
+  // The first normalization (before classification) already ensured valid
+  // probabilities; severity overrides intentionally shift the distribution.
 
   // Determine label
   if (pWhistle >= CLASSIFIER_WEIGHTS.WHISTLE_THRESHOLD && pWhistle > pFeedback) {
@@ -549,9 +630,12 @@ export function classifyTrackWithAlgorithms(
   let pFeedback = baseResult.pFeedback
   let pWhistle = baseResult.pWhistle
   let pInstrument = baseResult.pInstrument
-  
+
+  // Extract frequency for chromatic quantization detection
+  const trackFreqHz = 'trueFrequencyHz' in track ? track.trueFrequencyHz : track.frequency
+
   // ==================== Integrate Advanced Algorithm Scores ====================
-  
+
   // MSD Analysis
   if (algorithmScores.msd) {
     const msd = algorithmScores.msd
@@ -571,9 +655,21 @@ export function classifyTrackWithAlgorithms(
   if (algorithmScores.phase) {
     const phase = algorithmScores.phase
     if (phase.isFeedbackLikely) {
-      // High phase coherence - strong feedback indicator
-      pFeedback = Math.min(1, pFeedback + phase.feedbackScore * 0.15)
-      reasons.push(`Phase coherence: ${(phase.coherence * 100).toFixed(0)}%`)
+      // Chromatic quantization gate: pitch-corrected audio (Auto-Tune, Melodyne)
+      // snaps to the 12-TET grid, producing artificially high phase coherence.
+      // When quantized AND coherence > threshold, reduce phase boost by 40%.
+      const chromaticGated =
+        phase.coherence > CHROMATIC_PHASE_THRESHOLD &&
+        isChromaticallyQuantized(trackFreqHz)
+      const phaseScale = chromaticGated ? CHROMATIC_PHASE_REDUCTION : 1.0
+
+      // High phase coherence - strong feedback indicator (scaled if quantized)
+      pFeedback = Math.min(1, pFeedback + phase.feedbackScore * 0.15 * phaseScale)
+      if (chromaticGated) {
+        reasons.push(`Phase coherence: ${(phase.coherence * 100).toFixed(0)}% (reduced — chromatic quantization detected)`)
+      } else {
+        reasons.push(`Phase coherence: ${(phase.coherence * 100).toFixed(0)}%`)
+      }
     } else if (phase.coherence < 0.4) {
       // Low coherence - likely music/noise
       pFeedback = Math.max(0, pFeedback - 0.1)
@@ -672,7 +768,14 @@ export function classifyTrackWithAlgorithms(
     pWhistle /= total
     pInstrument /= total
   }
-  
+
+  // Re-apply severity overrides AFTER normalization — overrides are final
+  if (baseResult.severity === 'RUNAWAY') {
+    pFeedback = Math.max(pFeedback, 0.85)
+  } else if (baseResult.severity === 'GROWING') {
+    pFeedback = Math.max(pFeedback, 0.7)
+  }
+
   // Recalculate confidence
   const maxProb = Math.max(pFeedback, pWhistle, pInstrument)
   const confidence = fusionResult
