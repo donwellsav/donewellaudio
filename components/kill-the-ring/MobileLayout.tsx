@@ -280,10 +280,10 @@ export const MobileLayout = memo(function MobileLayout({
         </div>
       </div>
 
-      {/* ── Landscape mobile: 40% Issues / 60% Graph + fader sidecar (< md only) ── */}
+      {/* ── Landscape mobile: 40% Issues / 55% Graphs / 5% fader sidecar (< md only) ── */}
       <div className="hidden landscape:flex md:landscape:hidden flex-1 overflow-hidden">
-        {/* Issues — 35% */}
-        <div className="w-[35%] flex flex-col overflow-hidden border-r border-border/50">
+        {/* Issues — 40% */}
+        <div className="w-[40%] flex flex-col overflow-hidden border-r border-border/50">
           <div className="flex-1 overflow-y-auto p-2">
             <h2 className="section-label mb-1 flex items-center justify-between">
               <span>Issues</span>
@@ -306,8 +306,8 @@ export const MobileLayout = memo(function MobileLayout({
             <EarlyWarningPanel earlyWarning={earlyWarning} />
           </div>
         </div>
-        {/* Graph — 60% */}
-        <div className="flex-1 flex flex-col gap-0.5 overflow-hidden p-0.5">
+        {/* Graphs — 55% */}
+        <div className="w-[55%] flex flex-col gap-0.5 overflow-hidden p-0.5">
           {/* RTA — top half */}
           <div ref={rtaContainerRef} className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
             <div className="absolute top-1 left-1.5 z-20 flex items-center gap-1">
@@ -357,8 +357,8 @@ export const MobileLayout = memo(function MobileLayout({
             <GEQBarView advisories={advisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
           </div>
         </div>
-        {/* Right fader sidecar */}
-        <div className="flex-shrink-0 w-16 border-l border-border/50 channel-strip">
+        {/* Right fader sidecar — 5% */}
+        <div className="w-[5%] min-w-[3rem] flex-shrink-0 border-l border-border/50 channel-strip">
           <VerticalGainFader
             value={settings.inputGainDb}
             onChange={(v) => onSettingsChange({ inputGainDb: v })}
