@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useCallback, memo } from 'react'
+import { useMemo, useState, useCallback, useRef, useEffect, memo } from 'react'
 import { formatFrequency, formatPitch } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { getSeverityText } from '@/lib/dsp/classifier'
@@ -12,6 +12,9 @@ import type { Advisory } from '@/types/advisory'
 // Velocity thresholds for runaway prediction
 const RUNAWAY_VELOCITY_THRESHOLD = 15 // dB/s
 const WARNING_VELOCITY_THRESHOLD = 10 // dB/s
+
+/** Minimum time (ms) issue cards stay in place before the list re-sorts */
+const MIN_DISPLAY_MS = 3000
 
 interface IssuesListProps {
   advisories: Advisory[]
@@ -31,7 +34,7 @@ interface IssuesListProps {
 export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onDismiss, onClearAll, onClearResolved, touchFriendly, isRunning, onStart, onFalsePositive, falsePositiveIds, isLowSignal }: IssuesListProps) {
   // Filter dismissed, sort repeat offenders to top by hit count, then slice to max.
   // We attach occurrenceCount here so IssueCard doesn't need to re-query feedbackHistory.
-  const sorted = useMemo(() => {
+  const latestSorted = useMemo(() => {
     const history = getFeedbackHistory()
     return [...advisories]
       .filter((a) => !dismissedIds?.has(a.id))
@@ -49,6 +52,50 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
       })
       .slice(0, maxIssues)
   }, [advisories, dismissedIds, maxIssues])
+
+  // Stabilize displayed list — hold card order for at least MIN_DISPLAY_MS so
+  // engineers can read them before they shuffle. Advisory data (severity, age,
+  // velocity) still updates in-place via IssueCard's own memos.
+  const stableRef = useRef(latestSorted)
+  const lastUpdateRef = useRef(Date.now())
+  const [sorted, setSorted] = useState(latestSorted)
+  const pendingRef = useRef(false)
+
+  useEffect(() => {
+    const elapsed = Date.now() - lastUpdateRef.current
+
+    // Check if list identity changed (different IDs or different order)
+    const prevIds = stableRef.current.map(s => s.advisory.id).join(',')
+    const nextIds = latestSorted.map(s => s.advisory.id).join(',')
+    const orderChanged = prevIds !== nextIds
+
+    if (!orderChanged) {
+      // Same cards in same order — update advisory data in-place (no visual jump)
+      stableRef.current = latestSorted
+      setSorted(latestSorted)
+      return
+    }
+
+    if (elapsed >= MIN_DISPLAY_MS) {
+      // Enough time has passed — apply new order immediately
+      stableRef.current = latestSorted
+      lastUpdateRef.current = Date.now()
+      pendingRef.current = false
+      setSorted(latestSorted)
+    } else {
+      // Too soon — schedule deferred update
+      pendingRef.current = true
+      const remaining = MIN_DISPLAY_MS - elapsed
+      const timer = setTimeout(() => {
+        pendingRef.current = false
+        lastUpdateRef.current = Date.now()
+        // Use latest value at time of flush
+        stableRef.current = latestSorted
+        setSorted(latestSorted)
+      }, remaining)
+      return () => clearTimeout(timer)
+    }
+  }, [latestSorted])
 
   const hasResolved = sorted.some(s => s.advisory.resolved)
 
