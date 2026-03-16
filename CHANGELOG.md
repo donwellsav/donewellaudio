@@ -2,18 +2,34 @@
 
 All notable changes to Kill The Ring are documented in this file.
 
-## [0.107.0] - 2026-03-16
+## [0.117.0] - 2026-03-16
 
-### UI Improvements
+### UI Overhaul (PRs #108–#116)
+
+- **Issue cards simplified** — Removed GEQ info from cards (kept PEQ only), removed preset/start buttons from sidecar
+- **Compact card buttons** — Larger icons, less dead space in issue card action area
+- **RTA fullscreen** — New fullscreen button in header for RTA graph, works on mobile and desktop via element-level Fullscreen API
+- **Landscape mobile layout** — New 40/55/5 (Issues/Graph/Controls) split for landscape orientation; bottom tab bar removed in landscape
+- **Auto MEMS calibration** — Smartphone MEMS mic calibration profile auto-applied on mobile devices
+- **Mobile advisory limit** — Top 5 most problematic frequencies shown on mobile (`MOBILE_MAX_DISPLAYED_ISSUES = 5`)
+- **Issue card stability** — Cards stabilized for 3s minimum display time to prevent flickering
+- **RTA label overlap suppression** — Greedy label acceptance algorithm prioritizes highest-severity labels; prevents clutter when markers cluster at same frequency
+- **VerticalGainFader removed** — Component deleted (no longer needed)
+
+### UI Improvements (PR #107)
 
 - **Permanent Clear All button** — Trash icon now always visible in header; clears advisory cards, GEQ bars, and RTA markers in a single click. Visually dimmed when nothing to clear.
 - **FALSE+ button repositioned** — Moved from inline with Copy/Dismiss to its own row beneath them in each advisory card, improving visual hierarchy and reducing misclick risk.
 
-### ML Data Pipeline (Phase 1 + 2)
+### ML Data Pipeline (PR #106)
 
 - **Snapshot enrichment** — Every snapshot batch now includes intermediate algorithm scores (MSD, phase, spectral, comb, IHR, PTMR) plus fused probability and confidence (v1.1 schema, backward-compatible)
 - **Always-on FALSE+ button** — User feedback available on all advisory cards (not just calibration mode); flows to DSP worker for ground truth labeling of pending snapshot batches
 - **Ingest API v1.1** — Accepts optional `algorithmScores` and `userFeedback` fields with validation
+
+### Documentation (PR #117)
+
+- Comprehensive CLAUDE.md update: file counts, line counts, version tags, ML pipeline section, UI features section
 
 ### Tests
 

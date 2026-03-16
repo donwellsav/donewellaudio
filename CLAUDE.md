@@ -1,6 +1,6 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 137 TypeScript/TSX files, 373 tests (368 pass, 4 skip, 1 todo), 15 suites. Version 0.107.0.**
+> **Last updated March 2026. 137 TypeScript/TSX files, 373 tests (368 pass, 4 skip, 1 todo), 15 suites. Version 0.117.0.**
 
 ## CRITICAL RULES
 
@@ -10,7 +10,7 @@
 
 ## Project Overview
 
-**Kill The Ring** (killthering.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.107.0. Repository: github.com/donwellsav/killthering.
+**Kill The Ring** (killthering.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.117.0. Repository: github.com/donwellsav/killthering.
 
 ## Tech Stack
 
@@ -157,22 +157,22 @@ app/                          # Next.js App Router
   api/v1/ingest/route.ts (160)#   Spectral snapshot ingest (v1.1 schema, rate-limited, IP-stripped)
 components/
   kill-the-ring/ (23 files)   # Domain components + barrel index.ts
-    KillTheRing.tsx (423)     #   Root orchestrator, settings debounce, FP handling
+    KillTheRing.tsx (436)     #   Root orchestrator, settings debounce, FP handling
     HeaderBar.tsx (220)       #   Header bar with permanent Clear All button
-    IssuesList.tsx (416)      #   Advisory cards with FALSE+ below Copy/Dismiss
+    IssuesList.tsx (440)      #   Advisory cards with FALSE+ below Copy/Dismiss, 3s stability
     settings/ (7 files)       # Settings tab components
   ui/ (20 files)              # shadcn/ui primitives
 contexts/ (4 files)           # React context providers
   AudioAnalyzerContext (246)  #   Engine lifecycle, settings, devices, spectrum (28 fields)
   AdvisoryContext (190)       #   Advisory state, dismiss/clear/FP, derived booleans
-  UIContext (107)             #   Mobile tab, freeze, fullscreen, layout reset
+  UIContext (162)             #   Mobile tab, freeze, fullscreen, RTA fullscreen, layout reset
   PortalContainerContext (23) #   Portal mount for mobile overlays
 hooks/ (11 files)             # Custom hooks
   useDSPWorker.ts (359)       #   Worker lifecycle, crash recovery, userFeedback
 lib/
   dsp/ (17 modules)           # DSP engine (8,057 lines):
     feedbackDetector.ts (1662)#   Core: peak detection, MSD pool, auto-gain, persistence
-    constants.ts (959)        #   All tuning constants, 8 mode presets, ECM8000 cal curve
+    constants.ts (961)        #   All tuning constants, 8 mode presets, ECM8000 cal curve, mobile constants
     acousticUtils.ts (861)    #   Room modes, Schroeder, RT60, vibrato, cumulative growth
     classifier.ts (850)       #   11-feature Bayesian classification + formant/chromatic gates
     algorithmFusion.ts (823)  #   6-algo fusion, comb, IHR, PTMR, MINDS, CombStabilityTracker
@@ -189,7 +189,7 @@ lib/
     decayAnalyzer.ts (86)     #   RT60 decay comparison for room mode suppression
     severityUtils.ts (18)     #   Severity urgency mapping
     advancedDetection.ts (16) #   Barrel re-export
-  canvas/spectrumDrawing.ts(562)# Pure canvas drawing (no React)
+  canvas/spectrumDrawing.ts(605)# Pure canvas drawing (no React), RTA label overlap suppression
   export/ (3 files)           # PDF/TXT/CSV/JSON export
   calibration/ (3 files)      # Room profile, session recording, JSON export
   storage/ktrStorage.ts (183) # Typed localStorage abstraction
@@ -290,3 +290,9 @@ tests/
 
 - **Permanent Clear All button:** Trash icon always visible in header. Calls `onClearAll()` + `onClearGEQ()` + `onClearRTA()` in one click. Visually dimmed (`text-muted-foreground/30`) when nothing to clear.
 - **FALSE+ card layout:** FALSE+ button renders on its own row beneath Copy/Dismiss icons in each `IssueCard`, improving visual hierarchy and reducing misclick risk.
+- **RTA fullscreen:** Element-level Fullscreen API via `UIContext`. Toggle button in header (Maximize2/Minimize2). Works on mobile and desktop.
+- **Landscape mobile layout:** 40/55/5 split (Issues/Graph/Controls) in landscape orientation. Portrait keeps 3-tab carousel.
+- **Issue card simplification:** GEQ removed from cards (PEQ only). Compact buttons with larger icons. 3s minimum display time for stability.
+- **Mobile advisory limit:** Top 5 most problematic frequencies shown (`MOBILE_MAX_DISPLAYED_ISSUES` in constants.ts).
+- **Auto MEMS calibration:** Smartphone MEMS mic profile auto-applied on mobile devices.
+- **RTA label overlap suppression:** Greedy algorithm in `spectrumDrawing.ts` prioritizes highest-severity labels, prevents clutter.
