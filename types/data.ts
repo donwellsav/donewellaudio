@@ -34,6 +34,29 @@ export interface QuantizedSnapshot {
   tagged: boolean
 }
 
+/** Intermediate algorithm scores captured at time of detection (v1.1+) */
+export interface MarkerAlgorithmScores {
+  /** Magnitude Slope Deviation feedback score [0,1] */
+  msd: number | null
+  /** Phase coherence feedback score [0,1] */
+  phase: number | null
+  /** Spectral flatness feedback score [0,1] */
+  spectral: number | null
+  /** Comb pattern feedback score [0,1] */
+  comb: number | null
+  /** Inter-Harmonic Ratio feedback score [0,1] */
+  ihr: number | null
+  /** Peak-to-Median Ratio feedback score [0,1] */
+  ptmr: number | null
+  /** Fused feedback probability [0,1] */
+  fusedProbability: number
+  /** Fusion confidence [0,1] */
+  fusedConfidence: number
+}
+
+/** User feedback on a detection event (v1.1+) */
+export type UserFeedback = 'correct' | 'false_positive'
+
 /** Feedback event marker for tagging snapshots */
 export interface FeedbackMarker {
   /** Milliseconds since session start */
@@ -44,11 +67,15 @@ export interface FeedbackMarker {
   confidence: number
   /** Content type detected at time of event */
   contentType: string
+  /** Intermediate algorithm scores (v1.1+, omitted in v1.0 batches) */
+  algorithmScores?: MarkerAlgorithmScores
+  /** User feedback: 'correct' or 'false_positive' (v1.1+, set post-detection) */
+  userFeedback?: UserFeedback
 }
 
 /** A batch of tagged snapshots ready for upload */
 export interface SnapshotBatch {
-  version: '1.0'
+  version: '1.0' | '1.1'
   /** Random UUID, not linked to any user account */
   sessionId: string
   /** ISO 8601 */

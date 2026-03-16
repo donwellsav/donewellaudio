@@ -28,7 +28,7 @@ import type {
   DetectorSettings,
   TrackedPeak,
 } from '@/types/advisory'
-import type { SnapshotWorkerInbound, SnapshotWorkerOutbound } from '@/types/data'
+import type { SnapshotWorkerInbound, SnapshotWorkerOutbound, MarkerAlgorithmScores, UserFeedback } from '@/types/data'
 import { SnapshotCollector } from '@/lib/data/snapshotCollector'
 import { DEFAULT_SETTINGS } from './constants'
 
@@ -63,6 +63,11 @@ export type WorkerInboundMessage =
     }
   | {
       type: 'reset'
+    }
+  | {
+      type: 'userFeedback'
+      frequencyHz: number
+      feedback: UserFeedback
     }
   // Snapshot collection messages (free tier only)
   | SnapshotWorkerInbound
@@ -242,6 +247,13 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       break
     }
 
+    case 'userFeedback': {
+      if (snapshotCollector) {
+        snapshotCollector.applyUserFeedback(msg.frequencyHz, msg.feedback)
+      }
+      break
+    }
+
     case 'getSnapshotBatch': {
       if (snapshotCollector?.hasPendingBatches) {
         const batch = snapshotCollector.extractBatch()
@@ -341,12 +353,24 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       // Collect before the reporting gate — ML model needs ring, feedback,
       // instruments, and false positives alike to learn the boundaries.
       if (snapshotCollector) {
+        // Extract intermediate algorithm scores for ML training data (v1.1+)
+        const markerScores: MarkerAlgorithmScores = {
+          msd: algorithmScores.msd?.feedbackScore ?? null,
+          phase: algorithmScores.phase?.feedbackScore ?? null,
+          spectral: algorithmScores.spectral?.feedbackScore ?? null,
+          comb: algorithmScores.comb?.confidence ?? null,
+          ihr: algorithmScores.ihr?.feedbackScore ?? null,
+          ptmr: algorithmScores.ptmr?.feedbackScore ?? null,
+          fusedProbability: fusionResult.feedbackProbability,
+          fusedConfidence: fusionResult.confidence,
+        }
         snapshotCollector.markFeedbackEvent(
           track.trueFrequencyHz,
           track.trueAmplitudeDb,
           classification.severity,
           classification.confidence,
-          contentType
+          contentType,
+          markerScores
         )
         if (snapshotCollector.hasPendingBatches) {
           const batch = snapshotCollector.extractBatch()

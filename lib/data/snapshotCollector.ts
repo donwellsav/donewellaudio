@@ -14,6 +14,8 @@
 import type {
   QuantizedSnapshot,
   FeedbackMarker,
+  MarkerAlgorithmScores,
+  UserFeedback,
   SnapshotBatch,
   EncodedSnapshot,
 } from '@/types/data'
@@ -167,13 +169,15 @@ export class SnapshotCollector {
 
   /**
    * Mark a feedback detection event. Tags surrounding snapshots.
+   * Optional algorithmScores enables ML training data enrichment (v1.1+).
    */
   markFeedbackEvent(
     frequencyHz: number,
     amplitudeDb: number,
     severity: string,
     confidence: number,
-    contentType: string
+    contentType: string,
+    algorithmScores?: MarkerAlgorithmScores
   ): void {
     const marker: FeedbackMarker = {
       relativeMs: Date.now() - this._sessionStartMs,
@@ -182,6 +186,7 @@ export class SnapshotCollector {
       severity,
       confidence,
       contentType,
+      algorithmScores,
     }
 
     // Tag snapshots in the window around this event
@@ -213,7 +218,7 @@ export class SnapshotCollector {
     }))
 
     return {
-      version: '1.0',
+      version: event.algorithmScores ? '1.1' : '1.0',
       sessionId: this._sessionId,
       capturedAt: new Date().toISOString(),
       fftSize: this._fftSize,
@@ -222,6 +227,21 @@ export class SnapshotCollector {
       event,
       snapshots: encoded,
     }
+  }
+
+  /**
+   * Apply user feedback to a pending event by frequency.
+   * Matches the most recent pending marker within ±10 Hz of the given frequency.
+   */
+  applyUserFeedback(frequencyHz: number, feedback: UserFeedback): boolean {
+    // Search backwards (most recent first) for a matching event
+    for (let i = this._pendingEvents.length - 1; i >= 0; i--) {
+      if (Math.abs(this._pendingEvents[i].frequencyHz - frequencyHz) <= 10) {
+        this._pendingEvents[i].userFeedback = feedback
+        return true
+      }
+    }
+    return false
   }
 
   /** Check if there are pending batches to extract */
