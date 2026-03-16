@@ -83,6 +83,9 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
   const droppedFramesRef = useRef(0) // Frames skipped due to backpressure
   const totalFramesRef = useRef(0)   // Total frames attempted
   const callbacksRef = useRef(callbacks)
+  const restartCountRef = useRef(0)         // Auto-restart attempts (max 3)
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastInitRef = useRef<{ settings: DetectorSettings; sampleRate: number; fftSize: number } | null>(null)
 
   // Pending collection enable — queued if called before worker is ready
   const pendingCollectionRef = useRef<{ sessionId: string; fftSize: number; sampleRate: number } | null>(null)
@@ -104,6 +107,8 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
       switch (msg.type) {
         case 'ready':
           isReadyRef.current = true
+          crashedRef.current = false
+          restartCountRef.current = 0  // Healthy worker — reset restart budget
           // Replay any enableCollection that arrived before the worker was ready
           if (pendingCollectionRef.current) {
             const { sessionId, fftSize, sampleRate } = pendingCollectionRef.current
@@ -145,13 +150,47 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
     }
 
     worker.onerror = (err) => {
+      const MAX_RESTARTS = 3
+      const RESTART_DELAY_MS = 500
+
       crashedRef.current = true
       isReadyRef.current = false
       busyRef.current = false
-      Sentry.captureMessage(`DSP worker crashed: ${err.message ?? 'unknown'}`, 'error')
+
+      const attempt = restartCountRef.current + 1
+      const canRestart = attempt <= MAX_RESTARTS && lastInitRef.current !== null
+
+      Sentry.captureMessage(
+        `DSP worker crashed (attempt ${attempt}/${MAX_RESTARTS}): ${err.message ?? 'unknown'}` +
+        (canRestart ? ' — auto-restarting' : ' — giving up'),
+        canRestart ? 'warning' : 'error'
+      )
       callbacksRef.current.onError?.(err.message ?? 'DSP worker crashed')
+
+      // Terminate the dead worker
       worker.terminate()
       workerRef.current = null
+
+      if (!canRestart) return
+
+      // Debounced restart: 500ms delay to avoid rapid crash loops
+      if (restartTimerRef.current) clearTimeout(restartTimerRef.current)
+      restartTimerRef.current = setTimeout(() => {
+        restartTimerRef.current = null
+        restartCountRef.current = attempt
+
+        const newWorker = new Worker(
+          new URL('../lib/dsp/dspWorker.ts', import.meta.url),
+          { type: 'module' }
+        )
+        setupWorkerHandlers(newWorker)
+        workerRef.current = newWorker
+        crashedRef.current = false
+
+        // Re-send init with last-known settings
+        const { settings, sampleRate, fftSize } = lastInitRef.current!
+        newWorker.postMessage({ type: 'init', settings, sampleRate, fftSize })
+      }, RESTART_DELAY_MS)
     }
   }, [])
 
@@ -166,6 +205,7 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
     workerRef.current = worker
 
     return () => {
+      if (restartTimerRef.current) clearTimeout(restartTimerRef.current)
       worker.terminate()
       workerRef.current = null
       isReadyRef.current = false
@@ -181,6 +221,7 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
 
   const init = useCallback(
     (settings: DetectorSettings, sampleRate: number, fftSize: number) => {
+      lastInitRef.current = { settings, sampleRate, fftSize }
       isReadyRef.current = false
       busyRef.current = false
       // Re-create worker if it died (onerror terminates + nulls workerRef)

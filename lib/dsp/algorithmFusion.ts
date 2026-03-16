@@ -104,6 +104,71 @@ export const COMB_CONSTANTS = {
   MAX_PATH_LENGTH: COMB_PATTERN_SETTINGS.MAX_PATH_LENGTH,
 } as const
 
+/**
+ * Temporal comb stability tracking — distinguishes static feedback loops
+ * from sweeping time-based effects (flanger, phaser, chorus).
+ *
+ * Acoustic feedback creates a fixed comb pattern (constant path length d).
+ * Flangers/phasers modulate delay time via LFO (typically 0.1–5 Hz),
+ * causing fundamentalSpacing to drift across frames.
+ *
+ * Method: Track fundamentalSpacing over a sliding window, compute
+ * coefficient of variation CV = σ/μ. Low CV (< threshold) = static = feedback.
+ * High CV (> threshold) = sweeping = effect → suppress comb contribution.
+ */
+const COMB_STABILITY_WINDOW = 16       // Frames of history (~320ms at 50fps)
+const COMB_STABILITY_CV_THRESHOLD = 0.05 // CV above this = sweeping effect
+const COMB_SWEEP_PENALTY = 0.25        // Reduce comb confidence when sweeping
+
+export class CombStabilityTracker {
+  private _history: number[] = []
+  private _maxLen: number
+
+  constructor(maxLen = COMB_STABILITY_WINDOW) {
+    this._maxLen = maxLen
+  }
+
+  /** Push a new fundamentalSpacing observation. */
+  push(spacing: number): void {
+    this._history.push(spacing)
+    if (this._history.length > this._maxLen) this._history.shift()
+  }
+
+  /** Clear history (e.g. on session reset). */
+  reset(): void {
+    this._history.length = 0
+  }
+
+  /** Number of observations collected so far. */
+  get length(): number {
+    return this._history.length
+  }
+
+  /**
+   * Coefficient of variation of stored spacings.
+   * Returns 0 when fewer than 4 samples (not enough data to judge).
+   */
+  get cv(): number {
+    if (this._history.length < 4) return 0
+    const n = this._history.length
+    let sum = 0
+    for (let i = 0; i < n; i++) sum += this._history[i]
+    const mean = sum / n
+    if (mean === 0) return 0
+    let sumSq = 0
+    for (let i = 0; i < n; i++) sumSq += (this._history[i] - mean) ** 2
+    return Math.sqrt(sumSq / n) / mean
+  }
+
+  /** True when enough history exists and spacing is sweeping (effect, not feedback). */
+  get isSweeping(): boolean {
+    return this._history.length >= 4 && this.cv > COMB_STABILITY_CV_THRESHOLD
+  }
+}
+
+/** Module-level singleton — lives for the duration of the worker. */
+export const combStabilityTracker = new CombStabilityTracker()
+
 // Three-model consensus (Claude+Gemini+ChatGPT): 'existing' was a legacy
 // prominence metric that overlapped with spectral/MSD (double-counting).
 // Removed entirely and redistributed to IHR (harmonic discrimination) and
@@ -485,23 +550,47 @@ export function fuseAlgorithmResults(
   }
 
   // Comb doubling: when acoustic comb pattern detected, comb weight doubles
-  // from base (e.g., 0.08 to 0.16). Both numerator and denominator are
-  // adjusted so feedbackProbability stays in [0,1]. This is intentional:
-  // comb detection is a strong physical indicator of a closed feedback loop.
-  // However, totalWeight becomes 1.08, diluting other algorithms by ~7.4%.
+  // in the numerator only (e.g., 0.08 → 0.16 contribution to weightedSum).
+  // Only the base weight is added to totalWeight so other algorithms are NOT
+  // diluted. This gives comb a bonus boost without penalizing MSD/phase/etc.
   // See: ChatGPT-CTX finding #3, Gemini deep-think finding #6.
+  //
+  // Temporal comb stability: track fundamentalSpacing across frames.
+  // Static spacing (low CV) = feedback loop. Sweeping spacing (high CV)
+  // = flanger/phaser effect → reduce comb confidence to suppress FP.
   if (activeAlgorithms.includes('comb') && scores.comb && scores.comb.hasPattern) {
+    // Feed spacing into temporal tracker
+    if (scores.comb.fundamentalSpacing != null) {
+      combStabilityTracker.push(scores.comb.fundamentalSpacing)
+    }
+
+    // Apply sweep penalty: if spacing is drifting, this is likely an effect
+    const sweeping = combStabilityTracker.isSweeping
+    const combConfidence = sweeping
+      ? scores.comb.confidence * COMB_SWEEP_PENALTY
+      : scores.comb.confidence
+
     const combWeight = weights.comb * 2
-    weightedSum += scores.comb.confidence * combWeight
-    totalWeight += combWeight
+    weightedSum += combConfidence * combWeight
+    totalWeight += weights.comb
     contributingAlgorithms.push('Comb')
+
+    const cvStr = combStabilityTracker.length >= 4
+      ? `, CV=${combStabilityTracker.cv.toFixed(3)}`
+      : ''
+    const sweepStr = sweeping ? ' [SWEEPING — effect suppressed]' : ''
     reasons.push(
       `Comb pattern: ${scores.comb.matchingPeaks} peaks, ` +
       `${scores.comb.fundamentalSpacing?.toFixed(0)} Hz spacing` +
       (scores.comb.estimatedPathLength != null
         ? ` (path ~${scores.comb.estimatedPathLength.toFixed(1)} m)`
-        : '')
+        : '') +
+      cvStr + sweepStr
     )
+  } else {
+    // No comb pattern this frame — reset tracker to avoid stale history
+    // bleeding across unrelated peaks
+    combStabilityTracker.reset()
   }
 
   if (activeAlgorithms.includes('ihr') && scores.ihr) {
@@ -557,7 +646,7 @@ export function fuseAlgorithmResults(
   const mean     = algorithmScoresList.reduce((a, b) => a + b, 0) / algorithmScoresList.length
   const variance = algorithmScoresList.reduce((sum, s) => sum + Math.pow(s - mean, 2), 0) / algorithmScoresList.length
   const agreement = 1 - Math.sqrt(variance)
-  const confidence = agreement * feedbackProbability + (1 - agreement) * 0.5
+  const confidence = feedbackProbability * (0.5 + 0.5 * agreement)
 
   let verdict: FusedDetectionResult['verdict']
   if (feedbackProbability >= config.feedbackThreshold && confidence >= 0.6) {

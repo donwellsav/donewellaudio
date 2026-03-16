@@ -458,9 +458,9 @@ describe('confidence formula', () => {
     }
   }
 
-  it('confidence = agreement * probability + (1 - agreement) * 0.5', () => {
+  it('confidence = probability * (0.5 + 0.5 * agreement)', () => {
     // When all algorithms agree (uniform scores), variance=0 → agreement=1
-    // confidence = 1.0 * probability + 0 * 0.5 = probability
+    // confidence = probability * (0.5 + 0.5 * 1.0) = probability
     const result = fuseAlgorithmResults(uniformScores(0.9), 'unknown', 0.9)
     // With uniform scores at 0.9, probability ≈ 0.9, agreement ≈ 1
     // So confidence ≈ probability
@@ -480,7 +480,7 @@ describe('confidence formula', () => {
     if (mixed.ptmr) mixed.ptmr.feedbackScore = 0.9
     const mixedResult = fuseAlgorithmResults(mixed, 'unknown', 0.5)
 
-    // Higher variance → lower agreement → confidence pulled toward 0.5
+    // Higher variance → lower agreement → confidence scaled down toward 0.5 * probability
     expect(mixedResult.confidence).toBeLessThan(uniform.confidence)
   })
 })

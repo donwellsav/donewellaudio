@@ -263,9 +263,7 @@ export class FeedbackDetector {
     this.setFftSize(this.config.fftSize)
 
     // Recalculate EMA coefficients for this audio context's frame rate
-    const fps = 1000 / this.config.analysisIntervalMs
-    this._autoGainAttackCoeff = 1 - Math.exp(-1 / (0.3 * fps))
-    this._autoGainReleaseCoeff = 1 - Math.exp(-1 / (1.0 * fps))
+    this._recomputeEmaCoefficients(this.config.analysisIntervalMs)
     // Auto-gain state is NOT touched here — managed entirely by updateSettings()
     // when user clicks LOUD/MED/QUIET calibration buttons
 
@@ -387,6 +385,7 @@ export class FeedbackDetector {
     if (config.analysisIntervalMs !== undefined) {
       this.maxAnalysisGapMs = Math.max(2 * this.config.analysisIntervalMs, 120)
       this._recomputePersistenceFrames(this.config.analysisIntervalMs)
+      this._recomputeEmaCoefficients(this.config.analysisIntervalMs)
     }
 
     if (needsReset) {
@@ -1582,6 +1581,17 @@ export class FeedbackDetector {
     this._persistVeryHighFrames = Math.ceil(PERSISTENCE_SCORING.VERY_HIGH_PERSISTENCE_MS / intervalMs)
     this._persistLowFrames = Math.ceil(PERSISTENCE_SCORING.LOW_PERSISTENCE_MS / intervalMs)
     this._persistHistoryFrames = Math.ceil(PERSISTENCE_SCORING.HISTORY_MS / intervalMs)
+  }
+
+  /**
+   * Recompute auto-gain EMA attack/release coefficients from the analysis interval.
+   * Attack (0.3s tau) responds fast to loud signals; release (1.0s tau) decays slowly.
+   * Called from start() and updateConfig() when analysisIntervalMs changes.
+   */
+  private _recomputeEmaCoefficients(intervalMs: number): void {
+    const fps = 1000 / intervalMs
+    this._autoGainAttackCoeff = 1 - Math.exp(-1 / (0.3 * fps))
+    this._autoGainReleaseCoeff = 1 - Math.exp(-1 / (1.0 * fps))
   }
 
   /**
