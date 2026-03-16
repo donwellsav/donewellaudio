@@ -73,6 +73,10 @@ function drawBars(
   bandRecommendations: Map<number, BandRecommendation>,
   issueFontSize: number,
 ) {
+  // ── Pass 1: Draw all bars, cut labels, badges ──────────────────────────────
+  // Collect freq label positions for overlap detection in pass 2
+  const freqLabels: { x: number; y: number; label: string; color: string; severity: number }[] = []
+
   for (let i = 0; i < numBands; i++) {
     const x = i * barSpacing + (barSpacing - barWidth) / 2
     const recommendation = bandRecommendations.get(i)
@@ -114,12 +118,14 @@ function drawBars(
       ctx.textAlign = 'center'
       ctx.fillText(`${cutDb}`, x + barWidth / 2, y + barHeight + issueFontSize + 4)
 
-      // Frequency label for active issue
-      ctx.fillStyle = recommendation.color
-      ctx.font = `bold ${issueFontSize}px monospace`
-      ctx.textAlign = 'center'
-      const freqLabel = GEQ_BAND_LABELS[i]
-      ctx.fillText(freqLabel, x + barWidth / 2, y - 8)
+      // Collect frequency label for overlap-aware rendering
+      freqLabels.push({
+        x: x + barWidth / 2,
+        y: y - 8,
+        label: GEQ_BAND_LABELS[i],
+        color: recommendation.color,
+        severity: Math.abs(cutDb), // deeper cut = more problematic
+      })
 
       // Cluster count badge (if > 1 peak merged)
       if (recommendation.clusterCount > 1) {
@@ -134,6 +140,51 @@ function drawBars(
       ctx.strokeStyle = '#121416'
       ctx.lineWidth = 0.5
       ctx.strokeRect(x, centerY - (plotHeight / 2) + 5, barWidth, plotHeight - 10)
+    }
+  }
+
+  // ── Pass 2: Frequency labels with overlap suppression ──────────────────────
+  // When labels overlap, only the most problematic (deepest cut) is shown
+  if (freqLabels.length > 0) {
+    ctx.font = `bold ${issueFontSize}px monospace`
+    ctx.textAlign = 'center'
+
+    // Estimate label width for overlap detection
+    const charWidth = issueFontSize * 0.6
+    const minSpacing = charWidth * 3 // enough room for typical "1.6k" labels
+
+    // Sort by x position for sweep, then mark winners
+    const sorted = freqLabels.slice().sort((a, b) => a.x - b.x)
+    const visible = new Array<boolean>(sorted.length).fill(true)
+
+    for (let i = 0; i < sorted.length; i++) {
+      if (!visible[i]) continue
+      const labelA = sorted[i]
+      const halfWidthA = (labelA.label.length * charWidth) / 2
+
+      for (let j = i + 1; j < sorted.length; j++) {
+        if (!visible[j]) continue
+        const labelB = sorted[j]
+        const halfWidthB = (labelB.label.length * charWidth) / 2
+        const gap = labelB.x - labelA.x
+
+        if (gap >= halfWidthA + halfWidthB + minSpacing * 0.3) break // no more overlaps
+
+        // Overlap detected — suppress the less problematic label
+        if (labelA.severity >= labelB.severity) {
+          visible[j] = false
+        } else {
+          visible[i] = false
+          break // labelA suppressed, move on
+        }
+      }
+    }
+
+    for (let i = 0; i < sorted.length; i++) {
+      if (!visible[i]) continue
+      const lbl = sorted[i]
+      ctx.fillStyle = lbl.color
+      ctx.fillText(lbl.label, lbl.x, lbl.y)
     }
   }
 }
