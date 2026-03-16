@@ -282,8 +282,8 @@ export const MobileLayout = memo(function MobileLayout({
 
       {/* ── Landscape mobile: 40% Issues / 60% Graph + fader sidecar (< md only) ── */}
       <div className="hidden landscape:flex md:landscape:hidden flex-1 overflow-hidden">
-        {/* Issues — 40% */}
-        <div className="w-[40%] flex flex-col overflow-hidden border-r border-border/50">
+        {/* Issues — 35% */}
+        <div className="w-[35%] flex flex-col overflow-hidden border-r border-border/50">
           <div className="flex-1 overflow-y-auto p-2">
             <h2 className="section-label mb-1 flex items-center justify-between">
               <span>Issues</span>
