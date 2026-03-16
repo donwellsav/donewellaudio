@@ -182,6 +182,47 @@ const KillTheRingInner = memo(function KillTheRingInner({
     prevAdvisoryIdsRef.current = new Set(advisories.map(a => a.id))
   }, [advisories, calibration, spectrumRef])
 
+  // ── False positive feedback (always available, not just during calibration) ──
+  // Tracks flagged advisory IDs for UI state + sends feedback to worker for
+  // snapshot enrichment (ML training data).
+
+  const [fpIds, setFpIds] = useState<Set<string>>(new Set())
+  const handleFalsePositive = useCallback((advisoryId: string) => {
+    // Toggle the flag
+    setFpIds(prev => {
+      const next = new Set(prev)
+      if (next.has(advisoryId)) {
+        next.delete(advisoryId)
+      } else {
+        next.add(advisoryId)
+      }
+      return next
+    })
+
+    // Find the advisory to get its frequency
+    const advisory = advisories.find(a => a.id === advisoryId)
+    if (advisory) {
+      const isFlagging = !fpIds.has(advisoryId)
+      dspWorker.sendUserFeedback(
+        advisory.trueFrequencyHz,
+        isFlagging ? 'false_positive' : 'correct'
+      )
+    }
+
+    // Chain to calibration handler if active
+    if (calibration.calibrationEnabled) {
+      calibration.onFalsePositive(advisoryId)
+    }
+  }, [advisories, fpIds, dspWorker, calibration])
+
+  // Merge calibration FP IDs with standalone FP IDs
+  const mergedFpIds = useMemo<ReadonlySet<string>>(() => {
+    if (!calibration.calibrationEnabled) return fpIds
+    const merged = new Set(fpIds)
+    calibration.falsePositiveIds.forEach(id => merged.add(id))
+    return merged
+  }, [fpIds, calibration.calibrationEnabled, calibration.falsePositiveIds])
+
   // ── Calibration settings wrapper ────────────────────────────────────────
 
   // Debounce settings updates (100ms) to prevent per-frame calls during slider drag.
@@ -260,8 +301,8 @@ const KillTheRingInner = memo(function KillTheRingInner({
 
   return (
     <AdvisoryProvider
-      onFalsePositive={calibration.calibrationEnabled ? calibration.onFalsePositive : undefined}
-      falsePositiveIds={calibration.calibrationEnabled ? calibration.falsePositiveIds : undefined}
+      onFalsePositive={handleFalsePositive}
+      falsePositiveIds={mergedFpIds}
     >
       <UIProvider rootRef={rootRef}>
         <FullscreenPortalGate rootEl={rootEl}>
