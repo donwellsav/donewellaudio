@@ -32,6 +32,7 @@ import { clearPanelLayouts } from '@/lib/storage/ktrStorage'
 
 function wrapper({ children }: { children: ReactNode }) {
   const rootRef = createRef<HTMLDivElement>()
+  // eslint-disable-next-line react/no-children-prop
   return createElement(UIProvider, { rootRef, children })
 }
 

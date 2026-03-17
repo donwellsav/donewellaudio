@@ -58,6 +58,7 @@ function makeAdvisory(overrides: Partial<Advisory> = {}): Advisory {
 }
 
 function wrapper({ children }: { children: ReactNode }) {
+  // eslint-disable-next-line react/no-children-prop
   return createElement(
     AdvisoryProvider,
     { onFalsePositive: undefined, falsePositiveIds: undefined, children },
