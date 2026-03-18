@@ -24,7 +24,7 @@ export const GuideTab = memo(function GuideTab() {
               <li>Detected issues appear in the <strong>Active Issues</strong> panel, sorted by frequency</li>
               <li>Each issue card shows frequency, pitch, severity, and recommended GEQ/PEQ cuts</li>
               <li>Tap the <strong>copy</strong> icon on a card to copy EQ settings to clipboard</li>
-              <li>Use <strong>Quick Controls</strong> to adjust sensitivity, or switch to <strong>Full Controls</strong> for all settings</li>
+              <li>Open the <strong>Sensitivity &amp; Range</strong> accordion in the Controls panel to adjust detection thresholds</li>
               <li>Review <strong>Feedback History</strong> to track repeat offender frequencies</li>
             </ol>
           </HelpSection>
@@ -68,12 +68,11 @@ export const GuideTab = memo(function GuideTab() {
 
           <HelpSection title="Detection Controls">
             <ul className="space-y-2">
-              <li><strong>Quick / Full Controls:</strong> Pill toggle at top. Quick mode shows essentials; Full mode shows all settings.</li>
+              <li><strong>Accordion Sections:</strong> All settings organized in collapsible sections — Sensitivity &amp; Range, Detection, Algorithms, Timing &amp; Limits, Presets &amp; Mode. All closed by default.</li>
               <li><strong>Freq Range Presets:</strong> Vocal (200–8 kHz), Monitor (300–3 kHz), Full (20–20 kHz), Sub (20–250 Hz).</li>
               <li><strong>Sensitivity:</strong> Detection sensitivity — slide right for more sensitive. Lower dB values catch earlier feedback.</li>
               <li><strong>Mode Selector:</strong> Operation mode presets plus any saved custom presets.</li>
               <li><strong>Save as Preset:</strong> Save current settings as a named custom preset (up to 5). Load from mode dropdown.</li>
-              <li><strong>Full Controls extras:</strong> Ring, Growth, Music-Aware, Sustain, Confidence, Algorithm grid, A-Weighting, and more.</li>
             </ul>
           </HelpSection>
         </div>
