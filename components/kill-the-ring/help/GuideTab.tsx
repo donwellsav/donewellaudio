@@ -57,6 +57,15 @@ export const GuideTab = memo(function GuideTab() {
             </ul>
           </HelpSection>
 
+          <HelpSection title="Issue Card Actions">
+            <ul className="space-y-2">
+              <li><strong>Copy:</strong> Tap the copy icon to copy frequency and EQ info to clipboard.</li>
+              <li><strong>FALSE+:</strong> Flag a detection as a false positive. Feeds into ML training data for better future accuracy.</li>
+              <li><strong>CONFIRM:</strong> Confirm a detection as real feedback. Symmetric labeling alongside FALSE+ for balanced training data.</li>
+              <li><strong>Swipe to Label:</strong> Enable in Display settings. Swipe a card left for FALSE+, right for CONFIRM. Hides the buttons for a cleaner layout. Works with touch input on any screen size — phones, tablets, and touchscreen monitors.</li>
+            </ul>
+          </HelpSection>
+
           <HelpSection title="Detection Controls">
             <ul className="space-y-2">
               <li><strong>Quick / Full Controls:</strong> Pill toggle at top. Quick mode shows essentials; Full mode shows all settings.</li>
@@ -77,7 +86,7 @@ export const GuideTab = memo(function GuideTab() {
           <HelpSection title="Settings Sidebar (5 Icon Tabs)">
             <ul className="space-y-2">
               <li><strong>Detect:</strong> Sensitivity, algorithm mode, FFT size, smoothing, thresholds, A-weighting, harmonic filter, noise floor, peak detection, max tracks, track timeout, whistle suppression. Uses accordion sections for progressive disclosure.</li>
-              <li><strong>Display:</strong> Tooltips, graph font size, max issues, EQ style, RTA dB range, spectrum line width.</li>
+              <li><strong>Display:</strong> Tooltips, graph font size, max issues, EQ style, RTA dB range, spectrum line width, swipe-to-label toggle.</li>
               <li><strong>Room:</strong> Room acoustics presets, RT60, volume, Schroeder frequency, modal overlap.</li>
               <li><strong>Advanced:</strong> Save/load defaults, reset to factory settings.</li>
               <li><strong>Calibrate:</strong> Room profile (dimensions, materials, mics), ambient noise capture, measurement mic compensation (Behringer ECM8000, dbx RTA-M, or Smartphone MEMS), calibration session recording with live stats and JSON export.</li>
