@@ -272,6 +272,12 @@ describe('detectContentType', () => {
     expect(result).toBe('speech')
   })
 
+  it('detects speech even with elevated flatness from ambient noise', () => {
+    // crestFactor=10 > 8 trumps flatness=0.22 > 0.2 — speech dynamics win
+    const result = detectContentType(flatSpectrum(-40), 10, 0.22)
+    expect(result).toBe('speech')
+  })
+
   it('detects music from moderate crest + high flatness', () => {
     const result = detectContentType(flatSpectrum(-40), 7, 0.25)
     expect(result).toBe('music')

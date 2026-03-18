@@ -22,6 +22,8 @@ import { useRef, useEffect, useCallback } from 'react'
 import * as Sentry from '@sentry/nextjs'
 import type {
   Advisory,
+  AlgorithmMode,
+  ContentType,
   DetectorSettings,
   TrackedPeak,
   DetectedPeak,
@@ -34,7 +36,7 @@ export interface DSPWorkerCallbacks {
   onAdvisory?: (advisory: Advisory) => void
   onAdvisoryCleared?: (advisoryId: string) => void
   onAdvisoryReplaced?: (replacedId: string, advisory: Advisory) => void
-  onTracksUpdate?: (tracks: TrackedPeak[]) => void
+  onTracksUpdate?: (tracks: TrackedPeak[], status?: { contentType?: ContentType; algorithmMode?: AlgorithmMode; isCompressed?: boolean; compressionRatio?: number }) => void
   onReady?: () => void
   onError?: (message: string) => void
   /** Called when a snapshot batch is ready for upload (free tier only) */
@@ -130,7 +132,12 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
           break
         case 'tracksUpdate':
           busyRef.current = false  // Clear backpressure — worker finished processing
-          callbacksRef.current.onTracksUpdate?.(msg.tracks)
+          callbacksRef.current.onTracksUpdate?.(msg.tracks, {
+            contentType: msg.contentType,
+            algorithmMode: msg.algorithmMode,
+            isCompressed: msg.isCompressed,
+            compressionRatio: msg.compressionRatio,
+          })
           break
         case 'returnBuffers':
           busyRef.current = false  // Also clears backpressure (fixes stall on early-break paths)

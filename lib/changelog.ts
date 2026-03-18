@@ -14,6 +14,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.130.0',
+    date: '2026-03-17',
+    highlights: 'MSD status, content type detection, unified settings',
+    changes: [
+      { type: 'fix', description: 'MSD buffer status now displays correctly — uses analysis call count as readiness proxy instead of unreliable pool frame count' },
+      { type: 'fix', description: 'Content type (SPEECH / MUSIC / COMP) now reaches the UI — worker piggybacks status on tracksUpdate message' },
+      { type: 'fix', description: 'Speech no longer misclassified as music — crest factor check (speech) now evaluated before spectral flatness (music)' },
+      { type: 'feat', description: 'Unified settings sidebar with icon sub-tabs (Detect, Display, Room, Advanced, Calibrate) and accordion sections' },
+      { type: 'ui', description: 'Issue card buttons streamlined — FALSE+ promoted to top row beside Copy, CONFIRM beneath, dismiss removed' },
+      { type: 'ui', description: 'Fader mode toggle switched to vertical stacking for better touch targets' },
+    ],
+  },
+  {
     version: '0.129.0',
     date: '2026-03-17',
     highlights: 'Defensive hardening from code audit',

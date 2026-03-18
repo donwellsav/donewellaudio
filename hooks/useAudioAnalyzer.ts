@@ -126,6 +126,9 @@ export function useAudioAnalyzer(
 
   // ── DSP Worker callbacks — stable refs, never change identity ───────────────
 
+  // Worker-derived status (contentType, algorithmMode, etc.) — updated on tracksUpdate
+  const workerStatusRef = useRef<{ contentType?: ContentType; algorithmMode?: AlgorithmMode; isCompressed?: boolean; compressionRatio?: number }>({})
+
   // Keep external callbacks ref in sync
   const externalCallbacksRef = useRef(externalCallbacks)
   useEffect(() => { externalCallbacksRef.current = externalCallbacks }, [externalCallbacks])
@@ -134,7 +137,10 @@ export function useAudioAnalyzer(
   const stableCallbacks = useRef<DSPWorkerCallbacks>({
     onAdvisory,
     onAdvisoryCleared,
-    onTracksUpdate: (tracks) => { tracksRef.current = tracks },
+    onTracksUpdate: (tracks, status) => {
+      tracksRef.current = tracks
+      if (status) workerStatusRef.current = status
+    },
     onReady: () => {
       // Worker (re)started successfully — clear any crash warning
       setState(prev => prev.workerError ? { ...prev, workerError: null } : prev)
@@ -170,11 +176,11 @@ export function useAudioAnalyzer(
               autoGainDb: data.autoGainDb,
               autoGainEnabled: data.autoGainEnabled,
               autoGainLocked: data.autoGainLocked,
-              algorithmMode: data.algorithmMode,
-              contentType: data.contentType,
+              algorithmMode: workerStatusRef.current.algorithmMode ?? data.algorithmMode,
+              contentType: workerStatusRef.current.contentType ?? data.contentType,
               msdFrameCount: data.msdFrameCount,
-              isCompressed: data.isCompressed,
-              compressionRatio: data.compressionRatio,
+              isCompressed: workerStatusRef.current.isCompressed ?? data.isCompressed,
+              compressionRatio: workerStatusRef.current.compressionRatio ?? data.compressionRatio,
               isSignalPresent: data.isSignalPresent,
               rawPeakDb: data.rawPeakDb,
             },

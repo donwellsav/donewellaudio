@@ -74,14 +74,13 @@ export const GuideTab = memo(function GuideTab() {
       <div>
         <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Configuration</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-          <HelpSection title="Settings Panel (6 Tabs)">
+          <HelpSection title="Settings Sidebar (5 Icon Tabs)">
             <ul className="space-y-2">
-              <li><strong>Detection:</strong> FFT size, smoothing, thresholds, A-weighting, harmonic filter, noise floor, peak detection.</li>
-              <li><strong>Algorithms:</strong> Algorithm mode, algorithm scores display, music-aware, max tracks, track timeout, whistle suppression.</li>
+              <li><strong>Detect:</strong> Sensitivity, algorithm mode, FFT size, smoothing, thresholds, A-weighting, harmonic filter, noise floor, peak detection, max tracks, track timeout, whistle suppression. Uses accordion sections for progressive disclosure.</li>
               <li><strong>Display:</strong> Tooltips, graph font size, max issues, EQ style, RTA dB range, spectrum line width.</li>
               <li><strong>Room:</strong> Room acoustics presets, RT60, volume, Schroeder frequency, modal overlap.</li>
               <li><strong>Advanced:</strong> Save/load defaults, reset to factory settings.</li>
-              <li><strong>Calibrate:</strong> Room profile (dimensions, materials, mics), ambient noise capture, measurement mic compensation (Behringer ECM8000, dbx RTA-M, or Smartphone MEMS), calibration session recording with live stats and JSON export (v1.1 with per-event mic cal flags).</li>
+              <li><strong>Calibrate:</strong> Room profile (dimensions, materials, mics), ambient noise capture, measurement mic compensation (Behringer ECM8000, dbx RTA-M, or Smartphone MEMS), calibration session recording with live stats and JSON export.</li>
             </ul>
           </HelpSection>
 

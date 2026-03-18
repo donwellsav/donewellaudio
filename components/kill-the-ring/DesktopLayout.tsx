@@ -52,7 +52,7 @@ export const DesktopLayout = memo(function DesktopLayout({
 
   const {
     advisories, activeAdvisoryCount, earlyWarning,
-    dismissedIds, onDismiss, onClearAll,
+    dismissedIds, onClearAll,
     rtaClearedIds, geqClearedIds,
     hasActiveRTAMarkers, hasActiveGEQBars,
     onClearRTA, onClearGEQ,
@@ -135,7 +135,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                       advisories={advisories}
                       maxIssues={settings.maxDisplayedIssues}
                       dismissedIds={dismissedIds}
-                      onDismiss={onDismiss}
+
                       onClearAll={onClearAll}
                       isRunning={isRunning}
                       onStart={start}
@@ -196,7 +196,6 @@ export const DesktopLayout = memo(function DesktopLayout({
                 advisories={advisories}
                 maxIssues={settings.maxDisplayedIssues}
                 dismissedIds={dismissedIds}
-                onDismiss={onDismiss}
                 onClearAll={onClearAll}
                 isRunning={isRunning}
                 onStart={start}

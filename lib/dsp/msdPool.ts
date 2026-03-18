@@ -190,6 +190,15 @@ export class MSDPool {
     return this._binToSlot.size
   }
 
+  /** Maximum frame count across all active slots. */
+  get maxFrameCount(): number {
+    let max = 0
+    for (const slot of this._binToSlot.values()) {
+      if (this._frameCount[slot] > max) max = this._frameCount[slot]
+    }
+    return max
+  }
+
   // ── Lifecycle ────────────────────────────────────────────────────────────
 
   /**

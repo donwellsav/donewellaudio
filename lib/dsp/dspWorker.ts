@@ -24,6 +24,8 @@ import { AdvisoryManager } from './advisoryManager'
 import { DecayAnalyzer } from './decayAnalyzer'
 import type {
   Advisory,
+  AlgorithmMode,
+  ContentType,
   DetectedPeak,
   DetectorSettings,
   TrackedPeak,
@@ -76,7 +78,7 @@ export type WorkerOutboundMessage =
   | { type: 'advisory'; advisory: Advisory }
   | { type: 'advisoryReplaced'; replacedId: string; advisory: Advisory }
   | { type: 'advisoryCleared'; advisoryId: string }
-  | { type: 'tracksUpdate'; tracks: TrackedPeak[] }
+  | { type: 'tracksUpdate'; tracks: TrackedPeak[]; contentType?: ContentType; algorithmMode?: AlgorithmMode; isCompressed?: boolean; compressionRatio?: number }
   | { type: 'returnBuffers'; spectrum: Float32Array; timeDomain?: Float32Array }
   | { type: 'ready' }
   | { type: 'error'; message: string }
@@ -96,6 +98,11 @@ let peakProcessCount = 0
 import type { ShelfRecommendation } from '@/types/advisory'
 let cachedShelves: ShelfRecommendation[] | null = null
 let cachedShelvesFrameId = -1
+
+// ─── Worker-side status (sent to main thread via tracksUpdate) ───────────────
+let lastContentType: ContentType = 'unknown'
+let lastIsCompressed = false
+let lastCompressionRatio = 1
 
 // ─── Snapshot collection (free tier only) ────────────────────────────────────
 // SnapshotCollector is statically imported (line 32) but only instantiated when
@@ -335,6 +342,11 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
         peak, track, spectrum, sampleRate, fftSize, peakFrequencies
       )
 
+      // Update worker-side status for UI
+      lastContentType = contentType
+      lastIsCompressed = algorithmScores.compression?.isCompressed ?? false
+      lastCompressionRatio = algorithmScores.compression?.estimatedRatio ?? 1
+
       // Fuse algorithm results with user-selected mode
       const fusionConfig: FusionConfig = {
         ...DEFAULT_FUSION_CONFIG,
@@ -403,7 +415,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
         if (clearedId) {
           self.postMessage({ type: 'advisoryCleared', advisoryId: clearedId } satisfies WorkerOutboundMessage)
         }
-        self.postMessage({ type: 'tracksUpdate', tracks: trackManager.getActiveTracks() } satisfies WorkerOutboundMessage)
+        self.postMessage({ type: 'tracksUpdate', tracks: trackManager.getActiveTracks(), contentType: lastContentType, algorithmMode: settings?.algorithmMode ?? 'auto', isCompressed: lastIsCompressed, compressionRatio: lastCompressionRatio } satisfies WorkerOutboundMessage)
         break
       }
 
@@ -434,7 +446,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
 
       // Post tracks update if any advisory was created/updated
       if (actions.length > 0) {
-        self.postMessage({ type: 'tracksUpdate', tracks: trackManager.getActiveTracks() } satisfies WorkerOutboundMessage)
+        self.postMessage({ type: 'tracksUpdate', tracks: trackManager.getActiveTracks(), contentType: lastContentType, algorithmMode: settings?.algorithmMode ?? 'auto', isCompressed: lastIsCompressed, compressionRatio: lastCompressionRatio } satisfies WorkerOutboundMessage)
       }
 
       break
@@ -468,7 +480,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
         self.postMessage({ type: 'advisoryCleared', advisoryId: clearedId } satisfies WorkerOutboundMessage)
       }
 
-      self.postMessage({ type: 'tracksUpdate', tracks: trackManager.getActiveTracks() } satisfies WorkerOutboundMessage)
+      self.postMessage({ type: 'tracksUpdate', tracks: trackManager.getActiveTracks(), contentType: lastContentType, algorithmMode: settings?.algorithmMode ?? 'auto', isCompressed: lastIsCompressed, compressionRatio: lastCompressionRatio } satisfies WorkerOutboundMessage)
       break
     }
   }

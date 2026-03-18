@@ -173,11 +173,10 @@ export class AudioAnalyzer {
           autoGainDb: state.autoGainDb,
           autoGainLocked: state.autoGainLocked,
           rawPeakDb: state.rawPeakDb,
-          // Advanced algorithm state - populated at the worker/hook level, not by FeedbackDetector
-          // Safe to default to undefined; higher-level code fills these in
+          // Advanced algorithm state - algorithmMode/contentType populated by worker
           algorithmMode: undefined,
           contentType: undefined,
-          msdFrameCount: undefined,
+          msdFrameCount: state.msdFrameCount,
           isCompressed: undefined,
           compressionRatio: undefined,
           isSignalPresent: state.isSignalPresent,

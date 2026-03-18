@@ -665,8 +665,9 @@ export class FeedbackDetector {
     if (this.activeBinPos) this.activeBinPos.fill(-1)
     this.activeCount = 0
     
-    // Reset MSD pool
+    // Reset MSD pool and high-water mark
     this._msdPool?.reset()
+    this._msdFrameCount = 0
     this._fastConfirmCounts.clear()
     
     // Reset persistence scoring
@@ -903,6 +904,13 @@ export class FeedbackDetector {
 
     // Stage 4: Peak detection loop
     this._scanAndProcessPeaks(now, dt, effectiveThresholdDb)
+
+    // Update MSD frame count for UI status display.
+    // Use analysis call count (capped at history size) as readiness proxy —
+    // the pool's maxFrameCount is unreliable because broadband signal causes
+    // constant LRU eviction across 256 slots, keeping individual slot frame
+    // counts near 1 even when the system has been analyzing for seconds.
+    this._msdFrameCount = Math.min(this._analyzeCallCount, this._msdPool ? MSD_SETTINGS.HISTORY_SIZE : 0)
 
     if (debugPerf) {
       const t3 = performance.now()

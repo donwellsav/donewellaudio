@@ -5,7 +5,7 @@ import { formatFrequency, formatPitch } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { getSeverityText } from '@/lib/dsp/classifier'
 import { getFeedbackHistory } from '@/lib/dsp/feedbackHistory'
-import { AlertTriangle, CheckCircle2, X, TrendingUp, Copy, Check } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, TrendingUp, Copy, Check } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Advisory } from '@/types/advisory'
 
@@ -20,7 +20,6 @@ interface IssuesListProps {
   advisories: Advisory[]
   maxIssues?: number
   dismissedIds?: Set<string>
-  onDismiss?: (id: string) => void
   onClearAll?: () => void
   onClearResolved?: () => void
   touchFriendly?: boolean
@@ -33,7 +32,7 @@ interface IssuesListProps {
   isLowSignal?: boolean
 }
 
-export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onDismiss, onClearAll, onClearResolved, touchFriendly, isRunning, onStart, onFalsePositive, falsePositiveIds, onConfirmFeedback, confirmedIds, isLowSignal }: IssuesListProps) {
+export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onClearAll, onClearResolved, touchFriendly, isRunning, onStart, onFalsePositive, falsePositiveIds, onConfirmFeedback, confirmedIds, isLowSignal }: IssuesListProps) {
   // Filter dismissed, sort repeat offenders to top by hit count, then slice to max.
   // We attach occurrenceCount here so IssueCard doesn't need to re-query feedbackHistory.
   const latestSorted = useMemo(() => {
@@ -169,7 +168,6 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               key={advisory.id}
               advisory={advisory}
               occurrenceCount={occurrenceCount}
-              onDismiss={onDismiss}
               touchFriendly={touchFriendly}
               onFalsePositive={onFalsePositive}
               isFalsePositive={falsePositiveIds?.has(advisory.id) ?? false}
@@ -186,7 +184,6 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
 interface IssueCardProps {
   advisory: Advisory
   occurrenceCount: number
-  onDismiss?: (id: string) => void
   touchFriendly?: boolean
   onFalsePositive?: (advisoryId: string) => void
   isFalsePositive?: boolean
@@ -194,7 +191,7 @@ interface IssueCardProps {
   isConfirmed?: boolean
 }
 
-const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, onDismiss, touchFriendly, onFalsePositive, isFalsePositive, onConfirmFeedback, isConfirmed }: IssueCardProps) {
+const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFriendly, onFalsePositive, isFalsePositive, onConfirmFeedback, isConfirmed }: IssueCardProps) {
   // Memoize derived values that only change when the advisory object changes
   const {
     severityColor, pitchStr, exactFreqStr,
@@ -375,8 +372,8 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, onDismiss
             </div>
           </div>
 
-          {/* RIGHT: Copy / Dismiss + FALSE+ below */}
-          <div className="flex flex-col items-end gap-0 flex-shrink-0 self-center">
+          {/* RIGHT: Copy / FALSE+ top row, CONFIRM beneath */}
+          <div className="flex flex-col items-end flex-shrink-0 self-center">
             <div className="flex items-center gap-0">
               <button
                   onClick={handleCopy}
@@ -395,47 +392,32 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, onDismiss
               {copied && (
                 <span className="sr-only" role="status">Frequency info copied</span>
               )}
-              {onDismiss && (
+              {onFalsePositive && (
                 <button
-                  onClick={() => onDismiss(advisory.id)}
-                  aria-label={`Dismiss ${exactFreqStr} issue`}
-                  className={`rounded text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60 transition-colors flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
-                    touchFriendly ? 'w-8 h-8' : 'w-7 h-7'
-                  }`}
+                  onClick={() => onFalsePositive(advisory.id)}
+                  aria-label={`${isFalsePositive ? 'Unflag' : 'Flag'} ${exactFreqStr} as false positive`}
+                  className={`rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+                    isFalsePositive
+                      ? 'text-red-400 bg-red-500/20 border border-red-500/40'
+                      : 'text-muted-foreground/50 hover:text-red-400 hover:bg-red-500/10 border border-transparent'
+                  } ${touchFriendly ? 'h-7 min-w-[36px]' : 'h-6 min-w-[36px]'}`}
                 >
-                  <X className={touchFriendly ? 'w-5 h-5' : 'w-3.5 h-3.5'} />
+                  FALSE+
                 </button>
               )}
             </div>
-            {(onConfirmFeedback || onFalsePositive) && (
-              <div className="flex items-center gap-1">
-                {onConfirmFeedback && (
-                  <button
-                    onClick={() => onConfirmFeedback(advisory.id)}
-                    aria-label={`${isConfirmed ? 'Unconfirm' : 'Confirm'} ${exactFreqStr} as real feedback`}
-                    className={`rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
-                      isConfirmed
-                        ? 'text-emerald-400 bg-emerald-500/20 border border-emerald-500/40'
-                        : 'text-muted-foreground/50 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent'
-                    } ${touchFriendly ? 'h-7 min-w-[36px]' : 'h-6 min-w-[36px]'}`}
-                  >
-                    CONFIRM
-                  </button>
-                )}
-                {onFalsePositive && (
-                  <button
-                    onClick={() => onFalsePositive(advisory.id)}
-                    aria-label={`${isFalsePositive ? 'Unflag' : 'Flag'} ${exactFreqStr} as false positive`}
-                    className={`rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
-                      isFalsePositive
-                        ? 'text-red-400 bg-red-500/20 border border-red-500/40'
-                        : 'text-muted-foreground/50 hover:text-red-400 hover:bg-red-500/10 border border-transparent'
-                    } ${touchFriendly ? 'h-7 min-w-[36px]' : 'h-6 min-w-[36px]'}`}
-                  >
-                    FALSE+
-                  </button>
-                )}
-              </div>
+            {onConfirmFeedback && (
+              <button
+                onClick={() => onConfirmFeedback(advisory.id)}
+                aria-label={`${isConfirmed ? 'Unconfirm' : 'Confirm'} ${exactFreqStr} as real feedback`}
+                className={`rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 self-end ${
+                  isConfirmed
+                    ? 'text-emerald-400 bg-emerald-500/20 border border-emerald-500/40'
+                    : 'text-muted-foreground/50 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent'
+                } ${touchFriendly ? 'h-7 min-w-[36px]' : 'h-6 min-w-[36px]'}`}
+              >
+                CONFIRM
+              </button>
             )}
           </div>
         </div>

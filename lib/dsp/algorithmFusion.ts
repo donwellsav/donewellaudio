@@ -796,12 +796,16 @@ export function detectContentType(
     return 'unknown'
   }
 
-  if (spectralFlatness > 0.2) {
-    return 'music'
-  }
-
+  // Speech check FIRST — crest factor is more discriminating than flatness.
+  // Real-world speech in rooms with ambient noise often has flatness > 0.2
+  // (noise fills between formants), but still has high crest factor from
+  // amplitude dynamics (pauses between words/phrases).
   if (crestFactor > 8) {
     return 'speech'
+  }
+
+  if (spectralFlatness > 0.2) {
+    return 'music'
   }
 
   let totalPower = 0

@@ -1,6 +1,6 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 144 TypeScript/TSX files, 463 tests (459 pass, 4 skip, 1 todo), 26 suites. Version 0.129.0.**
+> **Last updated March 2026. 158 TypeScript/TSX files, 469 tests (464 pass, 4 skip, 1 todo), 26 suites. Version 0.130.0.**
 
 ## CRITICAL RULES
 
@@ -10,7 +10,7 @@
 
 ## Project Overview
 
-**Kill The Ring** (killthering.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.119.0. Repository: github.com/donwellsav/killthering.
+**Kill The Ring** (killthering.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.130.0. Repository: github.com/donwellsav/killthering.
 
 ## Tech Stack
 
@@ -23,7 +23,7 @@
 | DSP Offload | Web Worker (dspWorker.ts, ~458 lines) |
 | Visualization | HTML5 Canvas at 30fps |
 | State | React 19 hooks + 4 context providers (no external state library) |
-| Testing | Vitest (435 tests, 25 suites, under 11s) |
+| Testing | Vitest (469 tests, 26 suites, under 11s) |
 | Error Reporting | Sentry (browser + server + worker runtimes) |
 | PWA | Serwist (service worker, offline caching, installable) |
 | Package Manager | pnpm |
@@ -35,7 +35,7 @@ pnpm dev              # Dev server on :3000 (Turbopack, no SW)
 pnpm build            # Production build (webpack, generates SW)
 pnpm start            # Production server
 pnpm lint             # ESLint (flat config)
-pnpm test             # Vitest (464 tests: 459 pass + 4 skip + 1 todo)
+pnpm test             # Vitest (469 tests: 464 pass + 4 skip + 1 todo)
 pnpm test:watch       # Vitest watch mode
 pnpm test:coverage    # Vitest with V8 coverage
 npx tsc --noEmit      # Type-check (run BEFORE pnpm build)
@@ -105,42 +105,9 @@ COMPRESSED: MSD=0.12  Phase=0.30  Spectral=0.18  Comb=0.08  IHR=0.18  PTMR=0.14
 - **Chromatic quantization gate:** When peak frequency snaps to 12-TET semitone grid (±5 cents) AND phase coherence > 0.80, phase score contribution scaled by 0.60 (40% reduction). Suppresses Auto-Tune FP. File: `classifier.ts`
 - **Comb stability gate:** CombStabilityTracker monitors fundamentalSpacing CV across 16 frames. When CV > 0.05 (sweeping), comb confidence *= 0.25. Suppresses flanger/phaser FP. File: `algorithmFusion.ts`
 
-## Known Bugs (Priority Order)
+## Known Bugs
 
-### Recently Fixed
-
-| Bug | Fix | Version |
-|-----|-----|---------|
-| Auto-gain EMA coefficients stale in `updateConfig()` | `_recomputeEmaCoefficients()` called from both `start()` and `updateConfig()` | v0.105.0 |
-| Confidence formula floors at 0.5 (UNCERTAIN unreachable) | Changed to `prob * (0.5 + 0.5 * agreement)` | v0.105.0 |
-| Post-override normalization undoes RUNAWAY pFeedback=0.85 | Normalization before overrides; overrides are final | v0.105.0 |
-| `existing` weight (0.04) double-counts features | Removed from all profiles, redistributed to IHR+PTMR | v0.105.0 |
-| Comb weight doubling dilutes others by 7.4% | Doubled weight in numerator only, base weight in denominator | v0.105.0 |
-| No worker crash recovery | Auto-restart: 500ms debounce, max 3 retries, Sentry logging | v0.105.0 |
-| SpectrumCanvas missing devicePixelRatio (blurry on Retina) | Full DPR scaling: buffer, CSS style, `ctx.scale(dpr, dpr)` | v0.105.0 |
-| Dual MSD implementations | Consolidated into single `MSDPool` class in `msdPool.ts` | v0.98.0 |
-| Only axial room modes (tangential + oblique missing) | `calculateRoomModes()` now handles all three mode types | v0.105.0 |
-| PRIOR_PROBABILITY = 0.33 (uniform priors) | Per-class priors: feedback=0.45, whistle=0.27, instrument=0.27 | v0.105.0 |
-| Settings slider fires per-frame (no debounce) | 100ms debounce with merge accumulation in `KillTheRing.tsx` | v0.105.0 |
-| TS2688: Missing @serwist/next type definition | Types declared in `tsconfig.json` | v0.98.0 |
-| Persistence thresholds frame-count-based (FUTURE-002) | ms-based thresholds with runtime `Math.ceil(ms / intervalMs)` | v0.105.0 |
-
-### High (P1)
-
-~~1. **Zero tests for hooks, components, contexts, exports, storage.** 373 tests cover DSP only.~~ **FIXED v0.119.0** — 62 new tests across 10 modules (hooks, contexts, storage, exports). 435 total tests, 25 suites.
-
-### Medium (P2)
-
-~~2. `analyze()` is ~420 lines — decompose into `_detectPeaks()`, `_updateAutoGain()`, `_computeSpectrum()`, etc.~~ **FIXED v0.121.0** — Decomposed into 4 extracted methods: `_measureSignalAndApplyGain()`, `_buildPowerSpectrum()`, `_scanAndProcessPeaks()`, `_registerPeak()`. `analyze()` is now ~45 lines.
-~~3. `AudioAnalyzerContext` is god-context mixing engine/settings/detection (28 fields). Split into 3-4 focused contexts.~~ **FIXED v0.122.0** — Split into 4 focused contexts: `EngineContext` (11), `SettingsContext` (5), `MeteringContext` (10), `DetectionContext` (3). All consumers migrated to narrowest hooks. `useAudio()` retained as deprecated shim.
-~~4. No shelf overlap validation in eqAdvisor.~~ **FIXED v0.123.0** — Added `validateShelves()` post-processing (dedup by type, HPF < lowShelf sanity check, cap at 3). HPF-active raises mud threshold +2 dB to prevent overlap in 80–300 Hz region. Cross-advisory dedup: shelves computed once per analysis frame in worker, shared across all peaks.
-~~5. `HelpMenu.tsx` is 991 lines doing 3+ things — split.~~ **FIXED v0.124.0** — Split into thin orchestrator (~90 lines) + `help/` subdirectory (6 files: HelpShared, GuideTab, ModesTab, AlgorithmsTab, ReferenceTab, AboutTab). Mirrors `settings/` pattern.
-~~6. No tablet responsive breakpoint (CSS var `--breakpoint-tablet: 600px` defined but not wired to components).~~ **FIXED v0.125.0** — Wired `tablet:` Tailwind v4 prefix (600px) to MobileLayout (`tablet:hidden` on 3 portrait-only elements), DesktopLayout (`tablet:flex tablet:landscape:hidden`), and HeaderBar. Portrait tablets now get desktop layout. `useIsMobile()` threshold lowered from 768→600 so tablets skip smartphone mic calibration.
-
-### Low (P3)
-
-~~7. `unsafe-inline` in production script-src CSP (required by Next.js).~~ **FIXED v0.126.0** — Replaced with nonce-based CSP via `middleware.ts`. Per-request nonce + `'strict-dynamic'` in script-src. Dev mode keeps `unsafe-inline` for Turbopack hot reload. `style-src 'unsafe-inline'` retained (low risk, required by Tailwind/React).
-~~8. No security scanning in CI (Snyk/Dependabot/npm audit).~~ **FIXED v0.127.0** — Added `pnpm audit --prod --audit-level=high` to CI (fails on high/critical CVEs in production deps). Added `.github/dependabot.yml` for weekly grouped npm updates + monthly GitHub Actions updates.
+All previously tracked bugs (P1–P3) have been resolved as of v0.127.0. See git history for details.
 
 ## Known False Positives
 
@@ -161,13 +128,15 @@ app/                          # Next.js App Router
   sw.ts (38)                  #   Serwist service worker
   api/v1/ingest/route.ts (160)#   Spectral snapshot ingest (v1.0/1.1/1.2 schema, rate-limited, IP-stripped)
 components/
-  kill-the-ring/ (29 files)   # Domain components + barrel index.ts
+  kill-the-ring/ (23 files)   # Domain components + barrel index.ts
     help/ (6 files)           # Help tab components (mirrors settings/ pattern)
-    KillTheRing.tsx (436)     #   Root orchestrator, settings debounce, FP handling
-    HeaderBar.tsx (220)       #   Header bar with permanent Clear All button
+    KillTheRing.tsx (473)     #   Root orchestrator, settings debounce, FP handling
+    HeaderBar.tsx (191)       #   Header bar (zero props, permanent Clear All)
     IssuesList.tsx (440)      #   Advisory cards with CONFIRM + FALSE+ buttons, 3s stability
-    settings/ (7 files)       # Settings tab components
-  ui/ (20 files)              # shadcn/ui primitives
+    UnifiedControls.tsx (760) #   All settings: icon sub-tabs, accordion sections, container queries
+    LandscapeSettingsSheet.tsx (58) # Bottom Sheet wrapper for mobile landscape settings
+    settings/ (5 files)       # Settings sub-tab components (Display, Room, Advanced, Calibration, Shared)
+  ui/ (21 files)              # shadcn/ui primitives (includes accordion)
 contexts/ (8 files)           # React context providers
   AudioAnalyzerContext (195)  #   Compound provider: nests Engine/Settings/Metering/Detection
   EngineContext (42)          #   Engine lifecycle, devices, dspWorker (11 fields)
@@ -324,3 +293,4 @@ scripts/ml/                     # ML training pipeline
 - **Mobile advisory limit:** Top 5 most problematic frequencies shown (`MOBILE_MAX_DISPLAYED_ISSUES` in constants.ts).
 - **Auto MEMS calibration:** Smartphone MEMS mic profile auto-applied on mobile devices.
 - **RTA label overlap suppression:** Greedy algorithm in `spectrumDrawing.ts` prioritizes highest-severity labels, prevents clutter.
+- **Unified settings sidebar (v0.129.0):** `UnifiedControls.tsx` consolidates the old `SettingsPanel` (Sheet drawer) and `DetectionControls` (sidebar) into one component. Icon-only sub-tabs with tooltips (Detect | Display | Room | Advanced | Calibrate). Detect tab uses `<Accordion>` sections for progressive disclosure. Container queries (`@container`) replace viewport breakpoints so grids stay single-column in narrow sidebar. `LandscapeSettingsSheet.tsx` provides bottom-sheet access on mobile landscape.

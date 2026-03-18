@@ -40,7 +40,7 @@ export const MobileLayout = memo(function MobileLayout({
 
   const {
     advisories, activeAdvisoryCount, earlyWarning,
-    dismissedIds, onDismiss, onClearAll, onClearResolved,
+    dismissedIds, onClearAll, onClearResolved,
     rtaClearedIds, geqClearedIds,
     hasActiveRTAMarkers, hasActiveGEQBars,
     onClearRTA, onClearGEQ,
@@ -157,7 +157,6 @@ export const MobileLayout = memo(function MobileLayout({
                 advisories={mobileAdvisories}
                 maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
                 dismissedIds={dismissedIds}
-                onDismiss={onDismiss}
                 onClearAll={onClearAll}
                 onClearResolved={onClearResolved}
                 touchFriendly
@@ -310,7 +309,6 @@ export const MobileLayout = memo(function MobileLayout({
               advisories={mobileAdvisories}
               maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
               dismissedIds={dismissedIds}
-              onDismiss={onDismiss}
               onClearAll={onClearAll}
               onClearResolved={onClearResolved}
               touchFriendly
