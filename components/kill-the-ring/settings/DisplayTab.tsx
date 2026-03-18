@@ -174,7 +174,7 @@ export const DisplayTab = memo(function DisplayTab({
       <Section
         title="Swipe to Label"
         showTooltip={settings.showTooltips}
-        tooltip="Swipe issue cards left to flag as FALSE+, right to CONFIRM. Hides the label buttons for a cleaner card layout. Works with touch input on any screen size."
+        tooltip="Swipe issue cards left to flag as FALSE+, right to CONFIRM. On mobile, swipe is always enabled. This toggle controls desktop/tablet behavior."
       >
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground font-mono tracking-wide">Swipe gestures</span>
