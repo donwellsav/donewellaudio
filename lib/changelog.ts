@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.131.2',
+    date: '2026-03-18',
+    changes: [
+      { type: 'ui', description: 'ui: KTR brand logo replaces speaker icon (#138)' },
+    ],
+  },
+  {
     version: '0.131.1',
     date: '2026-03-18',
     changes: [
