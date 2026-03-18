@@ -13,6 +13,7 @@ import {
 import type { DetectedPeak, AnalysisConfig, DetectorSettings, AlgorithmMode, ContentType } from '@/types/advisory'
 import { DEFAULT_CONFIG } from '@/types/advisory'
 import type { CombPatternResult } from './advancedDetection'
+import { detectContentType } from './algorithmFusion'
 import { MSDPool } from './msdPool'
 
 const HOLD_DECAY_RATE_MULTIPLIER = 2
@@ -911,6 +912,29 @@ export class FeedbackDetector {
     // constant LRU eviction across 256 slots, keeping individual slot frame
     // counts near 1 even when the system has been analyzing for seconds.
     this._msdFrameCount = Math.min(this._analyzeCallCount, this._msdPool ? MSD_SETTINGS.HISTORY_SIZE : 0)
+
+    // Content type detection — throttled to every ~500ms (25 frames at 50fps).
+    // Runs on the main thread so it works even when no peaks are detected
+    // (speech without feedback produces no peaks → worker never classifies).
+    if (this._analyzeCallCount % 25 === 1) {
+      const freqDb = this.freqDb!
+      let specMax = -Infinity
+      let sumLinear = 0
+      let validBins = 0
+      for (let i = this.startBin; i <= this.endBin; i++) {
+        const v = freqDb[i]
+        if (Number.isFinite(v)) {
+          if (v > specMax) specMax = v
+          sumLinear += Math.pow(10, v / 10)
+          validBins++
+        }
+      }
+      if (validBins > 0 && specMax > this._silenceThresholdDb) {
+        const rmsDb = 10 * Math.log10(sumLinear / validBins)
+        const crestFactor = specMax - rmsDb
+        this._contentType = detectContentType(freqDb, crestFactor)
+      }
+    }
 
     if (debugPerf) {
       const t3 = performance.now()

@@ -1,6 +1,6 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 158 TypeScript/TSX files, 469 tests (464 pass, 4 skip, 1 todo), 26 suites. Version 0.130.0.**
+> **Last updated March 2026. 158 TypeScript/TSX files, 468 tests (463 pass, 4 skip, 1 todo), 26 suites. Version 0.130.0.**
 
 ## CRITICAL RULES
 
@@ -23,7 +23,7 @@
 | DSP Offload | Web Worker (dspWorker.ts, ~458 lines) |
 | Visualization | HTML5 Canvas at 30fps |
 | State | React 19 hooks + 4 context providers (no external state library) |
-| Testing | Vitest (469 tests, 26 suites, under 11s) |
+| Testing | Vitest (468 tests, 26 suites, under 11s) |
 | Error Reporting | Sentry (browser + server + worker runtimes) |
 | PWA | Serwist (service worker, offline caching, installable) |
 | Package Manager | pnpm |
@@ -35,7 +35,7 @@ pnpm dev              # Dev server on :3000 (Turbopack, no SW)
 pnpm build            # Production build (webpack, generates SW)
 pnpm start            # Production server
 pnpm lint             # ESLint (flat config)
-pnpm test             # Vitest (469 tests: 464 pass + 4 skip + 1 todo)
+pnpm test             # Vitest (468 tests: 463 pass + 4 skip + 1 todo)
 pnpm test:watch       # Vitest watch mode
 pnpm test:coverage    # Vitest with V8 coverage
 npx tsc --noEmit      # Type-check (run BEFORE pnpm build)

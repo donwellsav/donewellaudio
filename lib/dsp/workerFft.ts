@@ -328,9 +328,9 @@ export class AlgorithmEngine {
     // Peak-to-median ratio
     const ptmrResult = calculatePTMR(spectrum, binIndex)
 
-    // Content type detection
+    // Content type detection — uses full spectrum + global crest factor
     const crestFactor = this.specMax - this.rmsDb
-    const contentType = detectContentType(spectrum, crestFactor, spectralResult.flatness)
+    const contentType = detectContentType(spectrum, crestFactor)
 
     // MSD: write this peak's magnitude to pool (builds history across frames)
     this.msdPool?.write(binIndex, spectrum[binIndex])

@@ -255,7 +255,38 @@ describe('calculateMINDS', () => {
 // ── detectContentType ──────────────────────────────────────────────────────
 
 describe('detectContentType', () => {
-  /** Create a flat spectrum for testing */
+  /**
+   * Create a speech-like spectrum: energy concentrated in low bins (100-4kHz),
+   * steep rolloff, low global spectral flatness (tonal formants).
+   */
+  function speechSpectrum(length: number = 4096): Float32Array {
+    const arr = new Float32Array(length)
+    for (let i = 0; i < length; i++) {
+      // Strong energy in low bins (formant region), steep rolloff
+      const normFreq = i / length
+      if (normFreq < 0.10) arr[i] = -25 - normFreq * 100  // Strong 0–2kHz
+      else if (normFreq < 0.20) arr[i] = -45 - normFreq * 50  // Moderate 2–4kHz
+      else arr[i] = -80 - normFreq * 20  // Very weak above 4kHz
+    }
+    return arr
+  }
+
+  /**
+   * Create a music-like spectrum: energy spread evenly across wide range,
+   * high global spectral flatness (dense harmonics across many bins).
+   * All bins at roughly the same level → high centroid, high rolloff, high flatness.
+   */
+  function musicSpectrum(length: number = 4096): Float32Array {
+    const arr = new Float32Array(length)
+    for (let i = 0; i < length; i++) {
+      // Broad, even energy spread — slight slope but energy present throughout
+      const normFreq = i / length
+      arr[i] = -35 - normFreq * 15  // -35 to -50 — very flat slope
+    }
+    return arr
+  }
+
+  /** Create a flat spectrum (all bins equal dB) */
   function flatSpectrum(db: number, length: number = 4096): Float32Array {
     const arr = new Float32Array(length)
     arr.fill(db)
@@ -263,33 +294,33 @@ describe('detectContentType', () => {
   }
 
   it('detects compressed content from low crest factor', () => {
-    const result = detectContentType(flatSpectrum(-40), 4, 0.15) // crestFactor=4 < 6
+    // crestFactor=4 < COMPRESSED_CREST_FACTOR (6) — early gate fires
+    const result = detectContentType(flatSpectrum(-40), 4)
     expect(result).toBe('compressed')
   })
 
-  it('detects speech from high crest factor + low flatness', () => {
-    const result = detectContentType(flatSpectrum(-40), 12, 0.06)
+  it('detects speech from speech-like spectrum + high crest factor', () => {
+    // Speech: concentrated low energy, steep rolloff, high crest (pauses)
+    const result = detectContentType(speechSpectrum(), 12)
     expect(result).toBe('speech')
   })
 
-  it('detects speech even with elevated flatness from ambient noise', () => {
-    // crestFactor=10 > 8 trumps flatness=0.22 > 0.2 — speech dynamics win
-    const result = detectContentType(flatSpectrum(-40), 10, 0.22)
-    expect(result).toBe('speech')
-  })
-
-  it('detects music from moderate crest + high flatness', () => {
-    const result = detectContentType(flatSpectrum(-40), 7, 0.25)
+  it('detects music from music-like spectrum + moderate crest factor', () => {
+    // Music: broad energy spread, moderate crest factor
+    const result = detectContentType(musicSpectrum(), 7)
     expect(result).toBe('music')
   })
 
-  it('returns unknown for very low spectral flatness', () => {
-    const result = detectContentType(flatSpectrum(-40), 7, 0.03)
+  it('returns unknown for silent/empty spectrum', () => {
+    // All bins at -Infinity → no valid power → unknown
+    const silent = new Float32Array(4096)
+    silent.fill(-Infinity)
+    const result = detectContentType(silent, 10)
     expect(result).toBe('unknown')
   })
 
   it('returns a valid ContentType string', () => {
-    const result = detectContentType(flatSpectrum(-40), 8, 0.1)
+    const result = detectContentType(flatSpectrum(-40), 8)
     expect(['speech', 'music', 'compressed', 'unknown']).toContain(result)
   })
 })

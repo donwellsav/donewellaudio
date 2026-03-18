@@ -173,9 +173,10 @@ export class AudioAnalyzer {
           autoGainDb: state.autoGainDb,
           autoGainLocked: state.autoGainLocked,
           rawPeakDb: state.rawPeakDb,
-          // Advanced algorithm state - algorithmMode/contentType populated by worker
+          // Advanced algorithm state - contentType computed on main thread (every ~500ms),
+          // algorithmMode populated by worker
           algorithmMode: undefined,
-          contentType: undefined,
+          contentType: state.contentType,
           msdFrameCount: state.msdFrameCount,
           isCompressed: undefined,
           compressionRatio: undefined,

@@ -783,40 +783,56 @@ export function calculateMINDS(
 
 // ── Content Type Detection ───────────────────────────────────────────────────
 
+/**
+ * Classify audio content as speech, music, or compressed using 4 global
+ * spectral features: centroid, rolloff, crest factor, and spectral flatness.
+ *
+ * Previous versions used aggressive single-feature early gates (crestFactor > 8
+ * → speech, flatness > 0.2 → music) that failed in practice because:
+ * - Music with a loud fundamental easily has crest factor > 8 dB
+ * - Speech in rooms with ambient noise often has flatness > 0.2
+ * - The `spectralFlatness` parameter was peak-local (±5 bins), not global
+ *
+ * Now uses only the multi-feature scoring system. Global flatness is computed
+ * internally from the full spectrum (geometric/arithmetic mean ratio).
+ *
+ * @param spectrum - Full-resolution spectrum in dBFS
+ * @param crestFactor - specMax − rmsDb in dB (global)
+ */
 export function detectContentType(
   spectrum: Float32Array,
   crestFactor: number,
-  spectralFlatness: number
 ): ContentType {
+  // Only reliable early gate: low crest factor = heavily compressed
   if (crestFactor < COMPRESSION_CONSTANTS.COMPRESSED_CREST_FACTOR) {
     return 'compressed'
   }
 
-  if (spectralFlatness < 0.05) {
-    return 'unknown'
-  }
-
-  // Speech check FIRST — crest factor is more discriminating than flatness.
-  // Real-world speech in rooms with ambient noise often has flatness > 0.2
-  // (noise fills between formants), but still has high crest factor from
-  // amplitude dynamics (pauses between words/phrases).
-  if (crestFactor > 8) {
-    return 'speech'
-  }
-
-  if (spectralFlatness > 0.2) {
-    return 'music'
-  }
-
+  // ── Compute global spectral features from full spectrum ─────────────
   let totalPower = 0
   let weightedSum = 0
+  let logSum = 0  // for geometric mean (global flatness)
+  let validBins = 0
   for (let i = 0; i < spectrum.length; i++) {
     const power = Math.pow(10, spectrum[i] / 10)
-    totalPower += power
-    weightedSum += i * power
+    if (power > 0) {
+      totalPower += power
+      weightedSum += i * power
+      logSum += Math.log(power)
+      validBins++
+    }
   }
-  const centroidNormalized = totalPower > 0 ? weightedSum / totalPower / spectrum.length : 0
+  if (totalPower <= 0 || validBins === 0) return 'unknown'
 
+  const centroidNormalized = weightedSum / totalPower / spectrum.length
+
+  // Global spectral flatness: geometric mean / arithmetic mean
+  // Speech: 0.01–0.10 (tonal formants), Music: 0.10–0.50 (dense harmonics)
+  const arithmeticMean = totalPower / validBins
+  const geometricMean = Math.exp(logSum / validBins)
+  const globalFlatness = arithmeticMean > 0 ? geometricMean / arithmeticMean : 0
+
+  // Spectral rolloff: bin where 85% of energy is reached
   const rolloffThreshold = totalPower * 0.85
   let cumulative = 0
   let rolloffBin = spectrum.length - 1
@@ -829,28 +845,35 @@ export function detectContentType(
   }
   const rolloffNormalized = rolloffBin / spectrum.length
 
+  // ── Multi-feature scoring ──────────────────────────────────────────
   let speechScore = 0
   let musicScore = 0
 
+  // Spectral centroid: speech is concentrated low (100–4 kHz)
   if (centroidNormalized < 0.12) speechScore += 0.3
   else if (centroidNormalized < 0.20) speechScore += 0.15
   if (centroidNormalized > 0.15) musicScore += 0.2
 
+  // Spectral rolloff: speech energy rolls off early
   if (rolloffNormalized < 0.18) speechScore += 0.25
   else if (rolloffNormalized < 0.25) speechScore += 0.1
   if (rolloffNormalized > 0.25) musicScore += 0.2
 
-  if (crestFactor > 10) speechScore += 0.2
-  else if (crestFactor > 8) speechScore += 0.1
-  if (crestFactor < 10 && crestFactor > 4) musicScore += 0.15
+  // Crest factor: speech has pauses → higher crest (>10 dB typical)
+  if (crestFactor > 12) speechScore += 0.25
+  else if (crestFactor > 10) speechScore += 0.15
+  else if (crestFactor > 8) speechScore += 0.05
+  if (crestFactor < 8 && crestFactor > 4) musicScore += 0.2
 
-  if (spectralFlatness < 0.08) speechScore += 0.25
-  else if (spectralFlatness < 0.15) speechScore += 0.1
-  if (spectralFlatness > 0.15) musicScore += 0.25
-  if (spectralFlatness > 0.3) musicScore += 0.2
+  // Global spectral flatness: speech is tonal (low), music is dense (high)
+  if (globalFlatness < 0.03) speechScore += 0.3
+  else if (globalFlatness < 0.08) speechScore += 0.2
+  else if (globalFlatness < 0.12) speechScore += 0.1
+  if (globalFlatness > 0.10) musicScore += 0.2
+  if (globalFlatness > 0.20) musicScore += 0.15
 
-  if (speechScore > musicScore && speechScore > 0.4) return 'speech'
-  if (musicScore > speechScore && musicScore > 0.4) return 'music'
+  if (speechScore > musicScore && speechScore > 0.3) return 'speech'
+  if (musicScore > speechScore && musicScore > 0.3) return 'music'
 
   return 'unknown'
 }
