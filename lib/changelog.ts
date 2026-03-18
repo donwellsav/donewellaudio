@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.132.1',
+    date: '2026-03-18',
+    changes: [
+      { type: 'fix', description: 'v0.132.0: KTR logo, settings persist, algorithm scores debug (#139)' },
+    ],
+  },
+  {
     version: '0.132.0',
     date: '2026-03-18',
     highlights: 'KTR brand logo, settings persistence, algorithm scores debug',
