@@ -390,8 +390,8 @@ const DetectContent = memo(function DetectContent({
 }: DetectContentProps) {
   return (
     <>
-      {/* ── Accordion sections — all closed by default ────────── */}
-      <Accordion type="multiple" defaultValue={[]} className="space-y-0">
+      {/* ── Accordion sections — Sensitivity open by default ────────── */}
+      <Accordion type="multiple" defaultValue={['sensitivity']} className="space-y-0">
           {/* ── Sensitivity & Range ────────────── */}
           <AccordionItem value="sensitivity" className="border-b border-border/40">
             <AccordionTrigger className="py-2 text-xs font-mono font-bold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:no-underline">
