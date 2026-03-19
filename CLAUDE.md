@@ -1,7 +1,7 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 161 TypeScript/TSX files, 488 tests (483 pass, 4 skip, 1 todo), 28 suites. Version 0.156.0.**
-> Architecture audit: worker error context, Sentry breadcrumbs, worker message tests.
+> **Last updated March 2026. 161 TypeScript/TSX files, 488 tests (483 pass, 4 skip, 1 todo), 28 suites. Version 0.158.0.**
+> Tablet portrait layout, SpectrumCanvas deps fix, advisory identity optimization.
 
 ## CRITICAL RULES
 

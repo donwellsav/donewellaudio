@@ -8,6 +8,7 @@
 
 @theme inline {
   --breakpoint-tablet: 600px;
+  --breakpoint-lg: 1024px;
 }
 
 /* Kill The Ring - Pro Audio Instrument Theme */

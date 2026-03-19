@@ -93,12 +93,19 @@ export function useAdvisoryMap(
     }
 
     // Only rebuild sorted array when structure changed; for updates, patch cache in-place
-    const sorted = dirtyRef.current
-      ? buildSorted()
-      : sortedCacheRef.current.map(a => a.id === advisory.id ? advisory : a)
-
-    if (!dirtyRef.current) sortedCacheRef.current = sorted
-    setAdvisories(sorted)
+    if (dirtyRef.current) {
+      const sorted = buildSorted()
+      setAdvisories(sorted)
+    } else {
+      // Check if the advisory actually changed before creating a new array
+      const prev = sortedCacheRef.current.find(a => a.id === advisory.id)
+      if (prev && prev.severity === advisory.severity && prev.confidence === advisory.confidence && prev.trueAmplitudeDb === advisory.trueAmplitudeDb) {
+        return // No meaningful change — skip re-render
+      }
+      const sorted = sortedCacheRef.current.map(a => a.id === advisory.id ? advisory : a)
+      sortedCacheRef.current = sorted
+      setAdvisories(sorted)
+    }
   }
 
   // ── Identity-stable callbacks — created once, delegate through refs ─────
