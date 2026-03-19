@@ -162,7 +162,7 @@ export const MobileLayout = memo(function MobileLayout({
   return (
     <>
       {/* ── Mobile: 3-tab sliding content area + fader sidecar (portrait only) ───── */}
-      <div className="landscape:hidden tablet:hidden flex-1 flex overflow-hidden">
+      <div className="landscape:hidden lg:hidden flex-1 flex overflow-hidden">
         {/* Sliding tab area — takes remaining width */}
         <div
           className="flex-1 flex flex-col overflow-hidden min-w-0"
@@ -322,7 +322,7 @@ export const MobileLayout = memo(function MobileLayout({
 
       {/* ── Fullscreen graph overlay (both RTA + GEQ stacked) ─────── */}
       {isRtaFullscreen && (
-        <div className="landscape:hidden tablet:hidden fixed inset-0 z-50 bg-background flex flex-col">
+        <div className="landscape:hidden lg:hidden fixed inset-0 z-50 bg-background flex flex-col">
           <div className="flex items-center justify-between px-2 py-1 border-b border-border bg-card/90">
             <span className="text-xs font-mono font-bold tracking-[0.15em] uppercase text-muted-foreground">Real-Time Analyzer + Graphic Equalizer</span>
             <button
@@ -466,7 +466,7 @@ export const MobileLayout = memo(function MobileLayout({
       </div>
 
       {/* ── Page indicator dots (portrait only) ─────────────────── */}
-      <div className="landscape:hidden tablet:hidden flex items-center justify-center gap-1.5 py-1 bg-card/90" aria-hidden="true">
+      <div className="landscape:hidden lg:hidden flex items-center justify-center gap-1.5 py-1 bg-card/90" aria-hidden="true">
         {TAB_ORDER.map(id => (
           <div
             key={id}
@@ -478,7 +478,7 @@ export const MobileLayout = memo(function MobileLayout({
       </div>
 
       {/* ── Mobile bottom tab bar (portrait only) ──────────────── */}
-      <nav className="landscape:hidden tablet:hidden flex-shrink-0 border-t border-border/60 bg-card/90 backdrop-blur-sm" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <nav className="landscape:hidden lg:hidden flex-shrink-0 border-t border-border/60 bg-card/90 backdrop-blur-sm" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="flex items-stretch" role="tablist" onKeyDown={handleTabKeyDown}>
           {([
             { id: 'issues' as const, label: 'Issues', Icon: AlertTriangle, badge: activeAdvisoryCount },

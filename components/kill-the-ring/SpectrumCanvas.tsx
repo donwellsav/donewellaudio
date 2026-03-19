@@ -325,12 +325,12 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
 
     drawAxisLabels(ctx, padding, plotWidth, plotHeight, range, fontSize, width, height, canvasThemeRef.current)
 
-  }, [spectrumRef, graphFontSize, earlyWarning, rtaDbMinProp, rtaDbMaxProp, spectrumLineWidthProp, showThresholdLine, feedbackThresholdDb])
+  }, [spectrumRef, graphFontSize, earlyWarning, rtaDbMinProp, rtaDbMaxProp, spectrumLineWidthProp, showThresholdLine, feedbackThresholdDb, showFreqZones, spectrumWarmMode])
 
   useAnimationFrame(render, isRunning || hasEverStarted, canvasTargetFps)
 
   // Mark dirty when display props change (triggers redraw on next rAF tick)
-  useEffect(() => { dirtyRef.current = true }, [graphFontSize, earlyWarning, rtaDbMinProp, rtaDbMaxProp, spectrumLineWidthProp, showThresholdLine, feedbackThresholdDb])
+  useEffect(() => { dirtyRef.current = true }, [graphFontSize, earlyWarning, rtaDbMinProp, rtaDbMaxProp, spectrumLineWidthProp, showThresholdLine, feedbackThresholdDb, showFreqZones, spectrumWarmMode])
   useEffect(() => { dirtyRef.current = true }, [advisories, clearedIds])
 
   // Pointer event handlers for dragging frequency range lines + threshold line

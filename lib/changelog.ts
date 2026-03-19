@@ -14,6 +14,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.158.0',
+    date: '2026-03-19',
+    highlights: 'Tablet layout, canvas fixes, advisory perf',
+    changes: [
+      { type: 'fix', description: 'SpectrumCanvas missing deps — freq zones and warm mode toggle now take effect immediately instead of requiring another event to trigger redraw' },
+      { type: 'perf', description: 'Advisory array identity stabilization — skip re-renders when severity/confidence/amplitude unchanged, reducing React reconciliation from ~50fps to only on actual changes' },
+      { type: 'ui', description: 'Tablet portrait layout — iPads and tablets (600-1024px) in portrait now show touch-friendly MobileLayout instead of cramped 3-panel DesktopLayout' },
+    ],
+  },
+  {
     version: '0.157.0',
     date: '2026-03-19',
     changes: [
