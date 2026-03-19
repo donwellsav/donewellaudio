@@ -14,6 +14,24 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.152.0',
+    date: '2026-03-19',
+    changes: [
+      { type: 'feat', description: '**Architecture Audit Report** — thread model, context providers, memory management, security, performance, type safety. 3 critical, 3 medium, 6 low findings.' },
+      { type: 'feat', description: '**Bug Bible** — 50 bugs cataloged across 8 subsystems (DSP, content type, fusion, EQ, auto-gain, worker, UI, security)' },
+      { type: 'feat', description: '**Known Issues** — open accessibility gaps, skipped tests, feature roadmap, 8 prioritized fix recommendations with effort estimates' },
+      { type: 'feat', description: '**PDF** — combined professional document with tables and color coding' },
+      { type: 'feat', description: '**PDF generator** — `scripts/generate_audit_pdf.py` for regeneration' },
+    ],
+  },
+  {
+    version: '0.149.3',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'v0.151.0: sensitivity guidance, default tuning, onnx warning fix (#151)' },
+    ],
+  },
+  {
     version: '0.151.0',
     date: '2026-03-19',
     highlights: 'Sensitivity guidance, default tuning, onnx warning fix',
