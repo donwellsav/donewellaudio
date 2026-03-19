@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.156.1',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'v0.156.0: architecture audit — diagnostics, breadcrumbs, worker tests (#156)' },
+    ],
+  },
+  {
     version: '0.156.0',
     date: '2026-03-19',
     highlights: 'Architecture audit: diagnostics, Sentry breadcrumbs, worker tests',
