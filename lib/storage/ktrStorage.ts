@@ -167,6 +167,9 @@ export const onboardingStorage = flagStorage('ktr-onboarding-seen')
 /** User's saved custom defaults (full DetectorSettings snapshot) */
 export const customDefaultsStorage = typedStorage<DetectorSettings | null>('ktr-custom-defaults', null)
 
+/** First-drag hint dismissed — once user drags the RTA threshold, hide the "Drag to adjust" label forever */
+export const thresholdDraggedStorage = flagStorage('ktr-threshold-dragged')
+
 /** Clear resizable panel layout data (forces re-mount to defaults) */
 export function clearPanelLayouts(): void {
   if (typeof window === 'undefined') return

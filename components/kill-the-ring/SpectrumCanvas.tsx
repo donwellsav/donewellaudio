@@ -7,6 +7,7 @@ import { useAnimationFrame } from '@/hooks/useAnimationFrame'
 import { freqToLogPosition, logPositionToFreq, roundFreqToNice, clamp } from '@/lib/utils/mathHelpers'
 import { formatFrequency } from '@/lib/utils/pitchUtils'
 import { CANVAS_SETTINGS } from '@/lib/dsp/constants'
+import { thresholdDraggedStorage } from '@/lib/storage/ktrStorage'
 import type { SpectrumData, Advisory } from '@/types/advisory'
 import type { EarlyWarning } from '@/hooks/useAudioAnalyzer'
 import {
@@ -67,6 +68,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
   // Drag state — freq range (horizontal) + threshold (vertical)
   const dragRef = useRef<'min' | 'max' | null>(null)
   const threshDragRef = useRef<{ active: boolean; startY: number; startDb: number }>({ active: false, startY: 0, startDb: 0 })
+  const showDragHintRef = useRef(!thresholdDraggedStorage.isSet())
   const paddingRef = useRef({ left: 0, top: 0, plotWidth: 0, plotHeight: 0 })
   const onFreqRangeChangeRef = useRef(onFreqRangeChange)
   onFreqRangeChangeRef.current = onFreqRangeChange
@@ -232,7 +234,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
 
     drawGrid(ctx, plotWidth, plotHeight, range, canvasThemeRef.current)
     drawFreqZones(ctx, plotWidth, plotHeight, range, showFreqZones, canvasThemeRef.current)
-    drawIndicatorLines(ctx, plotWidth, plotHeight, range, spectrum, showThresholdLine, feedbackThresholdDb, fontSize)
+    drawIndicatorLines(ctx, plotWidth, plotHeight, range, spectrum, showThresholdLine, feedbackThresholdDb, fontSize, showDragHintRef.current)
 
     // Track threshold line Y for drag detection (in canvas coords relative to plot area)
     if (showThresholdLine && spectrum?.effectiveThresholdDb != null) {
@@ -373,6 +375,11 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
         const rect = canvas!.getBoundingClientRect()
         const startY = e.clientY - rect.top - paddingRef.current.top
         threshDragRef.current = { active: true, startY, startDb: feedbackThresholdDbRef.current }
+        // Dismiss first-drag hint permanently
+        if (showDragHintRef.current) {
+          showDragHintRef.current = false
+          thresholdDraggedStorage.set()
+        }
         canvas!.setPointerCapture(e.pointerId)
         canvas!.style.cursor = 'ns-resize'
         return
