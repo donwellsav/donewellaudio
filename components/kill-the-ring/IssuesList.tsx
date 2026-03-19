@@ -6,6 +6,7 @@ import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { getSeverityText } from '@/lib/dsp/classifier'
 import { getFeedbackHistory } from '@/lib/dsp/feedbackHistory'
 import { AlertTriangle, CheckCircle2, TrendingUp, Copy, Check } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { KtrLogo } from './KtrLogo'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Advisory } from '@/types/advisory'
@@ -229,12 +230,15 @@ interface IssueCardProps {
 }
 
 const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFriendly, onFalsePositive, isFalsePositive, onConfirmFeedback, isConfirmed, swipeLabeling, showAlgorithmScores, onDismiss }: IssueCardProps) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme !== 'light'
+
   // Memoize derived values that only change when the advisory object changes
   const {
     severityColor, pitchStr, exactFreqStr,
     velocity, isRunaway, isWarning, isResolved, timeToClipStr,
   } = useMemo(() => {
-    const _severityColor = getSeverityColor(advisory.severity)
+    const _severityColor = getSeverityColor(advisory.severity, isDark)
     const _pitchStr = advisory.advisory?.pitch ? formatPitch(advisory.advisory.pitch) : null
     const _exactFreqStr = advisory.trueFrequencyHz != null ? formatFrequency(advisory.trueFrequencyHz) : '---'
     const _velocity = advisory.velocityDbPerSec ?? 0
@@ -254,7 +258,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
       velocity: _velocity, isRunaway: _isRunaway, isWarning: _isWarning,
       isResolved: _isResolved, timeToClipStr: _timeToClipStr,
     }
-  }, [advisory])
+  }, [advisory, isDark])
 
   // Age display — refreshes naturally on advisory updates (~10Hz)
   // eslint-disable-next-line react-hooks/purity -- benign: Date.now() in render is intentional for live age display

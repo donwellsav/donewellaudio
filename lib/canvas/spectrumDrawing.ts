@@ -158,10 +158,11 @@ export function drawGrid(
 
 /** Frequency zone definitions for the educational overlay */
 const FREQ_ZONES: { label: string; minHz: number; maxHz: number; color: string }[] = [
-  { label: 'SUB', minHz: 20, maxHz: 250, color: 'rgba(139, 92, 246, 0.06)' },   // violet tint
-  { label: 'VOICE', minHz: 250, maxHz: 4000, color: 'rgba(75, 146, 255, 0.05)' }, // blue tint
-  { label: 'PRESENCE', minHz: 4000, maxHz: 8000, color: 'rgba(250, 204, 21, 0.04)' }, // yellow tint
-  { label: 'AIR', minHz: 8000, maxHz: 20000, color: 'rgba(96, 165, 250, 0.04)' }, // light blue tint
+  { label: 'SUB',      minHz: 20,   maxHz: 120,   color: 'rgba(139, 92, 246, 0.06)' },  // violet tint
+  { label: 'LOW MID',  minHz: 120,  maxHz: 500,   color: 'rgba(96, 165, 250, 0.05)' },  // blue tint
+  { label: 'MID',      minHz: 500,  maxHz: 2000,  color: 'rgba(75, 146, 255, 0.05)' },  // primary blue tint
+  { label: 'PRESENCE', minHz: 2000, maxHz: 6000,  color: 'rgba(250, 204, 21, 0.04)' },  // yellow tint
+  { label: 'AIR',      minHz: 6000, maxHz: 20000, color: 'rgba(96, 165, 250, 0.04)' },  // light blue tint
 ]
 
 /**
@@ -187,6 +188,16 @@ export function drawFreqZones(
     // Tinted background
     ctx.fillStyle = zone.color
     ctx.fillRect(x1, 0, x2 - x1, plotHeight)
+
+    // Thin separator at zone start
+    ctx.strokeStyle = theme.zoneLabel
+    ctx.globalAlpha = 0.15
+    ctx.lineWidth = 0.5
+    ctx.beginPath()
+    ctx.moveTo(x1, 0)
+    ctx.lineTo(x1, plotHeight)
+    ctx.stroke()
+    ctx.globalAlpha = 1
 
     // Label at top center of zone
     const centerX = (x1 + x2) / 2
@@ -688,13 +699,16 @@ export function drawPlaceholder(
 
   drawGrid(ctx, plotWidth, plotHeight, range, theme)
 
+  // Educational frequency zone bands — always shown at idle
+  drawFreqZones(ctx, plotWidth, plotHeight, range, true, theme)
+
   // Draw fake spectrum fill + stroke using PLACEHOLDER_CURVE
   // Use freqRangeLine color (primary blue) for the placeholder spectrum
   const pColor = theme.freqRangeLine
   const gradient = ctx.createLinearGradient(0, 0, 0, plotHeight)
   gradient.addColorStop(0, pColor + 'd9')  // ~85% opacity
-  gradient.addColorStop(0.5, pColor + '59') // ~35% opacity
-  gradient.addColorStop(1, pColor + '0d')   // ~5% opacity
+  gradient.addColorStop(0.5, pColor + '73') // ~45% opacity (was 35%)
+  gradient.addColorStop(1, pColor + '1a')   // ~10% opacity (was 5%)
 
   const strokePath = new Path2D()
   const fillPath = new Path2D()

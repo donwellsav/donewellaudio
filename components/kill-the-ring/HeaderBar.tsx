@@ -64,7 +64,10 @@ export const HeaderBar = memo(function HeaderBar() {
       </div>
 
       {/* ── Action icons (right side) ──────────────────── */}
-      <div className="flex items-center justify-end gap-0.5 sm:gap-2 text-sm text-muted-foreground flex-shrink-0">
+      <div className="flex items-center justify-end gap-0 sm:gap-1 text-sm text-muted-foreground flex-shrink-0">
+
+        {/* ── Primary actions group ───────────────────── */}
+        <div className="flex items-center gap-0">
 
         {/* Audio source selector */}
         {devices.length > 0 && (
@@ -182,6 +185,13 @@ export const HeaderBar = memo(function HeaderBar() {
           </TooltipContent>
         </Tooltip>
 
+        </div>
+
+        {/* ── Separator ───────────────────────────────── */}
+        <div className="w-px h-6 bg-border/40 mx-1 sm:mx-1.5 flex-shrink-0" aria-hidden="true" />
+
+        {/* ── Utility group ───────────────────────────── */}
+        <div className="flex items-center gap-0">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -189,9 +199,9 @@ export const HeaderBar = memo(function HeaderBar() {
               size="icon"
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               aria-label="Toggle theme"
-              className="h-9 w-9 cursor-pointer text-muted-foreground hover:text-foreground"
+              className="h-10 w-10 cursor-pointer text-muted-foreground hover:text-foreground"
             >
-              {resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {resolvedTheme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-sm">
@@ -200,10 +210,10 @@ export const HeaderBar = memo(function HeaderBar() {
         </Tooltip>
 
         <FeedbackHistoryPanel />
-        <div className="hidden sm:block w-px h-6 bg-border/40 mx-0.5" />
         <Suspense fallback={<div className="h-10 w-10" />}>
           <LazyHelpMenu />
         </Suspense>
+        </div>
       </div>
     </header>
   )

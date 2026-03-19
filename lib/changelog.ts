@@ -14,6 +14,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.155.0',
+    date: '2026-03-19',
+    highlights: 'Canvas polish, light mode severity fix, header icon grouping',
+    changes: [
+      { type: 'ui', description: 'RTA idle state shows frequency zone labels (SUB, LOW MID, MID, PRESENCE, AIR) with separator lines and more visible placeholder curve' },
+      { type: 'fix', description: 'Light mode severity colors — darker tones for WCAG AA contrast (yellow-700, orange-600, etc.) replace unreadable bright colors on light backgrounds' },
+      { type: 'ui', description: 'Header icons grouped by function — primary actions (mic, fullscreen, trash) separated from utility (theme, history, help) with thin vertical divider' },
+      { type: 'ui', description: 'Theme toggle icon bumped to consistent size (w-5 h-5) matching other header icons' },
+    ],
+  },
+  {
     version: '0.154.0',
     date: '2026-03-19',
     changes: [

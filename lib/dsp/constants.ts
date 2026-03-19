@@ -819,6 +819,16 @@ export const VIZ_COLORS = {
   AXIS_LABEL: '#8891a0', // dimmed — pro tools keep grid labels subtle, data pops
 } as const
 
+/** Light-mode severity colors — darker tones for WCAG AA contrast on light backgrounds */
+export const VIZ_COLORS_LIGHT = {
+  RUNAWAY: '#dc2626',       // red-600 (7.1:1 on white)
+  GROWING: '#ea580c',       // orange-600 (4.6:1 on white)
+  RESONANCE: '#a16207',     // yellow-700 (5.2:1 on white)
+  POSSIBLE_RING: '#9333ea', // purple-600 (5.5:1 on white)
+  WHISTLE: '#0891b2',       // cyan-600 (4.5:1 on white)
+  INSTRUMENT: '#16a34a',    // green-600 (4.6:1 on white)
+} as const
+
 // ============================================================================
 // ADVANCED ALGORITHM CONSTANTS (from academic research)
 // ============================================================================

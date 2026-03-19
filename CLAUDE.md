@@ -1,7 +1,7 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 161 TypeScript/TSX files, 476 tests (471 pass, 4 skip, 1 todo), 27 suites. Version 0.153.0.**
-> Context prompt for new sessions. Fusion weights + project structure accuracy fixes.
+> **Last updated March 2026. 161 TypeScript/TSX files, 476 tests (471 pass, 4 skip, 1 todo), 27 suites. Version 0.155.0.**
+> Canvas frequency zone labels at idle. Light mode severity WCAG AA fix. Header icon grouping.
 
 ## CRITICAL RULES
 

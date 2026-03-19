@@ -1,7 +1,7 @@
 // KillTheRing2 EQ Advisor - GEQ/PEQ recommendations with pitch translation
 // Enhanced with MINDS (MSD-Inspired Notch Depth Setting) from DAFx-16 paper
 
-import { ISO_31_BANDS, EQ_PRESETS, ERB_SETTINGS, SPECTRAL_TRENDS, VIZ_COLORS } from './constants'
+import { ISO_31_BANDS, EQ_PRESETS, ERB_SETTINGS, SPECTRAL_TRENDS, VIZ_COLORS, VIZ_COLORS_LIGHT } from './constants'
 import { calculateMINDS } from './advancedDetection'
 import { hzToPitch, formatPitch } from '@/lib/utils/pitchUtils'
 import { clamp } from '@/lib/utils/mathHelpers'
@@ -439,16 +439,18 @@ export function getGEQBandLabels(): string[] {
 }
 
 /**
- * Get color for severity level
+ * Get color for severity level.
+ * @param isDark - true for dark theme (default), false for light theme with WCAG AA contrast
  */
-export function getSeverityColor(severity: SeverityLevel): string {
+export function getSeverityColor(severity: SeverityLevel, isDark: boolean = true): string {
+  const colors = isDark ? VIZ_COLORS : { ...VIZ_COLORS, ...VIZ_COLORS_LIGHT }
   switch (severity) {
-    case 'RUNAWAY': return VIZ_COLORS.RUNAWAY
-    case 'GROWING': return VIZ_COLORS.GROWING
-    case 'RESONANCE': return VIZ_COLORS.RESONANCE
-    case 'POSSIBLE_RING': return VIZ_COLORS.POSSIBLE_RING
-    case 'WHISTLE': return VIZ_COLORS.WHISTLE
-    case 'INSTRUMENT': return VIZ_COLORS.INSTRUMENT
+    case 'RUNAWAY': return colors.RUNAWAY
+    case 'GROWING': return colors.GROWING
+    case 'RESONANCE': return colors.RESONANCE
+    case 'POSSIBLE_RING': return colors.POSSIBLE_RING
+    case 'WHISTLE': return colors.WHISTLE
+    case 'INSTRUMENT': return colors.INSTRUMENT
     default: return VIZ_COLORS.NOISE_FLOOR
   }
 }
