@@ -1,7 +1,7 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 160 TypeScript/TSX files, 476 tests (471 pass, 4 skip, 1 todo), 27 suites. Version 0.146.0.**
-> Dark/Light theme toggle with full canvas support. next-themes provider, CanvasTheme palette, ref-based RAF reads.
+> **Last updated March 2026. 161 TypeScript/TSX files, 476 tests (471 pass, 4 skip, 1 todo), 27 suites. Version 0.147.0.**
+> Ring-Out guided wizard. Dual entry point UX (Start Analysis + Ring Out Room). Dark/Light theme toggle.
 
 ## CRITICAL RULES
 

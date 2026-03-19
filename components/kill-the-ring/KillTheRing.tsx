@@ -97,7 +97,7 @@ const KillTheRingInner = memo(function KillTheRingInner({
   rootEl,
 }: KillTheRingInnerProps) {
   const { isRunning, error, workerError, start, stop, dspWorker } = useEngine()
-  const { settings, updateSettings, resetSettings } = useSettings()
+  const { settings, updateSettings, resetSettings, handleModeChange } = useSettings()
   const { spectrumRef, spectrumStatus, noiseFloorDb, sampleRate, fftSize } = useMetering()
   const { advisories } = useDetection()
 
@@ -106,6 +106,15 @@ const KillTheRingInner = memo(function KillTheRingInner({
 
   const { actualFps, droppedPercent } = useFpsMonitor(isRunning, settings.canvasTargetFps)
   const calibration = useCalibrationSession(spectrumRef, isRunning, settings)
+
+  // Ring-out wizard state
+  const [isWizardActive, setIsWizardActive] = useState(false)
+
+  const handleStartRingOut = useCallback(() => {
+    handleModeChange('ringOut')
+    start()
+    setIsWizardActive(true)
+  }, [handleModeChange, start])
 
   // ── Desktop panel state (imperative ref-based, stays as local state) ─────
 
@@ -410,6 +419,10 @@ const KillTheRingInner = memo(function KillTheRingInner({
             onSettingsChange={handleSettingsChange}
             calibration={calibrationTabProps}
             dataCollection={dataCollectionTabProps}
+            isWizardActive={isWizardActive}
+            onStartWizard={() => setIsWizardActive(true)}
+            onFinishWizard={() => setIsWizardActive(false)}
+            onStartRingOut={handleStartRingOut}
           />
 
           <DesktopLayout
@@ -425,6 +438,10 @@ const KillTheRingInner = memo(function KillTheRingInner({
             droppedPercent={droppedPercent}
             calibration={calibrationTabProps}
             dataCollection={dataCollectionTabProps}
+            isWizardActive={isWizardActive}
+            onStartWizard={() => setIsWizardActive(true)}
+            onFinishWizard={() => setIsWizardActive(false)}
+            onStartRingOut={handleStartRingOut}
           />
         </FullscreenPortalGate>
       </UIProvider>

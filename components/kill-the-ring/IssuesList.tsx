@@ -33,9 +33,10 @@ interface IssuesListProps {
   isLowSignal?: boolean
   swipeLabeling?: boolean
   showAlgorithmScores?: boolean
+  onStartRingOut?: () => void
 }
 
-export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onClearAll, onClearResolved, touchFriendly, isRunning, onStart, onFalsePositive, falsePositiveIds, onConfirmFeedback, confirmedIds, isLowSignal, swipeLabeling, showAlgorithmScores }: IssuesListProps) {
+export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onClearAll, onClearResolved, touchFriendly, isRunning, onStart, onFalsePositive, falsePositiveIds, onConfirmFeedback, confirmedIds, isLowSignal, swipeLabeling, showAlgorithmScores, onStartRingOut }: IssuesListProps) {
   // Filter dismissed, sort repeat offenders to top by hit count, then slice to max.
   // We attach occurrenceCount here so IssueCard doesn't need to re-query feedbackHistory.
   const latestSorted = useMemo(() => {
@@ -114,14 +115,38 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               className="group relative flex flex-col items-center justify-center gap-2 w-full max-w-[200px] py-4 px-4 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all duration-300 cursor-pointer animate-start-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <KtrLogo className="w-20 h-20 text-foreground drop-shadow-[0_0_10px_rgba(37,99,235,0.3)] dark:drop-shadow-[0_0_10px_rgba(75,146,255,0.4)]" />
-              <div className="flex items-baseline gap-1.5">
-                <span className="font-mono text-xs font-black tracking-[0.15em] text-foreground/90">KILL THE</span>
-                <span className="font-mono text-sm font-black tracking-[0.15em] text-primary drop-shadow-[0_0_8px_rgba(37,99,235,0.2)] dark:drop-shadow-[0_0_8px_rgba(75,146,255,0.3)]">RING</span>
+              <div className="flex flex-col items-center">
+                <span className="font-mono text-xs font-bold tracking-[0.15em] uppercase text-muted-foreground group-hover:text-foreground transition-colors">
+                  Press to Start
+                </span>
+                <span className="font-mono text-xs font-bold tracking-[0.15em] uppercase text-muted-foreground group-hover:text-foreground transition-colors">
+                  Analysis
+                </span>
               </div>
-              <span className="font-mono text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground group-hover:text-foreground transition-colors">
-                Press To Start
-              </span>
             </button>
+
+            {onStartRingOut && (
+              <>
+                <div className="flex items-center gap-2 w-full max-w-[200px]">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-widest">or</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+
+                <button
+                  onClick={onStartRingOut}
+                  aria-label="Start ring-out wizard"
+                  className="group relative flex flex-col items-center justify-center gap-1 w-full max-w-[200px] py-3 px-4 rounded-lg border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                >
+                  <span className="font-mono text-sm font-black tracking-[0.15em] text-amber-500 dark:text-amber-400">
+                    RING OUT ROOM
+                  </span>
+                  <span className="font-mono text-[9px] font-bold tracking-[0.12em] uppercase text-muted-foreground/60 group-hover:text-muted-foreground transition-colors">
+                    Guided Calibration
+                  </span>
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center flex-1 min-h-[80px] text-muted-foreground py-4">
