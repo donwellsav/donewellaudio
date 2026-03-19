@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.149.0',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'Mobile graph resize handle now works — larger touch target (py-3), removed passive preventDefault conflict, default height increased to 18vh' },
+    ],
+  },
+  {
     version: '0.148.0',
     date: '2026-03-19',
     highlights: 'Mobile inline graphs, resizable, swipe gestures rework, fullscreen fixes',
