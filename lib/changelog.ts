@@ -14,6 +14,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.151.0',
+    date: '2026-03-19',
+    highlights: 'Sensitivity guidance, default tuning, onnx warning fix',
+    changes: [
+      { type: 'fix', description: 'Suppressed onnxruntime-web Turbopack warning via webpackIgnore magic comment' },
+      { type: 'fix', description: 'Speech + Ring-out default sensitivity changed to 27dB — reduces HVAC/ambient false positives' },
+      { type: 'ui', description: 'Three-layer sensitivity guidance: tooltip on slider, "Drag to adjust" hint on RTA threshold (one-time), idle text below start buttons' },
+    ],
+  },
+  {
     version: '0.149.2',
     date: '2026-03-19',
     changes: [

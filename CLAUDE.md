@@ -1,7 +1,7 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 161 TypeScript/TSX files, 476 tests (471 pass, 4 skip, 1 todo), 27 suites. Version 0.150.0.**
-> onnxruntime-web warning suppressed. Ring-out sensitivity max by default.
+> **Last updated March 2026. 161 TypeScript/TSX files, 476 tests (471 pass, 4 skip, 1 todo), 27 suites. Version 0.151.0.**
+> Sensitivity guidance (3 layers). Speech/Ring-out default 27dB. onnxruntime-web warning suppressed.
 
 ## CRITICAL RULES
 

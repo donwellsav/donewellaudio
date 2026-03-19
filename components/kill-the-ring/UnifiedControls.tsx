@@ -427,7 +427,7 @@ const DetectContent = memo(function DetectContent({
               </div>
 
               <SliderRow label="Sensitivity" value={`${settings.feedbackThresholdDb}dB`}
-                tooltip={settings.showTooltips ? 'Detection sensitivity. Slide right for more sensitive (catches early feedback). Slide left for less sensitive (ignores weak peaks).' : undefined}
+                tooltip={settings.showTooltips ? 'Adjust to match your room. Lower = more sensitive (catches subtle resonances). Higher = fewer false positives from HVAC/ambient noise. Also draggable on the RTA spectrum.' : undefined}
                 min={2} max={50} step={1} sliderValue={52 - settings.feedbackThresholdDb} onChange={(v) => onSettingsChange({ feedbackThresholdDb: 52 - v })} />
 
               <div className="flex items-center justify-between">

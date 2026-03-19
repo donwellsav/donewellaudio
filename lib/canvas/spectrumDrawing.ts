@@ -210,6 +210,7 @@ export function drawIndicatorLines(
   showThresholdLine: boolean,
   feedbackThresholdDb: number | undefined,
   fontSize: number,
+  showDragHint: boolean = false,
 ) {
   // Noise floor
   if (spectrum?.noiseFloorDb !== null && spectrum?.noiseFloorDb !== undefined) {
@@ -281,6 +282,16 @@ export function drawIndicatorLines(
     ctx.textAlign = 'right'
     ctx.globalAlpha = 0.7
     ctx.fillText(threshLabel, handleX - 6, threshY - 4)
+
+    // First-drag hint — shows until user drags the threshold for the first time
+    if (showDragHint) {
+      ctx.font = `${Math.max(9, fontSize - 1)}px monospace`
+      ctx.fillStyle = VIZ_COLORS.THRESHOLD
+      ctx.globalAlpha = 0.55
+      ctx.textAlign = 'right'
+      ctx.fillText('← Drag to adjust', handleX - 6, threshY + 12)
+    }
+
     ctx.globalAlpha = 1
     ctx.textAlign = 'left'
   }

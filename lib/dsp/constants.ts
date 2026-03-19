@@ -418,7 +418,7 @@ export const OPERATION_MODES: Record<string, ModePreset> = {
   speech: {
     label: 'Speech',
     description: 'Corporate & Conference',
-    feedbackThresholdDb: 30, // Real-world tested — 30 dB above noise floor in quiet conference room
+    feedbackThresholdDb: 27, // Conservative — reduces HVAC/ambient FP in conference rooms
     ringThresholdDb: 5,      // Proven value — filters HVAC/ambient without missing genuine resonances
     growthRateThreshold: 1.0,
     musicAware: false,
@@ -566,7 +566,7 @@ export const OPERATION_MODES: Record<string, ModePreset> = {
   ringOut: {
     label: 'Ring Out',
     description: 'System Calibration',
-    feedbackThresholdDb: 2,  // Calibration — maximum sensitivity, catch every resonance
+    feedbackThresholdDb: 27, // Calibration — conservative default, adjustable via slider/RTA drag
     ringThresholdDb: 2,
     growthRateThreshold: 0.5,
     musicAware: false,

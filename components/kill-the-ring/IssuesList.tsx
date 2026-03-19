@@ -148,6 +148,9 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
                 </button>
               </>
             )}
+            <p className="text-[10px] font-mono text-muted-foreground/40 text-center mt-3 max-w-[220px]">
+              Adjust sensitivity with the fader or drag the threshold line on the spectrum
+            </p>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center flex-1 min-h-[80px] text-muted-foreground py-4">
