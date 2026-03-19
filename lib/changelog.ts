@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.146.1',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'v0.146.0: dark/light theme toggle (#146)' },
+    ],
+  },
+  {
     version: '0.146.0',
     date: '2026-03-19',
     highlights: 'Dark/Light theme toggle',
