@@ -566,7 +566,7 @@ export const OPERATION_MODES: Record<string, ModePreset> = {
   ringOut: {
     label: 'Ring Out',
     description: 'System Calibration',
-    feedbackThresholdDb: 12, // Calibration — most sensitive, catch every resonance
+    feedbackThresholdDb: 2,  // Calibration — maximum sensitivity, catch every resonance
     ringThresholdDb: 2,
     growthRateThreshold: 0.5,
     musicAware: false,

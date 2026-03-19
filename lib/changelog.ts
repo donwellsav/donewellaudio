@@ -14,6 +14,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.150.0',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'Suppressed onnxruntime-web Turbopack warning via webpackIgnore magic comment — no more noisy build output' },
+      { type: 'fix', description: 'Ring-out mode default sensitivity reduced to 2dB (maximum sensitivity) for catching every resonance during calibration' },
+    ],
+  },
+  {
     version: '0.149.1',
     date: '2026-03-19',
     changes: [
