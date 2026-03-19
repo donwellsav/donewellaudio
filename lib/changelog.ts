@@ -14,6 +14,21 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.158.0',
+    date: '2026-03-19',
+    changes: [
+      { type: 'feat', description: '**Tablet portrait layout** — iPads/tablets (600-1024px) in portrait now show touch-friendly MobileLayout instead of cramped 3-panel DesktopLayout. Tablets in landscape still get full DesktopLayout.' },
+      { type: 'feat', description: '**SpectrumCanvas deps fix** — `showFreqZones` and `spectrumWarmMode` were missing from render callback and dirty-flag deps. Toggling these settings now takes effect immediately.' },
+      { type: 'feat', description: '**Advisory identity optimization** — skip `setAdvisories()` when severity, confidence, and amplitude are unchanged, reducing unnecessary React reconciliation from ~50fps to only on actual changes.' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` — clean' },
+      { type: 'feat', description: '[x] `pnpm test` — 483 passed, 4 skipped, 1 todo' },
+      { type: 'feat', description: '[x] Preview at 768x1024 (tablet portrait) — MobileLayout shown' },
+      { type: 'feat', description: '[x] Preview at 1280x800 (desktop) — DesktopLayout unchanged' },
+      { type: 'feat', description: '[x] Preview at 375x812 (mobile) — MobileLayout unchanged' },
+      { type: 'feat', description: '[x] Zero console errors' },
+    ],
+  },
+  {
     version: '0.158.1',
     date: '2026-03-19',
     changes: [
