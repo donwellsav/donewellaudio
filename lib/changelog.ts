@@ -14,10 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.155.1',
+    version: '0.156.0',
     date: '2026-03-19',
+    highlights: 'Architecture audit: diagnostics, Sentry breadcrumbs, worker tests',
     changes: [
-      { type: 'fix', description: 'v0.155.0: canvas zone labels, light mode severity, header grouping (#155)' },
+      { type: 'fix', description: 'Worker error messages now include peak frequency and bin index for faster crash diagnosis' },
+      { type: 'feat', description: 'Sentry breadcrumbs at worker init, ready, and crash events — gives crash reports a timeline of what happened before the error' },
+      { type: 'feat', description: 'Worker message type contract tests (12 tests) — validates WorkerOutboundMessage type safety and error format' },
     ],
   },
   {
