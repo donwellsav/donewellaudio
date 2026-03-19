@@ -20,7 +20,7 @@ export const GuideTab = memo(function GuideTab() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
           <HelpSection title="Quick Start">
             <ol className="list-decimal list-inside space-y-2">
-              <li>Click the KTR logo button in the header to start analysis</li>
+              <li>Click <strong>Press to Start Analysis</strong> for live detection, or <strong>Ring Out Room</strong> for guided calibration wizard</li>
               <li>Detected issues appear in the <strong>Active Issues</strong> panel, sorted by frequency</li>
               <li>Each issue card shows frequency, pitch, severity, and recommended GEQ/PEQ cuts</li>
               <li>Tap the <strong>copy</strong> icon on a card to copy EQ settings to clipboard</li>

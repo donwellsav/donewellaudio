@@ -2,6 +2,7 @@
 
 import { memo } from 'react'
 import { IssuesList } from './IssuesList'
+import { RingOutWizard } from './RingOutWizard'
 import { EarlyWarningPanel } from './EarlyWarningPanel'
 import { SpectrumCanvas } from './SpectrumCanvas'
 import { GEQBarView } from './GEQBarView'
@@ -34,6 +35,10 @@ interface DesktopLayoutProps {
   droppedPercent?: number
   calibration?: Omit<CalibrationTabProps, 'settings' | 'onSettingsChange'>
   dataCollection?: DataCollectionTabProps
+  isWizardActive?: boolean
+  onStartWizard?: () => void
+  onFinishWizard?: () => void
+  onStartRingOut?: () => void
 }
 
 export const DesktopLayout = memo(function DesktopLayout({
@@ -43,6 +48,7 @@ export const DesktopLayout = memo(function DesktopLayout({
   openIssuesPanel, closeIssuesPanel, setIssuesPanelOpen,
   actualFps, droppedPercent,
   calibration, dataCollection,
+  isWizardActive, onStartWizard, onFinishWizard, onStartRingOut,
 }: DesktopLayoutProps) {
   const { isRunning, isStarting, error, start, stop } = useEngine()
   const { settings, handleModeChange, handleFreqRangeChange, resetSettings } = useSettings()
@@ -131,23 +137,42 @@ export const DesktopLayout = memo(function DesktopLayout({
               <div className="flex-1 overflow-y-auto p-3">
                 {activeSidebarTab === 'issues' && !issuesPanelOpen && (
                   <div className="animate-in fade-in-0 duration-150">
-                    <IssuesList
-                      advisories={advisories}
-                      maxIssues={settings.maxDisplayedIssues}
-                      dismissedIds={dismissedIds}
+                    {isWizardActive ? (
+                      <RingOutWizard
+                        advisories={advisories}
+                        onFinish={() => onFinishWizard?.()}
+                        isRunning={isRunning}
+                      />
+                    ) : (
+                      <>
+                        <IssuesList
+                          advisories={advisories}
+                          maxIssues={settings.maxDisplayedIssues}
+                          dismissedIds={dismissedIds}
 
-                      onClearAll={onClearAll}
-                      isRunning={isRunning}
-                      onStart={start}
-                      onFalsePositive={onFalsePositive}
-                      falsePositiveIds={falsePositiveIds}
-                      onConfirmFeedback={onConfirmFeedback}
-                      confirmedIds={confirmedIds}
-                      isLowSignal={isRunning && inputLevel < -45}
-                      swipeLabeling={settings.swipeLabeling}
-                      showAlgorithmScores={settings.showAlgorithmScores}
-                    />
-                    <EarlyWarningPanel earlyWarning={earlyWarning} />
+                          onClearAll={onClearAll}
+                          isRunning={isRunning}
+                          onStart={start}
+                          onFalsePositive={onFalsePositive}
+                          falsePositiveIds={falsePositiveIds}
+                          onConfirmFeedback={onConfirmFeedback}
+                          confirmedIds={confirmedIds}
+                          isLowSignal={isRunning && inputLevel < -45}
+                          swipeLabeling={settings.swipeLabeling}
+                          showAlgorithmScores={settings.showAlgorithmScores}
+                          onStartRingOut={onStartRingOut}
+                        />
+                        {settings.mode === 'ringOut' && isRunning && onStartWizard && (
+                          <button
+                            onClick={onStartWizard}
+                            className="w-full mt-2 py-2 rounded font-mono text-xs font-bold tracking-[0.15em] uppercase bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+                          >
+                            Start Ring-Out Wizard
+                          </button>
+                        )}
+                        <EarlyWarningPanel earlyWarning={earlyWarning} />
+                      </>
+                    )}
                   </div>
                 )}
                 {activeSidebarTab === 'controls' && (
@@ -194,22 +219,33 @@ export const DesktopLayout = memo(function DesktopLayout({
               </Button>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto p-3">
-              <IssuesList
-                advisories={advisories}
-                maxIssues={settings.maxDisplayedIssues}
-                dismissedIds={dismissedIds}
-                onClearAll={onClearAll}
-                isRunning={isRunning}
-                onStart={start}
-                onFalsePositive={onFalsePositive}
-                falsePositiveIds={falsePositiveIds}
-                onConfirmFeedback={onConfirmFeedback}
-                confirmedIds={confirmedIds}
-                isLowSignal={isRunning && inputLevel < -45}
-                swipeLabeling={settings.swipeLabeling}
-                      showAlgorithmScores={settings.showAlgorithmScores}
-              />
-              <EarlyWarningPanel earlyWarning={earlyWarning} />
+              {isWizardActive ? (
+                <RingOutWizard
+                  advisories={advisories}
+                  onFinish={() => onFinishWizard?.()}
+                  isRunning={isRunning}
+                />
+              ) : (
+                <>
+                  <IssuesList
+                    advisories={advisories}
+                    maxIssues={settings.maxDisplayedIssues}
+                    dismissedIds={dismissedIds}
+                    onClearAll={onClearAll}
+                    isRunning={isRunning}
+                    onStart={start}
+                    onFalsePositive={onFalsePositive}
+                    falsePositiveIds={falsePositiveIds}
+                    onConfirmFeedback={onConfirmFeedback}
+                    confirmedIds={confirmedIds}
+                    isLowSignal={isRunning && inputLevel < -45}
+                    swipeLabeling={settings.swipeLabeling}
+                    showAlgorithmScores={settings.showAlgorithmScores}
+                    onStartRingOut={onStartRingOut}
+                  />
+                  <EarlyWarningPanel earlyWarning={earlyWarning} />
+                </>
+              )}
             </div>
           </div>
         </ResizablePanel>

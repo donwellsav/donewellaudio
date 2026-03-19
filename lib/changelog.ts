@@ -14,10 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.146.1',
+    version: '0.147.0',
     date: '2026-03-19',
+    highlights: 'Ring-Out Wizard, dual entry point UX',
     changes: [
-      { type: 'fix', description: 'v0.146.0: dark/light theme toggle (#146)' },
+      { type: 'feat', description: 'Ring-Out guided wizard — step-by-step feedback notching with EQ recommendations, session tracking, and export' },
+      { type: 'ui', description: 'Dual entry point — "Press to Start Analysis" and "Ring Out Room" buttons on idle screen. Ring Out auto-switches mode and launches wizard.' },
+      { type: 'ui', description: 'Simplified start button — logo + two-line "Press to Start / Analysis" text, removed redundant "Kill The Ring" label' },
     ],
   },
   {

@@ -2,6 +2,7 @@
 
 import { memo, useRef, useCallback, useMemo } from 'react'
 import { IssuesList } from './IssuesList'
+import { RingOutWizard } from './RingOutWizard'
 import { EarlyWarningPanel } from './EarlyWarningPanel'
 import { SpectrumCanvas } from './SpectrumCanvas'
 import { GEQBarView } from './GEQBarView'
@@ -25,12 +26,17 @@ interface MobileLayoutProps {
   onSettingsChange: (s: Partial<DetectorSettings>) => void
   calibration?: Omit<CalibrationTabProps, 'settings' | 'onSettingsChange'>
   dataCollection?: DataCollectionTabProps
+  isWizardActive?: boolean
+  onStartWizard?: () => void
+  onFinishWizard?: () => void
+  onStartRingOut?: () => void
 }
 
 export const MobileLayout = memo(function MobileLayout({
   onSettingsChange,
   calibration,
   dataCollection,
+  isWizardActive, onStartWizard, onFinishWizard, onStartRingOut,
 }: MobileLayoutProps) {
   const { isRunning, isStarting, error, start, stop } = useEngine()
   const { settings, handleModeChange, resetSettings, handleFreqRangeChange } = useSettings()
@@ -153,24 +159,43 @@ export const MobileLayout = memo(function MobileLayout({
                 <span>Active Issues</span>
                 <span className="text-primary font-mono">{activeAdvisoryCount}</span>
               </h2>
-              <IssuesList
-                advisories={mobileAdvisories}
-                maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
-                dismissedIds={dismissedIds}
-                onClearAll={onClearAll}
-                onClearResolved={onClearResolved}
-                touchFriendly
-                isRunning={isRunning}
-                onStart={start}
-                onFalsePositive={onFalsePositive}
-                falsePositiveIds={falsePositiveIds}
-                onConfirmFeedback={onConfirmFeedback}
-                confirmedIds={confirmedIds}
-                isLowSignal={isRunning && inputLevel < -45}
-                swipeLabeling
-                showAlgorithmScores={settings.showAlgorithmScores}
-              />
-              <EarlyWarningPanel earlyWarning={earlyWarning} />
+              {isWizardActive ? (
+                <RingOutWizard
+                  advisories={advisories}
+                  onFinish={() => onFinishWizard?.()}
+                  isRunning={isRunning}
+                />
+              ) : (
+                <>
+                  <IssuesList
+                    advisories={mobileAdvisories}
+                    maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
+                    dismissedIds={dismissedIds}
+                    onClearAll={onClearAll}
+                    onClearResolved={onClearResolved}
+                    touchFriendly
+                    isRunning={isRunning}
+                    onStart={start}
+                    onFalsePositive={onFalsePositive}
+                    falsePositiveIds={falsePositiveIds}
+                    onConfirmFeedback={onConfirmFeedback}
+                    confirmedIds={confirmedIds}
+                    isLowSignal={isRunning && inputLevel < -45}
+                    swipeLabeling
+                    showAlgorithmScores={settings.showAlgorithmScores}
+                    onStartRingOut={onStartRingOut}
+                  />
+                  {settings.mode === 'ringOut' && isRunning && onStartWizard && (
+                    <button
+                      onClick={onStartWizard}
+                      className="w-full mt-2 py-2 rounded font-mono text-xs font-bold tracking-[0.15em] uppercase bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+                    >
+                      Start Ring-Out Wizard
+                    </button>
+                  )}
+                  <EarlyWarningPanel earlyWarning={earlyWarning} />
+                </>
+              )}
             </div>
           </div>
 
@@ -307,23 +332,32 @@ export const MobileLayout = memo(function MobileLayout({
                 dataCollection={dataCollection}
               />
             </h2>
-            <IssuesList
-              advisories={mobileAdvisories}
-              maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
-              dismissedIds={dismissedIds}
-              onClearAll={onClearAll}
-              onClearResolved={onClearResolved}
-              touchFriendly
-              isRunning={isRunning}
-              onStart={start}
-              onFalsePositive={onFalsePositive}
-              falsePositiveIds={falsePositiveIds}
-              onConfirmFeedback={onConfirmFeedback}
-              confirmedIds={confirmedIds}
-              isLowSignal={isRunning && inputLevel < -45}
-              swipeLabeling
-              showAlgorithmScores={settings.showAlgorithmScores}
-            />
+            {isWizardActive ? (
+              <RingOutWizard
+                advisories={advisories}
+                onFinish={() => onFinishWizard?.()}
+                isRunning={isRunning}
+              />
+            ) : (
+              <IssuesList
+                advisories={mobileAdvisories}
+                maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
+                dismissedIds={dismissedIds}
+                onClearAll={onClearAll}
+                onClearResolved={onClearResolved}
+                touchFriendly
+                isRunning={isRunning}
+                onStart={start}
+                onFalsePositive={onFalsePositive}
+                falsePositiveIds={falsePositiveIds}
+                onConfirmFeedback={onConfirmFeedback}
+                confirmedIds={confirmedIds}
+                isLowSignal={isRunning && inputLevel < -45}
+                swipeLabeling
+                showAlgorithmScores={settings.showAlgorithmScores}
+                onStartRingOut={onStartRingOut}
+              />
+            )}
             <EarlyWarningPanel earlyWarning={earlyWarning} />
           </div>
         </div>
