@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.153.1',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'v0.153.0: context prompt, CLAUDE.md accuracy fixes (#153)' },
+    ],
+  },
+  {
     version: '0.153.0',
     date: '2026-03-19',
     highlights: 'Context prompt, CLAUDE.md accuracy fixes',
