@@ -1,7 +1,7 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 161 TypeScript/TSX files, 476 tests (471 pass, 4 skip, 1 todo), 27 suites. Version 0.149.0.**
-> Mobile graph resize fix (18vh default, larger touch target). Inline resizable graphs, 2-tab layout.
+> **Last updated March 2026. 161 TypeScript/TSX files, 476 tests (471 pass, 4 skip, 1 todo), 27 suites. Version 0.150.0.**
+> onnxruntime-web warning suppressed. Ring-out sensitivity max by default.
 
 ## CRITICAL RULES
 
