@@ -23,6 +23,13 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    version: '0.144.0',
+    date: '2026-03-19',
+    changes: [
+      { type: 'feat', description: 'Draggable sensitivity threshold on RTA, compact start area, header icon hierarchy, GEQ ghost bars, resolved badge removed, tighter algorithm scores padding' },
+    ],
+  },
+  {
     version: '0.143.1',
     date: '2026-03-18',
     changes: [
