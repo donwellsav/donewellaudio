@@ -14,6 +14,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.157.0',
+    date: '2026-03-19',
+    changes: [
+      { type: 'feat', description: '**Rate limit map pruning** — expired entries cleaned up when map exceeds 1000 entries' },
+      { type: 'feat', description: '**Error sanitization** — 502 responses no longer expose Supabase error text to clients' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` — clean' },
+      { type: 'feat', description: '[x] `pnpm test` — 483 passed, 4 skipped, 1 todo' },
+    ],
+  },
+  {
+    version: '0.156.1',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'v0.156.0: architecture audit — diagnostics, breadcrumbs, worker tests (#156)' },
+    ],
+  },
+  {
     version: '0.156.0',
     date: '2026-03-19',
     highlights: 'Architecture audit: diagnostics, Sentry breadcrumbs, worker tests',
