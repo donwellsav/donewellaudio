@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.149.3',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'v0.151.0: sensitivity guidance, default tuning, onnx warning fix (#151)' },
+    ],
+  },
+  {
     version: '0.151.0',
     date: '2026-03-19',
     highlights: 'Sensitivity guidance, default tuning, onnx warning fix',
