@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.145.0',
+    date: '2026-03-18',
+    highlights: 'Temporal envelope content type detection',
+    changes: [
+      { type: 'feat', description: 'Temporal envelope analysis for speech/music classification — uses energy variance and silence gap ratio from a 1-second ring buffer (50 frames at 50fps)' },
+      { type: 'fix', description: 'Content type classifier now weights temporal features at 40% when available, with spectral features scaling to 60%. Speech silence gaps and music continuous energy are the strongest discriminators.' },
+    ],
+  },
+  {
     version: '0.143.1',
     date: '2026-03-18',
     changes: [
