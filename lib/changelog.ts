@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.158.1',
+    date: '2026-03-19',
+    changes: [
+      { type: 'fix', description: 'v0.158.0: tablet portrait layout, canvas deps fix, advisory perf (#158)' },
+    ],
+  },
+  {
     version: '0.158.0',
     date: '2026-03-19',
     highlights: 'Tablet layout, canvas fixes, advisory perf',
