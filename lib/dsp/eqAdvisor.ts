@@ -207,17 +207,45 @@ export function generateGEQRecommendation(
 }
 
 /**
- * Generate PEQ recommendation for a track
+ * Widen Q to cover a cluster of nearby merged frequencies.
+ *
+ * Q = f_center / bandwidth. If the cluster spans Δf Hz, the minimum Q
+ * to fully cover it is f_center / Δf. We apply a 1.5× bandwidth margin
+ * so the notch envelopes the cluster edges rather than just touching them.
+ *
+ * Returns the wider (lower) of baseQ and the cluster-derived Q.
+ */
+export function clusterAwareQ(
+  baseQ: number,
+  centerHz: number,
+  clusterMinHz?: number,
+  clusterMaxHz?: number,
+): number {
+  if (!clusterMinHz || !clusterMaxHz || clusterMinHz >= clusterMaxHz) return baseQ
+  const spanHz = clusterMaxHz - clusterMinHz
+  const coverageQ = centerHz / (spanHz * 1.5) // 1.5× margin
+  return Math.max(Math.min(baseQ, coverageQ), 2) // floor at Q=2
+}
+
+/**
+ * Generate PEQ recommendation for a track.
+ *
+ * When `clusterMinHz`/`clusterMaxHz` are provided (merged advisory),
+ * the Q is widened to cover the full cluster span.
  */
 export function generatePEQRecommendation(
   track: TrackInput,
   severity: SeverityLevel,
-  preset: Preset
+  preset: Preset,
+  clusterMinHz?: number,
+  clusterMaxHz?: number,
 ): PEQRecommendation {
   const freqHz = getTrackFrequency(track)
   const baseCut = calculateCutDepth(severity, preset)
   const suggestedDb = Math.round(baseCut * erbDepthScale(freqHz))
-  const q = calculateQ(severity, preset, getTrackQ(track))
+  const baseQ = calculateQ(severity, preset, getTrackQ(track))
+  // Widen Q if this advisory covers a cluster of merged peaks
+  const q = clusterAwareQ(baseQ, freqHz, clusterMinHz, clusterMaxHz)
   // Pass through measured bandwidth from detector (if available)
   const measuredBandwidth = 'bandwidthHz' in track ? track.bandwidthHz : undefined
 

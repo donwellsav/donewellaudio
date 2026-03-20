@@ -575,7 +575,9 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-sm">
-                      {advisory.clusterCount} peaks merged
+                      {advisory.clusterCount} peaks merged{advisory.clusterMinHz && advisory.clusterMaxHz
+                        ? ` (${Math.round(advisory.clusterMinHz)}–${Math.round(advisory.clusterMaxHz)} Hz)`
+                        : ''}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

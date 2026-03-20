@@ -11,6 +11,7 @@
  */
 
 import { getSeverityUrgency } from './classifier'
+import { generatePEQRecommendation } from './eqAdvisor'
 import { generateId } from '@/lib/utils/mathHelpers'
 import { BAND_COOLDOWN_MS, MEMORY_LIMITS } from './constants'
 import type {
@@ -129,6 +130,8 @@ export class AdvisoryManager {
     const actions: AdvisoryAction[] = []
     const existingId = this.trackToAdvisoryId.get(track.id)
     let mergedClusterCount = 1
+    let mergedClusterMinHz: number | undefined
+    let mergedClusterMaxHz: number | undefined
 
     if (!existingId) {
       // ── New advisory checks ───────────────────────────────────────────
@@ -157,15 +160,28 @@ export class AdvisoryManager {
         const existingUrgency = getSeverityUrgency(dup.severity)
         const newUrgency = getSeverityUrgency(classification.severity)
         if (newUrgency <= existingUrgency && track.trueAmplitudeDb <= dup.trueAmplitudeDb) {
-          // New peak is less urgent — absorb into existing, bump cluster count
-          const updatedAdvisory = { ...dup, clusterCount: (dup.clusterCount ?? 1) + 1 }
+          // New peak is less urgent — absorb into existing, bump cluster count + widen Q
+          const clusterMinHz = Math.min(dup.clusterMinHz ?? dup.trueFrequencyHz, track.trueFrequencyHz)
+          const clusterMaxHz = Math.max(dup.clusterMaxHz ?? dup.trueFrequencyHz, track.trueFrequencyHz)
+          const updatedPeq = generatePEQRecommendation(
+            track, dup.severity, settings.eqPreset, clusterMinHz, clusterMaxHz,
+          )
+          const updatedAdvisory: Advisory = {
+            ...dup,
+            clusterCount: (dup.clusterCount ?? 1) + 1,
+            clusterMinHz,
+            clusterMaxHz,
+            advisory: dup.advisory ? { ...dup.advisory, peq: updatedPeq } : dup.advisory,
+          }
           this.advisories.set(dup.id, updatedAdvisory)
           this.trackToAdvisoryId.set(track.id, dup.id)
           actions.push({ type: 'advisory', advisory: updatedAdvisory })
           return actions
         }
-        // New peak supersedes — carry over cluster count
+        // New peak supersedes — carry over cluster count + bounds
         mergedClusterCount = (dup.clusterCount ?? 1) + 1
+        mergedClusterMinHz = Math.min(dup.clusterMinHz ?? dup.trueFrequencyHz, track.trueFrequencyHz)
+        mergedClusterMaxHz = Math.max(dup.clusterMaxHz ?? dup.trueFrequencyHz, track.trueFrequencyHz)
         if (dup.advisory?.geq?.bandIndex !== undefined) {
           this.advisoriesByBand.delete(dup.advisory.geq.bandIndex)
         }
@@ -196,11 +212,15 @@ export class AdvisoryManager {
       stabilityCentsStd: track.features.stabilityCentsStd,
       harmonicityScore: track.features.harmonicityScore,
       modulationScore: track.features.modulationScore,
-      advisory: eqAdvisory,
+      advisory: mergedClusterMinHz
+        ? { ...eqAdvisory, peq: generatePEQRecommendation(track, classification.severity, settings.eqPreset, mergedClusterMinHz, mergedClusterMaxHz) }
+        : eqAdvisory,
       modalOverlapFactor: classification.modalOverlapFactor,
       cumulativeGrowthDb: classification.cumulativeGrowthDb,
       frequencyBand: classification.frequencyBand,
       clusterCount: mergedClusterCount > 1 ? mergedClusterCount : undefined,
+      clusterMinHz: mergedClusterMinHz,
+      clusterMaxHz: mergedClusterMaxHz,
     }
 
     this.advisories.set(advisoryId, advisory)

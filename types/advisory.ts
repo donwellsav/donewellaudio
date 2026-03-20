@@ -222,6 +222,8 @@ export interface Advisory {
   schroederFrequency?: number // Calculated Schroeder frequency for reference
   // Cluster info — tracks merged peaks in same GEQ band
   clusterCount?: number // Number of peaks merged into this advisory (default 1)
+  clusterMinHz?: number // Lowest frequency in merged cluster
+  clusterMaxHz?: number // Highest frequency in merged cluster
   /** Algorithm scores that contributed to this detection (debug display) */
   algorithmScores?: {
     msd: number | null

@@ -19,6 +19,7 @@ import {
   erbDepthScale,
   calculateCutDepth,
   calculateQ,
+  clusterAwareQ,
   generateGEQRecommendation,
   generatePEQRecommendation,
   analyzeSpectralTrends,
@@ -242,6 +243,59 @@ describe('calculateQ', () => {
     const surgicalQ = calculateQ('RUNAWAY', 'surgical', 30)
     const heavyQ = calculateQ('RUNAWAY', 'heavy', 30)
     expect(surgicalQ).toBeGreaterThan(heavyQ)
+  })
+})
+
+// ── clusterAwareQ ─────────────────────────────────────────────────────────
+
+describe('clusterAwareQ', () => {
+  it('returns baseQ unchanged when no cluster bounds', () => {
+    expect(clusterAwareQ(30, 1000)).toBe(30)
+    expect(clusterAwareQ(30, 1000, undefined, undefined)).toBe(30)
+  })
+
+  it('returns baseQ when cluster bounds are equal', () => {
+    expect(clusterAwareQ(30, 1000, 1000, 1000)).toBe(30)
+  })
+
+  it('widens Q to cover a 30 Hz cluster at 835 Hz', () => {
+    // 3 peaks at 820, 835, 850 Hz → span = 30 Hz
+    // coverageQ = 835 / (30 * 1.5) = 835 / 45 ≈ 18.6
+    const q = clusterAwareQ(30, 835, 820, 850)
+    expect(q).toBeCloseTo(18.6, 0)
+    expect(q).toBeLessThan(30) // Wider than original
+  })
+
+  it('does not narrow Q below cluster-derived value', () => {
+    // If baseQ is already wider (lower) than cluster needs, keep baseQ
+    const q = clusterAwareQ(5, 1000, 990, 1010)
+    // coverageQ = 1000 / (20 * 1.5) = 33.3 → min(5, 33.3) = 5
+    expect(q).toBe(5)
+  })
+
+  it('floors at Q=2', () => {
+    // Very wide cluster → coverageQ < 2
+    // span = 400 Hz, center = 500 Hz → coverageQ = 500 / (400*1.5) = 0.83
+    const q = clusterAwareQ(30, 500, 300, 700)
+    expect(q).toBe(2)
+  })
+})
+
+// ── generatePEQRecommendation with cluster bounds ────────────────────────
+
+describe('generatePEQRecommendation (cluster-aware)', () => {
+  it('widens Q when cluster bounds are provided', () => {
+    const track = makeTrack({ trueFrequencyHz: 835, qEstimate: 30 })
+    const withoutCluster = generatePEQRecommendation(track, 'GROWING', 'surgical')
+    const withCluster = generatePEQRecommendation(track, 'GROWING', 'surgical', 820, 850)
+    expect(withCluster.q).toBeLessThan(withoutCluster.q)
+  })
+
+  it('produces identical Q without cluster bounds', () => {
+    const track = makeTrack({ trueFrequencyHz: 1000, qEstimate: 30 })
+    const rec = generatePEQRecommendation(track, 'GROWING', 'surgical')
+    const recNoCluster = generatePEQRecommendation(track, 'GROWING', 'surgical', undefined, undefined)
+    expect(rec.q).toBe(recNoCluster.q)
   })
 })
 
