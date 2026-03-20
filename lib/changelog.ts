@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.160.1',
+    date: '2026-03-20',
+    changes: [
+      { type: 'feat', description: 'feat: mains hum gate (6th gate) + document suite (#160)' },
+    ],
+  },
+  {
     version: '0.160.0',
     date: '2026-03-20',
     highlights: 'Mains hum gate (6th multiplicative gate) + document suite',
