@@ -183,7 +183,7 @@ lib/
     severityUtils.ts (18)     #   Severity urgency mapping
     mlInference.ts (~180)     #   ONNX Runtime Web ML inference, predictCached(), lazy model loading
     advancedDetection.ts (16) #   Barrel re-export
-  canvas/spectrumDrawing.ts(605)# Pure canvas drawing (no React), RTA label overlap suppression
+  canvas/spectrumDrawing.ts(949)# Pure canvas drawing (no React), RTA label overlap suppression, theme-aware notch overlays (70% opacity), frequency zone bands, label range merging
   export/ (3 files)           # PDF/TXT/CSV/JSON export
   calibration/ (3 files)      # Room profile, session recording, JSON export
   storage/ktrStorage.ts (183) # Typed localStorage abstraction
@@ -340,7 +340,7 @@ Then when user says "PR and merge":
 - **Algorithm scores debug:** Toggle in Display settings shows MSD/PH/SP/CM/IH/PT/ML scores on each card.
 
 ### Theme & Branding
-- **Dark/light theme (v0.146.0):** `next-themes` with CSS variables. Canvas colors via `canvasThemeRef` pattern (ref updated on theme change, read in RAF loop). Blue spectrum in light mode, amber/blue toggle in dark mode.
+- **Dark/light theme (v0.146.0):** `next-themes` with CSS variables. Canvas colors via `canvasThemeRef` pattern (ref updated on theme change, read in RAF loop). Blue spectrum in light mode, amber/blue toggle in dark mode. RTA labels use frosted glass pills with theme-aware fills, shadows, and accent strips (v0.167.0).
 - **KTR brand logo (v0.132.0):** Frequency analyzer crosshair + equalizer bars SVG. `KtrLogo.tsx` component. Replaces generic speaker icon in header (64px) and start button (80px).
 - **Full names:** "Real-Time Analyzer" / "Graphic Equalizer" labels when space allows, abbreviated on narrow screens.
 
@@ -351,7 +351,9 @@ Then when user says "PR and merge":
 ### Detection & Analysis
 - **Content type detection:** 4-feature scoring (centroid, rolloff, flatness, crest factor) with temporal envelope analysis (energy variance over 2s windows). Majority-vote smoothing over 10 frames.
 - **Sensitivity guidance (v0.151.0):** Three-layer contextual hints — idle hint below start buttons, first-detection tooltip, persistent RTA label next to threshold line. Speech/ringOut default 27dB.
-- **RTA label overlap suppression:** Greedy algorithm prioritizes highest-severity labels.
+- **RTA label overlap suppression (v0.170.0):** Greedy algorithm prioritizes highest-severity labels with 16px collision padding. Nearby suppressed labels merge into range pills ("820–950 Hz ×3") with highlight bands.
+- **Frequency zone overlay (v0.171.0):** 5 theme-aware bands (Sub/Low Mid/Mid/Presence/Air) with separate dark/light opacity arrays. Merged range labels get filled highlight bands.
+- **Notch overlays (v0.172.0):** Severity-colored solid bars at 70% opacity. Marker vertical lines at 75% opacity.
 - **Draggable threshold line:** Drag the dashed line on the RTA to adjust sensitivity directly. 8×28px grab handle with notch affordance.
 
 ### Settings Persistence
