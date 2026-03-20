@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.167.1',
+    date: '2026-03-20',
+    changes: [
+      { type: 'fix', description: 'chore: bump v0.167.0, changelog, GuideTab, CLAUDE.md (#168)' },
+    ],
+  },
+  {
     version: '0.167.0',
     date: '2026-03-20',
     highlights: 'Pro audio RTA labels, cluster-aware Q, notch overlays, PEQ card details',
