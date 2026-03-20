@@ -1,7 +1,7 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 164 TypeScript/TSX files, 516 tests (511 pass, 4 skip, 1 todo), 29 suites. Version 0.169.0.**
-> RTA label pill fix (baseline-aware positioning), refined instrument-grade label styling.
+> **Last updated March 2026. 164 TypeScript/TSX files, 516 tests (511 pass, 4 skip, 1 todo), 29 suites. Version 0.170.0.**
+> RTA label overlap fix, nearby label range merging ("820–950Hz ×3"), collision-aware pill spacing.
 
 ## CRITICAL RULES
 

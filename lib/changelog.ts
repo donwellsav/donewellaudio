@@ -14,10 +14,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.169.1',
+    version: '0.170.0',
     date: '2026-03-20',
+    highlights: 'RTA label overlap fix + nearby label range merging',
     changes: [
-      { type: 'fix', description: 'fix: RTA label pill positioning + v0.169.0 docs (#169)' },
+      { type: 'fix', description: 'RTA label pills no longer visually overlap — collision padding increased to account for full pill width (padding + border + shadow + gap)' },
+      { type: 'feat', description: 'Nearby suppressed RTA labels merge into range pills (e.g. "820–950Hz" or "1.2–1.5kHz ×3") instead of being hidden' },
     ],
   },
   {

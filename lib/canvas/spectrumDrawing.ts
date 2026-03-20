@@ -622,7 +622,8 @@ export function drawMarkers(
   // Higher-severity (more problematic) advisories win; ties broken by confidence.
   const labelFont = `${fontSize + 3}px monospace`
   ctx.font = labelFont
-  const labelPadding = 8
+  // Collision padding: pillPadX(7) + border(1) + shadow(1) + visual gap(7) = 16
+  const labelPadding = 16
   const labelShowFlags: boolean[] = new Array(visibleAdvisories.length).fill(false)
 
   // Build priority-sorted indices (most problematic first)
@@ -634,12 +635,15 @@ export function drawMarkers(
     return visibleAdvisories[b].confidence - visibleAdvisories[a].confidence
   })
 
+  // Pre-compute x-center for each advisory
+  const labelXCenters: number[] = visibleAdvisories.map(advisory =>
+    freqToLogPosition(advisory.trueFrequencyHz, range.freqMin, range.freqMax) * plotWidth
+  )
+
   // Compute label x-ranges (center ± half-width + padding)
-  const labelXRanges: Array<{ left: number; right: number }> = visibleAdvisories.map(advisory => {
-    const freq = advisory.trueFrequencyHz
-    const x = freqToLogPosition(freq, range.freqMin, range.freqMax) * plotWidth
-    const halfWidth = ctx.measureText(formatFrequency(freq)).width / 2 + labelPadding
-    return { left: x - halfWidth, right: x + halfWidth }
+  const labelXRanges: Array<{ left: number; right: number }> = visibleAdvisories.map((advisory, i) => {
+    const halfWidth = ctx.measureText(formatFrequency(advisory.trueFrequencyHz)).width / 2 + labelPadding
+    return { left: labelXCenters[i] - halfWidth, right: labelXCenters[i] + halfWidth }
   })
 
   // Greedily accept labels in priority order, reject overlaps
@@ -653,6 +657,32 @@ export function drawMarkers(
     if (!overlaps) {
       labelShowFlags[idx] = true
       accepted.push(idx)
+    }
+  }
+
+  // Merge nearby suppressed labels into range pills for accepted labels.
+  // Each accepted label absorbs suppressed neighbors within merge distance,
+  // producing a range label like "820–950Hz" or "1.2–1.5kHz ×3".
+  const mergeDistance = labelPadding * 3
+  const mergedLabelText = new Map<number, string>()
+  const claimed = new Set<number>() // prevent double-claiming suppressed labels
+
+  for (const acceptedIdx of accepted) {
+    const group = [acceptedIdx]
+    for (let j = 0; j < visibleAdvisories.length; j++) {
+      if (labelShowFlags[j] || j === acceptedIdx || claimed.has(j)) continue
+      const dist = Math.abs(labelXCenters[j] - labelXCenters[acceptedIdx])
+      if (dist < mergeDistance) {
+        group.push(j)
+        claimed.add(j)
+      }
+    }
+    if (group.length > 1) {
+      const freqs = group.map(i => visibleAdvisories[i].trueFrequencyHz)
+      const minF = Math.min(...freqs)
+      const maxF = Math.max(...freqs)
+      const countSuffix = group.length >= 3 ? ` ×${group.length}` : ''
+      mergedLabelText.set(acceptedIdx, `${formatFrequency(minF)}–${formatFrequency(maxF)}${countSuffix}`)
     }
   }
 
@@ -690,7 +720,7 @@ export function drawMarkers(
 
     // Frequency label — only show if not occluded by a higher-priority label
     if (labelShowFlags[i]) {
-      const labelText = formatFrequency(freq)
+      const labelText = mergedLabelText.get(i) ?? formatFrequency(freq)
       ctx.font = labelFont
       ctx.textAlign = 'center'
       const labelY = y - 10
