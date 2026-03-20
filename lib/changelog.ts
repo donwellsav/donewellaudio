@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.169.1',
+    date: '2026-03-20',
+    changes: [
+      { type: 'fix', description: 'fix: RTA label pill positioning + v0.169.0 docs (#169)' },
+    ],
+  },
+  {
     version: '0.169.0',
     date: '2026-03-20',
     highlights: 'RTA label pill positioning fix, refined instrument-grade label styling',
