@@ -14,18 +14,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.176.1',
+    version: '0.177.0',
     date: '2026-03-20',
     changes: [
-      { type: 'ui', description: 'ui: notch overlays render as single solid blocks (#176)' },
-    ],
-  },
-  {
-    version: '0.176.0',
-    date: '2026-03-20',
-    changes: [
-      { type: 'ui', description: 'Notch overlays render as single solid blocks — marker vertical line skipped when notch overlay exists, eliminating two-line artifact' },
-      { type: 'ui', description: 'Notch overlay fill and marker vertical lines at 100% opacity' },
+      { type: 'ui', description: 'Notch overlays merge nearby advisories into single solid blocks — wider problem zone highlighting like a real engineer would use one wider-Q cut' },
+      { type: 'ui', description: 'Minimum notch bar width increased to 8px so even narrow-Q notches render as visible blocks' },
+      { type: 'ui', description: 'Marker vertical line skipped when notch overlay exists, eliminating two-line artifact' },
     ],
   },
   {

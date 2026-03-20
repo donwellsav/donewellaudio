@@ -532,6 +532,9 @@ export function drawNotchOverlays(
     .filter(a => !clearedIds?.has(a.id))
     .slice(-7) // Same cap as drawMarkers
 
+  // Build pixel-space bars, then merge overlapping/adjacent ones into solid blocks
+  const bars: { x1: number; x2: number; color: string; ids: string[] }[] = []
+
   for (const advisory of visible) {
     const centerHz = advisory.trueFrequencyHz
     const peqQ = advisory.advisory?.peq?.q ?? advisory.qEstimate
@@ -555,16 +558,32 @@ export function drawNotchOverlays(
     // Clamp to visible range and convert to pixels
     const x1 = freqToLogPosition(Math.max(minHz, range.freqMin), range.freqMin, range.freqMax) * plotWidth
     const x2 = freqToLogPosition(Math.min(maxHz, range.freqMax), range.freqMin, range.freqMax) * plotWidth
-    if (x2 - x1 < 1) continue // Too narrow to draw
+    if (x2 - x1 < 1) continue
 
     const color = getSeverityColor(advisory.severity)
+    bars.push({ x1, x2: Math.max(x2, x1 + 8), color, ids: [advisory.id] })
+  }
 
-    // Solid severity-colored bar spanning the notch width
-    const barWidth = Math.max(x2 - x1, 3) // min 3px so narrow notches stay visible
-    ctx.fillStyle = color
+  // Sort by x1, then merge overlapping/adjacent bars (within 2px gap)
+  bars.sort((a, b) => a.x1 - b.x1)
+  const merged: typeof bars = []
+  for (const bar of bars) {
+    const prev = merged[merged.length - 1]
+    if (prev && bar.x1 <= prev.x2 + 2) {
+      // Merge: extend previous bar, use highest-severity color (first in sorted advisories)
+      prev.x2 = Math.max(prev.x2, bar.x2)
+      prev.ids.push(...bar.ids)
+    } else {
+      merged.push({ ...bar })
+    }
+  }
+
+  // Draw merged bars as single solid blocks
+  for (const bar of merged) {
+    ctx.fillStyle = bar.color
     ctx.globalAlpha = 1.0
-    ctx.fillRect(x1, 0, barWidth, plotHeight)
-    notchedIds.add(advisory.id)
+    ctx.fillRect(bar.x1, 0, bar.x2 - bar.x1, plotHeight)
+    for (const id of bar.ids) notchedIds.add(id)
   }
 
   ctx.globalAlpha = 1
