@@ -14,10 +14,10 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.182.1',
+    version: '0.183.0',
     date: '2026-03-20',
     changes: [
-      { type: 'ui', description: 'ui: reduce notch overlay opacity from 60% to 42% (#182)' },
+      { type: 'ui', description: 'Reduce notch overlay opacity from 42% to 27% for even better spectrum readability' },
     ],
   },
   {
