@@ -578,7 +578,9 @@ export function drawMarkers(
   clearedIds: Set<string> | undefined,
   peakMarkerRadius: number,
   fontSize: number,
+  theme: CanvasTheme = DARK_CANVAS_THEME,
 ) {
+  const isDark = theme === DARK_CANVAS_THEME
   // Early warning predictions
   if (earlyWarning && earlyWarning.predictedFrequencies.length > 0) {
     const warningColor = '#f59e0b' // amber-500
@@ -693,20 +695,61 @@ export function drawMarkers(
       ctx.textAlign = 'center'
       const labelY = y - 10
 
-      // Dark backdrop pill for readability over busy spectrum
+      // Pro audio callout badge — frosted glass with severity accent
+      // Adapts to light/dark canvas theme for legibility in both modes
       const metrics = ctx.measureText(labelText)
-      const pillPadX = 4
-      const pillPadY = 2
+      const pillPadX = 6
+      const pillPadY = 3
       const pillW = metrics.width + pillPadX * 2
       const pillH = (fontSize + 3) + pillPadY * 2
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.65)'
+      const pillX = x - pillW / 2
+      const pillY = labelY - pillH + pillPadY + 2
+      const pillR = 4
+
+      // 1. Drop shadow for depth
+      ctx.fillStyle = isDark
+        ? 'rgba(0, 0, 0, 0.4)'
+        : 'rgba(0, 0, 0, 0.12)'
       ctx.beginPath()
-      ctx.roundRect(x - pillW / 2, labelY - pillH + pillPadY + 2, pillW, pillH, 3)
+      ctx.roundRect(pillX + 1, pillY + 1, pillW, pillH, pillR)
       ctx.fill()
 
-      // Label text
+      // 2. Frosted glass fill — dark glass in dark mode, frosted white in light
+      ctx.fillStyle = isDark
+        ? 'rgba(8, 10, 12, 0.85)'
+        : 'rgba(255, 255, 255, 0.92)'
+      ctx.beginPath()
+      ctx.roundRect(pillX, pillY, pillW, pillH, pillR)
+      ctx.fill()
+
+      // 3. Severity-tinted border
+      ctx.strokeStyle = color
+      ctx.globalAlpha = isDark ? 0.30 : 0.45
+      ctx.lineWidth = 1
+      ctx.stroke() // Strokes the same roundRect path
+      ctx.globalAlpha = 1
+
+      // 4. Severity accent strip at bottom (LED status bar)
+      const accentH = 2
+      ctx.fillStyle = color
+      ctx.globalAlpha = isDark ? 0.40 : 0.55
+      ctx.beginPath()
+      ctx.roundRect(pillX + 1, pillY + pillH - accentH - 1, pillW - 2, accentH, 1)
+      ctx.fill()
+      ctx.globalAlpha = 1
+
+      // 5. Label text with shadow for crispness against glass backdrop
+      ctx.shadowColor = isDark
+        ? 'rgba(0, 0, 0, 0.80)'
+        : 'rgba(255, 255, 255, 0.90)'
+      ctx.shadowBlur = isDark ? 1 : 2
+      ctx.shadowOffsetX = 0
+      ctx.shadowOffsetY = isDark ? 1 : 0
       ctx.fillStyle = color
       ctx.fillText(labelText, x, labelY)
+      ctx.shadowColor = 'transparent'
+      ctx.shadowBlur = 0
+      ctx.shadowOffsetY = 0
     }
   }
 }

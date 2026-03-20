@@ -249,7 +249,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
 
     drawFreqRangeOverlay(ctx, plotWidth, plotHeight, range, freqRangeRef.current, canvasThemeRef.current)
     drawNotchOverlays(ctx, plotWidth, plotHeight, range, advisoriesRef.current, clearedIdsRef.current)
-    drawMarkers(ctx, plotWidth, plotHeight, range, earlyWarning, advisoriesRef.current, clearedIdsRef.current, peakMarkerRadius, fontSize)
+    drawMarkers(ctx, plotWidth, plotHeight, range, earlyWarning, advisoriesRef.current, clearedIdsRef.current, peakMarkerRadius, fontSize, canvasThemeRef.current)
 
     // Frozen badge — top-right of plot area
     if (isFrozenRef.current) {
