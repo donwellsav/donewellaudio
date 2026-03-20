@@ -14,6 +14,24 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.161.0',
+    date: '2026-03-20',
+    changes: [
+      { type: 'feat', description: 'Add 11 ML columns to `spectral_snapshots` table (algo scores, fused probability/confidence, user feedback, model version, schema version)' },
+      { type: 'feat', description: 'Update Supabase Edge Function to persist v1.1/1.2 batch data with algorithm scores and user feedback labels' },
+      { type: 'feat', description: 'Add Supabase env vars to `.env.example`' },
+      { type: 'feat', description: 'FALSE+/CONFIRM labels from advisory cards now flow end-to-end to Supabase' },
+      { type: 'feat', description: 'Algorithm scores (MSD, phase, spectral, comb, IHR, PTMR) stored alongside each snapshot' },
+      { type: 'feat', description: '`scripts/ml/export_training_data.py` can now pull labeled training data' },
+      { type: 'feat', description: 'Weekly ML training workflow can produce improved ONNX models' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` passes' },
+      { type: 'feat', description: '[x] `pnpm test` — 491 pass, 4 skip, 1 todo' },
+      { type: 'feat', description: '[x] Migration applied to Supabase (table verified with 26 columns)' },
+      { type: 'feat', description: '[x] Edge Function deployed (version 5, ACTIVE)' },
+      { type: 'feat', description: '[ ] End-to-end: trigger detection → click FALSE+ → verify row in Supabase dashboard' },
+    ],
+  },
+  {
     version: '0.160.1',
     date: '2026-03-20',
     changes: [
