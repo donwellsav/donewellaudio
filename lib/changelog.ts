@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.170.1',
+    date: '2026-03-20',
+    changes: [
+      { type: 'feat', description: 'feat: RTA label overlap fix + nearby range merging (#170)' },
+    ],
+  },
+  {
     version: '0.170.0',
     date: '2026-03-20',
     highlights: 'RTA label overlap fix + nearby label range merging',
