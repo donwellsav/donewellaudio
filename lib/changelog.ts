@@ -14,6 +14,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.164.0',
+    date: '2026-03-20',
+    changes: [
+      { type: 'feat', description: 'When multiple nearby feedback peaks merge into one advisory, the PEQ Q is now **widened to cover the full cluster span** with 1.5× margin' },
+      { type: 'feat', description: 'Adds `clusterAwareQ()` function: `coverageQ = centerHz / (span × 1.5)`, picks the wider (lower Q) of severity-based vs cluster-based' },
+      { type: 'feat', description: 'Tracks `clusterMinHz`/`clusterMaxHz` on Advisory through both merge paths (absorption + supersede)' },
+      { type: 'feat', description: 'Cluster tooltip now shows frequency range: "3 peaks merged (820–850 Hz)"' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` — 0 errors' },
+      { type: 'feat', description: '[x] `pnpm test` — 511 pass (7 new), 4 skip, 1 todo' },
+      { type: 'feat', description: '[ ] Visual: generate clustered detections → verify advisory shows widened Q and range tooltip' },
+    ],
+  },
+  {
     version: '0.162.2',
     date: '2026-03-20',
     changes: [
