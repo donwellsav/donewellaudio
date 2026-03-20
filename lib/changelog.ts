@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.173.2',
+    date: '2026-03-20',
+    changes: [
+      { type: 'fix', description: 'docs: update CLAUDE.md body — stale spectrumDrawing line count + missing canvas UI features (#174)' },
+    ],
+  },
+  {
     version: '0.173.1',
     date: '2026-03-20',
     changes: [
