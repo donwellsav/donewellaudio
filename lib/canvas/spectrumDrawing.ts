@@ -561,7 +561,7 @@ export function drawNotchOverlays(
     // Solid severity-colored bar spanning the notch width
     const barWidth = Math.max(x2 - x1, 3) // min 3px so narrow notches stay visible
     ctx.fillStyle = color
-    ctx.globalAlpha = 0.70
+    ctx.globalAlpha = 1.0
     ctx.fillRect(x1, 0, barWidth, plotHeight)
   }
 
@@ -699,12 +699,11 @@ export function drawMarkers(
     // Vertical line
     ctx.strokeStyle = color
     ctx.lineWidth = 2
-    ctx.globalAlpha = 0.75
+    ctx.globalAlpha = 1.0
     ctx.beginPath()
     ctx.moveTo(x, y)
     ctx.lineTo(x, plotHeight)
     ctx.stroke()
-    ctx.globalAlpha = 1
 
     // Peak halo — soft glow ring behind dot
     ctx.fillStyle = color
