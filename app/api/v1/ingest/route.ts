@@ -27,23 +27,43 @@ const MAX_PAYLOAD_BYTES = 512 * 1024
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX_REQUESTS = 6
 
-// In-memory rate limit store (resets on cold start — acceptable for edge)
+// In-memory rate limit stores (reset on cold start — acceptable for edge)
 const rateLimitMap = new Map<string, { count: number; windowStart: number }>()
+const ipRateLimitMap = new Map<string, { count: number; windowStart: number }>()
+
+/** IP-based rate limit: more generous than session, catches rotating sessionIds */
+const IP_RATE_LIMIT_MAX_REQUESTS = 30
 
 // ─── Route handler ──────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   try {
-    // Check content length
+    // Check content length header (fast rejection for oversized requests)
     const contentLength = parseInt(request.headers.get('content-length') ?? '0', 10)
     if (contentLength > MAX_PAYLOAD_BYTES) {
       return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
     }
 
-    // Parse body
+    // IP-based rate limit (primary gate — client cannot forge on Vercel)
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+    if (isRateLimitedByKey(ipRateLimitMap, clientIp, IP_RATE_LIMIT_MAX_REQUESTS)) {
+      return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
+    }
+
+    // Parse body and enforce actual size (Content-Length can be spoofed)
+    let rawText: string
+    try {
+      rawText = await request.text()
+    } catch {
+      return NextResponse.json({ error: 'Failed to read body' }, { status: 400 })
+    }
+    if (rawText.length > MAX_PAYLOAD_BYTES) {
+      return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
+    }
+
     let batch: SnapshotBatch
     try {
-      batch = await request.json()
+      batch = JSON.parse(rawText) as SnapshotBatch
     } catch {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
@@ -54,8 +74,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validationError }, { status: 400 })
     }
 
-    // Rate limit by session ID
-    if (isRateLimited(batch.sessionId)) {
+    // Session-based rate limit (secondary — catches burst within same session)
+    if (isRateLimitedByKey(rateLimitMap, batch.sessionId, RATE_LIMIT_MAX_REQUESTS)) {
       return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
     }
 
@@ -90,8 +110,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, stored: true })
   } catch (err) {
+    console.error('[ingest] Unexpected error:', err)
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Internal error' },
+      { error: 'Internal error' },
       { status: 500 }
     )
   }
@@ -146,24 +167,28 @@ function validateBatch(batch: unknown): string | null {
 
 // ─── Rate limiting ──────────────────────────────────────────────────────────
 
-function isRateLimited(sessionId: string): boolean {
+function isRateLimitedByKey(
+  map: Map<string, { count: number; windowStart: number }>,
+  key: string,
+  maxRequests: number,
+): boolean {
   const now = Date.now()
-  const entry = rateLimitMap.get(sessionId)
+  const entry = map.get(key)
 
   // Prune stale entries when map grows large (prevents unbounded growth on long-lived instances)
-  if (rateLimitMap.size > 1000) {
-    for (const [key, val] of rateLimitMap) {
-      if (now - val.windowStart > RATE_LIMIT_WINDOW_MS) rateLimitMap.delete(key)
+  if (map.size > 1000) {
+    for (const [k, val] of map) {
+      if (now - val.windowStart > RATE_LIMIT_WINDOW_MS) map.delete(k)
     }
   }
 
   if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
-    rateLimitMap.set(sessionId, { count: 1, windowStart: now })
+    map.set(key, { count: 1, windowStart: now })
     return false
   }
 
   entry.count++
-  if (entry.count > RATE_LIMIT_MAX_REQUESTS) return true
+  if (entry.count > maxRequests) return true
 
   return false
 }

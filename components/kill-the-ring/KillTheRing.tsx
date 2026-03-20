@@ -189,7 +189,23 @@ const KillTheRingInner = memo(function KillTheRingInner({
   // snapshot enrichment (ML training data).
 
   const [fpIds, setFpIds] = useState<Set<string>>(new Set())
+  const [confirmedIds, setConfirmedIds] = useState<Set<string>>(new Set())
+
+  // Refs for stable callback identity — avoids re-creation on every
+  // advisories/fpIds/confirmedIds change (advisories updates at ~50fps).
+  const fpIdsRef = useRef(fpIds)
+  fpIdsRef.current = fpIds
+  const confirmedIdsRef = useRef(confirmedIds)
+  confirmedIdsRef.current = confirmedIds
+  const advisoriesRef2 = useRef(advisories)
+  advisoriesRef2.current = advisories
+  const calibrationRef = useRef(calibration)
+  calibrationRef.current = calibration
+
   const handleFalsePositive = useCallback((advisoryId: string) => {
+    // Read current state via ref (avoids stale closure)
+    const isFlagging = !fpIdsRef.current.has(advisoryId)
+
     // Toggle the flag
     setFpIds(prev => {
       const next = new Set(prev)
@@ -202,9 +218,8 @@ const KillTheRingInner = memo(function KillTheRingInner({
     })
 
     // Find the advisory to get its frequency
-    const advisory = advisories.find(a => a.id === advisoryId)
+    const advisory = advisoriesRef2.current.find(a => a.id === advisoryId)
     if (advisory) {
-      const isFlagging = !fpIds.has(advisoryId)
       dspWorker.sendUserFeedback(
         advisory.trueFrequencyHz,
         isFlagging ? 'false_positive' : 'correct'
@@ -220,17 +235,19 @@ const KillTheRingInner = memo(function KillTheRingInner({
     })
 
     // Chain to calibration handler if active
-    if (calibration.calibrationEnabled) {
-      calibration.onFalsePositive(advisoryId)
+    if (calibrationRef.current.calibrationEnabled) {
+      calibrationRef.current.onFalsePositive(advisoryId)
     }
-  }, [advisories, fpIds, dspWorker, calibration])
+  }, [dspWorker])
 
   // ── Confirm Feedback (positive label for ML training) ──────────────────
   // Symmetric to FALSE+: marks an advisory as confirmed real feedback.
   // CONFIRM and FALSE+ are mutually exclusive toggles.
 
-  const [confirmedIds, setConfirmedIds] = useState<Set<string>>(new Set())
   const handleConfirmFeedback = useCallback((advisoryId: string) => {
+    // Read current state via ref (avoids stale closure)
+    const isConfirming = !confirmedIdsRef.current.has(advisoryId)
+
     // Toggle confirmed state
     setConfirmedIds(prev => {
       const next = new Set(prev)
@@ -251,15 +268,14 @@ const KillTheRingInner = memo(function KillTheRingInner({
     })
 
     // Send confirmed_feedback to worker for snapshot labeling
-    const advisory = advisories.find(a => a.id === advisoryId)
+    const advisory = advisoriesRef2.current.find(a => a.id === advisoryId)
     if (advisory) {
-      const isConfirming = !confirmedIds.has(advisoryId)
       dspWorker.sendUserFeedback(
         advisory.trueFrequencyHz,
         isConfirming ? 'confirmed_feedback' : 'correct'
       )
     }
-  }, [advisories, confirmedIds, dspWorker])
+  }, [dspWorker])
 
   // Merge calibration FP IDs with standalone FP IDs
   const mergedFpIds = useMemo<ReadonlySet<string>>(() => {

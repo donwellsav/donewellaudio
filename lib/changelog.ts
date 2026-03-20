@@ -14,10 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.179.1',
+    version: '0.180.0',
     date: '2026-03-20',
+    highlights: 'Deep audit: 5 critical/important fixes from 4-agent code review',
     changes: [
-      { type: 'feat', description: 'feat: widen advisory merge to 1000 cents + 60% opacity notch overlays (#179)' },
+      { type: 'fix', description: 'Activate low-frequency phase suppression — pass peakFrequencyHz to fusion, halving phase weight below 200 Hz to reduce sub-bass FPs' },
+      { type: 'fix', description: 'Fix stale closure in FALSE+/CONFIRM callbacks — ref-ify fpIds, confirmedIds, advisories to send correct ML labels and eliminate ~50/s callback churn' },
+      { type: 'fix', description: 'Patch Next.js 16.1.6 → 16.1.7 (HTTP request smuggling CVE)' },
+      { type: 'fix', description: 'Harden ingest API: IP-based rate limiting (30/min primary gate), actual body size enforcement, stop leaking error messages in 500 responses' },
+      { type: 'fix', description: 'Fix SnapshotCollector re-enable — always recreate with new sessionId/fftSize/sampleRate instead of resetting stale instance' },
     ],
   },
   {

@@ -1,7 +1,7 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 164 TypeScript/TSX files, 516 tests (511 pass, 4 skip, 1 todo), 29 suites. Version 0.179.0.**
-> Advisory merge at 1000 cents (minor seventh). Notch overlays at 60% opacity. clusterAwareQ() widens Q for merged zones.
+> **Last updated March 2026. 165 TypeScript/TSX files, 516 tests (511 pass, 4 skip, 1 todo), 29 suites. Version 0.180.0.**
+> Deep audit fixes: low-freq phase suppression activated, stale closure ML labels fixed, API security hardened, Next.js CVE patched.
 
 ## CRITICAL RULES
 
@@ -294,7 +294,7 @@ Then when user says "PR and merge":
 - **CSP:** Nonce-based `script-src` in prod (middleware.ts), `'unsafe-inline'` in dev for hot reload. `style-src 'unsafe-inline'` in both (required by Tailwind/React). `suppressHydrationWarning` on `<html>` and `<body>` to prevent nonce mismatch (browsers strip nonce from DOM).
 - **Permissions-Policy:** `microphone=(self), camera=(), geolocation=()`
 - **Zero XSS vectors:** No direct HTML injection, no dynamic code execution
-- **API:** Ingest endpoint validates v1.0/v1.1 schema, rate-limits (6/60s per session), caps payload (512KB), strips IP
+- **API:** Ingest endpoint validates v1.0/v1.1/v1.2 schema, dual rate-limiting (IP-based 30/60s primary + session-based 6/60s secondary), actual body size enforcement (512KB), strips IP, error messages not leaked
 - **Worker:** Inbound messages type-validated via `WorkerOutboundMessage` switch; outbound postMessage lacks compile-time Set validation (minor gap)
 - **localStorage:** 37 touchpoints, all via ktrStorage.ts abstraction with try/catch
 

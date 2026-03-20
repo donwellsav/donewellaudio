@@ -262,13 +262,13 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
 
     case 'enableCollection': {
       try {
-        // Guard against double-enable (avoids leaking previous instance)
+        // Always create a new instance — re-enable may carry new sessionId,
+        // fftSize, or sampleRate (e.g., device change, session restart).
         if (snapshotCollector) {
-          console.log('[DSP Worker] enableCollection: resetting existing collector')
+          console.log('[DSP Worker] enableCollection: replacing existing collector')
           snapshotCollector.reset()
-        } else {
-          snapshotCollector = new SnapshotCollector(msg.sessionId, msg.fftSize, msg.sampleRate)
         }
+        snapshotCollector = new SnapshotCollector(msg.sessionId, msg.fftSize, msg.sampleRate)
         console.log('[DSP Worker] SnapshotCollector ready')
         const stats = snapshotCollector.getStats()
         self.postMessage({
@@ -458,7 +458,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
         enabledAlgorithms: settings?.enabledAlgorithms,
       }
       const fusionResult = fuseAlgorithmResults(
-        algorithmScores, contentType, existingScore, fusionConfig
+        algorithmScores, contentType, existingScore, fusionConfig, track.trueFrequencyHz
       )
 
       // Feed fusion result back to AlgorithmEngine for ML's next-frame input
