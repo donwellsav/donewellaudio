@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.164.1',
+    date: '2026-03-20',
+    changes: [
+      { type: 'feat', description: 'feat: notch-width overlay on RTA for advisory markers (#165)' },
+    ],
+  },
+  {
     version: '0.164.0',
     date: '2026-03-20',
     changes: [
