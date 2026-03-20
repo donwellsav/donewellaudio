@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.178.1',
+    date: '2026-03-20',
+    changes: [
+      { type: 'feat', description: 'feat: widen advisory merge to 500 cents + solid notch blocks (#178)' },
+    ],
+  },
+  {
     version: '0.178.0',
     date: '2026-03-20',
     changes: [
