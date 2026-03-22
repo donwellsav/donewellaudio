@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.3.2',
+    date: '2026-03-22',
+    changes: [
+      { type: 'feat', description: 'feat: configure Sentry source maps, tunnel route, and ad-blocker bypass' },
+    ],
+  },
+  {
     version: '0.3.1',
     date: '2026-03-22',
     changes: [
