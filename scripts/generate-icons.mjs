@@ -34,18 +34,25 @@ const LOGO_BLACK = join(publicDir, 'images', 'dwa-logo-black.png');
 
 /**
  * Generate a square icon with the DW Audio logo centered on a background.
- * Logo is padded to ~65% of the icon size (75% for maskable to respect safe zone).
+ * Logo fills ~85% of the icon (70% for maskable safe zone).
+ * Small sizes (<=32px) use sharpen to keep text legible.
  */
 async function generateIcon(size, { maskable = false, light = false } = {}) {
   const bg = light ? BG_LIGHT : BG_DARK;
   const logoSrc = light ? LOGO_BLACK : LOGO_WHITE;
-  const logoScale = maskable ? 0.55 : 0.65;
+  const logoScale = maskable ? 0.70 : 0.85;
 
   // Resize logo to fit within the padded area, maintaining aspect ratio
   const logoSize = Math.round(size * logoScale);
-  const logo = await sharp(logoSrc)
-    .resize(logoSize, logoSize, { fit: 'inside' })
-    .toBuffer();
+  let resizer = sharp(logoSrc)
+    .resize(logoSize, logoSize, { fit: 'inside', kernel: size <= 32 ? 'lanczos3' : 'lanczos3' });
+
+  // Sharpen small icons to keep text crisp
+  if (size <= 48) {
+    resizer = resizer.sharpen({ sigma: 1.2, m1: 1.5, m2: 0.7 });
+  }
+
+  const logo = await resizer.toBuffer();
 
   const logoMeta = await sharp(logo).metadata();
   const logoW = logoMeta.width;
