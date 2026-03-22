@@ -46,6 +46,7 @@
   "exclude": [
     "node_modules",
     "public/sw.js",
-    "supabase/functions"
+    "supabase/functions",
+    "companion/extracted"
   ]
 }
