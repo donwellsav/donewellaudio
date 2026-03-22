@@ -149,10 +149,10 @@ children.push(
   }),
   new Paragraph({ spacing: { before: 480 }, children: [] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: "Don Wells", font: FONT_BODY, size: SIZE_SUBTITLE, bold: true })] }),
-  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: "Kill The Ring Project", font: FONT_BODY, size: SIZE_BODY, italics: true })] }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: "DoneWell Audio Project", font: FONT_BODY, size: SIZE_BODY, italics: true })] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: "March 20, 2026", font: FONT_BODY, size: SIZE_BODY })] }),
   new Paragraph({ spacing: { before: 600 }, children: [] }),
-  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: "Version 1.0  •  killthering.com", font: FONT_BODY, size: SIZE_SMALL, color: "999999" })] }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: "Version 1.0  •  donewellaudio.com", font: FONT_BODY, size: SIZE_SMALL, color: "999999" })] }),
 );
 
 children.push(new Paragraph({ children: [new PageBreak()] }));
@@ -160,7 +160,7 @@ children.push(new Paragraph({ children: [new PageBreak()] }));
 // ─── EXECUTIVE SUMMARY ───
 children.push(h1("Executive Summary"));
 
-children.push(body("This whitepaper documents a significant discovery arising from the Kill The Ring (KTR) project: a real-time acoustic feedback detection system, when operated at elevated sensitivity without an active feedback loop, spontaneously performs room acoustic resonance analysis. The system identifies room modes and generates parametric EQ correction recommendations — functionality equivalent to dedicated room analyzers costing $400–$800+ — using only a standard microphone and ambient sound."));
+children.push(body("This whitepaper documents a significant discovery arising from the DoneWell Audio (DWA) project: a real-time acoustic feedback detection system, when operated at elevated sensitivity without an active feedback loop, spontaneously performs room acoustic resonance analysis. The system identifies room modes and generates parametric EQ correction recommendations — functionality equivalent to dedicated room analyzers costing $400–$800+ — using only a standard microphone and ambient sound."));
 
 children.push(calloutBox(
   "Key Discovery",
@@ -205,13 +205,13 @@ children.push(body("No such tool exists in the current market. Until now."));
 children.push(new Paragraph({ children: [new PageBreak()] }));
 
 // ─── 2. THE TECHNOLOGY ───
-children.push(h1("2. The Technology: Kill The Ring"));
+children.push(h1("2. The Technology: DoneWell Audio"));
 
-children.push(body("Kill The Ring (KTR) is a browser-based, real-time acoustic feedback detection system designed for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms augmented by a neural network, and delivers EQ recommendations with pitch translation. KTR runs entirely in the browser — no installation, no plugins, no server-side processing."));
+children.push(body("DoneWell Audio (DWA) is a browser-based, real-time acoustic feedback detection system designed for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms augmented by a neural network, and delivers EQ recommendations with pitch translation. DWA runs entirely in the browser — no installation, no plugins, no server-side processing."));
 
 children.push(h2("2.1 Architecture Overview"));
 
-children.push(body("KTR employs a three-layer processing pipeline optimized for real-time performance:"));
+children.push(body("DWA employs a three-layer processing pipeline optimized for real-time performance:"));
 
 children.push(body([b("Layer 1 — Main Thread (50 fps): "), t("Captures audio via getUserMedia, performs 8,192-point FFT at 48 kHz (5.86 Hz resolution), detects spectral peaks using prominence-based analysis with O(1) prefix-sum computation, and transfers peak data to the classification worker via zero-copy transferable buffers.")]));
 
@@ -269,7 +269,7 @@ children.push(
 children.push(h2("2.3 Content-Adaptive Weighted Fusion"));
 
 children.push(body([
-  t("The six algorithm scores are combined via weighted sum, but the weights change based on what the system is hearing. KTR classifies audio content in real-time using four spectral features (centroid, rolloff, flatness, crest factor) and selects from four weight profiles:"),
+  t("The six algorithm scores are combined via weighted sum, but the weights change based on what the system is hearing. DWA classifies audio content in real-time using four spectral features (centroid, rolloff, flatness, crest factor) and selects from four weight profiles:"),
 ]));
 
 // Weight profiles table
@@ -368,7 +368,7 @@ children.push(
 children.push(h2("2.5 EQ Advisory Generation"));
 
 children.push(body([
-  t("When a peak passes all gates with sufficient probability, KTR generates a parametric EQ recommendation specifying center frequency, Q factor, and cut depth. Cut depth is computed by the MINDS algorithm (MSD-Inspired Notch Depth Setting) based on the temporal growth rate of the peak, then scaled by the ERB psychoacoustic model: ERB("),
+  t("When a peak passes all gates with sufficient probability, DWA generates a parametric EQ recommendation specifying center frequency, Q factor, and cut depth. Cut depth is computed by the MINDS algorithm (MSD-Inspired Notch Depth Setting) based on the temporal growth rate of the peak, then scaled by the ERB psychoacoustic model: ERB("),
   it("f"),
   t(") = 24.7 × (4.37"),
   it("f"),
@@ -382,7 +382,7 @@ children.push(h1("3. The Discovery: Emergent Room Analysis"));
 
 children.push(calloutBox(
   "The Observation",
-  "On March 20, 2026, while testing KTR at maximum sensitivity (Ring Out mode, 2 dB threshold) with no feedback loop present — the microphone was not routed to any speakers — the system began generating sustained EQ advisories. The recommended frequencies corresponded to expected room resonance modes for the space."
+  "On March 20, 2026, while testing DWA at maximum sensitivity (Ring Out mode, 2 dB threshold) with no feedback loop present — the microphone was not routed to any speakers — the system began generating sustained EQ advisories. The recommended frequencies corresponded to expected room resonance modes for the space."
 ));
 
 children.push(new Paragraph({ spacing: { after: 160 }, children: [] }));
@@ -444,7 +444,7 @@ children.push(
 
 children.push(h2("3.3 Why the Gates Don't Help"));
 
-children.push(body("KTR has five multiplicative gates specifically designed to suppress false positives. None of them fire for room resonances:"));
+children.push(body("DWA has five multiplicative gates specifically designed to suppress false positives. None of them fire for room resonances:"));
 
 children.push(body([b("IHR Gate: "), t("Requires ≥3 harmonics with IHR > 0.35. Room modes are typically isolated (no harmonic series from a single mode). Gate doesn't activate.")]));
 children.push(body([b("PTMR Gate: "), t("Activates when PTMR is low (broad peaks). Room modes are sharp, narrow peaks — PTMR is high. Gate doesn't activate.")]));
@@ -452,7 +452,7 @@ children.push(body([b("Comb Stability Gate: "), t("Monitors for sweeping comb pa
 children.push(body([b("Formant Gate: "), t("Requires 2+ peaks in vocal formant bands with Q 3–20. Isolated room modes don't cluster in formant patterns. Gate doesn't activate.")]));
 children.push(body([b("Chromatic Gate: "), t("Requires frequency alignment to the 12-tone equal temperament grid (±5 cents). Room mode frequencies are determined by room dimensions, not musical scales. Gate doesn't activate.")]));
 
-children.push(body([t("Additionally, KTR has room mode suppression gates (roomModeProximity, modalDensityPenalty) that "), it("could"), t(" catch room resonances — but these are "), b("disabled by default"), t(" because the room configuration preset defaults to 'none'. Without explicit room dimensions, the system has no basis for computing expected mode frequencies.")]));
+children.push(body([t("Additionally, DWA has room mode suppression gates (roomModeProximity, modalDensityPenalty) that "), it("could"), t(" catch room resonances — but these are "), b("disabled by default"), t(" because the room configuration preset defaults to 'none'. Without explicit room dimensions, the system has no basis for computing expected mode frequencies.")]));
 
 children.push(calloutBox(
   "The Formal Statement",
@@ -468,7 +468,7 @@ children.push(h1("4. Practical Implications"));
 
 children.push(h2("4.1 What the System Actually Outputs"));
 
-children.push(body("When KTR operates in high-sensitivity mode in a room with no feedback loop, each advisory card produced by the system contains:"));
+children.push(body("When DWA operates in high-sensitivity mode in a room with no feedback loop, each advisory card produced by the system contains:"));
 
 children.push(body([b("• Center frequency (Hz): "), t("The frequency of the room resonance mode")]));
 children.push(body([b("• Q factor: "), t("Matched to the width of the resonance, reflecting how sharp the room mode is")]));
@@ -497,7 +497,7 @@ children.push(
     rows: [
       new TableRow({ tableHeader: true, children: [
         makeHeaderCell("Feature", pColW[0]),
-        makeHeaderCell("KTR (Emergent)", pColW[1]),
+        makeHeaderCell("DWA (Emergent)", pColW[1]),
         makeHeaderCell("Smaart", pColW[2]),
         makeHeaderCell("REW", pColW[3]),
         makeHeaderCell("Dirac Live", pColW[4]),
@@ -512,19 +512,19 @@ children.push(
       })),
     ],
   }),
-  caption("KTR's unique advantage is zero-setup, real-time operation with audience present. Trade-off: no phase response measurement."),
+  caption("DWA's unique advantage is zero-setup, real-time operation with audience present. Trade-off: no phase response measurement."),
 );
 
 children.push(h2("4.3 Use Cases"));
 
 children.push(h3("Pre-Show Room Check"));
-children.push(body("A sound engineer arrives at a venue, opens KTR on a phone or laptop, sets the threshold to Ring Out mode (2 dB), and within seconds begins seeing which frequencies are problematic in the room. No pink noise through the PA, no measurement mic on a stand — just ambient room sound exciting the modes."));
+children.push(body("A sound engineer arrives at a venue, opens DWA on a phone or laptop, sets the threshold to Ring Out mode (2 dB), and within seconds begins seeing which frequencies are problematic in the room. No pink noise through the PA, no measurement mic on a stand — just ambient room sound exciting the modes."));
 
 children.push(h3("Live Monitoring During Performance"));
-children.push(body("Unlike any existing tool, KTR can continuously monitor room resonances during a performance. As the audience fills the venue (absorbing mid/high frequencies), as the room heats up (increasing speed of sound, shifting mode frequencies), or as humidity changes (affecting air absorption), KTR tracks these changes in real-time."));
+children.push(body("Unlike any existing tool, DWA can continuously monitor room resonances during a performance. As the audience fills the venue (absorbing mid/high frequencies), as the room heats up (increasing speed of sound, shifting mode frequencies), or as humidity changes (affecting air absorption), DWA tracks these changes in real-time."));
 
 children.push(h3("Houses of Worship"));
-children.push(body("Many churches operate with volunteer sound engineers who lack the training or equipment for traditional room analysis. KTR provides automated room correction recommendations that a volunteer can apply directly to a graphic or parametric equalizer."));
+children.push(body("Many churches operate with volunteer sound engineers who lack the training or equipment for traditional room analysis. DWA provides automated room correction recommendations that a volunteer can apply directly to a graphic or parametric equalizer."));
 
 children.push(h3("Dual-Mode Operation"));
 children.push(body("The same system serves two purposes with a single sensitivity control: at normal sensitivity (15–42 dB threshold) it detects and helps eliminate feedback during sound check; at high sensitivity (2–8 dB) it characterizes the room. No separate tools needed."));
@@ -538,11 +538,11 @@ children.push(body("Intellectual honesty requires acknowledging what this approa
 
 children.push(body([b("Lower signal-to-noise ratio: "), t("Dedicated measurement signals (pink noise, swept sine) provide controlled, broadband excitation with known spectral characteristics. Ambient sound excitation is uncontrolled — frequency coverage depends entirely on what sounds are present in the room. Quiet frequency bands may have room modes that go undetected.")]));
 
-children.push(body([b("No phase response: "), t("KTR performs magnitude-only analysis. Traditional room measurement captures both magnitude and phase, enabling minimum-phase EQ corrections. KTR's corrections address magnitude response only.")]));
+children.push(body([b("No phase response: "), t("DWA performs magnitude-only analysis. Traditional room measurement captures both magnitude and phase, enabling minimum-phase EQ corrections. DWA's corrections address magnitude response only.")]));
 
 children.push(body([b("Cannot distinguish room modes from other persistent peaks: "), t("HVAC noise, external traffic rumble, structural vibration, and electrical hum can all produce persistent narrowband peaks that the system will classify as room resonances. An experienced engineer must use judgment to evaluate recommendations.")]));
 
-children.push(body([b("Uncalibrated microphone: "), t("Without a calibrated measurement microphone, the system's frequency response is colored by the microphone's own response curve. KTR mitigates this with A-weighting compensation and an optional MEMS mic calibration profile, but this does not match the accuracy of a purpose-built measurement microphone.")]));
+children.push(body([b("Uncalibrated microphone: "), t("Without a calibrated measurement microphone, the system's frequency response is colored by the microphone's own response curve. DWA mitigates this with A-weighting compensation and an optional MEMS mic calibration profile, but this does not match the accuracy of a purpose-built measurement microphone.")]));
 
 children.push(body([b("Sensitivity threshold trade-off: "), t("High sensitivity (low threshold) is required to detect room modes, but it also increases the false positive rate for feedback detection. The system cannot simultaneously operate in its most sensitive room analysis mode and its normal feedback detection mode.")]));
 
@@ -640,7 +640,7 @@ children.push(body("The discovery opens several avenues for development:"));
 
 children.push(body([b("Dedicated Room Analysis Mode: "), t("A purpose-built UI mode with labeling appropriate for room analysis (\"Room Resonance\" rather than \"Feedback\"), room correction curve export, and Schroeder frequency auto-estimation from the pattern of detected modes.")]));
 
-children.push(body([b("Formal Validation Study: "), t("Side-by-side comparison of KTR room analysis output against Smaart transfer function measurements in multiple venue types (small room, medium hall, large reverberant space) to quantify accuracy and identify systematic biases.")]));
+children.push(body([b("Formal Validation Study: "), t("Side-by-side comparison of DWA room analysis output against Smaart transfer function measurements in multiple venue types (small room, medium hall, large reverberant space) to quantify accuracy and identify systematic biases.")]));
 
 children.push(body([b("Ambient Excitation Analysis: "), t("Research into how different ambient sound sources (speech, music, HVAC, crowd noise) affect the coverage and accuracy of room mode detection. Some ambient sources may excite certain frequency ranges more than others, creating blind spots.")]));
 
@@ -655,7 +655,7 @@ children.push(h1("8. Conclusion"));
 
 children.push(body("The discovery that a feedback detection system inherently performs room acoustic analysis is not an accident of implementation — it is a consequence of the physical equivalence between room resonances and acoustic feedback at the spectral level. Both are self-sustaining narrowband oscillations; only their sustaining mechanisms differ — and a microphone analyzing the frequency spectrum cannot observe the sustaining mechanism."));
 
-children.push(body("This equivalence means that Kill The Ring, originally designed to protect live sound from feedback, can simultaneously serve as a real-time room analyzer requiring no setup, no test signals, no calibrated microphones, and no prior room configuration. It works with audience present, during live events, continuously tracking how room acoustics change over time."));
+children.push(body("This equivalence means that DoneWell Audio, originally designed to protect live sound from feedback, can simultaneously serve as a real-time room analyzer requiring no setup, no test signals, no calibrated microphones, and no prior room configuration. It works with audience present, during live events, continuously tracking how room acoustics change over time."));
 
 children.push(body("For the live sound engineering community — particularly those working without access to expensive measurement systems — this represents a meaningful step toward democratizing room acoustic analysis."));
 
@@ -687,7 +687,7 @@ const refs = [
   "[12] Kuttruff, H. — \"Room Acoustics,\" 6th ed., CRC Press, 2016.",
   "[13] Cooley, J.W., Tukey, J.W. — \"An Algorithm for the Machine Calculation of Complex Fourier Series,\" Mathematics of Computation, 1965.",
   "[14] ISO 3382-1:2009 — \"Acoustics — Measurement of room acoustic parameters.\"",
-  "[15] Wells, D. — \"Kill The Ring: Real-Time Acoustic Feedback Detection Using Six-Algorithm Fusion,\" AES Convention Paper (draft), 2026.",
+  "[15] Wells, D. — \"DoneWell Audio: Real-Time Acoustic Feedback Detection Using Six-Algorithm Fusion,\" AES Convention Paper (draft), 2026.",
 ];
 
 for (const ref of refs) {
@@ -704,7 +704,7 @@ children.push(new Paragraph({ spacing: { before: 4800 }, children: [] }));
 children.push(new Paragraph({
   alignment: AlignmentType.CENTER,
   spacing: { after: 120 },
-  children: [new TextRun({ text: "Kill The Ring", font: FONT_HEADING, size: SIZE_TITLE, bold: true, color: BRAND_BLUE })],
+  children: [new TextRun({ text: "DoneWell Audio", font: FONT_HEADING, size: SIZE_TITLE, bold: true, color: BRAND_BLUE })],
 }));
 children.push(new Paragraph({
   alignment: AlignmentType.CENTER,
@@ -714,7 +714,7 @@ children.push(new Paragraph({
 children.push(new Paragraph({
   alignment: AlignmentType.CENTER,
   spacing: { after: 60 },
-  children: [new TextRun({ text: "killthering.com", font: FONT_BODY, size: SIZE_BODY, color: BRAND_BLUE })],
+  children: [new TextRun({ text: "donewellaudio.com", font: FONT_BODY, size: SIZE_BODY, color: BRAND_BLUE })],
 }));
 children.push(new Paragraph({
   alignment: AlignmentType.CENTER,
@@ -744,7 +744,7 @@ const doc = new Document({
         children: [new Paragraph({
           alignment: AlignmentType.RIGHT,
           children: [
-            new TextRun({ text: "Kill The Ring — Technical Whitepaper", font: FONT_BODY, size: SIZE_SMALL, italics: true, color: "999999" }),
+            new TextRun({ text: "DoneWell Audio — Technical Whitepaper", font: FONT_BODY, size: SIZE_SMALL, italics: true, color: "999999" }),
           ],
         })],
       }),
@@ -772,7 +772,7 @@ const doc = new Document({
   }],
 });
 
-const outputPath = process.argv[2] || "2026-03-20-ktr-room-analysis-whitepaper.docx";
+const outputPath = process.argv[2] || "2026-03-20-dwa-room-analysis-whitepaper.docx";
 Packer.toBuffer(doc).then(buffer => {
   fs.writeFileSync(outputPath, buffer);
   console.log(`Technical whitepaper written to ${outputPath} (${(buffer.length / 1024).toFixed(1)} KB)`);

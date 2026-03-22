@@ -18,7 +18,7 @@ async function createGradient(fn,c1,c2,w=1920,h=1080){
 }
 
 function sn(s,n,t){s.addText(`${n} / ${t}`,{x:8.5,y:5.2,w:1.2,h:0.3,fontSize:9,fontFace:FONT,color:C.textDim,align:'right'});}
-function ft(s){s.addText('Kill The Ring  •  killthering.com',{x:0.3,y:5.2,w:4,h:0.3,fontSize:9,fontFace:FONT,color:C.textDim});}
+function ft(s){s.addText('DoneWell Audio  •  donewellaudio.com',{x:0.3,y:5.2,w:4,h:0.3,fontSize:9,fontFace:FONT,color:C.textDim});}
 function at(s,t,o={}){s.addText(t,{x:0.6,y:0.3,w:8.8,h:0.7,fontSize:28,fontFace:FONT,color:C.accent1,bold:true,...o});}
 function as(s,t){s.addText(t,{x:0.6,y:0.95,w:8.8,h:0.4,fontSize:14,fontFace:FONT,color:C.textMuted,italic:true});}
 function al(s){s.addShape(pptx.shapes.RECTANGLE,{x:0.6,y:1.2,w:2.0,h:0.04,fill:{color:C.accent1}});}
@@ -41,13 +41,13 @@ async function build(){
   s.addText('Emergent Room Acoustic Resonance\nAnalysis via Multi-Algorithm\nFeedback Detection',{x:0.8,y:1.5,w:8.4,h:2.0,fontSize:30,fontFace:FONT,color:C.white,bold:true,lineSpacingMultiple:1.15});
   s.addText('How Six Fused Algorithms Accidentally Became a Room Analyzer',{x:0.8,y:3.5,w:8.4,h:0.5,fontSize:15,fontFace:FONT,color:C.accent1,italic:true});
   s.addShape(pptx.shapes.RECTANGLE,{x:0.8,y:4.2,w:3.0,h:0.03,fill:{color:C.accent1}});
-  s.addText('Don Wells  •  Kill The Ring Project  •  March 2026',{x:0.8,y:4.4,w:8.4,h:0.3,fontSize:12,fontFace:FONT,color:C.textMuted});
+  s.addText('Don Wells  •  DoneWell Audio Project  •  March 2026',{x:0.8,y:4.4,w:8.4,h:0.3,fontSize:12,fontFace:FONT,color:C.textMuted});
   sn(s,1,T);
 
   // 2: Observation
   s=ns();at(s,'The Observation');as(s,'March 20, 2026 — An Unexpected Result');al(s);
   s.addShape(pptx.shapes.ROUNDED_RECTANGLE,{x:0.6,y:1.5,w:8.8,h:1.6,fill:{color:'1C2128'},rectRadius:0.1,line:{color:C.accent2,width:2}});
-  s.addText([{text:'KTR running in Ring Out mode (2 dB threshold)\n',options:{fontSize:14,color:C.white,bold:true}},{text:'No feedback loop present — mic not routed to speakers\n',options:{fontSize:13,color:C.text}},{text:'System generates sustained EQ advisories for persistent spectral peaks\n',options:{fontSize:13,color:C.text}},{text:'Advisory frequencies match expected room resonance modes',options:{fontSize:13,color:C.accent1,bold:true}}],{x:0.9,y:1.6,w:8.2,h:1.4,valign:'middle',lineSpacingMultiple:1.4});
+  s.addText([{text:'DWA running in Ring Out mode (2 dB threshold)\n',options:{fontSize:14,color:C.white,bold:true}},{text:'No feedback loop present — mic not routed to speakers\n',options:{fontSize:13,color:C.text}},{text:'System generates sustained EQ advisories for persistent spectral peaks\n',options:{fontSize:13,color:C.text}},{text:'Advisory frequencies match expected room resonance modes',options:{fontSize:13,color:C.accent1,bold:true}}],{x:0.9,y:1.6,w:8.2,h:1.4,valign:'middle',lineSpacingMultiple:1.4});
   s.addText([{text:'The system was detecting ',options:{fontSize:15,color:C.text}},{text:'room resonances',options:{fontSize:15,color:C.accent2,bold:true}},{text:' and generating ',options:{fontSize:15,color:C.text}},{text:'room correction EQ',options:{fontSize:15,color:C.accent2,bold:true}},{text:' — with zero setup.',options:{fontSize:15,color:C.text}}],{x:0.6,y:3.5,w:8.8,h:0.6});
   s.addText('This is not a bug. It is physics.',{x:0.6,y:4.3,w:8.8,h:0.5,fontSize:18,fontFace:FONT,color:C.accent1,bold:true,italic:true});
   ft(s);sn(s,2,T);
@@ -118,8 +118,8 @@ async function build(){
   ft(s);sn(s,11,T);
 
   // 12: Prior Art
-  s=ns();at(s,'Prior Art Comparison');as(s,'KTR Room Analysis vs. Existing Tools');al(s);
-  s.addTable([[{text:'Feature',options:{fill:{color:C.accent1},color:C.white,bold:true}},{text:'KTR',options:{fill:{color:C.accent2},color:C.white,bold:true,align:'center'}},{text:'Smaart v8',options:{fill:{color:C.accent1},color:C.white,bold:true,align:'center'}},{text:'REW',options:{fill:{color:C.accent1},color:C.white,bold:true,align:'center'}},{text:'Dirac Live',options:{fill:{color:C.accent1},color:C.white,bold:true,align:'center'}}],['Test signal',{text:'No',options:{color:C.green,bold:true}},'Pink noise','Swept sine','Swept sine'],['Cal. mic',{text:'No',options:{color:C.green,bold:true}},'Required','Required','Required'],['Real-time',{text:'Yes (50fps)',options:{color:C.green,bold:true}},'Yes','No','No'],['Audience OK',{text:'Yes',options:{color:C.green,bold:true}},'Difficult','No','No'],['Setup time',{text:'Zero',options:{color:C.green,bold:true}},'15–30 min','10–20 min','15–30 min'],['Output','PEQ recs','Xfer func','IR + EQ','Room corr.'],['Cost',{text:'Free',options:{color:C.green,bold:true}},'~$800','Free','~$400']],{x:0.3,y:1.5,w:9.4,colW:[1.4,1.8,1.5,1.5,1.5],border:{pt:0.5,color:C.border},color:C.text,fontSize:10,fontFace:FONT,rowH:[0.35,0.38,0.38,0.38,0.38,0.38,0.38,0.38],fill:{color:C.bgCard},valign:'middle'});
+  s=ns();at(s,'Prior Art Comparison');as(s,'DWA Room Analysis vs. Existing Tools');al(s);
+  s.addTable([[{text:'Feature',options:{fill:{color:C.accent1},color:C.white,bold:true}},{text:'DWA',options:{fill:{color:C.accent2},color:C.white,bold:true,align:'center'}},{text:'Smaart v8',options:{fill:{color:C.accent1},color:C.white,bold:true,align:'center'}},{text:'REW',options:{fill:{color:C.accent1},color:C.white,bold:true,align:'center'}},{text:'Dirac Live',options:{fill:{color:C.accent1},color:C.white,bold:true,align:'center'}}],['Test signal',{text:'No',options:{color:C.green,bold:true}},'Pink noise','Swept sine','Swept sine'],['Cal. mic',{text:'No',options:{color:C.green,bold:true}},'Required','Required','Required'],['Real-time',{text:'Yes (50fps)',options:{color:C.green,bold:true}},'Yes','No','No'],['Audience OK',{text:'Yes',options:{color:C.green,bold:true}},'Difficult','No','No'],['Setup time',{text:'Zero',options:{color:C.green,bold:true}},'15–30 min','10–20 min','15–30 min'],['Output','PEQ recs','Xfer func','IR + EQ','Room corr.'],['Cost',{text:'Free',options:{color:C.green,bold:true}},'~$800','Free','~$400']],{x:0.3,y:1.5,w:9.4,colW:[1.4,1.8,1.5,1.5,1.5],border:{pt:0.5,color:C.border},color:C.text,fontSize:10,fontFace:FONT,rowH:[0.35,0.38,0.38,0.38,0.38,0.38,0.38,0.38],fill:{color:C.bgCard},valign:'middle'});
   s.addText('Trade-off: No phase response measurement (magnitude-only analysis)',{x:0.6,y:4.75,w:8.8,h:0.3,fontSize:10,fontFace:FONT,color:C.textMuted,italic:true});
   ft(s);sn(s,12,T);
 
@@ -142,10 +142,10 @@ async function build(){
   s.addText([{text:'Room resonances and acoustic feedback are spectrally identical.\n',options:{fontSize:16,color:C.white,bold:true}},{text:'A system designed to detect one inherently detects the other.\n\n',options:{fontSize:14,color:C.text}},{text:'This is not an implementation artifact — it is a consequence of the\nSpectral Signature Equivalence Theorem: ',options:{fontSize:13,color:C.text}},{text:'‖S_fb − S_rm‖₂ → 0\n\n',options:{fontSize:14,fontFace:FONT_MONO,color:C.accent2,bold:true}}],{x:0.8,y:1.4,w:8.4,h:2.4,valign:'top',lineSpacingMultiple:1.3});
   const nx=[{n:'1',t:'Formal validation\nvs. Smaart/REW',c:C.accent3},{n:'2',t:'Dedicated Room\nAnalysis mode',c:C.accent1},{n:'3',t:'ML discrimination\n(room vs. feedback)',c:C.accent2},{n:'4',t:'Cross-platform\nvalidation study',c:C.accent5}];
   for(let i=0;i<nx.length;i++){const x=0.8+i*2.25;s.addShape(pptx.shapes.ROUNDED_RECTANGLE,{x,y:3.8,w:2.05,h:1.0,fill:{color:C.bgCard},rectRadius:0.08,line:{color:nx[i].c,width:1.5}});s.addText(nx[i].n,{x:x+0.1,y:3.85,w:0.4,h:0.35,fontSize:14,fontFace:FONT,color:nx[i].c,bold:true});s.addText(nx[i].t,{x:x+0.5,y:3.85,w:1.45,h:0.9,fontSize:10,fontFace:FONT,color:C.text,valign:'middle',lineSpacingMultiple:1.3});}
-  s.addText('Don Wells  •  Kill The Ring  •  killthering.com  •  March 2026',{x:0.8,y:5.0,w:8.4,h:0.3,fontSize:10,fontFace:FONT,color:C.textDim});
+  s.addText('Don Wells  •  DoneWell Audio  •  donewellaudio.com  •  March 2026',{x:0.8,y:5.0,w:8.4,h:0.3,fontSize:10,fontFace:FONT,color:C.textDim});
   sn(s,15,T);
 
-  const out=process.argv[2]||'ktr-scientific-pitch-deck.pptx';
+  const out=process.argv[2]||'dwa-scientific-pitch-deck.pptx';
   await pptx.writeFile({fileName:out});
   console.log(`Scientific pitch deck: ${out}`);
   console.log(`${T} slides, dark theme, algorithm tables, weight chart, formulas`);

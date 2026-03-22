@@ -160,7 +160,7 @@ children.push(new Paragraph({ spacing: { after: 80 }, alignment: AlignmentType.C
   new TextRun({ text: "Don Wells", font: FONT_BODY, size: SIZE_AUTHOR, bold: true }),
 ] }));
 children.push(new Paragraph({ spacing: { after: 400 }, alignment: AlignmentType.CENTER, children: [
-  new TextRun({ text: "Kill The Ring Project", font: FONT_BODY, size: SIZE_AUTHOR, italics: true }),
+  new TextRun({ text: "DoneWell Audio Project", font: FONT_BODY, size: SIZE_AUTHOR, italics: true }),
 ] }));
 
 // ═══════════════════════════════════════════════════════════════
@@ -182,7 +182,7 @@ children.push(bodyPara([
   bodyText("Traditional room analysis methods require dedicated measurement infrastructure: swept sine or pink noise test signals, calibrated omnidirectional measurement microphones (such as the Earthworks M30 or Behringer ECM8000), and specialized analysis software such as Rational Acoustics Smaart [8], Room EQ Wizard (REW) [9], or Dirac Live [10]. These measurements are typically performed in an unoccupied venue, as audience presence significantly alters the room\u2019s acoustic response. The measurement procedure, from equipment setup through data acquisition and analysis, typically requires 15\u201330 minutes for a single microphone position, with multiple positions recommended for comprehensive coverage [13]."),
 ]));
 children.push(bodyPara([
-  bodyText("This paper presents the discovery of an emergent capability within a real-time acoustic feedback detection system called Kill The Ring (KTR) [20]. When the system\u2019s detection sensitivity is elevated beyond its intended operating range \u2014 specifically, when the prominence threshold is reduced below 8 dB \u2014 the six-algorithm fusion pipeline begins detecting and issuing equalization recommendations for persistent spectral peaks that are not acoustic feedback, but rather "),
+  bodyText("This paper presents the discovery of an emergent capability within a real-time acoustic feedback detection system called DoneWell Audio (DWA) [20]. When the system\u2019s detection sensitivity is elevated beyond its intended operating range \u2014 specifically, when the prominence threshold is reduced below 8 dB \u2014 the six-algorithm fusion pipeline begins detecting and issuing equalization recommendations for persistent spectral peaks that are not acoustic feedback, but rather "),
   italicText("room resonance modes"),
   bodyText(". This behavior was observed during live operation and subsequently traced through the complete algorithm chain to establish its physical and mathematical basis."),
 ]));
@@ -336,7 +336,7 @@ children.push(sectionHeading("3. System Architecture"));
 
 children.push(subsectionHeading("3.1 Detection Pipeline Overview"));
 children.push(bodyPara([
-  bodyText("Kill The Ring (KTR) [20] is a browser-based real-time acoustic feedback detection system implemented in TypeScript. The detection pipeline operates on a three-layer architecture: a main thread performing 8192-point FFT analysis at 50 fps (5.86 Hz frequency resolution at 48 kHz sample rate), a Web Worker performing classification and advisory generation, and a React-based user interface rendering at 30 fps. Audio data is captured via the Web Audio API\u2019s AnalyserNode and transferred to the worker via zero-copy transferable Float32Array buffers."),
+  bodyText("DoneWell Audio (DWA) [20] is a browser-based real-time acoustic feedback detection system implemented in TypeScript. The detection pipeline operates on a three-layer architecture: a main thread performing 8192-point FFT analysis at 50 fps (5.86 Hz frequency resolution at 48 kHz sample rate), a Web Worker performing classification and advisory generation, and a React-based user interface rendering at 30 fps. Audio data is captured via the Web Audio API\u2019s AnalyserNode and transferred to the worker via zero-copy transferable Float32Array buffers."),
 ]));
 
 children.push(subsectionHeading("3.2 Peak Detection (Main Thread)"));
@@ -735,7 +735,7 @@ children.push(sectionHeading("4. The Emergent Phenomenon"));
 
 children.push(subsectionHeading("4.1 Observation"));
 children.push(bodyPara([
-  bodyText("During routine testing, the KTR system was operated in Ring-Out mode \u2014 a calibration configuration employing a 2 dB prominence threshold, 0.30 confidence threshold, and 16384-point FFT (2.93 Hz resolution at 48 kHz). "),
+  bodyText("During routine testing, the DWA system was operated in Ring-Out mode \u2014 a calibration configuration employing a 2 dB prominence threshold, 0.30 confidence threshold, and 16384-point FFT (2.93 Hz resolution at 48 kHz). "),
   boldText("No electroacoustic feedback loop was present"),
   bodyText(": the microphone was not routed to any loudspeaker system. The system was simply listening to ambient room sound."),
 ]));
@@ -896,7 +896,7 @@ children.push(subsectionHeading("5.3 Information Content of Room Mode Advisories
 children.push(bodyPara([
   bodyText("Each advisory generated by the system contains: frequency (Hz), recommended cut depth (dB), and Q factor \u2014 precisely a parametric equalizer filter specification. When the system operates on room resonances rather than feedback, the collection of generated advisories constitutes a "),
   boldText("room correction EQ profile"),
-  bodyText(". This is functionally equivalent to the output of traditional room analysis tools: Smaart produces a transfer function from which correction filters are derived [8]; REW generates parametric EQ settings from room measurements [9]; Dirac Live computes room correction filter coefficients [10]. KTR produces this same information class without test signals or calibrated microphones."),
+  bodyText(". This is functionally equivalent to the output of traditional room analysis tools: Smaart produces a transfer function from which correction filters are derived [8]; REW generates parametric EQ settings from room measurements [9]; Dirac Live computes room correction filter coefficients [10]. DWA produces this same information class without test signals or calibrated microphones."),
 ]));
 
 // ═══════════════════════════════════════════════════════════════
@@ -911,7 +911,7 @@ children.push(new Table({
   rows: [
     new TableRow({ tableHeader: true, children: [
       makeHeaderCell("Feature", compColW[0]),
-      makeHeaderCell("KTR (Emergent)", compColW[1]),
+      makeHeaderCell("DWA (Emergent)", compColW[1]),
       makeHeaderCell("Smaart [8]", compColW[2]),
       makeHeaderCell("REW [9]", compColW[3]),
       makeHeaderCell("Dirac Live [10]", compColW[4]),
@@ -929,20 +929,20 @@ children.push(new Table({
     ].map(row => new TableRow({ children: row.map((v, i) => makeCell(v, compColW[i], i === 0 ? { align: AlignmentType.LEFT } : {})) }))),
   ],
 }));
-children.push(captionPara("Table 3. Comparison of KTR emergent room analysis with established room measurement systems."));
+children.push(captionPara("Table 3. Comparison of DWA emergent room analysis with established room measurement systems."));
 
 children.push(subsectionHeading("6.1 Advantages"));
 children.push(bodyPara([
   boldText("Zero-setup operation: "),
-  bodyText("KTR requires no test signal generator, no calibrated measurement microphone, and no venue clearance. The system operates on whatever ambient sound is present \u2014 HVAC noise, audience murmur, rehearsal sound, or environmental noise \u2014 as the excitation source. This enables room analysis during sound check with performers present, during audience load-in, or even during performance."),
+  bodyText("DWA requires no test signal generator, no calibrated measurement microphone, and no venue clearance. The system operates on whatever ambient sound is present \u2014 HVAC noise, audience murmur, rehearsal sound, or environmental noise \u2014 as the excitation source. This enables room analysis during sound check with performers present, during audience load-in, or even during performance."),
 ]));
 children.push(bodyPara([
   boldText("Real-time continuous monitoring: "),
-  bodyText("Traditional room measurements capture a snapshot at a single moment. KTR\u2019s emergent mode provides continuous 50 fps monitoring of room resonances, automatically detecting changes as doors open/close, audience fills the space, or temperature/humidity shifts alter the speed of sound and therefore mode frequencies."),
+  bodyText("Traditional room measurements capture a snapshot at a single moment. DWA\u2019s emergent mode provides continuous 50 fps monitoring of room resonances, automatically detecting changes as doors open/close, audience fills the space, or temperature/humidity shifts alter the speed of sound and therefore mode frequencies."),
 ]));
 children.push(bodyPara([
   boldText("Direct EQ output: "),
-  bodyText("Rather than producing a transfer function or impulse response that requires interpretation, KTR generates ready-to-apply PEQ recommendations \u2014 frequency, Q, and cut depth \u2014 reducing the expertise barrier for room correction."),
+  bodyText("Rather than producing a transfer function or impulse response that requires interpretation, DWA generates ready-to-apply PEQ recommendations \u2014 frequency, Q, and cut depth \u2014 reducing the expertise barrier for room correction."),
 ]));
 
 children.push(subsectionHeading("6.2 Limitations"));
@@ -952,7 +952,7 @@ children.push(bodyPara([
 ]));
 children.push(bodyPara([
   boldText("No phase response measurement: "),
-  bodyText("KTR performs magnitude-only analysis. Phase response, group delay, and time-domain characteristics (early reflections, RT60 decay shape) require impulse response measurement and are not available from spectral peak analysis alone."),
+  bodyText("DWA performs magnitude-only analysis. Phase response, group delay, and time-domain characteristics (early reflections, RT60 decay shape) require impulse response measurement and are not available from spectral peak analysis alone."),
 ]));
 children.push(bodyPara([
   boldText("Source ambiguity: "),
@@ -981,7 +981,7 @@ children.push(bodyPara([
 
 children.push(subsectionHeading("7.3 Future Work"));
 children.push(bodyPara([
-  bodyText("Formal validation is required, comparing KTR\u2019s room mode identifications against calibrated measurements (Smaart transfer function, REW room mode analysis) across multiple venues with known geometry. Auto-estimation of the Schroeder frequency from detected mode patterns would enable the system to infer room characteristics without explicit configuration. Extended ML training to distinguish room modes from feedback \u2014 potentially using the presence/absence of an electroacoustic loop as ground truth \u2014 could enable automatic mode classification. Cross-validation with impulse response measurements [13] would establish accuracy bounds for the ambient excitation approach."),
+  bodyText("Formal validation is required, comparing DWA\u2019s room mode identifications against calibrated measurements (Smaart transfer function, REW room mode analysis) across multiple venues with known geometry. Auto-estimation of the Schroeder frequency from detected mode patterns would enable the system to infer room characteristics without explicit configuration. Extended ML training to distinguish room modes from feedback \u2014 potentially using the presence/absence of an electroacoustic loop as ground truth \u2014 could enable automatic mode classification. Cross-validation with impulse response measurements [13] would establish accuracy bounds for the ambient excitation approach."),
 ]));
 
 // ═══════════════════════════════════════════════════════════════
@@ -989,7 +989,7 @@ children.push(bodyPara([
 // ═══════════════════════════════════════════════════════════════
 children.push(sectionHeading("8. Conclusions"));
 children.push(bodyPara([
-  bodyText("We have presented the discovery and mathematical analysis of an emergent behavior in the Kill The Ring acoustic feedback detection system: when operated at elevated sensitivity without an active feedback loop, the system\u2019s six-algorithm fusion pipeline detects room resonance modes and generates equalization correction recommendations for them."),
+  bodyText("We have presented the discovery and mathematical analysis of an emergent behavior in the DoneWell Audio acoustic feedback detection system: when operated at elevated sensitivity without an active feedback loop, the system\u2019s six-algorithm fusion pipeline detects room resonance modes and generates equalization correction recommendations for them."),
 ]));
 children.push(bodyPara([
   bodyText("The Spectral Signature Equivalence Theorem (Equation 17) formalizes the observation that room resonances and acoustic feedback occupy the same region of the six-dimensional algorithm score space. This equivalence is not a deficiency of the detection algorithms but a consequence of the physical similarity between the two phenomena: both are self-sustaining narrowband oscillations differing only in their sustaining mechanism, which is invisible to spectral analysis."),
@@ -1024,7 +1024,7 @@ const refs = [
   '[17] J. S. Bendat, A. G. Piersol, Random Data: Analysis and Measurement Procedures, 4th ed., Wiley, 2010.',
   '[18] M. M\u00F6ser, Engineering Acoustics: An Introduction to Noise Control, 2nd ed., Springer, 2009.',
   '[19] AES Information Document for Room Acoustics, AES-4id-2001.',
-  '[20] D. Wells, "Kill The Ring: Real-time acoustic feedback detection using six-algorithm fusion," unpublished, 2026.',
+  '[20] D. Wells, "DoneWell Audio: Real-time acoustic feedback detection using six-algorithm fusion," unpublished, 2026.',
 ];
 refs.forEach(r => children.push(refPara(r)));
 

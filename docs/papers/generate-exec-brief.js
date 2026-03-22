@@ -78,7 +78,7 @@ async function build(){
 
   // ── EXECUTIVE SUMMARY ──
   titleChildren.push(h('EXECUTIVE SUMMARY',{size:20,before:40,after:20,underline:true}));
-  titleChildren.push(body('Kill The Ring (KTR) is a browser-based, real-time acoustic feedback detection system that employs six fused detection algorithms and a neural network meta-model. In March 2026, we discovered that when operated at elevated sensitivity, the system detects room acoustic resonance modes — effectively performing real-time room analysis without test signals, calibrated microphones, or any setup. This emergent capability replaces $800+ professional measurement systems with a free browser tab.',{after:20}));
+  titleChildren.push(body('DoneWell Audio (DWA) is a browser-based, real-time acoustic feedback detection system that employs six fused detection algorithms and a neural network meta-model. In March 2026, we discovered that when operated at elevated sensitivity, the system detects room acoustic resonance modes — effectively performing real-time room analysis without test signals, calibrated microphones, or any setup. This emergent capability replaces $800+ professional measurement systems with a free browser tab.',{after:20}));
 
   // ── KEY DISCOVERY (callout box) ──
   titleChildren.push(new Table({
@@ -152,7 +152,7 @@ async function build(){
   titleChildren.push(hrule());
   titleChildren.push(new Paragraph({spacing:{before:20,after:0},children:[
     new TextRun({text:'STATUS: ',font:FONT_HEAD,size:16,bold:true,color:NAVY}),
-    new TextRun({text:'Live at killthering.com  •  v0.159  •  37K+ LOC  •  488 tests  •  161 files  •  US Patent Pending  •  AES Paper Submitted',font:FONT_BODY,size:16,color:GRAY}),
+    new TextRun({text:'Live at donewellaudio.com  •  v0.159  •  37K+ LOC  •  488 tests  •  161 files  •  US Patent Pending  •  AES Paper Submitted',font:FONT_BODY,size:16,color:GRAY}),
   ]}));
 
   const doc=new Document({

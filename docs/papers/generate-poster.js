@@ -19,7 +19,7 @@ const pptx=new pptxgen();
 pptx.defineLayout({name:'POSTER',width:48,height:36});
 pptx.layout='POSTER';
 pptx.author='Don Wells';
-pptx.title='KTR Conference Poster — Emergent Room Resonance Analysis';
+pptx.title='DWA Conference Poster — Emergent Room Resonance Analysis';
 
 async function grad(fn,c1,c2,w=4800,h=3600){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#${c1}"/><stop offset="100%" style="stop-color:#${c2}"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/></svg>`;
@@ -50,7 +50,7 @@ async function build(){
   card(s,1,0.8,46,4.5,{fill:'121E36',border:C.accent,borderW:2});
   s.addText('Emergent Room Acoustic Resonance Analysis via\nMulti-Algorithm Feedback Detection',{x:1.5,y:1.0,w:35,h:2.5,fontSize:60,fontFace:FONT,color:C.white,bold:true,lineSpacingMultiple:1.15});
   s.addText('Don Wells',{x:1.5,y:3.5,w:12,h:0.7,fontSize:28,fontFace:FONT,color:C.gold,bold:true});
-  s.addText('Kill The Ring Project  •  killthering.com  •  March 2026',{x:1.5,y:4.2,w:20,h:0.5,fontSize:22,fontFace:FONT,color:C.textMuted});
+  s.addText('DoneWell Audio Project  •  donewellaudio.com  •  March 2026',{x:1.5,y:4.2,w:20,h:0.5,fontSize:22,fontFace:FONT,color:C.textMuted});
 
   // Key result on right side of title
   card(s,36,1.2,10,3.5,{fill:'1A2230',border:C.gold,borderW:2});
@@ -212,7 +212,7 @@ async function build(){
   // Comparison with Prior Art
   secHead(s,c3x,c1y+5.7,c3w,'COMPARISON WITH EXISTING TOOLS',C.gold);
   const compRows=[
-    [{text:'Feature',options:{bold:true,color:C.gold,fontSize:14}},{text:'KTR',options:{bold:true,color:C.accent,fontSize:14}},{text:'Smaart',options:{bold:true,color:C.textMuted,fontSize:14}},{text:'REW',options:{bold:true,color:C.textMuted,fontSize:14}},{text:'Dirac',options:{bold:true,color:C.textMuted,fontSize:14}}],
+    [{text:'Feature',options:{bold:true,color:C.gold,fontSize:14}},{text:'DWA',options:{bold:true,color:C.accent,fontSize:14}},{text:'Smaart',options:{bold:true,color:C.textMuted,fontSize:14}},{text:'REW',options:{bold:true,color:C.textMuted,fontSize:14}},{text:'Dirac',options:{bold:true,color:C.textMuted,fontSize:14}}],
     [{text:'Test signal'},{text:'None',options:{color:C.green,bold:true}},{text:'Pink noise'},{text:'Sweep'},{text:'Sweep'}],
     [{text:'Cal. mic'},{text:'None',options:{color:C.green,bold:true}},{text:'Required'},{text:'Required'},{text:'Required'}],
     [{text:'Real-time'},{text:'50fps',options:{color:C.green,bold:true}},{text:'Yes'},{text:'No'},{text:'No'}],
@@ -318,7 +318,7 @@ async function build(){
     '[7] Fisher, N.I., "Statistical Analysis of Circular Data," Cambridge, 1993',
     '[8] Cooley & Tukey, "An Algorithm for Complex Fourier Series," Math. Comp., 1965',
     '[9] Kuttruff, H., "Room Acoustics," 6th ed., CRC Press, 2016',
-    '[10] Wells, D., "Kill The Ring: Real-Time Acoustic Feedback Detection," 2026',
+    '[10] Wells, D., "DoneWell Audio: Real-Time Acoustic Feedback Detection," 2026',
   ];
   refs.forEach((r,i)=>{
     s.addText(r,{x:c4x+0.3,y:c1y+18.9+i*0.5,w:c4w-0.6,h:0.45,fontSize:13,fontFace:FONT,color:C.textMuted,lineSpacingMultiple:1.1});
@@ -326,9 +326,9 @@ async function build(){
 
   // ── BOTTOM BANNER ──
   card(s,1,34.2,46,1.4,{fill:'121E36',border:C.accent,borderW:2});
-  s.addText('Kill The Ring  •  killthering.com  •  Real-Time Acoustic Intelligence',{x:2,y:34.3,w:20,h:0.5,fontSize:22,fontFace:FONT,color:C.accent,bold:true});
-  s.addText('US Provisional Patent Application Filed March 20, 2026  •  AES Convention Paper Submitted  •  Open Source: github.com/donwellsav/killthering',{x:2,y:34.9,w:35,h:0.4,fontSize:16,fontFace:FONT,color:C.textMuted});
-  s.addText('Don Wells  •  don@killthering.com',{x:35,y:34.3,w:11,h:1.0,fontSize:20,fontFace:FONT,color:C.gold,bold:true,align:'right',valign:'middle'});
+  s.addText('DoneWell Audio  •  donewellaudio.com  •  Real-Time Acoustic Intelligence',{x:2,y:34.3,w:20,h:0.5,fontSize:22,fontFace:FONT,color:C.accent,bold:true});
+  s.addText('US Provisional Patent Application Filed March 20, 2026  •  AES Convention Paper Submitted  •  Open Source: github.com/donwellsav/donewellaudio',{x:2,y:34.9,w:35,h:0.4,fontSize:16,fontFace:FONT,color:C.textMuted});
+  s.addText('Don Wells  •  don@donewellaudio.com',{x:35,y:34.3,w:11,h:1.0,fontSize:20,fontFace:FONT,color:C.gold,bold:true,align:'right',valign:'middle'});
 
   // ── WRITE ──
   const out=process.argv[2]||'conference-poster.pptx';

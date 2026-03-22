@@ -16,7 +16,7 @@ const T=14; // total slides
 
 const pptx=new pptxgen();
 pptx.layout='LAYOUT_16x9'; pptx.author='Don Wells';
-pptx.title='Kill The Ring — Investor Presentation';
+pptx.title='DoneWell Audio — Investor Presentation';
 
 async function grad(fn,c1,c2,w=1920,h=1080){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#${c1}"/><stop offset="100%" style="stop-color:#${c2}"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/></svg>`;
@@ -25,7 +25,7 @@ async function grad(fn,c1,c2,w=1920,h=1080){
 
 function ns(){const s=pptx.addSlide();s.background={fill:C.bg};return s;}
 function sn(s,n){s.addText(`${n} / ${T}`,{x:8.5,y:5.2,w:1.2,h:0.3,fontSize:9,fontFace:FONT,color:C.textMuted,align:'right'});}
-function ft(s){s.addText('Kill The Ring  •  Confidential',{x:0.3,y:5.2,w:4,h:0.3,fontSize:9,fontFace:FONT,color:C.textMuted});}
+function ft(s){s.addText('DoneWell Audio  •  Confidential',{x:0.3,y:5.2,w:4,h:0.3,fontSize:9,fontFace:FONT,color:C.textMuted});}
 function at(s,t){s.addText(t,{x:0.6,y:0.3,w:8.8,h:0.7,fontSize:28,fontFace:FONT,color:C.gold,bold:true});}
 function as(s,t){s.addText(t,{x:0.6,y:0.95,w:8.8,h:0.4,fontSize:14,fontFace:FONT,color:C.textMuted,italic:true});}
 function al(s){s.addShape(pptx.shapes.RECTANGLE,{x:0.6,y:1.25,w:2.0,h:0.04,fill:{color:C.gold}});}
@@ -51,7 +51,7 @@ async function build(){
   s.addShape(pptx.shapes.RECTANGLE,{x:0.8,y:3.2,w:3.0,h:0.03,fill:{color:C.gold}});
   s.addText('Investor Presentation  •  March 2026  •  Confidential',{x:0.8,y:3.5,w:8.4,h:0.3,fontSize:13,fontFace:FONT,color:C.textMuted});
   s.addText('Don Wells, Founder & CTO',{x:0.8,y:4.0,w:8.4,h:0.3,fontSize:13,fontFace:FONT,color:C.text});
-  s.addText('killthering.com',{x:0.8,y:4.4,w:8.4,h:0.3,fontSize:12,fontFace:FONT,color:C.gold});
+  s.addText('donewellaudio.com',{x:0.8,y:4.4,w:8.4,h:0.3,fontSize:12,fontFace:FONT,color:C.gold});
   sn(s,1);
 
   // ── SLIDE 2: The Problem ──
@@ -74,7 +74,7 @@ async function build(){
   // ── SLIDE 3: The Solution ──
   s=ns();at(s,'The Solution');as(s,'Real-Time Room Analysis — Zero Setup, Zero Cost');al(s);
   card(s,0.6,1.5,8.8,1.2,{border:C.gold});
-  s.addText('Kill The Ring transforms any smartphone or laptop into a professional room analyzer.',{x:0.9,y:1.6,w:8.2,h:0.4,fontSize:16,fontFace:FONT,color:C.white,bold:true});
+  s.addText('DoneWell Audio transforms any smartphone or laptop into a professional room analyzer.',{x:0.9,y:1.6,w:8.2,h:0.4,fontSize:16,fontFace:FONT,color:C.white,bold:true});
   s.addText('Open a browser. Grant mic access. Get real-time room correction EQ in seconds — during a live show, with audience present.',{x:0.9,y:2.1,w:8.2,h:0.4,fontSize:13,fontFace:FONT,color:C.text});
 
   const feats=[
@@ -147,10 +147,10 @@ async function build(){
   ft(s);sn(s,5);
 
   // ── SLIDE 6: Competitive Landscape ──
-  s=ns();at(s,'Competitive Landscape');as(s,'No Existing Tool Does What KTR Does');al(s);
+  s=ns();at(s,'Competitive Landscape');as(s,'No Existing Tool Does What DWA Does');al(s);
 
   const compRows=[
-    [{text:'Feature',options:{bold:true,color:C.gold,fontSize:11}},{text:'KTR',options:{bold:true,color:C.gold,fontSize:11}},{text:'Smaart\n($800)',options:{bold:true,color:C.textMuted,fontSize:10}},{text:'REW\n(Free)',options:{bold:true,color:C.textMuted,fontSize:10}},{text:'Dirac Live\n($400)',options:{bold:true,color:C.textMuted,fontSize:10}}],
+    [{text:'Feature',options:{bold:true,color:C.gold,fontSize:11}},{text:'DWA',options:{bold:true,color:C.gold,fontSize:11}},{text:'Smaart\n($800)',options:{bold:true,color:C.textMuted,fontSize:10}},{text:'REW\n(Free)',options:{bold:true,color:C.textMuted,fontSize:10}},{text:'Dirac Live\n($400)',options:{bold:true,color:C.textMuted,fontSize:10}}],
     [{text:'Test signal required'},{text:'No',options:{color:C.green,bold:true}},{text:'Yes'},{text:'Yes'},{text:'Yes'}],
     [{text:'Calibrated mic required'},{text:'No',options:{color:C.green,bold:true}},{text:'Yes'},{text:'Yes'},{text:'Yes'}],
     [{text:'Real-time analysis'},{text:'50fps',options:{color:C.green,bold:true}},{text:'Yes'},{text:'No'},{text:'No'}],
@@ -163,7 +163,7 @@ async function build(){
   compRows.forEach(r=>r.forEach(c=>{if(!c.options)c.options={};c.options.fontSize=c.options.fontSize||10;c.options.color=c.options.color||C.text;c.options.fontFace=FONT;}));
   s.addTable(compRows,{x:0.6,y:1.5,w:8.8,colW:[2.2,1.3,1.3,1.3,1.3],rowH:0.4,border:{type:'solid',pt:0.5,color:C.border},
     fill:{color:C.bgCard},autoPage:false});
-  s.addText('KTR is the only tool that performs real-time room analysis with zero setup.',{x:0.6,y:5.0,w:8.8,h:0.3,fontSize:12,fontFace:FONT,color:C.gold,bold:true,italic:true});
+  s.addText('DWA is the only tool that performs real-time room analysis with zero setup.',{x:0.6,y:5.0,w:8.8,h:0.3,fontSize:12,fontFace:FONT,color:C.gold,bold:true,italic:true});
   ft(s);sn(s,6);
 
   // ── SLIDE 7: Product Modes ──
@@ -214,7 +214,7 @@ async function build(){
   // ── SLIDE 9: Traction & Metrics ──
   s=ns();at(s,'Traction & Status');as(s,'Built, Deployed, and Generating Data');al(s);
 
-  metric(s,0.6,1.5,'LIVE','Production Status\nkillthering.com',C.green);
+  metric(s,0.6,1.5,'LIVE','Production Status\ndonewellaudio.com',C.green);
   metric(s,2.8,1.5,'37K+','Lines of Code\n161 TypeScript files',C.gold);
   metric(s,5.0,1.5,'488','Automated Tests\n483 passing, 28 suites',C.blue);
   metric(s,7.2,1.5,'v0.159','Current Version\nShipping weekly',C.teal);
@@ -264,7 +264,7 @@ async function build(){
     {name:'Touring Engineers',size:'50K+ globally',desc:'Different venue every night. Need instant room analysis without setup time.',color:C.teal},
     {name:'Architectural Acoustics',size:'$1.8B market',desc:'Acoustic consultants, architects, studio designers. Room correction is core workflow.',color:C.green},
     {name:'Education',size:'3K+ programs',desc:'Audio engineering schools, music technology programs. Teaching tool for room acoustics.',color:'9B59B6'},
-    {name:'Pro Audio OEMs',size:'Partnership',desc:'Mixer/speaker manufacturers. White-label KTR into hardware products.',color:'E74C3C'},
+    {name:'Pro Audio OEMs',size:'Partnership',desc:'Mixer/speaker manufacturers. White-label DWA into hardware products.',color:'E74C3C'},
   ];
   segs.forEach((seg,i)=>{
     const col=i%2, row=Math.floor(i/2);
@@ -280,7 +280,7 @@ async function build(){
   s=ns();at(s,'Go-to-Market Strategy');as(s,'Community-Led Growth with Strategic Partnerships');al(s);
 
   const phases=[
-    {phase:'PHASE 1: FOUNDATION',time:'Now — Q3 2026',items:['Free PWA live at killthering.com','Organic growth via audio engineering communities','Reddit (r/livesound, r/audioengineering), forums, YouTube','AES paper publication for credibility','Build user base for ML training data pipeline'],color:C.gold},
+    {phase:'PHASE 1: FOUNDATION',time:'Now — Q3 2026',items:['Free PWA live at donewellaudio.com','Organic growth via audio engineering communities','Reddit (r/livesound, r/audioengineering), forums, YouTube','AES paper publication for credibility','Build user base for ML training data pipeline'],color:C.gold},
     {phase:'PHASE 2: MONETIZATION',time:'Q4 2026 — Q2 2027',items:['Launch Pro tier ($9.99/mo)','Room analysis as premium feature','PDF/CSV export, session history','Partnership outreach to pro audio brands','Targeted marketing to houses of worship'],color:C.blue},
     {phase:'PHASE 3: SCALE',time:'Q3 2027+',items:['Enterprise tier with API access','White-label partnerships with OEMs','Mobile app (React Native)','International expansion','Hardware integration (DSP processors)'],color:C.green},
   ];
@@ -302,12 +302,12 @@ async function build(){
   card(s,0.6,1.5,4.2,2.0,{border:C.gold});
   s.addText('Don Wells',{x:0.9,y:1.6,w:3.6,h:0.4,fontSize:18,fontFace:FONT,color:C.white,bold:true});
   s.addText('Founder & CTO',{x:0.9,y:2.0,w:3.6,h:0.3,fontSize:13,fontFace:FONT,color:C.gold});
-  s.addText('Full-stack engineer with deep expertise in real-time audio signal processing, Web Audio API, and machine learning. Built the entire KTR system — 37K+ lines of TypeScript, 488 tests, 6 novel detection algorithms.',{x:0.9,y:2.4,w:3.6,h:0.9,fontSize:10,fontFace:FONT,color:C.text,lineSpacingMultiple:1.3});
+  s.addText('Full-stack engineer with deep expertise in real-time audio signal processing, Web Audio API, and machine learning. Built the entire DWA system — 37K+ lines of TypeScript, 488 tests, 6 novel detection algorithms.',{x:0.9,y:2.4,w:3.6,h:0.9,fontSize:10,fontFace:FONT,color:C.text,lineSpacingMultiple:1.3});
 
   card(s,5.2,1.5,4.2,2.0,{border:C.blue});
   s.addText('Vision',{x:5.5,y:1.6,w:3.6,h:0.4,fontSize:18,fontFace:FONT,color:C.white,bold:true});
   s.addText('Democratize Professional Audio',{x:5.5,y:2.0,w:3.6,h:0.3,fontSize:13,fontFace:FONT,color:C.blue});
-  s.addText('Every live sound engineer — from the volunteer at a church to the touring professional — deserves access to the same analysis tools the top 1% use. KTR makes that possible with zero cost, zero setup, and zero expertise required.',{x:5.5,y:2.4,w:3.6,h:0.9,fontSize:10,fontFace:FONT,color:C.text,lineSpacingMultiple:1.3});
+  s.addText('Every live sound engineer — from the volunteer at a church to the touring professional — deserves access to the same analysis tools the top 1% use. DWA makes that possible with zero cost, zero setup, and zero expertise required.',{x:5.5,y:2.4,w:3.6,h:0.9,fontSize:10,fontFace:FONT,color:C.text,lineSpacingMultiple:1.3});
 
   // IP Portfolio
   card(s,0.6,3.8,8.8,1.3);
@@ -337,8 +337,8 @@ async function build(){
 
   s.addShape(pptx.shapes.RECTANGLE,{x:0.8,y:3.1,w:3.0,h:0.03,fill:{color:C.gold}});
 
-  s.addText('Don Wells  •  don@killthering.com  •  killthering.com',{x:0.8,y:3.4,w:8.4,h:0.35,fontSize:14,fontFace:FONT,color:C.gold});
-  s.addText('US Provisional Patent Filed  •  AES Paper Submitted  •  Live at killthering.com',{x:0.8,y:3.9,w:8.4,h:0.3,fontSize:12,fontFace:FONT,color:C.textMuted});
+  s.addText('Don Wells  •  don@donewellaudio.com  •  donewellaudio.com',{x:0.8,y:3.4,w:8.4,h:0.35,fontSize:14,fontFace:FONT,color:C.gold});
+  s.addText('US Provisional Patent Filed  •  AES Paper Submitted  •  Live at donewellaudio.com',{x:0.8,y:3.9,w:8.4,h:0.3,fontSize:12,fontFace:FONT,color:C.textMuted});
   s.addText('Thank you.',{x:0.8,y:4.5,w:8.4,h:0.5,fontSize:24,fontFace:FONT,color:C.white,bold:true});
   sn(s,14);
 

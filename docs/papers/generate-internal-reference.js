@@ -136,7 +136,7 @@ c.push(
     children: [new TextRun({ text: "Code-Level Reference: What Happens, Where, and Why", font: FONT_TEXT, size: SIZE_H2, italics: true, color: GRAY })] }),
   new Paragraph({ spacing: { before: 600 }, children: [] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 },
-    children: [tx("Kill The Ring  •  v0.159.0  •  March 20, 2026")] }),
+    children: [tx("DoneWell Audio  •  v0.159.0  •  March 20, 2026")] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 },
     children: [tx("Author: Don Wells", { color: GRAY })] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 },
@@ -167,7 +167,7 @@ c.push(new Paragraph({ children: [new PageBreak()] }));
 c.push(h1("1. Quick Reference Card"));
 
 c.push(noteBox("TL;DR",
-  "KTR at high sensitivity (threshold ≤ 8 dB) with no feedback loop detects room resonance modes as feedback. All 6 algorithms unanimously score room modes identically to feedback. Room mode gates are disabled by default (roomPreset = 'none'). The system generates PEQ advisories that constitute a room correction EQ profile."));
+  "DWA at high sensitivity (threshold ≤ 8 dB) with no feedback loop detects room resonance modes as feedback. All 6 algorithms unanimously score room modes identically to feedback. Room mode gates are disabled by default (roomPreset = 'none'). The system generates PEQ advisories that constitute a room correction EQ profile."));
 c.push(new Paragraph({ spacing: { after: 120 }, children: [] }));
 
 const qrData = [
@@ -201,7 +201,7 @@ c.push(new Paragraph({ children: [new PageBreak()] }));
 // ═══ 2. DISCOVERY SUMMARY ═══
 c.push(h1("2. Discovery Summary"));
 
-c.push(para("While testing KTR in Ring Out mode (2 dB prominence threshold) with no active feedback loop — the microphone was capturing ambient room sound only, with no routing to speakers — the system generated sustained EQ advisories for persistent spectral peaks."));
+c.push(para("While testing DWA in Ring Out mode (2 dB prominence threshold) with no active feedback loop — the microphone was capturing ambient room sound only, with no routing to speakers — the system generated sustained EQ advisories for persistent spectral peaks."));
 
 c.push(para("Investigation revealed these peaks correspond to room acoustic resonance modes (standing waves between parallel room surfaces). All six detection algorithms unanimously classified the room modes as feedback because room resonances and acoustic feedback produce physically identical spectral signatures:"));
 
@@ -219,7 +219,7 @@ c.push(new Paragraph({ children: [new PageBreak()] }));
 // ═══ 3. CODE PATH ═══
 c.push(h1("3. Code Path: How Room Modes Become Advisories"));
 
-c.push(para("This section traces the exact code path a room resonance takes through the KTR pipeline, from microphone input to advisory card."));
+c.push(para("This section traces the exact code path a room resonance takes through the DWA pipeline, from microphone input to advisory card."));
 
 c.push(h2("3.1 Audio Capture → Peak Detection (Main Thread)"));
 
@@ -507,7 +507,7 @@ c.push(h1("7. How to Reproduce the Behavior"));
 
 c.push(h2("Step-by-Step Reproduction"));
 
-c.push(para([bf("1. "), tx("Open KTR (killthering.com or localhost:3000)")]));
+c.push(para([bf("1. "), tx("Open DWA (donewellaudio.com or localhost:3000)")]));
 c.push(para([bf("2. "), tx("Ensure the microphone is "), bf("NOT"), tx(" routed to any speaker in the same space")]));
 c.push(para([bf("3. "), tx("Click \"Ring Out Room\" or set mode to "), code("ringOut"), tx(" (threshold = 2 dB)")]));
 c.push(para([bf("4. "), tx("Wait 5–15 seconds for ambient sound to excite room modes")]));
@@ -605,9 +605,9 @@ c.push(h1("10. Related Documents"));
 
 const docs = [
   ["AES Convention Paper", "docs/papers/2026-03-20-emergent-room-resonance-analysis.docx", "Academic paper — formal analysis with 17 equations, 20 references, 8 sections. Targeted at AES peer review."],
-  ["US Provisional Patent", "docs/papers/2026-03-20-provisional-patent-ktr-room-analysis.docx", "USPTO provisional application — 16 claims (independent: 6-algo fusion; dependent: room analysis). Establishes priority date 2026-03-20. Docket WELLS-2026-001."],
-  ["Technical Whitepaper", "docs/papers/2026-03-20-ktr-room-analysis-whitepaper.docx", "Practitioner-focused document — explains the technology and discovery in accessible language with practical use cases and comparison tables."],
-  ["This Document", "docs/papers/2026-03-20-ktr-internal-reference.docx", "Internal reference — code-level tracing, exact file/function/line references, reproduction steps, configuration values."],
+  ["US Provisional Patent", "docs/papers/2026-03-20-provisional-patent-dwa-room-analysis.docx", "USPTO provisional application — 16 claims (independent: 6-algo fusion; dependent: room analysis). Establishes priority date 2026-03-20. Docket WELLS-2026-001."],
+  ["Technical Whitepaper", "docs/papers/2026-03-20-dwa-room-analysis-whitepaper.docx", "Practitioner-focused document — explains the technology and discovery in accessible language with practical use cases and comparison tables."],
+  ["This Document", "docs/papers/2026-03-20-dwa-internal-reference.docx", "Internal reference — code-level tracing, exact file/function/line references, reproduction steps, configuration values."],
   ["CLAUDE.md", "CLAUDE.md", "Project intelligence file — architecture overview, coding conventions, version history. Contains high-level overview of the 6-algorithm pipeline."],
 ];
 
@@ -640,7 +640,7 @@ const doc = new Document({
         children: [new Paragraph({
           alignment: AlignmentType.RIGHT,
           children: [
-            new TextRun({ text: "KTR Internal Reference — Room Resonance Analysis", font: FONT_TEXT, size: SIZE_SM, italics: true, color: GRAY }),
+            new TextRun({ text: "DWA Internal Reference — Room Resonance Analysis", font: FONT_TEXT, size: SIZE_SM, italics: true, color: GRAY }),
           ],
         })],
       }),
@@ -662,7 +662,7 @@ const doc = new Document({
   }],
 });
 
-const outputPath = process.argv[2] || "2026-03-20-ktr-internal-reference.docx";
+const outputPath = process.argv[2] || "2026-03-20-dwa-internal-reference.docx";
 Packer.toBuffer(doc).then(buffer => {
   fs.writeFileSync(outputPath, buffer);
   console.log(`Internal reference document written to ${outputPath} (${(buffer.length / 1024).toFixed(1)} KB)`);

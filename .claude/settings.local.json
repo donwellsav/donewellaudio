@@ -9,7 +9,15 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(gh auth:*)",
       "Bash(gh repo:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(node -e \"const os = require\\(''os''\\); const path = require\\(''path''\\); const marker = path.join\\(os.tmpdir\\(\\), ''claude-build-gate-passed''\\); console.log\\(''Marker path:'', marker\\); const fs = require\\(''fs''\\); console.log\\(''Exists:'', fs.existsSync\\(marker\\)\\)\")",
+      "Bash(node -e \"const fs = require\\(''fs''\\); const os = require\\(''os''\\); const path = require\\(''path''\\); const marker = path.join\\(os.tmpdir\\(\\), ''claude-build-gate-passed''\\); fs.writeFileSync\\(marker, Date.now\\(\\).toString\\(\\)\\); console.log\\(''Marker written to'', marker\\); const cia = path.join\\(os.tmpdir\\(\\), ''claude-cia-audit.md''\\); console.log\\(''CIA exists:'', fs.existsSync\\(cia\\)\\)\")",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__list_deployments",
+      "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__deploy_to_vercel",
+      "Bash(npx vercel:*)",
+      "Bash(node -e \"const fs = require\\(''fs''\\); const os = require\\(''os''\\); const path = require\\(''path''\\); fs.writeFileSync\\(path.join\\(os.tmpdir\\(\\), ''claude-build-gate-passed''\\), Date.now\\(\\).toString\\(\\)\\); console.log\\(''marker written''\\)\")"
     ]
   }
 }

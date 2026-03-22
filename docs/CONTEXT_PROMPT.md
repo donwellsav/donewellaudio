@@ -138,7 +138,7 @@ components/analyzer/
   HeaderBar.tsx (191)         # Header bar, permanent Clear All, theme toggle
   DesktopLayout.tsx           # 3-panel resizable layout
   MobileLayout.tsx            # 2-tab (Issues+Graph / Settings) with inline resizable graph
-  KtrLogo.tsx                 # Brand SVG logo component
+  DwaLogo.tsx                 # Brand SVG logo component
   RingOutWizard.tsx           # Guided ring-out workflow
 
 hooks/ (11 files)
