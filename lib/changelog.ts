@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.3.4',
+    date: '2026-03-22',
+    changes: [
+      { type: 'fix', description: 'fix: reduce PWA icon padding and sharpen small sizes' },
+    ],
+  },
+  {
     version: '0.3.3',
     date: '2026-03-22',
     changes: [
