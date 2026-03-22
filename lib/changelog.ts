@@ -14,10 +14,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '0.186.1',
+    version: '0.187.0',
     date: '2026-03-22',
+    highlights: 'Deep codebase audit: 15 fixes across security, privacy, accessibility, code quality, and testing',
     changes: [
-      { type: 'feat', description: 'feat: multi-stage development safeguards with CIA enforcement (#186)' },
+      { type: 'fix', description: 'Security: SSRF defense — invalid Supabase URL now throws at module load instead of silent log' },
+      { type: 'fix', description: 'Security: Rate limit maps bounded to 10K entries with LRU eviction to prevent memory exhaustion DoS' },
+      { type: 'fix', description: 'Security: Added `upgrade-insecure-requests` CSP directive' },
+      { type: 'fix', description: 'Security: Environment variable validation warns on missing service key in production' },
+      { type: 'fix', description: 'Security: Sanitized Supabase error logs (status + bytes only, no response body)' },
+      { type: 'fix', description: 'Privacy: Consent model changed from opt-out to opt-in — collection requires explicit acceptance via dialog' },
+      { type: 'fix', description: 'Privacy: DataConsentDialog re-enabled on first audio start for new users' },
+      { type: 'fix', description: 'Accessibility: Advisory dismiss buttons increased to 44px minimum (WCAG AA touch target)' },
+      { type: 'refactor', description: 'ML `predict()` method marked @deprecated — hot path correctly uses `predictCached()`' },
+      { type: 'fix', description: 'Worker init guard: `processPeak` now checks initialization before accessing trackManager' },
+      { type: 'refactor', description: 'PRESET_KEYS uses `as const satisfies` for compile-time type safety' },
+      { type: 'feat', description: 'New test suite: consent state machine (12 tests) — opt-in model, version migration, state transitions' },
+      { type: 'feat', description: 'New test suite: useDSPWorker verification (5 tests) — init guard, crash recovery, backpressure' },
     ],
   },
   {

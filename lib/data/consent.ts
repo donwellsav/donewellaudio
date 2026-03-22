@@ -1,16 +1,19 @@
 /**
  * Consent state for anonymous spectral data collection.
  *
- * Collection is ON by default (opt-out model). The data is truly
+ * Opt-in model (GDPR-compliant): collection requires explicit user acceptance
+ * via the DataConsentDialog shown on first audio start. The data is truly
  * anonymous: magnitude spectrum only, random session IDs, no PII.
  *
- * Users can disable collection in Settings → Advanced at any time.
- * The opt-out is persisted in localStorage and respected across sessions.
+ * Users can toggle collection in Settings → Advanced at any time.
+ * The consent state is persisted in localStorage and respected across sessions.
  *
  * State transitions:
- *   (new user) → ACCEPTED (auto)
+ *   (new user) → NOT_ASKED → dialog shown on first audio start
+ *   NOT_ASKED → ACCEPTED (user clicks "Share Data")
+ *   NOT_ASKED → DECLINED (user clicks "No Thanks")
  *   ACCEPTED → DECLINED (user toggles off in Settings)
- *   DECLINED → ACCEPTED (user toggles back on)
+ *   DECLINED → ACCEPTED (user toggles back on in Settings)
  *
  * Privacy: consent state is stored locally only, never transmitted.
  */
@@ -107,8 +110,8 @@ export function revokeConsent(): ConsentState {
 /** Check if collection is currently authorized */
 export function isConsentGiven(): boolean {
   const state = loadConsent()
-  // In opt-out model: collection is on unless explicitly declined
-  return state.status !== 'declined'
+  // Opt-in model: collection requires explicit acceptance (GDPR-compliant)
+  return state.status === 'accepted'
 }
 
 /** Check if user has been asked but hasn't responded yet */

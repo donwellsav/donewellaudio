@@ -341,6 +341,11 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
     }
 
     case 'processPeak': {
+      // Guard: worker must be initialized before processing peaks
+      if (!sampleRate || !fftSize) {
+        console.warn('[dspWorker] processPeak received before init — ignoring')
+        break
+      }
       const spectrum = msg.spectrum
       const timeDomain = msg.timeDomain
       try {

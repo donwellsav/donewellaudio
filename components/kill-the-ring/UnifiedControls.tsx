@@ -48,14 +48,18 @@ const MAX_CUSTOM_PRESETS = 5
 const LOG_MIN = Math.log10(20)
 const LOG_MAX = Math.log10(20000)
 
-/** Keys captured by custom presets — excludes display/graph settings */
-const PRESET_KEYS: (keyof DetectorSettings)[] = [
+/**
+ * Keys captured by custom presets — excludes display/graph/room/canvas settings.
+ * Uses `satisfies` to get a compile-time error if a key doesn't exist in DetectorSettings.
+ * When adding new detection settings, add them here to include in presets.
+ */
+const PRESET_KEYS = [
   'feedbackThresholdDb', 'ringThresholdDb', 'growthRateThreshold',
   'sustainMs', 'clearMs', 'holdTimeMs', 'confidenceThreshold',
   'minFrequency', 'maxFrequency', 'eqPreset', 'aWeightingEnabled',
   'harmonicFilterEnabled', 'musicAware', 'autoMusicAware',
   'algorithmMode', 'enabledAlgorithms', 'prominenceDb',
-]
+] as const satisfies readonly (keyof DetectorSettings)[]
 
 const SUB_TABS: { id: SubTab; label: string; Icon: typeof BarChart3 }[] = [
   { id: 'detect', label: 'Detect', Icon: BarChart3 },

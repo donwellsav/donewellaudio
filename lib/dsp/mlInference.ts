@@ -70,42 +70,35 @@ export class MLInferenceEngine {
   }
 
   /**
-   * Run inference on a feature vector.
+   * @deprecated Use predictCached() instead.
    *
-   * @param features - Float32Array of ML_SETTINGS.FEATURE_COUNT elements:
-   *   [msd, phase, spectral, comb, ihr, ptmr, prevFusedProb, prevFusedConf,
-   *    isSpeech, isMusic, isCompressed]
-   * @returns MLScoreResult if model is loaded, null otherwise
+   * This method has an async/sync mismatch: session.run() returns a Promise,
+   * but the result variable is read synchronously before the promise resolves.
+   * Returns null unless the microtask happens to resolve inline.
+   * The hot path (workerFft.ts) correctly uses predictCached().
+   *
+   * Kept for test compatibility only.
    */
   predict(features: Float32Array): MLScoreResult | null {
     if (!this._available || !this._session || !this._onnx) return null
     if (features.length !== ML_SETTINGS.FEATURE_COUNT) return null
 
     try {
-      // Synchronous inference via pre-loaded session
-      // Small MLP (<1K params) completes in <0.5ms — safe for sync execution
       const tensor = new (this._onnx.Tensor as unknown as new (type: string, data: Float32Array, dims: number[]) => unknown)(
         'float32', features, [1, ML_SETTINGS.FEATURE_COUNT]
       )
-      // Use synchronous run pattern — ONNX Runtime Web supports this for small models
-      // when the session is already warm
+      // session.run() is async — result is typically null on return
       let result: MLScoreResult | null = null
       void this._session.run({ input: tensor }).then(output => {
         const score = output.output?.data[0] ?? 0.5
         result = {
           feedbackScore: Math.max(0, Math.min(1, score)),
-          modelConfidence: 1.0, // Calibration quality — updated post-training
+          modelConfidence: 1.0,
           isAvailable: true,
           modelVersion: this._modelVersion,
         }
-      }).catch(() => {
-        // Inference failed — return null for this frame
-      })
+      }).catch(() => {})
 
-      // Since ONNX Runtime Web's run() is async but very fast for tiny models,
-      // we return the result from a cached previous prediction if the promise
-      // hasn't resolved synchronously. In practice, the WASM backend resolves
-      // microtasks inline for small models.
       return result
     } catch {
       return null

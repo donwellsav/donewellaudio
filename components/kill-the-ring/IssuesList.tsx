@@ -640,7 +640,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                   <button
                     onClick={() => onDismiss(advisory.id)}
                     aria-label={`Dismiss ${exactFreqStr}`}
-                    className="rounded flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/60 transition-colors h-7 w-7"
+                    className="rounded flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/60 transition-colors min-h-[44px] min-w-[44px]"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -746,7 +746,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                 <button
                   onClick={() => onDismiss(advisory.id)}
                   aria-label={`Dismiss ${exactFreqStr}`}
-                  className="rounded flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/60 transition-colors w-9 h-8"
+                  className="rounded flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/60 transition-colors min-h-[44px] min-w-[44px]"
                 >
                   <X className="w-4 h-4" />
                 </button>

@@ -2,13 +2,12 @@
  * useDataCollection — orchestrates anonymous spectral data collection.
  *
  * Lifecycle:
- *   1. On mount: load opt-out state from localStorage
- *   2. When audio starts: auto-enable collection (unless opted out)
- *   3. Settings toggle: user can opt out at any time
+ *   1. On mount: load consent state from localStorage
+ *   2. When audio starts: show consent dialog if status is 'not_asked'
+ *   3. On accept/decline: persist choice and enable/skip collection
+ *   4. Settings toggle: user can change consent at any time
  *
- * Collection is ON by default — no consent dialog. The data is truly
- * anonymous (magnitude spectrum only, random session IDs, no PII).
- * Users who don't want to participate toggle it off in Settings → Advanced.
+ * Collection requires explicit acceptance before any data is sent.
  *
  * This hook does NOT import any data collection code at the top level.
  * The uploader is lazy-loaded via dynamic import() and must be ready
@@ -33,7 +32,7 @@ import type { DSPWorkerHandle } from './useDSPWorker'
 export interface DataCollectionState {
   /** Current consent status */
   consentStatus: ConsentStatus
-  /** Whether the consent dialog should be shown (always false — dialog removed) */
+  /** Whether the consent dialog should be shown */
   showConsentDialog: boolean
   /** Whether collection is actively running */
   isCollecting: boolean
@@ -57,15 +56,9 @@ export interface DataCollectionHandle extends DataCollectionState {
 }
 
 export function useDataCollection(): DataCollectionHandle {
-  const [consentStatus, setConsentStatus] = useState<ConsentStatus>(() => {
-    const stored = loadConsent()
-    // Migrate: treat 'not_asked' and 'prompted' as 'accepted' (opt-out model)
-    if (stored.status === 'not_asked' || stored.status === 'prompted') {
-      return 'accepted'
-    }
-    return stored.status
-  })
+  const [consentStatus, setConsentStatus] = useState<ConsentStatus>(() => loadConsent().status)
   const [isCollecting, setIsCollecting] = useState(false)
+  const [showConsentDialog, setShowConsentDialog] = useState(false)
 
   // DSP worker handle — set externally by the consumer after useAudioAnalyzer
   const workerRef = useRef<DSPWorkerHandle | null>(null)
@@ -121,18 +114,18 @@ export function useDataCollection(): DataCollectionHandle {
 
     const consent = loadConsent()
     if (consent.status === 'declined') {
-      // User explicitly opted out in Settings — respect it
+      // User explicitly opted out — respect it
       return
     }
 
-    // Auto-accept for new users (no dialog)
-    if (consent.status === 'not_asked' || consent.status === 'prompted') {
-      acceptConsent()
-      setConsentStatus('accepted')
+    if (consent.status === 'accepted') {
+      // Already accepted — enable collection immediately
+      enableCollection(fftSize, sampleRate)
+      return
     }
 
-    // Enable collection
-    enableCollection(fftSize, sampleRate)
+    // Not yet asked — show consent dialog (opt-in model)
+    setShowConsentDialog(true)
   }, [enableCollection])
 
   // ─── Settings toggle actions ───────────────────────────────────────────
@@ -140,6 +133,7 @@ export function useDataCollection(): DataCollectionHandle {
   const handleAccept = useCallback(() => {
     acceptConsent()
     setConsentStatus('accepted')
+    setShowConsentDialog(false)
 
     if (audioParamsRef.current) {
       enableCollection(audioParamsRef.current.fftSize, audioParamsRef.current.sampleRate)
@@ -149,6 +143,7 @@ export function useDataCollection(): DataCollectionHandle {
   const handleDecline = useCallback(() => {
     revokeConsent()
     setConsentStatus('declined')
+    setShowConsentDialog(false)
     disableCollection()
   }, [disableCollection])
 
@@ -187,7 +182,7 @@ export function useDataCollection(): DataCollectionHandle {
 
   return {
     consentStatus,
-    showConsentDialog: false, // Dialog removed — always false
+    showConsentDialog,
     isCollecting,
     handleAccept,
     handleDecline,

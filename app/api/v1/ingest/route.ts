@@ -20,16 +20,27 @@ import type { SnapshotBatch } from '@/types/data'
 const SUPABASE_INGEST_URL = process.env.SUPABASE_INGEST_URL ?? ''
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 
-// Validate SUPABASE_INGEST_URL is a known Supabase domain (SSRF defense-in-depth)
+/**
+ * SSRF defense: validate SUPABASE_INGEST_URL against Supabase domain allowlist.
+ * Throws at module load if an invalid domain is configured — prevents data
+ * exfiltration via compromised environment variables.
+ */
 if (SUPABASE_INGEST_URL) {
   try {
     const host = new URL(SUPABASE_INGEST_URL).hostname
     if (!host.endsWith('.supabase.co') && !host.endsWith('.supabase.com') && !host.endsWith('.functions.supabase.co')) {
-      console.error(`[ingest] SUPABASE_INGEST_URL host not in allowlist: ${host}`)
+      throw new Error(`SUPABASE_INGEST_URL host not in allowlist: ${host}`)
     }
-  } catch {
-    console.error('[ingest] SUPABASE_INGEST_URL is not a valid URL')
+  } catch (err) {
+    // Re-throw validation errors; catch only URL parse failures
+    if (err instanceof Error && err.message.includes('not in allowlist')) throw err
+    throw new Error(`SUPABASE_INGEST_URL is not a valid URL: ${SUPABASE_INGEST_URL}`)
   }
+}
+
+// Production environment validation — catch silent misconfiguration early
+if (process.env.NODE_ENV === 'production' && SUPABASE_INGEST_URL && !SUPABASE_SERVICE_KEY) {
+  console.error('[ingest] WARNING: SUPABASE_INGEST_URL set but SUPABASE_SERVICE_ROLE_KEY is missing — forwarding will fail')
 }
 
 /** Max payload size: 512KB (batches are typically 2-10KB uncompressed) */
@@ -40,6 +51,8 @@ const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX_REQUESTS = 6
 
 // In-memory rate limit stores (reset on cold start — acceptable for edge)
+// Bounded to MAX_RATE_LIMIT_ENTRIES to prevent memory exhaustion via many unique keys
+const MAX_RATE_LIMIT_ENTRIES = 10_000
 const rateLimitMap = new Map<string, { count: number; windowStart: number }>()
 const ipRateLimitMap = new Map<string, { count: number; windowStart: number }>()
 
@@ -111,9 +124,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (!forwardResponse.ok) {
-      // Log detail server-side but don't expose to client
-      const errText = await forwardResponse.text().catch(() => 'unknown')
-      console.error(`[ingest] Storage failed: ${forwardResponse.status} — ${errText}`)
+      // Log status only — do not log response body (may contain Supabase internals)
+      const errLen = parseInt(forwardResponse.headers.get('content-length') ?? '0', 10)
+      console.error(`[ingest] Storage failed: ${forwardResponse.status} (${errLen} bytes)`)
       return NextResponse.json(
         { error: 'Storage temporarily unavailable' },
         { status: 502 }
@@ -197,10 +210,20 @@ function isRateLimitedByKey(
   const entry = map.get(key)
 
   // Amortised time-based pruning: sweep stale entries every 100 calls
+  // Hard cap prevents unbounded memory growth from many unique IPs (DoS defense)
   rateLimitCallCount++
-  if (rateLimitCallCount % 100 === 0) {
+  if (rateLimitCallCount % 100 === 0 || map.size > MAX_RATE_LIMIT_ENTRIES) {
     for (const [k, val] of map) {
       if (now - val.windowStart > RATE_LIMIT_WINDOW_MS) map.delete(k)
+    }
+    // If still over cap after pruning, drop oldest entries
+    if (map.size > MAX_RATE_LIMIT_ENTRIES) {
+      const excess = map.size - MAX_RATE_LIMIT_ENTRIES
+      const iter = map.keys()
+      for (let i = 0; i < excess; i++) {
+        const k = iter.next().value
+        if (k !== undefined) map.delete(k)
+      }
     }
   }
 
