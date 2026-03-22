@@ -21,12 +21,12 @@ vi.mock('@/hooks/useFullscreen', () => ({
   useFullscreen: () => ({ isFullscreen: false, toggle: vi.fn() }),
 }))
 
-vi.mock('@/lib/storage/ktrStorage', () => ({
+vi.mock('@/lib/storage/dwaStorage', () => ({
   clearPanelLayouts: vi.fn(),
 }))
 
 import { UIProvider, useUI } from '../UIContext'
-import { clearPanelLayouts } from '@/lib/storage/ktrStorage'
+import { clearPanelLayouts } from '@/lib/storage/dwaStorage'
 
 // ── Wrapper ───────────────────────────────────────────────────────────────────
 

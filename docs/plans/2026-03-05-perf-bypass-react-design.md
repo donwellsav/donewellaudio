@@ -18,7 +18,7 @@
 - Throttle `noiseFloorDb` update to ~2fps for status bar display
 - Keep `advisories` in React state (changes infrequently, drives DOM issue cards)
 
-### 2. SpectrumCanvas reads refs instead of props (`SpectrumCanvas.tsx`, `KillTheRing.tsx`)
+### 2. SpectrumCanvas reads refs instead of props (`SpectrumCanvas.tsx`, `AudioAnalyzer.tsx`)
 
 - Accept `spectrumRef` and `advisoriesRef` instead of value props
 - Remove `spectrum` and `advisories` from `useCallback` dependency array
@@ -42,8 +42,8 @@
 ## Files Touched
 
 - `hooks/useAudioAnalyzer.ts` — ref-based spectrum/tracks, throttled noiseFloor
-- `components/kill-the-ring/SpectrumCanvas.tsx` — ref props, cached objects, merged loop
-- `components/kill-the-ring/KillTheRing.tsx` — prop drilling update (refs instead of values)
+- `components/analyzer/SpectrumCanvas.tsx` — ref props, cached objects, merged loop
+- `components/analyzer/AudioAnalyzer.tsx` — prop drilling update (refs instead of values)
 
 ## Expected Impact
 

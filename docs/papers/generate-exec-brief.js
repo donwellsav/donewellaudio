@@ -71,7 +71,7 @@ async function build(){
       new TextRun({text:'Emergent Room Acoustic Resonance Analysis via Multi-Algorithm Feedback Detection',font:FONT_BODY,size:18,italic:true,color:GRAY}),
     ]}),
     new Paragraph({spacing:{before:20,after:0},children:[
-      new TextRun({text:'Don Wells  •  killthering.com  •  March 2026  •  Confidential',font:FONT_BODY,size:16,color:LIGHT_GRAY}),
+      new TextRun({text:'Don Wells  •  donewellaudio.com  •  March 2026  •  Confidential',font:FONT_BODY,size:16,color:LIGHT_GRAY}),
     ]}),
     hrule(),
   ];

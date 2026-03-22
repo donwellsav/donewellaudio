@@ -1,6 +1,6 @@
-# Kill The Ring — AI Prompt Library
+# DoneWell Audio — AI Prompt Library
 
-> **Purpose:** Battle-tested prompts for improving, extending, and maintaining the Kill The Ring codebase using AI assistants.
+> **Purpose:** Battle-tested prompts for improving, extending, and maintaining the DoneWell Audio codebase using AI assistants.
 > **Version:** 1.0 | **Date:** 2026-03-14
 > **Compatible with:** Claude (Opus 4.6, Sonnet), ChatGPT (5.4, Codex), Gemini Ultra
 
@@ -52,7 +52,7 @@ Each prompt includes:
 
 **Prompt:**
 ```
-I need to add a new detection algorithm to Kill The Ring's fusion engine. The algorithm is [ALGORITHM NAME] based on [PAPER/METHOD].
+I need to add a new detection algorithm to DoneWell Audio's fusion engine. The algorithm is [ALGORITHM NAME] based on [PAPER/METHOD].
 
 Follow these patterns exactly:
 
@@ -103,7 +103,7 @@ Reference fusion pattern: search for `msd` in `lib/dsp/algorithmFusion.ts`
 
 **Prompt:**
 ```
-Audit the algorithm fusion weights in Kill The Ring's detection engine.
+Audit the algorithm fusion weights in DoneWell Audio's detection engine.
 
 Read `lib/dsp/algorithmFusion.ts` — specifically the `DEFAULT_FUSION_CONFIG` weights and the `fuseAlgorithmResults()` function.
 
@@ -144,7 +144,7 @@ Format each scenario as a Vitest test case that can be added to `tests/dsp/algor
 
 **Prompt:**
 ```
-Review and optimize the hot loop in Kill The Ring's `FeedbackDetector.analyze()` method in `lib/dsp/feedbackDetector.ts`.
+Review and optimize the hot loop in DoneWell Audio's `FeedbackDetector.analyze()` method in `lib/dsp/feedbackDetector.ts`.
 
 This method is called 25-60 times per second and processes 4096-8192 FFT bins per call. Current optimizations:
 - EXP_LUT: precomputed dB→power lookup table (4KB, L1 cache)
@@ -183,7 +183,7 @@ CRITICAL: Do not break existing behavior. All 326 tests must still pass.
 
 **Prompt:**
 ```
-Add temporal envelope analysis to Kill The Ring's detection engine. This is a new algorithm that analyzes the amplitude envelope of detected peaks over time.
+Add temporal envelope analysis to DoneWell Audio's detection engine. This is a new algorithm that analyzes the amplitude envelope of detected peaks over time.
 
 Key insight: Feedback has a characteristic constant-amplitude or monotonically growing envelope. Music and speech have attack-decay-sustain-release (ADSR) patterns.
 
@@ -220,7 +220,7 @@ Integrate into the fusion engine with appropriate weight (suggest a weight based
 
 **Prompt:**
 ```
-Fix BUG-001 in Kill The Ring: the spectral flatness (Wiener entropy) calculation returns 0.035 for broad spectral peaks when it should return > 0.2.
+Fix BUG-001 in DoneWell Audio: the spectral flatness (Wiener entropy) calculation returns 0.035 for broad spectral peaks when it should return > 0.2.
 
 The test case is at `tests/dsp/compressionDetection.test.ts` line 51, currently marked as `it.todo()`.
 
@@ -255,15 +255,15 @@ Then un-`todo` the test and verify all 326+ tests pass.
 
 **Best AI:** Claude Opus (React architecture, accessibility)
 
-**Context files:** `components/kill-the-ring/settings/DetectionTab.tsx`, `components/kill-the-ring/settings/SettingsShared.tsx`, `components/kill-the-ring/SettingsPanel.tsx`
+**Context files:** `components/analyzer/settings/DetectionTab.tsx`, `components/analyzer/settings/SettingsShared.tsx`, `components/analyzer/SettingsPanel.tsx`
 
 **Prompt:**
 ```
-Create a new settings tab component for Kill The Ring. The tab is called "[TAB_NAME]" and its purpose is [DESCRIPTION].
+Create a new settings tab component for DoneWell Audio. The tab is called "[TAB_NAME]" and its purpose is [DESCRIPTION].
 
-Follow the exact pattern from `components/kill-the-ring/settings/DetectionTab.tsx`:
+Follow the exact pattern from `components/analyzer/settings/DetectionTab.tsx`:
 
-1. File: `components/kill-the-ring/settings/[TabName]Tab.tsx`
+1. File: `components/analyzer/settings/[TabName]Tab.tsx`
 2. Must include:
    - 'use client' directive
    - memo() wrapper
@@ -273,7 +273,7 @@ Follow the exact pattern from `components/kill-the-ring/settings/DetectionTab.ts
    - Touch targets ≥ 44×44px
    - Proper aria labels for all interactive elements
 
-3. Register in `components/kill-the-ring/SettingsPanel.tsx`:
+3. Register in `components/analyzer/SettingsPanel.tsx`:
    - Add to the tab list
    - Add tab content panel
 
@@ -291,11 +291,11 @@ The tab should contain: [DESCRIBE THE UI LAYOUT AND CONTROLS]
 
 **Best AI:** Claude Opus (canvas + architecture)
 
-**Context files:** `lib/canvas/spectrumDrawing.ts`, `components/kill-the-ring/SpectrumCanvas.tsx`
+**Context files:** `lib/canvas/spectrumDrawing.ts`, `components/analyzer/SpectrumCanvas.tsx`
 
 **Prompt:**
 ```
-Add a [VISUALIZATION_NAME] visualization to Kill The Ring's spectrum display.
+Add a [VISUALIZATION_NAME] visualization to DoneWell Audio's spectrum display.
 
 Follow the drawing helper pattern in `lib/canvas/spectrumDrawing.ts`:
 - Pure functions (no React dependency)
@@ -323,11 +323,11 @@ Render constraints:
 
 **Best AI:** Claude Opus or Gemini Ultra
 
-**Context files:** `lib/canvas/spectrumDrawing.ts`, `components/kill-the-ring/SpectrumCanvas.tsx`
+**Context files:** `lib/canvas/spectrumDrawing.ts`, `components/analyzer/SpectrumCanvas.tsx`
 
 **Prompt:**
 ```
-Create a spectral waterfall (spectrogram) display for Kill The Ring. This shows a scrolling time × frequency × amplitude visualization.
+Create a spectral waterfall (spectrogram) display for DoneWell Audio. This shows a scrolling time × frequency × amplitude visualization.
 
 Technical requirements:
 1. Canvas-based rendering (no libraries)
@@ -340,7 +340,7 @@ Technical requirements:
 
 Implementation pattern:
 - Drawing helper: `lib/canvas/waterfallDrawing.ts` (pure function, no React)
-- Component: `components/kill-the-ring/WaterfallCanvas.tsx`
+- Component: `components/analyzer/WaterfallCanvas.tsx`
 - Data: Read from `spectrumRef` in AudioAnalyzerContext (same data source as SpectrumCanvas)
 - Toggle: Add a display mode switch (Spectrum | Waterfall | Split) in DisplayTab settings
 
@@ -361,7 +361,7 @@ Reference: The `spectrumRef` contains `SpectrumData` with `spectrum: Float32Arra
 
 **Prompt:**
 ```
-The FeedbackDetector class in Kill The Ring has only 12.7% test coverage. Add comprehensive unit tests to increase coverage to 80%+.
+The FeedbackDetector class in DoneWell Audio has only 12.7% test coverage. Add comprehensive unit tests to increase coverage to 80%+.
 
 Read `lib/dsp/feedbackDetector.ts` and the existing tests in `lib/dsp/__tests__/feedbackDetector.test.ts`.
 
@@ -399,7 +399,7 @@ Target: At least 30 new test cases covering:
 
 **Prompt:**
 ```
-Create a test harness for Kill The Ring that processes pre-generated audio signals through the detection pipeline and validates classification results.
+Create a test harness for DoneWell Audio that processes pre-generated audio signals through the detection pipeline and validates classification results.
 
 Since we can't use real WAV files in Vitest (no Web Audio API), generate synthetic signals that simulate real-world scenarios:
 
@@ -432,7 +432,7 @@ Follow Vitest patterns from `tests/dsp/algorithmFusion.test.ts`.
 
 **Prompt:**
 ```
-You are a hostile adversary trying to break Kill The Ring's feedback detection algorithm. Your goal is to find audio scenarios that cause:
+You are a hostile adversary trying to break DoneWell Audio's feedback detection algorithm. Your goal is to find audio scenarios that cause:
 1. False positives (detecting feedback when there is none)
 2. False negatives (missing real feedback)
 3. Verdict oscillation (rapid switching between FEEDBACK and NOT_FEEDBACK)
@@ -464,7 +464,7 @@ Focus on edge cases at decision boundaries (probability near 0.4 and 0.7 where v
 
 **Prompt:**
 ```
-Implement a WebSocket API server for Kill The Ring that exposes advisory state for external integrations (Bitfocus Companion, custom dashboards, etc.).
+Implement a WebSocket API server for DoneWell Audio that exposes advisory state for external integrations (Bitfocus Companion, custom dashboards, etc.).
 
 Create `lib/companion/wsServer.ts`:
 - WebSocket server on configurable port (default 9741)
@@ -486,7 +486,7 @@ Create `lib/companion/stateSync.ts`:
 - Manage connected client list
 - Handle reconnection and cleanup
 
-Add WebSocket port configuration to `components/kill-the-ring/settings/AdvancedTab.tsx`.
+Add WebSocket port configuration to `components/analyzer/settings/AdvancedTab.tsx`.
 
 Security:
 - API key generated on first run, stored in localStorage
@@ -505,7 +505,7 @@ Security:
 
 **Prompt:**
 ```
-Create a Behringer X32 OSC adapter for Kill The Ring's mixer integration system.
+Create a Behringer X32 OSC adapter for DoneWell Audio's mixer integration system.
 
 Implement `lib/mixer/behringer.ts`:
 - Implements the `MixerConnection` interface (see `docs/INTEGRATIONS.md` Section 3.3)
@@ -584,7 +584,7 @@ Do NOT change any external behavior. All 326 tests must still pass.
 
 **Prompt:**
 ```
-Design the architecture for multi-channel audio analysis in Kill The Ring (up to 16 simultaneous microphone inputs).
+Design the architecture for multi-channel audio analysis in DoneWell Audio (up to 16 simultaneous microphone inputs).
 
 Current architecture: Single FeedbackDetector → single Web Worker → single advisory stream.
 
@@ -621,7 +621,7 @@ Output a detailed architecture document with:
 
 **Prompt:**
 ```
-Perform a comprehensive security audit of Kill The Ring. Check for:
+Perform a comprehensive security audit of DoneWell Audio. Check for:
 
 1. XSS vectors — any user-controlled content rendered as HTML?
 2. Injection — any string interpolation in queries, commands, or eval-like constructs?
@@ -645,7 +645,7 @@ Read these files:
 - next.config.mjs (CSP headers)
 - app/api/v1/ingest/route.ts (API endpoint)
 - lib/data/ (data collection system)
-- lib/storage/ktrStorage.ts (localStorage)
+- lib/storage/dwaStorage.ts (localStorage)
 - lib/dsp/dspWorker.ts (worker messages)
 - app/sw.ts (service worker)
 ```
@@ -658,9 +658,9 @@ Read these files:
 
 **Prompt:**
 ```
-Perform a WCAG 2.1 AA accessibility audit of Kill The Ring's UI components.
+Perform a WCAG 2.1 AA accessibility audit of DoneWell Audio's UI components.
 
-Read all components in `components/kill-the-ring/` and check:
+Read all components in `components/analyzer/` and check:
 
 1. **Keyboard navigation** — can every interactive element be reached via Tab? Are keyboard shortcuts documented?
 2. **Screen reader** — are all advisories announced via role="status" or aria-live? Are canvas visualizations described?
@@ -690,7 +690,7 @@ For each issue, provide:
 
 **Prompt:**
 ```
-Analyze Kill The Ring's production bundle for optimization opportunities.
+Analyze DoneWell Audio's production bundle for optimization opportunities.
 
 1. Run `pnpm build` and examine `.next/static/chunks/` output
 2. Identify the largest chunks
@@ -719,7 +719,7 @@ Target: Main chunk < 200KB gzipped
 
 **Prompt:**
 ```
-Optimize the Web Worker communication in Kill The Ring.
+Optimize the Web Worker communication in DoneWell Audio.
 
 Current pattern:
 1. Main thread: FFT data → FeedbackDetector.analyze() → postMessage(peak + spectrum)
@@ -750,7 +750,7 @@ For each optimization:
 
 **Prompt:**
 ```
-Generate comprehensive JSDoc documentation for all public interfaces in Kill The Ring's type system.
+Generate comprehensive JSDoc documentation for all public interfaces in DoneWell Audio's type system.
 
 Read `types/advisory.ts`, `types/calibration.ts`, `types/data.ts` and add JSDoc comments to every:
 - Type alias (explain what it represents and valid values)
@@ -779,7 +779,7 @@ Do not modify any type definitions — only add JSDoc comments.
 
 **Prompt:**
 ```
-Fix the following bug in Kill The Ring:
+Fix the following bug in DoneWell Audio:
 
 **Bug description:** [DESCRIBE THE BUG]
 **Steps to reproduce:** [HOW TO TRIGGER IT]
@@ -795,7 +795,7 @@ Requirements:
 1. Fix the root cause, not just the symptom
 2. Add a test case that would have caught this bug
 3. Verify all existing 326+ tests still pass
-4. Follow Kill The Ring's code conventions (see CLAUDE.md):
+4. Follow DoneWell Audio's code conventions (see CLAUDE.md):
    - @/* imports
    - SCREAMING_SNAKE constants in constants.ts
    - memo() on components
@@ -814,7 +814,7 @@ Run verification: `npx tsc --noEmit && pnpm test`
 
 **Prompt:**
 ```
-Complete the FUTURE-002 enhancement in Kill The Ring: frame-rate-independent persistence scoring.
+Complete the FUTURE-002 enhancement in DoneWell Audio: frame-rate-independent persistence scoring.
 
 Background: Persistence scoring counts consecutive frames a peak appears. Currently, frame-based thresholds are partially converted to millisecond-based:
 

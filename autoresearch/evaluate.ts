@@ -1,5 +1,5 @@
 /**
- * Autoresearch Evaluation Script — Kill the Ring
+ * Autoresearch Evaluation Script — DoneWell Audio
  *
  * Runs all labeled scenarios through the fusion engine and computes a
  * composite loss metric (lower is better).

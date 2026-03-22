@@ -15,7 +15,7 @@
 **Files:**
 - Modify: `hooks/useAudioAnalyzer.ts`
 
-**Context:** Currently `onSpectrum` (line 142-147) calls `setState` at ~30fps with the full SpectrumData object. This triggers React reconciliation of the entire component tree. The canvas doesn't need React — it reads data imperatively. But KillTheRing.tsx reads scalar fields from spectrum for:
+**Context:** Currently `onSpectrum` (line 142-147) calls `setState` at ~30fps with the full SpectrumData object. This triggers React reconciliation of the entire component tree. The canvas doesn't need React — it reads data imperatively. But AudioAnalyzer.tsx reads scalar fields from spectrum for:
 - `spectrum?.peak` → auto music-aware effect (line 128) + input level display (line 209)
 - `spectrum?.autoGainDb`, `autoGainEnabled`, `autoGainLocked` → gain display (lines 210-212)
 - `spectrum?.algorithmMode`, `contentType`, `msdFrameCount`, `isCompressed`, `compressionRatio` → AlgorithmStatusBar (lines 496-500)
@@ -93,12 +93,12 @@ onSpectrum: (data) => {
 
 - Add `tracksRef = useRef<TrackedPeak[]>([])`
 - Change `onTracksUpdateRef.current` to write to ref instead of setState
-- Remove `tracks` from React state (it's not consumed by any DOM component in KillTheRing)
+- Remove `tracks` from React state (it's not consumed by any DOM component in AudioAnalyzer)
 
 **Step 5: Verify**
 
 Run: `npx tsc --noEmit`
-Expected: Type errors in KillTheRing.tsx (it still destructures `spectrum`) — these get fixed in Task 2.
+Expected: Type errors in AudioAnalyzer.tsx (it still destructures `spectrum`) — these get fixed in Task 2.
 
 **Step 6: Commit**
 
@@ -109,12 +109,12 @@ git commit -m "perf: move spectrum to ref, throttle status to ~4fps"
 
 ---
 
-### Task 2: Update KillTheRing to use spectrumStatus + spectrumRef
+### Task 2: Update AudioAnalyzer to use spectrumStatus + spectrumRef
 
 **Files:**
-- Modify: `components/kill-the-ring/KillTheRing.tsx`
+- Modify: `components/analyzer/AudioAnalyzer.tsx`
 
-**Context:** KillTheRing destructures `spectrum` at line 67 and uses it in two ways: (a) passed as prop to SpectrumCanvas, (b) scalar field reads for DOM elements. After Task 1, we switch to `spectrumStatus` for DOM + `spectrumRef` for canvas.
+**Context:** AudioAnalyzer destructures `spectrum` at line 67 and uses it in two ways: (a) passed as prop to SpectrumCanvas, (b) scalar field reads for DOM elements. After Task 1, we switch to `spectrumStatus` for DOM + `spectrumRef` for canvas.
 
 **Step 1: Update destructuring**
 
@@ -143,8 +143,8 @@ Expected: Type errors in SpectrumCanvas (prop type changed) — fixed in Task 3.
 **Step 5: Commit**
 
 ```bash
-git add components/kill-the-ring/KillTheRing.tsx
-git commit -m "perf: switch KillTheRing to spectrumStatus + spectrumRef"
+git add components/analyzer/AudioAnalyzer.tsx
+git commit -m "perf: switch AudioAnalyzer to spectrumStatus + spectrumRef"
 ```
 
 ---
@@ -152,7 +152,7 @@ git commit -m "perf: switch KillTheRing to spectrumStatus + spectrumRef"
 ### Task 3: Refactor SpectrumCanvas to read from refs
 
 **Files:**
-- Modify: `components/kill-the-ring/SpectrumCanvas.tsx`
+- Modify: `components/analyzer/SpectrumCanvas.tsx`
 
 **Context:** Currently accepts `spectrum: SpectrumData | null` and `advisories: Advisory[]` as value props, listed in `useCallback` deps (line 304). The callback is recreated every frame, defeating memoization. After this change, canvas reads from refs and the render callback is stable.
 
@@ -197,7 +197,7 @@ Expected: Clean (0 errors)
 **Step 5: Commit**
 
 ```bash
-git add components/kill-the-ring/SpectrumCanvas.tsx
+git add components/analyzer/SpectrumCanvas.tsx
 git commit -m "perf: SpectrumCanvas reads spectrum from ref, stable render callback"
 ```
 
@@ -206,7 +206,7 @@ git commit -m "perf: SpectrumCanvas reads spectrum from ref, stable render callb
 ### Task 4: Cache expensive per-frame canvas objects
 
 **Files:**
-- Modify: `components/kill-the-ring/SpectrumCanvas.tsx`
+- Modify: `components/analyzer/SpectrumCanvas.tsx`
 
 **Step 1: Cache canvas context**
 
@@ -271,7 +271,7 @@ Run: `npx tsc --noEmit && pnpm build`
 Expected: Clean
 
 ```bash
-git add components/kill-the-ring/SpectrumCanvas.tsx
+git add components/analyzer/SpectrumCanvas.tsx
 git commit -m "perf: cache canvas context, gradient, and devicePixelRatio"
 ```
 
@@ -280,7 +280,7 @@ git commit -m "perf: cache canvas context, gradient, and devicePixelRatio"
 ### Task 5: Merge dual spectrum iteration into single pass
 
 **Files:**
-- Modify: `components/kill-the-ring/SpectrumCanvas.tsx`
+- Modify: `components/analyzer/SpectrumCanvas.tsx`
 
 **Context:** Lines 162-204 iterate the entire FFT array twice — once for the fill path, once for the stroke path. Both compute identical x/y coordinates. With 4096+ bins and up to 3 canvas instances, this is ~25,000 unnecessary iterations per frame.
 
@@ -336,7 +336,7 @@ Run: `npx tsc --noEmit && pnpm build`
 Expected: Clean
 
 ```bash
-git add components/kill-the-ring/SpectrumCanvas.tsx
+git add components/analyzer/SpectrumCanvas.tsx
 git commit -m "perf: merge dual spectrum iteration into single pass with Path2D"
 ```
 

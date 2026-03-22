@@ -1,6 +1,6 @@
-# Kill The Ring — Rebuild Manual
+# DoneWell Audio — Rebuild Manual
 
-> **Purpose:** A complete prompt manual to rebuild Kill The Ring from scratch using AI assistants. Three independent phases, each self-contained.
+> **Purpose:** A complete prompt manual to rebuild DoneWell Audio from scratch using AI assistants. Three independent phases, each self-contained.
 > **Version:** 1.0 | **Date:** 2026-03-14
 
 ---
@@ -15,7 +15,7 @@
 
 # Phase A: Blank Slate
 
-> **Purpose:** Rebuild Kill The Ring from first principles. No assumed knowledge. Every architectural decision explained.
+> **Purpose:** Rebuild DoneWell Audio from first principles. No assumed knowledge. Every architectural decision explained.
 > **Total prompts:** 15 | **Estimated time:** 2-3 days with AI assistance
 > **Best workflow:** Claude Code (Opus 4.6) for architecture → Gemini Ultra for DSP → Codex for integration
 
@@ -27,7 +27,7 @@
 **Purpose:** Create the project foundation
 
 ```
-Create a new Next.js 16 project called "killthering" for a real-time acoustic feedback detection PWA.
+Create a new Next.js 16 project called "donewellaudio" for a real-time acoustic feedback detection PWA.
 
 Requirements:
 1. Next.js 16 with App Router (NOT Pages Router)
@@ -45,7 +45,7 @@ Requirements:
 Project structure:
 app/                  — Next.js App Router pages
 components/
-  kill-the-ring/      — Domain components
+  analyzer/           — Domain components
   ui/                 — shadcn/ui primitives
 contexts/             — React context providers
 hooks/                — Custom React hooks
@@ -70,8 +70,8 @@ In package.json, add scripts:
 - test:watch: vitest
 - test:coverage: vitest run --coverage
 
-Create a basic app/layout.tsx with metadata (title: "Kill The Ring", description: "Real-time acoustic feedback detection").
-Create app/page.tsx that renders a placeholder <h1>Kill The Ring</h1>.
+Create a basic app/layout.tsx with metadata (title: "DoneWell Audio", description: "Real-time acoustic feedback detection").
+Create app/page.tsx that renders a placeholder <h1>DoneWell Audio</h1>.
 
 Verify: pnpm dev starts without errors, pnpm lint passes, pnpm test runs (0 tests).
 ```
@@ -84,7 +84,7 @@ Verify: pnpm dev starts without errors, pnpm lint passes, pnpm test runs (0 test
 **Purpose:** Define the complete type system before writing any implementation
 
 ```
-Create the type system for Kill The Ring in three files.
+Create the type system for DoneWell Audio in three files.
 
 1. `types/advisory.ts` — Core DSP and detection types:
    - Algorithm = 'msd' | 'phase' | 'spectral' | 'comb' | 'ihr' | 'ptmr'
@@ -134,7 +134,7 @@ Verify: npx tsc --noEmit passes with no errors.
 **Purpose:** Define all DSP tuning constants
 
 ```
-Create `lib/dsp/constants.ts` with all tuning constants for Kill The Ring's feedback detection engine.
+Create `lib/dsp/constants.ts` with all tuning constants for DoneWell Audio's feedback detection engine.
 
 Include these constant groups (with SCREAMING_SNAKE_CASE naming):
 
@@ -535,8 +535,8 @@ Verify: npx tsc --noEmit
 ```
 Create the UI component layer (all components: PascalCase, memo() wrapped, 'use client'):
 
-1. KillTheRing.tsx — root orchestrator, wraps providers, layout switch
-2. KillTheRingClient.tsx — client boundary wrapper
+1. AudioAnalyzer.tsx — root orchestrator, wraps providers, layout switch
+2. AudioAnalyzerClient.tsx — client boundary wrapper
 3. SpectrumCanvas.tsx — HTML5 Canvas spectrum display (60fps rAF)
 4. GEQBarView.tsx — GEQ overlay on spectrum
 5. IssuesList.tsx — active advisory cards
@@ -563,7 +563,7 @@ Create the UI component layer (all components: PascalCase, memo() wrapped, 'use 
 
 Canvas drawing helpers: lib/canvas/spectrumDrawing.ts (pure functions, {current: T} params)
 
-Barrel export: components/kill-the-ring/index.ts
+Barrel export: components/analyzer/index.ts
 
 Verify: pnpm dev starts, components render, pnpm lint passes
 ```
@@ -604,7 +604,7 @@ Add infrastructure:
    - exportTxt.ts — fixed-width text
    - downloadFile.ts — browser download trigger
 
-6. Storage: lib/storage/ktrStorage.ts
+6. Storage: lib/storage/dwaStorage.ts
    - typedStorage<T>(key) — get/set/remove with JSON serialization
    - stringStorage(key) — raw string storage
    - flagStorage(key) — boolean flag storage
@@ -627,7 +627,7 @@ Verify: pnpm build succeeds, all tests pass
 ```
 Final integration steps:
 
-1. Wire app/page.tsx to render KillTheRing component with all providers
+1. Wire app/page.tsx to render AudioAnalyzer component with all providers
 2. Verify the full data flow: mic → FFT → FeedbackDetector → Worker → Advisory → UI → Canvas
 3. Run all tests: pnpm test (target: 300+ tests passing)
 4. Run type check: npx tsc --noEmit (zero errors)
@@ -661,7 +661,7 @@ Verify: npx tsc --noEmit && pnpm test && pnpm build
 **AI:** Claude Code (Opus 4.6)
 
 ```
-Create a Next.js 16 project with the exact architecture of Kill The Ring.
+Create a Next.js 16 project with the exact architecture of DoneWell Audio.
 
 Preserve these architectural decisions:
 1. Three React contexts: AudioAnalyzer (engine), Advisory (state), UI (layout)
@@ -690,7 +690,7 @@ Verify: pnpm dev starts, npx tsc --noEmit passes
 **AI:** Gemini Ultra
 
 ```
-Regenerate all DSP modules for Kill The Ring using the preserved type system and constants.
+Regenerate all DSP modules for DoneWell Audio using the preserved type system and constants.
 
 Feed the AI: types/advisory.ts, lib/dsp/constants.ts, and the module interfaces/exports from each current module.
 
@@ -721,7 +721,7 @@ Verify: npx tsc --noEmit && pnpm test (all existing tests must pass)
 **AI:** ChatGPT 5.4
 
 ```
-Regenerate the complete test suite for Kill The Ring's DSP engine.
+Regenerate the complete test suite for DoneWell Audio's DSP engine.
 
 Target: 326+ tests across 14 test files.
 
@@ -819,7 +819,7 @@ Same pattern for `lib/dsp/dspWorker.ts`. Can improve message handling or add new
 ### C-09: Replace Any Component
 
 ```
-Replace `components/kill-the-ring/[COMPONENT_NAME].tsx` with an improved version.
+Replace `components/analyzer/[COMPONENT_NAME].tsx` with an improved version.
 
 Constraints:
 - Must have the same component name and export
@@ -843,4 +843,4 @@ Template for adding any new detection algorithm — references PROMPT-DSP-001 fr
 
 ---
 
-*This rebuild manual is designed to reconstruct Kill The Ring using any combination of AI assistants. Each phase is self-contained. Phase A builds from nothing, Phase B preserves architecture, Phase C upgrades individual pieces. Use the AI Strengths Matrix from the plan to choose the best AI for each prompt.*
+*This rebuild manual is designed to reconstruct DoneWell Audio using any combination of AI assistants. Each phase is self-contained. Phase A builds from nothing, Phase B preserves architecture, Phase C upgrades individual pieces. Use the AI Strengths Matrix from the plan to choose the best AI for each prompt.*

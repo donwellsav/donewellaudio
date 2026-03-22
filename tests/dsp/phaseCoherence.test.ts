@@ -1,5 +1,5 @@
 /**
- * Phase Coherence Tests — Kill the Ring
+ * Phase Coherence Tests — DoneWell Audio
  *
  * Tests the PhaseHistoryBuffer class from phaseCoherence.ts against
  * the KU Leuven 2025 mean phasor formula:

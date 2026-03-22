@@ -1,5 +1,5 @@
-import { KillTheRingClient } from '@/components/kill-the-ring/KillTheRingClient'
+import { AudioAnalyzerClient } from '@/components/analyzer/AudioAnalyzerClient'
 
 export default function Page() {
-  return <KillTheRingClient />
+  return <AudioAnalyzerClient />
 }

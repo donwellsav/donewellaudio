@@ -16,7 +16,7 @@ const MAP = [
   [/contexts\//, 'React State'],
   [/hooks\//, 'React State'],
   [/spectrumDrawing|canvas/, 'Canvas / Visualization'],
-  [/ktrStorage/, 'Settings / Storage'],
+  [/dwaStorage/, 'Settings / Storage'],
   [/middleware/, 'Security / CSP'],
   [/api\//, 'API / Ingest'],
   [/\.test\.|vitest|__tests__/, 'Testing'],

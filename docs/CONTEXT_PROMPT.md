@@ -1,4 +1,4 @@
-# Kill The Ring — AI Session Context Prompt
+# DoneWell Audio — AI Session Context Prompt
 
 > **Copy-paste this entire document at the start of a new AI session to get full project context.**
 > Built from deep code audit of v0.152.0. Every value verified against actual source code.
@@ -7,10 +7,10 @@
 
 ## Identity
 
-**Kill The Ring** is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using 7 fused detection algorithms, and delivers EQ recommendations with pitch translation. It is **analysis-only** — it never modifies the audio signal.
+**DoneWell Audio** is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using 7 fused detection algorithms, and delivers EQ recommendations with pitch translation. It is **analysis-only** — it never modifies the audio signal.
 
-- **URL:** killthering.com
-- **Repo:** github.com/donwellsav/killthering
+- **URL:** donewellaudio.com
+- **Repo:** github.com/donwellsav/donewellaudio
 - **Version:** 0.152.0
 - **Stack:** Next.js 16 (App Router, Turbopack) · TypeScript 5.7 (strict, zero `any`) · React 19 · shadcn/ui + Tailwind v4 · Vitest (476 tests, 27 suites) · Sentry · Serwist PWA · pnpm
 
@@ -18,8 +18,8 @@
 
 1. **NEVER run `git push`** unless the user explicitly says "push" or "send to GitHub". Committing locally is fine. Pushing is NOT.
 2. **Build verification after every change:** `npx tsc --noEmit && pnpm test`
-3. **Do not modify audio output.** KTR listens and advises. It never touches the audio signal.
-4. **"Update the usuals"** means: update changelog (`lib/changelog.ts`), help menu (`components/kill-the-ring/help/GuideTab.tsx`), version (`package.json` — `0.{PR_NUMBER}.0`), and CLAUDE.md.
+3. **Do not modify audio output.** DWA listens and advises. It never touches the audio signal.
+4. **"Update the usuals"** means: update changelog (`lib/changelog.ts`), help menu (`components/analyzer/help/GuideTab.tsx`), version (`package.json` — `0.{PR_NUMBER}.0`), and CLAUDE.md.
 
 ## Commands
 
@@ -102,7 +102,7 @@ PortalContainerProvider — Radix UI portal redirect for fullscreen
 
 ## Key Interfaces (types/advisory.ts)
 
-**DetectorSettings** — 46 fields controlling all detection behavior. Persisted to localStorage via `ktrStorage.ts`. Key fields: `mode`, `feedbackThresholdDb`, `minFrequency`, `maxFrequency`, `algorithmMode`, `confidenceThreshold` (default 0.35), `swipeLabeling`, `spectrumWarmMode`, `canvasTargetFps`.
+**DetectorSettings** — 46 fields controlling all detection behavior. Persisted to localStorage via `dwaStorage.ts`. Key fields: `mode`, `feedbackThresholdDb`, `minFrequency`, `maxFrequency`, `algorithmMode`, `confidenceThreshold` (default 0.35), `swipeLabeling`, `spectrumWarmMode`, `canvasTargetFps`.
 
 **Advisory** — 24-field detection result: `id`, `label` (ACOUSTIC_FEEDBACK|WHISTLE|INSTRUMENT|POSSIBLE_RING), `severity` (RUNAWAY|GROWING|RESONANCE|POSSIBLE_RING|WHISTLE|INSTRUMENT), `confidence`, `trueFrequencyHz`, `qEstimate`, `advisory` (EQAdvisory with PEQ/GEQ/shelf recs), `algorithmScores` (all 7 scores + fused probability).
 
@@ -131,8 +131,8 @@ lib/dsp/
 lib/canvas/
   spectrumDrawing.ts (750+)   # Pure canvas drawing, RTA labels, theme-aware (canvasThemeRef)
 
-components/kill-the-ring/
-  KillTheRing.tsx (473)       # Root orchestrator, settings debounce, FP handling
+components/analyzer/
+  AudioAnalyzer.tsx (473)       # Root orchestrator, settings debounce, FP handling
   IssuesList.tsx (440)        # Advisory cards with swipe gestures, 3s stability
   UnifiedControls.tsx (760)   # All settings: icon sub-tabs, accordion sections
   HeaderBar.tsx (191)         # Header bar, permanent Clear All, theme toggle
@@ -203,7 +203,7 @@ lib/utils/
 - **Draggable threshold:** Drag the dashed line on RTA to adjust sensitivity
 - **Algorithm scores debug:** Toggle in Display settings shows all 7 scores per card
 - **Settings auto-persist:** All 46 fields saved to localStorage on every change
-- **KTR brand logo:** Frequency analyzer crosshair + EQ bars SVG
+- **DWA brand logo:** Frequency analyzer crosshair + EQ bars SVG
 
 ## Coding Conventions
 

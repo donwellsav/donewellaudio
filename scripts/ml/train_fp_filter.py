@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Train KTR false positive filter model from labeled data.
+Train DoneWell Audio false positive filter model from labeled data.
 
 Reads exported CSV (from export_training_data.py), trains an MLP,
 and exports to ONNX. Uses numpy-only training (no PyTorch required).
@@ -8,7 +8,7 @@ and exports to ONNX. Uses numpy-only training (no PyTorch required).
 Usage:
   python scripts/ml/train_fp_filter.py --input data/training.csv [--version v2]
 
-Output: public/models/ktr-fp-filter-{version}.onnx + updated manifest.json
+Output: public/models/dwa-fp-filter-{version}.onnx + updated manifest.json
 """
 
 from __future__ import annotations
@@ -169,7 +169,7 @@ def update_manifest(manifest_path: Path, version: str, onnx_filename: str, metri
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train KTR FP filter model")
+    parser = argparse.ArgumentParser(description="Train DWA FP filter model")
     parser.add_argument("--input", "-i", required=True, help="Training CSV from export_training_data.py")
     parser.add_argument("--version", "-v", default="v2", help="Model version (default: v2)")
     parser.add_argument("--epochs", type=int, default=500, help="Max training epochs")
@@ -183,7 +183,7 @@ def main():
         print("Run export_training_data.py first.")
         sys.exit(1)
 
-    print(f"=== KTR FP Filter Training ({args.version}) ===\n")
+    print(f"=== DWA FP Filter Training ({args.version}) ===\n")
 
     X, y = load_csv(input_path)
     print(f"Loaded {len(X)} samples, {11} features")
@@ -206,7 +206,7 @@ def main():
 
     # Export
     models_dir = Path(__file__).parent.parent.parent / "public" / "models"
-    onnx_filename = f"ktr-fp-filter-{args.version}.onnx"
+    onnx_filename = f"dwa-fp-filter-{args.version}.onnx"
     onnx_path = models_dir / onnx_filename
 
     print(f"\nExporting to {onnx_path}...")
@@ -214,7 +214,7 @@ def main():
 
     # Update manifest
     manifest_path = models_dir / "manifest.json"
-    update_manifest(manifest_path, f"ktr-fp-{args.version}", onnx_filename, metrics)
+    update_manifest(manifest_path, f"dwa-fp-{args.version}", onnx_filename, metrics)
 
     print(f"\nDone! Deploy {onnx_filename} to production.")
 

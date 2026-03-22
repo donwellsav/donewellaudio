@@ -1,8 +1,8 @@
-# Kill The Ring
+# DoneWell Audio
 
 **Professional real-time acoustic feedback detection and analysis for live sound engineers.**
 
-Kill The Ring analyzes microphone input in the browser using the Web Audio API, identifies feedback frequencies using advanced DSP algorithms based on peer-reviewed academic research, and delivers specific EQ recommendations with pitch translation. This is an **analysis tool only** - it does not output or modify audio.
+DoneWell Audio analyzes microphone input in the browser using the Web Audio API, identifies feedback frequencies using advanced DSP algorithms based on peer-reviewed academic research, and delivers specific EQ recommendations with pitch translation. This is an **analysis tool only** - it does not output or modify audio.
 
 Built by [Don Wells AV](https://donwellsav.com).
 
@@ -115,8 +115,8 @@ Built by [Don Wells AV](https://donwellsav.com).
 
 ```bash
 # Clone the repository
-git clone https://github.com/donwellsav/killthering.git
-cd killthering
+git clone https://github.com/donwellsav/donewellaudio.git
+cd donewellaudio
 
 # Install dependencies
 pnpm install
@@ -132,7 +132,7 @@ Open [http://localhost:3000](http://localhost:3000), grant microphone permission
 ## Project Structure
 
 ```
-kill-the-ring/
+analyzer/
 ├── app/
 │   ├── layout.tsx                    # Root layout with metadata + Sentry
 │   ├── page.tsx                      # Entry point — renders KillTheRing
@@ -142,7 +142,7 @@ kill-the-ring/
 │   └── api/v1/ingest/route.ts        # Spectral snapshot ingest endpoint
 │
 ├── components/
-│   ├── kill-the-ring/
+│   ├── analyzer/
 │   │   ├── KillTheRing.tsx           # Main orchestration component
 │   │   ├── KillTheRingClient.tsx     # Client-side wrapper
 │   │   ├── SpectrumCanvas.tsx        # RTA Spectrum visualization

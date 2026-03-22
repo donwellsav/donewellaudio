@@ -1,4 +1,4 @@
-// KillTheRing2 Classifier - Distinguishes feedback vs whistle vs instrument
+// DoneWell Audio Classifier - Distinguishes feedback vs whistle vs instrument
 // Enhanced with acoustic research from "Sound Insulation" (Carl Hopkins, 2007)
 // Now integrates MSD, Phase Coherence, and Spectral Flatness from advancedDetection.ts
 

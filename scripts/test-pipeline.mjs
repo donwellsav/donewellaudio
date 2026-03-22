@@ -20,7 +20,7 @@
  *   node scripts/test-pipeline.mjs http://localhost:3000    # hits local dev
  */
 
-const BASE_URL = process.argv[2] || 'https://killthering.com'
+const BASE_URL = process.argv[2] || 'https://donewellaudio.com'
 const INGEST_URL = `${BASE_URL}/api/v1/ingest`
 
 // ─── Replicate SnapshotCollector logic exactly ──────────────────────────────

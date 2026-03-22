@@ -1,4 +1,4 @@
-# Kill The Ring — Hardware & Protocol Integration Specifications
+# DoneWell Audio — Hardware & Protocol Integration Specifications
 
 > **Version:** 1.0 | **Date:** 2026-03-14 | **App Version:** 0.95.0
 
@@ -22,7 +22,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        KILL THE RING (PWA)                          │
+│                        DONEWELL AUDIO (PWA)                          │
 │  ┌──────────┐  ┌───────────┐  ┌──────────────┐  ┌──────────────┐  │
 │  │ Web Audio │→ │ DSP Worker│→ │ Advisory Mgr │→ │ React State  │  │
 │  │ API       │  │ (FFT/     │  │ (detection   │  │ (contexts)   │  │
@@ -69,10 +69,10 @@
 
 | Layer | Purpose | Transport | Direction |
 |-------|---------|-----------|-----------|
-| **WebSocket API** | KTR ↔ external apps | WebSocket (ws/wss) | Bidirectional |
-| **Companion Module** | KTR → Stream Deck | WebSocket → Companion SDK | KTR pushes state |
-| **Mixer Bridge** | KTR → Mixer | WebSocket → UDP/TCP | KTR sends EQ commands |
-| **Dante** | Audio network → KTR | Dante Via / DAL SDK → Web Audio | Audio input |
+| **WebSocket API** | DWA ↔ external apps | WebSocket (ws/wss) | Bidirectional |
+| **Companion Module** | DWA → Stream Deck | WebSocket → Companion SDK | DWA pushes state |
+| **Mixer Bridge** | DWA → Mixer | WebSocket → UDP/TCP | DWA sends EQ commands |
+| **Dante** | Audio network → DWA | Dante Via / DAL SDK → Web Audio | Audio input |
 
 ---
 
@@ -82,12 +82,12 @@
 
 [Bitfocus Companion](https://bitfocus.io/companion) is an open-source software platform that turns Elgato Stream Deck, Loupedeck, and other button controllers into professional control surfaces. It supports 300+ products and services through its module system.
 
-Kill The Ring integrates as a **Companion module** — a Node.js package that connects to KTR's WebSocket API and exposes actions, feedbacks, variables, and presets to the Companion interface.
+DoneWell Audio integrates as a **Companion module** — a Node.js package that connects to DWA's WebSocket API and exposes actions, feedbacks, variables, and presets to the Companion interface.
 
 ### 2.2 Module Architecture
 
 ```
-companion-module-killthering/
+companion-module-donewellaudio/
 ├── package.json              # Module metadata + dependencies
 ├── src/
 │   ├── main.ts               # Module entry point (extends InstanceBase)
@@ -96,7 +96,7 @@ companion-module-killthering/
 │   ├── feedbacks.ts           # Dynamic button appearance
 │   ├── variables.ts           # Exposed variables
 │   ├── presets.ts             # Pre-configured button templates
-│   ├── connection.ts          # WebSocket client to KTR
+│   ├── connection.ts          # WebSocket client to DWA
 │   └── types.ts               # Shared types
 ├── companion/
 │   └── manifest.json          # Companion module manifest
@@ -107,8 +107,8 @@ companion-module-killthering/
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `host` | string | `127.0.0.1` | Kill The Ring WebSocket host |
-| `port` | number | `9741` | Kill The Ring WebSocket port |
+| `host` | string | `127.0.0.1` | DoneWell Audio WebSocket host |
+| `port` | number | `9741` | DoneWell Audio WebSocket port |
 | `reconnectInterval` | number | `5000` | Reconnection interval in ms |
 | `autoReconnect` | boolean | `true` | Auto-reconnect on disconnect |
 
@@ -118,7 +118,7 @@ export const configFields: CompanionInputFieldConfig[] = [
   {
     type: 'textinput',
     id: 'host',
-    label: 'Kill The Ring Host',
+    label: 'DoneWell Audio Host',
     default: '127.0.0.1',
     width: 8,
   },
@@ -134,7 +134,7 @@ export const configFields: CompanionInputFieldConfig[] = [
 ]
 ```
 
-### 2.4 Actions (Button Press → Kill The Ring)
+### 2.4 Actions (Button Press → DoneWell Audio)
 
 | Action ID | Label | Description | Parameters |
 |-----------|-------|-------------|------------|
@@ -151,7 +151,7 @@ export const configFields: CompanionInputFieldConfig[] = [
 | `undo_eq` | Undo Last EQ | Reverts the last EQ change sent to mixer | None |
 | `reset_session` | Reset Session | Clears all history and starts fresh | None |
 
-### 2.5 Feedbacks (Kill The Ring → Button Appearance)
+### 2.5 Feedbacks (DoneWell Audio → Button Appearance)
 
 | Feedback ID | Label | Description | Button Effect |
 |-------------|-------|-------------|---------------|
@@ -170,22 +170,22 @@ export const configFields: CompanionInputFieldConfig[] = [
 
 | Variable | Label | Example Value |
 |----------|-------|---------------|
-| `$(killthering:advisoryCount)` | Active Advisories | `3` |
-| `$(killthering:topFrequency)` | Top Frequency (Hz) | `2512` |
-| `$(killthering:topFrequencyFormatted)` | Top Frequency (Formatted) | `2.5 kHz` |
-| `$(killthering:topNote)` | Top Note | `D#5 +12¢` |
-| `$(killthering:topSeverity)` | Top Severity | `ALERT` |
-| `$(killthering:topGain)` | Recommended Cut (dB) | `-4.2` |
-| `$(killthering:topQ)` | Recommended Q | `8.3` |
-| `$(killthering:mode)` | Operation Mode | `live` |
-| `$(killthering:isRunning)` | Detection Running | `true` |
-| `$(killthering:isFrozen)` | Display Frozen | `false` |
-| `$(killthering:inputLevel)` | Input Level (dBFS) | `-18.5` |
-| `$(killthering:noiseFloor)` | Noise Floor (dB) | `-62.3` |
-| `$(killthering:mixerConnected)` | Mixer Connected | `true` |
-| `$(killthering:mixerName)` | Connected Mixer | `X32` |
-| `$(killthering:sessionDuration)` | Session Duration | `01:23:45` |
-| `$(killthering:totalDetections)` | Total Detections | `17` |
+| `$(donewellaudio:advisoryCount)` | Active Advisories | `3` |
+| `$(donewellaudio:topFrequency)` | Top Frequency (Hz) | `2512` |
+| `$(donewellaudio:topFrequencyFormatted)` | Top Frequency (Formatted) | `2.5 kHz` |
+| `$(donewellaudio:topNote)` | Top Note | `D#5 +12¢` |
+| `$(donewellaudio:topSeverity)` | Top Severity | `ALERT` |
+| `$(donewellaudio:topGain)` | Recommended Cut (dB) | `-4.2` |
+| `$(donewellaudio:topQ)` | Recommended Q | `8.3` |
+| `$(donewellaudio:mode)` | Operation Mode | `live` |
+| `$(donewellaudio:isRunning)` | Detection Running | `true` |
+| `$(donewellaudio:isFrozen)` | Display Frozen | `false` |
+| `$(donewellaudio:inputLevel)` | Input Level (dBFS) | `-18.5` |
+| `$(donewellaudio:noiseFloor)` | Noise Floor (dB) | `-62.3` |
+| `$(donewellaudio:mixerConnected)` | Mixer Connected | `true` |
+| `$(donewellaudio:mixerName)` | Connected Mixer | `X32` |
+| `$(donewellaudio:sessionDuration)` | Session Duration | `01:23:45` |
+| `$(donewellaudio:totalDetections)` | Total Detections | `17` |
 
 ### 2.7 Presets (Pre-Configured Button Templates)
 
@@ -235,11 +235,11 @@ export const configFields: CompanionInputFieldConfig[] = [
 ### 2.8 Companion Module Implementation Notes
 
 1. **Module SDK version:** Use `@companion-module/base` v3.x (latest)
-2. **TypeScript:** Module should be in TypeScript for type safety with KTR's shared types
+2. **TypeScript:** Module should be in TypeScript for type safety with DWA's shared types
 3. **Reconnection:** Use exponential backoff (1s, 2s, 4s, 8s, max 30s)
 4. **Status indicator:** Set module status to `ok`, `warning` (reconnecting), or `error` (connection failed)
 5. **Image generation:** Use Companion's image API for dynamic button images (frequency spectrum mini-graphs)
-6. **Separate repository:** `companion-module-killthering` — published to npm for Companion's module system
+6. **Separate repository:** `companion-module-donewellaudio` — published to npm for Companion's module system
 
 ---
 
@@ -247,7 +247,7 @@ export const configFields: CompanionInputFieldConfig[] = [
 
 ### 3.1 Overview
 
-Kill The Ring can send EQ recommendations directly to digital mixing consoles, automating the feedback reduction workflow. This requires a **bridge service** because browsers cannot directly send UDP/TCP packets.
+DoneWell Audio can send EQ recommendations directly to digital mixing consoles, automating the feedback reduction workflow. This requires a **bridge service** because browsers cannot directly send UDP/TCP packets.
 
 ### 3.2 Mixer Protocol Reference
 
@@ -507,7 +507,7 @@ export interface EQBandParams {
 | **Undo stack** | Last 20 changes | Yes (10-50) | Full undo/redo for all applied changes |
 | **Channel whitelist** | All channels | Yes (specify channels) | Only modify specified channels |
 | **Frequency range lock** | 200 Hz - 8 kHz | Yes (full range) | Restrict EQ changes to specific frequency range |
-| **Kill switch** | Physical button on Companion | N/A | Instantly undo all KTR-applied EQ changes |
+| **Kill switch** | Physical button on Companion | N/A | Instantly undo all DWA-applied EQ changes |
 | **Mixer connection timeout** | 5 seconds | Yes | Prevent applying EQ to wrong mixer if connection drops |
 | **Dry run mode** | Disabled | Yes | Show what would be applied without actually sending commands |
 
@@ -549,11 +549,11 @@ The bridge runs as a local service because browsers cannot send UDP/TCP packets 
 
 **Option A: Standalone Node.js Service**
 ```
-npx killthering-bridge --mixer behringer --host 192.168.1.100
+npx donewellaudio-bridge --mixer behringer --host 192.168.1.100
 ```
 
 **Option B: Companion Module Bridge** (recommended first)
-The Companion module already has network access. Add mixer control as a Companion feature — users configure the mixer connection in Companion's UI, and KTR sends EQ commands through the Companion WebSocket.
+The Companion module already has network access. Add mixer control as a Companion feature — users configure the mixer connection in Companion's UI, and DWA sends EQ commands through the Companion WebSocket.
 
 **Option C: Tauri/Electron Desktop App**
 Native desktop app bundles the bridge service. Users launch the desktop app instead of the browser PWA.
@@ -566,7 +566,7 @@ Native desktop app bundles the bridge service. Users launch the desktop app inst
 
 [Dante](https://www.getdante.com/) (Digital Audio Network Through Ethernet) is the dominant audio-over-IP protocol, with 91% market share in networked audio products. Over 5 million Dante-enabled devices are deployed globally.
 
-Kill The Ring can receive audio from Dante networks for analysis, enabling monitoring of any point in a Dante system without physical microphone connections.
+DoneWell Audio can receive audio from Dante networks for analysis, enabling monitoring of any point in a Dante system without physical microphone connections.
 
 ### 4.2 Integration Paths
 
@@ -574,7 +574,7 @@ Kill The Ring can receive audio from Dante networks for analysis, enabling monit
 
 **What:** [Dante Via](https://www.getdante.com/products/software-essentials/dante-via/) ($49.99) routes audio between applications and the Dante network on a PC/Mac. It makes any audio application Dante-capable.
 
-**How it works with Kill The Ring:**
+**How it works with DoneWell Audio:**
 ```
 Dante Network                    Computer
 ─────────────                    ────────
@@ -584,7 +584,7 @@ Dante Network                    Computer
 └───────────┘                │  │  virtual audio device  │
                              │  └────────────────────────│
 ┌───────────┐                │                           │
-│ Mixer     │                │  Kill The Ring (browser)  │
+│ Mixer     │                │  DoneWell Audio (browser)  │
 │ (insert   │                │  ├─ Selects virtual       │
 │  point)   │                │  │  device as mic input   │
 └───────────┘                │  └─ Analyzes audio        │
@@ -596,8 +596,8 @@ Dante Network                    Computer
 2. Connect computer to Dante network via Ethernet (not Wi-Fi — Dante requires wired connection)
 3. Open Dante Via → enable Dante control for your speakers/headphones device
 4. Open [Dante Controller](https://www.audinate.com/products/software/dante-controller) (free) → route desired Dante channel to the Dante Via receive channel
-5. Open Kill The Ring → select the Dante Via virtual audio device as microphone input
-6. KTR now analyzes audio from the Dante network in real-time
+5. Open DoneWell Audio → select the Dante Via virtual audio device as microphone input
+6. DWA now analyzes audio from the Dante network in real-time
 
 **Limitations:**
 - Up to 16 channels per application (Dante Via limit)
@@ -606,7 +606,7 @@ Dante Network                    Computer
 - $49.99 for Dante Via license (one-time)
 - Windows or macOS only (no Linux, no mobile)
 
-**KTR changes needed:** None — just documentation. The existing Web Audio API mic input selection already supports virtual audio devices.
+**DWA changes needed:** None — just documentation. The existing Web Audio API mic input selection already supports virtual audio devices.
 
 ---
 
@@ -623,7 +623,7 @@ Dante Network                    Desktop App (Tauri/Electron)
 │ (mic in)  │                │  ├─ Receives 64 Dante channels   │
 └───────────┘                │  │  at 48kHz / 4ms latency       │
                              │  │                                │
-┌───────────┐                │  ├─ Kill The Ring DSP Engine      │
+┌───────────┐                │  ├─ DoneWell Audio DSP Engine      │
 │ Any Dante │                │  │  ├─ Independent FeedbackDetector│
 │ device    │                │  │  │  per channel                 │
 └───────────┘                │  │  ├─ Per-channel advisories      │
@@ -640,7 +640,7 @@ Dante Network                    Desktop App (Tauri/Electron)
 - Windows or macOS (DAL is native C/C++)
 - Ethernet connection to Dante network
 
-**KTR changes needed:**
+**DWA changes needed:**
 - Desktop app wrapper (Tauri recommended)
 - Native DAL integration via Tauri's Rust FFI or Electron's N-API
 - Multi-channel FeedbackDetector instances (one per channel)
@@ -658,10 +658,10 @@ Dante Network                    Desktop App (Tauri/Electron)
 
 **How it works:**
 ```
-Dante Network          Dante Domain Manager        Kill The Ring
+Dante Network          Dante Domain Manager        DoneWell Audio
 ─────────────          ────────────────────        ─────────────
 ┌───────────┐          ┌────────────────────┐      ┌─────────┐
-│ Devices   │←────────→│  DDM Server        │      │ KTR     │
+│ Devices   │←────────→│  DDM Server        │      │ DWA     │
 │ on Dante  │          │  ├─ Managed API    │←────→│ ├─ Auto-│
 │ network   │          │  │  (GraphQL)      │      │ │ route  │
 └───────────┘          │  └─ Device/route   │      │ │ Dante  │
@@ -669,14 +669,14 @@ Dante Network          Dante Domain Manager        Kill The Ring
                        └────────────────────┘      └─────────┘
 ```
 
-**Use case:** Automatically route Dante channels to Kill The Ring's audio input. Instead of manually setting up Dante Controller routes, KTR could auto-discover available channels and set up monitoring routes via the Managed API.
+**Use case:** Automatically route Dante channels to DoneWell Audio's audio input. Instead of manually setting up Dante Controller routes, DWA could auto-discover available channels and set up monitoring routes via the Managed API.
 
 **Requirements:**
 - Customer must have Dante Domain Manager ($varies) or Dante Director
 - API access included free for DDM/Director customers
-- GraphQL client in KTR's backend
+- GraphQL client in DWA's backend
 
-**KTR changes needed:**
+**DWA changes needed:**
 - Backend API route for Dante Managed API proxy
 - Dante device discovery UI
 - Auto-routing configuration
@@ -688,14 +688,14 @@ Dante Network          Dante Domain Manager        Kill The Ring
 
 **What:** [Dante SDK Connect Edition](https://www.getdante.com/products/network-management/dante-sdk-connect-edition/) provides Dante audio transmission for cloud-based applications. Up to 256×256 channels at 48kHz with PTP clocking.
 
-**How it works:** Cloud-hosted KTR instance receives Dante audio streams for remote monitoring. An engineer could monitor a venue's audio from anywhere with internet access.
+**How it works:** Cloud-hosted DWA instance receives Dante audio streams for remote monitoring. An engineer could monitor a venue's audio from anywhere with internet access.
 
 **Requirements:**
 - Linux cloud environment (AWS, GCP, etc.)
 - Dante SDK Connect Edition license (customer-side)
 - Low-latency internet connection
 
-**KTR changes needed:**
+**DWA changes needed:**
 - Cloud-hosted analysis service
 - Server-side DSP engine (Node.js or Rust)
 - Real-time WebSocket stream of analysis results to browser client
@@ -707,7 +707,7 @@ Dante Network          Dante Domain Manager        Kill The Ring
 
 | Phase | Path | Effort | Prerequisites | User Value |
 |-------|------|--------|--------------|------------|
-| **Phase 1** | Dante Via documentation | 1-2 days | None | Users can start using Dante audio with KTR immediately |
+| **Phase 1** | Dante Via documentation | 1-2 days | None | Users can start using Dante audio with DWA immediately |
 | **Phase 2** | DAL SDK in desktop app | 15-20 days | Desktop app (Tauri), Audinate licensing | Direct Dante reception, multi-channel |
 | **Phase 3** | Managed API integration | 5-7 days | Backend routes, user auth | Auto-routing convenience |
 | **Phase 4** | Cloud analysis | 30+ days | Cloud infra, server DSP | Remote monitoring |
@@ -717,9 +717,9 @@ Dante Network          Dante Domain Manager        Kill The Ring
 This content should be added to the HelpMenu component as a "Dante Integration" section:
 
 ```markdown
-## Using Kill The Ring with Dante
+## Using DoneWell Audio with Dante
 
-Kill The Ring can analyze audio from your Dante network. Here's how:
+DoneWell Audio can analyze audio from your Dante network. Here's how:
 
 ### What You Need
 - A computer connected to your Dante network via Ethernet (not Wi-Fi)
@@ -732,8 +732,8 @@ Kill The Ring can analyze audio from your Dante network. Here's how:
 3. **Open Dante Via** — Click "Enable Dante control" on your computer's audio output device
 4. **Open Dante Controller** — Find the Dante transmitter you want to monitor (e.g., stage box input, mixer insert point)
 5. **Route audio** — In Dante Controller, route the desired transmitter channel(s) to your Dante Via receiver
-6. **Open Kill The Ring** — Click the microphone icon → select your Dante Via audio device from the dropdown
-7. **Start analyzing** — Hit Start — KTR now analyzes your Dante audio in real-time!
+6. **Open DoneWell Audio** — Click the microphone icon → select your Dante Via audio device from the dropdown
+7. **Start analyzing** — Hit Start — DWA now analyzes your Dante audio in real-time!
 
 ### Tips
 - Monitor individual mic channels to identify which mic is feeding back
@@ -900,7 +900,7 @@ interface WSMessage {
 | Concern | Mitigation |
 |---------|-----------|
 | **Unauthorized access** | Bind to localhost by default (127.0.0.1); require API key for remote connections |
-| **API key management** | Generated on first run, stored in KTR settings, displayed in Advanced tab |
+| **API key management** | Generated on first run, stored in DWA settings, displayed in Advanced tab |
 | **Cross-origin** | Validate Origin header; reject non-local origins unless explicitly allowed |
 | **Message injection** | Validate all incoming messages against schema; reject malformed messages |
 | **DoS** | Rate limit commands (10/second); rate limit connections (5 concurrent) |
@@ -921,9 +921,9 @@ interface WSMessage {
 
 | Concern | Mitigation |
 |---------|-----------|
-| **Dante credentials** | Stored encrypted in OS keychain (not in KTR config files) |
-| **Network access** | Dante operates on dedicated audio VLAN; KTR bridge follows same network boundary |
-| **Audio capture** | KTR only receives/analyzes audio — never modifies or retransmits |
+| **Dante credentials** | Stored encrypted in OS keychain (not in DWA config files) |
+| **Network access** | Dante operates on dedicated audio VLAN; DWA bridge follows same network boundary |
+| **Audio capture** | DWA only receives/analyzes audio — never modifies or retransmits |
 
 ---
 
@@ -936,14 +936,14 @@ interface WSMessage {
 | Design WebSocket message types | `types/websocket.ts` | 1 day |
 | Implement WebSocket server (in-app) | `lib/companion/wsServer.ts` | 2-3 days |
 | Connect advisory state to WS events | `lib/companion/stateSync.ts` | 1-2 days |
-| Add WS port configuration to settings | `components/kill-the-ring/settings/AdvancedTab.tsx` | 0.5 days |
+| Add WS port configuration to settings | `components/analyzer/settings/AdvancedTab.tsx` | 0.5 days |
 | Test WS API with wscat/postman | — | 1 day |
 
 ### Phase 2: Companion Module (Week 3-4)
 
 | Task | File | Effort |
 |------|------|--------|
-| Scaffold companion-module-killthering | Separate repo | 1 day |
+| Scaffold companion-module-donewellaudio | Separate repo | 1 day |
 | Implement connection.ts (WS client) | `src/connection.ts` | 1-2 days |
 | Implement actions.ts | `src/actions.ts` | 1-2 days |
 | Implement feedbacks.ts | `src/feedbacks.ts` | 1-2 days |
@@ -961,7 +961,7 @@ interface WSMessage {
 | OSC value mapping functions | `lib/mixer/oscMapping.ts` | 1-2 days |
 | Safety controls module | `lib/mixer/safety.ts` | 2-3 days |
 | Undo stack implementation | `lib/mixer/undoStack.ts` | 1-2 days |
-| EQ application UI (confirmation dialog) | `components/kill-the-ring/MixerEQDialog.tsx` | 2-3 days |
+| EQ application UI (confirmation dialog) | `components/analyzer/MixerEQDialog.tsx` | 2-3 days |
 | Bridge service (standalone or via Companion) | `lib/mixer/bridge.ts` | 2-3 days |
 | Integration testing with X32 hardware | — | 2-3 days |
 

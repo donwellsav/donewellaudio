@@ -8,14 +8,14 @@
  *   Client → /api/v1/ingest (Next.js) → Supabase Edge Function → spectral_snapshots table
  *
  * Usage:
- *   node scripts/test-ingest.mjs                    # hits production (killthering.com)
+ *   node scripts/test-ingest.mjs                    # hits production (donewellaudio.com)
  *   node scripts/test-ingest.mjs http://localhost:3000  # hits local dev
  *
  * After a successful run, verify the row in Supabase:
  *   SELECT * FROM spectral_snapshots ORDER BY created_at DESC LIMIT 1;
  */
 
-const BASE_URL = process.argv[2] || 'https://killthering.com'
+const BASE_URL = process.argv[2] || 'https://donewellaudio.com'
 const INGEST_URL = `${BASE_URL}/api/v1/ingest`
 
 // Generate a realistic but identifiable test session ID

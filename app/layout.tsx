@@ -16,13 +16,13 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Kill The Ring — Acoustic Feedback Detection',
-  description: 'Real-time acoustic feedback and ring detection tool for live sound engineers. Works offline.',
+  title: 'DoneWell Audio — Acoustic Feedback Detection',
+  description: 'Real-time acoustic feedback detection and EQ advisory for live sound engineers. Works offline.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'KillTheRing',
+    title: 'DoneWellAudio',
   },
   other: {
     'mobile-web-app-capable': 'yes',
@@ -52,7 +52,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased" nonce={nonce} suppressHydrationWarning>
-        <ThemeProvider attribute="class" defaultTheme="dark" storageKey="ktr-theme" disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="dark" storageKey="dwa-theme" disableTransitionOnChange>
           {children}
         </ThemeProvider>
       </body>

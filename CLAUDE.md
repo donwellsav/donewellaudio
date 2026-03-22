@@ -1,13 +1,13 @@
-# CLAUDE.md — Kill The Ring Project Intelligence
+# CLAUDE.md — DoneWell Audio Project Intelligence
 
-> **Last updated March 2026. 170 TypeScript/TSX files, 679 tests (674 pass, 4 skip, 1 todo), 34 suites. Version 0.187.0.**
+> **Last updated March 2026. 170 TypeScript/TSX files, 679 tests (674 pass, 4 skip, 1 todo), 34 suites. Version 1.0.0.**
 > Notch overlay opacity set to 42%.
 
 ## CRITICAL RULES
 
 - **NEVER run `git push` unless the user explicitly says "push" or "send to GitHub".** Committing locally is fine. Pushing is NOT. No exceptions.
 - **Build verification after every change:** `npx tsc --noEmit && pnpm test`
-- **Do not modify audio output.** KTR is analysis-only. It listens and advises. It never modifies the audio signal.
+- **Do not modify audio output.** DoneWell Audio is analysis-only. It listens and advises. It never modifies the audio signal.
 
 ## Risk-First Planning
 
@@ -45,7 +45,7 @@ For trivial changes (typo, comment, single-value tweak), say "TRIVIAL — skippi
 When the user asks to cut a release or "update the usuals":
 
 1. Update `lib/changelog.ts` — add entry with version, date, changes
-2. Update `components/kill-the-ring/help/GuideTab.tsx` — fix any stale references
+2. Update `components/analyzer/help/GuideTab.tsx` — fix any stale references
 3. Update `package.json` version — `0.{next_PR_number}.0`
 4. Update `CLAUDE.md` header — version, test count, file count, summary line
 5. Commit locally
@@ -53,7 +53,7 @@ When the user asks to cut a release or "update the usuals":
 
 ## Project Overview
 
-**Kill The Ring** (killthering.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.152.0. Repository: github.com/donwellsav/killthering.
+**DoneWell Audio** (donewellaudio.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.152.0. Repository: github.com/donwellsav/donewellaudio.
 
 ## Tech Stack
 
@@ -165,7 +165,7 @@ app/                          # Next.js App Router
   sw.ts (38)                  #   Serwist service worker
   api/v1/ingest/route.ts (160)#   Spectral snapshot ingest (v1.0/1.1/1.2 schema, rate-limited, IP-stripped)
 components/
-  kill-the-ring/ (23 files)   # Domain components + barrel index.ts
+  analyzer/ (23 files)        # Domain components + barrel index.ts
     help/ (6 files)           # Help tab components (mirrors settings/ pattern)
     KillTheRing.tsx (473)     #   Root orchestrator, settings debounce, FP handling
     HeaderBar.tsx (191)       #   Header bar (zero props, permanent Clear All)
@@ -211,7 +211,7 @@ lib/
   canvas/spectrumDrawing.ts(949)# Pure canvas drawing (no React), RTA label overlap suppression, theme-aware notch overlays (70% opacity), frequency zone bands, label range merging
   export/ (3 files)           # PDF/TXT/CSV/JSON export
   calibration/ (3 files)      # Room profile, session recording, JSON export
-  storage/ktrStorage.ts (183) # Typed localStorage abstraction
+  storage/dwaStorage.ts (183) # Typed localStorage abstraction
   data/ (4 files)             # Anonymous spectral collection (opt-out, v1.1 with algo scores)
     snapshotCollector.ts (343)#   Batch collection, algorithm score enrichment, user feedback, label balance tracking
   utils/ (2 files)            # Math helpers, pitch utilities
@@ -225,12 +225,12 @@ tests/
   helpers/                    # Mock algorithm score builders
 hooks/__tests__/ (4 files)    # Hook unit tests (useAdvisoryMap, useFpsMonitor, useAdvisoryLogging, useIsMobile)
 contexts/__tests__/ (2 files) # Context unit tests (AdvisoryContext, UIContext)
-lib/storage/__tests__/ (1 file)  # ktrStorage unit tests
+lib/storage/__tests__/ (1 file)  # dwaStorage unit tests
 lib/export/__tests__/ (3 files)  # Export module unit tests (txt, pdf, downloadFile)
 lib/dsp/__tests__/ (1 file)     # mlInference unit tests (12 tests)
 public/models/                  # ML model assets
   manifest.json                 #   Model registry (version, metrics, architecture)
-  ktr-fp-filter-v1.onnx         #   Bootstrap ONNX model (929 params, 4KB)
+  dwa-fp-filter-v1.onnx         #   Bootstrap ONNX model (929 params, 4KB)
 scripts/ml/                     # ML training pipeline
   create_bootstrap_model.py     #   Generate ONNX from gate logic (numpy-only)
   export_training_data.py       #   Pull labeled events from Supabase to CSV
@@ -322,7 +322,7 @@ Always. If you changed code, you audit it. Specifically:
 | React State | Contexts (`contexts/*`), hooks (`hooks/*`), prop drilling, re-renders |
 | UI Components | `components/*`, layout, mobile/desktop, tabs, sheets, gestures |
 | Canvas / Visualization | `spectrumDrawing.ts`, RTA, GEQ, overlays, markers, labels, theme colors |
-| Settings / Storage | `ktrStorage.ts`, localStorage keys, defaults, migration, presets |
+| Settings / Storage | `dwaStorage.ts`, localStorage keys, defaults, migration, presets |
 | PWA / Service Worker | `sw.ts`, Serwist config, offline caching, installability |
 | Security / CSP | `middleware.ts`, nonce generation, headers, API validation |
 | API / Ingest | `api/v1/ingest/route.ts`, schema validation, rate limiting |
@@ -429,7 +429,7 @@ For trivial changes (typo fix, comment update, import reorder), a one-line audit
 
 **Example 3 — Storage change (hypothetical key rename):**
 
-**CHANGE:** Renamed localStorage key `ktr-settings` → `ktr-settings-v2`
+**CHANGE:** Renamed localStorage key `dwa-settings` → `dwa-settings-v2`
 **CLASSIFICATION:** 🔴 NEGATIVE (data loss risk)
 **SCOPE:** Settings / Storage
 
@@ -446,7 +446,7 @@ For trivial changes (typo fix, comment update, import reorder), a one-line audit
 When the user says "update the usuals" or "update the usual stuff", do all of these:
 
 1. **Changelog** (`lib/changelog.ts`) — add entry for new version with all features/fixes
-2. **Help menu** (`components/kill-the-ring/help/GuideTab.tsx`) — update any stale references
+2. **Help menu** (`components/analyzer/help/GuideTab.tsx`) — update any stale references
 3. **Version** (`package.json`) — bump to `0.{next_PR_number}.0`
 4. **CLAUDE.md** — update header (version, test count, file count, summary line)
 
@@ -463,7 +463,7 @@ Then when user says "PR and merge":
 - **Zero XSS vectors:** No direct HTML injection, no dynamic code execution
 - **API:** Ingest endpoint validates v1.0/v1.1/v1.2 schema, dual rate-limiting (IP-based 30/60s primary + session-based 6/60s secondary), actual body size enforcement (512KB), strips IP, error messages not leaked
 - **Worker:** Inbound messages type-validated via `WorkerOutboundMessage` switch; outbound postMessage lacks compile-time Set validation (minor gap)
-- **localStorage:** 37 touchpoints, all via ktrStorage.ts abstraction with try/catch
+- **localStorage:** 37 touchpoints, all via dwaStorage.ts abstraction with try/catch
 
 ## Accessibility Notes
 
@@ -508,7 +508,7 @@ Then when user says "PR and merge":
 
 ### Theme & Branding
 - **Dark/light theme (v0.146.0):** `next-themes` with CSS variables. Canvas colors via `canvasThemeRef` pattern (ref updated on theme change, read in RAF loop). Blue spectrum in light mode, amber/blue toggle in dark mode. RTA labels use frosted glass pills with theme-aware fills, shadows, and accent strips (v0.167.0).
-- **KTR brand logo (v0.132.0):** Frequency analyzer crosshair + equalizer bars SVG. `KtrLogo.tsx` component. Replaces generic speaker icon in header (64px) and start button (80px).
+- **DWA brand logo:** PNG-based DW Audio logo with theme switching. `DwaLogo.tsx` component. Displays in header (64px) and start button (80px).
 - **Full names:** "Real-Time Analyzer" / "Graphic Equalizer" labels when space allows, abbreviated on narrow screens.
 
 ### Ring-Out Wizard (v0.147.0)
@@ -524,7 +524,7 @@ Then when user says "PR and merge":
 - **Draggable threshold line:** Drag the dashed line on the RTA to adjust sensitivity directly. 8×28px grab handle with notch affordance.
 
 ### Settings Persistence
-- **Auto-persist:** All 47 settings fields saved to localStorage on every change via `ktrStorage.ts`. Loaded on mount with `DEFAULT_SETTINGS` as fallback.
+- **Auto-persist:** All 47 settings fields saved to localStorage on every change via `dwaStorage.ts`. Loaded on mount with `DEFAULT_SETTINGS` as fallback.
 - **Custom presets:** Save/load named presets (up to 5). Mode selector + saved presets in Detect accordion.
 
 ### Other

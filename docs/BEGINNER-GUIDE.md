@@ -1,4 +1,4 @@
-# Kill The Ring — Beginner Developer Guide
+# DoneWell Audio — Beginner Developer Guide
 
 > A comprehensive guide for navigating, understanding, and troubleshooting this codebase.
 
@@ -23,7 +23,7 @@
 
 ## 1. What Does This App Do?
 
-Kill The Ring listens to a microphone in real time, finds frequencies that are "feeding back" (that loud ringing/squealing sound at concerts), and tells the sound engineer exactly which EQ knob to turn to fix it.
+DoneWell Audio listens to a microphone in real time, finds frequencies that are "feeding back" (that loud ringing/squealing sound at concerts), and tells the sound engineer exactly which EQ knob to turn to fix it.
 
 **It NEVER plays or modifies audio.** It only listens and analyzes.
 
@@ -44,7 +44,7 @@ Key concepts:
 
 ### First-Time Setup
 ```bash
-cd C:\ktr\killthering
+cd C:\ktr\donewellaudio
 pnpm install          # Install all dependencies
 pnpm dev              # Start dev server on http://localhost:3000
 ```
@@ -71,19 +71,19 @@ The DSP engine has 335 unit tests across 14 test suites covering algorithm fusio
 ## 3. Project Map — Where Everything Lives
 
 ```
-C:\ktr\killthering\
+C:\ktr\donewellaudio\
 │
 ├── app/                          # ENTRY POINT — Next.js pages
 │   ├── layout.tsx                #   HTML wrapper (fonts, metadata, PWA config)
-│   ├── page.tsx                  #   The one page — just renders <KillTheRingClient />
+│   ├── page.tsx                  #   The one page — just renders <AudioAnalyzerClient />
 │   ├── globals.css               #   Global styles + Tailwind theme colors
 │   ├── sw.ts                     #   Service worker config (for offline/PWA)
 │   └── ~offline/page.tsx         #   Shown when user is offline
 │
 ├── components/
-│   ├── kill-the-ring/            # YOUR MAIN WORK AREA — all app components
-│   │   ├── KillTheRingClient.tsx #   Wrapper: dynamic import + error boundary
-│   │   ├── KillTheRing.tsx       #   THE MAIN COMPONENT — layout, state, wiring
+│   ├── analyzer/            # YOUR MAIN WORK AREA — all app components
+│   │   ├── AudioAnalyzerClient.tsx #   Wrapper: dynamic import + error boundary
+│   │   ├── AudioAnalyzer.tsx       #   THE MAIN COMPONENT — layout, state, wiring
 │   │   ├── HeaderBar.tsx         #   Top bar (mic button, logo, toolbar icons)
 │   │   ├── DesktopLayout.tsx     #   Desktop resizable panel layout
 │   │   ├── MobileLayout.tsx      #   Mobile portrait tab layout
@@ -194,7 +194,7 @@ C:\ktr\killthering\
 ```
 
 ### The Golden Rule
-- **`components/kill-the-ring/`** = UI changes (what you see)
+- **`components/analyzer/`** = UI changes (what you see)
 - **`lib/dsp/`** = Detection logic (what it calculates)
 - **`hooks/`** = Glue between UI and logic
 - **`types/advisory.ts`** = Core DSP data shapes
@@ -240,7 +240,7 @@ Microphone
     │  React state: advisories[], spectrum, settings
     │
     ▼
-[KillTheRing.tsx]             ◄── Passes state to child components
+[AudioAnalyzer.tsx]             ◄── Passes state to child components
     │
     ├── [IssuesList.tsx]      ◄── Renders issue cards
     ├── [SpectrumCanvas.tsx]  ◄── Draws the frequency graph
@@ -255,8 +255,8 @@ Microphone
 
 ```
 app/page.tsx
-  └── KillTheRingClient         (dynamic import, error boundary)
-       └── KillTheRing          ★ THE HUB — owns all state
+  └── AudioAnalyzerClient         (dynamic import, error boundary)
+       └── AudioAnalyzer          ★ THE HUB — owns all state
             │
             ├── HeaderBar
             │   ├── Start/Stop button (mic circle)
@@ -288,7 +288,7 @@ app/page.tsx
                     └── Bottom-right → SpectrumCanvas / GEQBarView / Controls
 ```
 
-**Important:** `KillTheRing.tsx` is the central hub. It:
+**Important:** `AudioAnalyzer.tsx` is the central hub. It:
 - Calls `useAudioAnalyzer()` to get all state
 - Passes state down as props to every child
 - Handles all callbacks (start, stop, apply, dismiss, settings changes)
@@ -407,13 +407,13 @@ useAudioAnalyzer()  ←── single hook that owns ALL state
     │   start(), stop(), updateSettings(), resetSettings()
     │
     ▼
-KillTheRing.tsx passes these as props to children
+AudioAnalyzer.tsx passes these as props to children
 ```
 
 ### Settings Persistence
 - Settings save to **localStorage** automatically
 - Key: look for `localStorage.getItem()` / `setItem()` in the code
-- Layout preferences: `ktr-layout-prefs`
+- Layout preferences: `dwa-layout-prefs`
 - Resizable panel sizes: `react-resizable-panels:*`
 
 ### Settings Flow
@@ -424,7 +424,7 @@ User changes slider in SettingsPanel
 onSettingsChange({ feedbackThresholdDb: -35 })
     │
     ▼
-KillTheRing.handleSettingsChange()
+AudioAnalyzer.handleSettingsChange()
     │
     ▼
 useAudioAnalyzer.updateSettings()
@@ -524,7 +524,7 @@ Open browser DevTools → Console. The `useAdvisoryLogging` hook logs every advi
 **Check localStorage settings:**
 ```javascript
 // In browser console:
-JSON.parse(localStorage.getItem('ktr-settings'))
+JSON.parse(localStorage.getItem('dwa-settings'))
 ```
 
 ---
@@ -533,7 +533,7 @@ JSON.parse(localStorage.getItem('ktr-settings'))
 
 ### Changing the UI (what users see)
 
-1. Find the component in `components/kill-the-ring/`
+1. Find the component in `components/analyzer/`
 2. Edit the JSX/Tailwind classes
 3. Run `pnpm dev` and check in browser
 4. Run `pnpm build` before committing
@@ -545,7 +545,7 @@ JSON.parse(localStorage.getItem('ktr-settings'))
 → Multiple files needed:
 1. `types/advisory.ts` — add to `DetectorSettings` interface
 2. `lib/dsp/constants.ts` — add default value to `DEFAULT_SETTINGS`
-3. `components/kill-the-ring/SettingsPanel.tsx` — add the UI control
+3. `components/analyzer/SettingsPanel.tsx` — add the UI control
 4. Whatever DSP file needs to USE the setting
 
 ### Changing detection behavior (how it works)
@@ -579,7 +579,7 @@ JSON.parse(localStorage.getItem('ktr-settings'))
 
 ### Adding a new component
 
-1. Create `components/kill-the-ring/MyComponent.tsx`
+1. Create `components/analyzer/MyComponent.tsx`
 2. Follow the pattern:
 ```tsx
 'use client'
@@ -598,11 +598,11 @@ export const MyComponent = memo(function MyComponent({ ...props }: MyComponentPr
   )
 })
 ```
-3. Add to `components/kill-the-ring/index.ts`:
+3. Add to `components/analyzer/index.ts`:
 ```tsx
 export { MyComponent } from "./MyComponent"
 ```
-4. Import and use in `KillTheRing.tsx` or wherever needed
+4. Import and use in `AudioAnalyzer.tsx` or wherever needed
 
 ### Import Paths
 Always use the `@/` alias:
@@ -620,7 +620,7 @@ import { Advisory } from '../../types/advisory'     // ❌
 | **Advisory** | A detected problem + its EQ fix recommendation |
 | **FFT** | Fast Fourier Transform — breaks audio into frequency bins |
 | **FFT Size** | Number of samples per analysis (4096/8192/16384). Bigger = more frequency detail, slower |
-| **ECM8000** | Behringer ECM8000 measurement microphone — flat response mic used for calibration. Kill The Ring compensates its +4.7 dB rise at 10–16 kHz. Also supports dbx RTA-M and Smartphone MEMS profiles |
+| **ECM8000** | Behringer ECM8000 measurement microphone — flat response mic used for calibration. DoneWell Audio compensates its +4.7 dB rise at 10–16 kHz. Also supports dbx RTA-M and Smartphone MEMS profiles |
 | **GEQ** | Graphic Equalizer — fixed frequency bands (31-band standard) |
 | **PEQ** | Parametric Equalizer — adjustable frequency, Q, and gain |
 | **Q Factor** | How narrow/wide an EQ cut is. High Q = surgical, Low Q = broad |
@@ -640,4 +640,4 @@ import { Advisory } from '../../types/advisory'     // ❌
 
 ---
 
-*Last updated: March 2026 — Kill The Ring v0.95.0*
+*Last updated: March 2026 — DoneWell Audio v0.95.0*

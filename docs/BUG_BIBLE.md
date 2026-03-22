@@ -1,4 +1,4 @@
-# Kill The Ring — Bug Bible
+# DoneWell Audio — Bug Bible
 
 > **Complete catalog of bugs found and fixed.** Organized by subsystem. 50+ entries from v0.89.0 to v0.151.0.
 

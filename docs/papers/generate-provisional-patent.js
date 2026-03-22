@@ -881,7 +881,7 @@ const doc = new Document({
   }],
 });
 
-const outputPath = process.argv[2] || "2026-03-20-provisional-patent-ktr-room-analysis.docx";
+const outputPath = process.argv[2] || "2026-03-20-provisional-patent-dwa-room-analysis.docx";
 Packer.toBuffer(doc).then(buffer => {
   fs.writeFileSync(outputPath, buffer);
   console.log(`Provisional patent application written to ${outputPath} (${(buffer.length / 1024).toFixed(1)} KB)`);

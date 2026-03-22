@@ -1,4 +1,4 @@
-// Kill The Ring Constants - ISO bands, note frequencies, and configuration
+// DoneWell Audio Constants - ISO bands, note frequencies, and configuration
 import type { DetectorSettings } from '@/types/advisory'
 
 // Standard ISO 31-band graphic EQ center frequencies (1/3 octave)
@@ -35,7 +35,7 @@ export const ML_SETTINGS = {
   /** Weight in fusion (0 to disable ML contribution) */
   DEFAULT_WEIGHT: 0.10,
   /** Model URL (relative to public/) — static asset or fetched from registry */
-  MODEL_PATH: '/models/ktr-fp-filter-v1.onnx',
+  MODEL_PATH: '/models/dwa-fp-filter-v1.onnx',
   /** Max inference time in ms before skipping (safety timeout) */
   MAX_INFERENCE_MS: 2,
   /** Feature count for the meta-model input vector */

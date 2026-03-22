@@ -1,4 +1,4 @@
-// KillTheRing2 Track Manager - Associates peaks to tracks and extracts features
+// DoneWell Audio Track Manager - Associates peaks to tracks and extracts features
 
 import { TRACK_SETTINGS } from './constants'
 import { hzToCents } from '@/lib/utils/pitchUtils'

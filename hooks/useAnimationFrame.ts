@@ -1,4 +1,4 @@
-// KillTheRing2 Animation Frame Hook - RAF with delta timing for canvas rendering
+// DoneWell Audio Animation Frame Hook - RAF with delta timing for canvas rendering
 
 import { useEffect, useRef } from 'react'
 

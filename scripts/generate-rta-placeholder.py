@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate RTA placeholder PNG images for Kill The Ring.
+Generate RTA placeholder PNG images for DoneWell Audio.
 Produces dark and light mode variants that match the live canvas rendering.
 
 Usage: python3 scripts/generate-rta-placeholder.py

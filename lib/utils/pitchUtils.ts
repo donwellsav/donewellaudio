@@ -1,4 +1,4 @@
-// KillTheRing2 Pitch Utilities - Hz to note/cents/MIDI conversion
+// DoneWell Audio Pitch Utilities - Hz to note/cents/MIDI conversion
 
 import { A4_HZ, A4_MIDI, NOTE_NAMES, CENTS_PER_SEMITONE, SEMITONES_PER_OCTAVE } from '@/lib/dsp/constants'
 import type { PitchInfo } from '@/types/advisory'

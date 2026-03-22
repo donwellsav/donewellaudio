@@ -191,7 +191,7 @@ describe('GPT-5.4 Scenarios — COMPRESSED Profile', () => {
    * GPT calculated: 0.761 (strong false positive)
    * VULNERABILITY: 38% Phase weight perfectly targets electronic pitch
    * correction. Every modern pop/worship vocal uses pitch correction.
-   * This means KTR will false positive on EVERY sustained Auto-Tuned note
+   * This means DWA will false positive on EVERY sustained Auto-Tuned note
    * in compressed content.
    */
   it('FALSE POSITIVE: Auto-Tuned vocal triggers phase-locked detection', () => {

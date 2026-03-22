@@ -1,4 +1,4 @@
-# Kill The Ring — Architecture Audit Report
+# DoneWell Audio — Architecture Audit Report
 
 > **Audit date:** March 19, 2026 | **Version:** 0.151.0 | **Auditor:** Claude Opus 4.6
 
@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-The Kill The Ring codebase demonstrates **excellent engineering discipline** across its 161 TypeScript files, 476 tests, and complex real-time audio processing pipeline. The architecture is sound — proper buffer pooling, worker backpressure, zero-allocation hot paths, and comprehensive error handling.
+The DoneWell Audio codebase demonstrates **excellent engineering discipline** across its 161 TypeScript files, 476 tests, and complex real-time audio processing pipeline. The architecture is sound — proper buffer pooling, worker backpressure, zero-allocation hot paths, and comprehensive error handling.
 
 **Critical issues found: 3** (all related to worker message handling edge cases)
 **Medium issues found: 3** (context efficiency, lifecycle timing)
@@ -124,7 +124,7 @@ PortalContainerProvider
 | API validation | v1.0/1.1/1.2 schema validated | Session ID format not UUID-validated |
 | Rate limiting | 6 requests/60s per session | IP stripped server-side |
 | XSS | No direct HTML injection vectors | Canvas-only visualization |
-| localStorage | All via ktrStorage.ts with try/catch | 37 touchpoints, all safe |
+| localStorage | All via dwaStorage.ts with try/catch | 37 touchpoints, all safe |
 | Audio | No audio transmitted | All processing client-side |
 
 ### Minor: Session ID Format
@@ -161,7 +161,7 @@ Only checks `sessionId.length >= 10`. Should validate UUID v4 format to prevent 
 | Worker message types | Compile-time only (satisfies), no runtime validation |
 | Advisory types | Comprehensive interfaces in types/advisory.ts |
 | Canvas drawing functions | Pure, well-typed parameters |
-| Storage abstractions | Generic typed factories in ktrStorage.ts |
+| Storage abstractions | Generic typed factories in dwaStorage.ts |
 
 **One gap:** Worker outbound messages lack runtime type guards. All other type safety is excellent.
 

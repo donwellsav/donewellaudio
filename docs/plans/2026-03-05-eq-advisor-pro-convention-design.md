@@ -96,7 +96,7 @@ PHPR_SETTINGS = {
 | `lib/dsp/feedbackDetector.ts` | Add calculatePHPR(), call in detectPeaks() |
 | `lib/dsp/classifier.ts` | PHPR confidence boost/penalty |
 | `types/advisory.ts` | Add bandwidthHz to PEQRecommendation, add phpr to peak types |
-| `components/kill-the-ring/HelpMenu.tsx` | Update Q values in documentation |
+| `components/analyzer/HelpMenu.tsx` | Update Q values in documentation |
 
 ## Decisions
 

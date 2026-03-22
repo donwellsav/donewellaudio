@@ -1,4 +1,4 @@
-# Kill The Ring — Pre-Release Audit & Strategic Roadmap
+# DoneWell Audio — Pre-Release Audit & Strategic Roadmap
 
 > **Version:** 1.0 | **Date:** 2026-03-14 | **App Version:** 0.95.0
 > **Auditor:** Claude Opus 4.6 (Claude Code) | **Scope:** Full codebase, DSP engine, architecture, market, strategy
@@ -21,7 +21,7 @@
 
 ## 1. Executive Summary
 
-Kill The Ring is a **genuinely impressive** pre-release project. For an early-development PWA, it has:
+DoneWell Audio is a **genuinely impressive** pre-release project. For an early-development PWA, it has:
 
 - **326 passing tests** across 14 test files with strong coverage metrics
 - **7-algorithm fusion engine** grounded in peer-reviewed academic research (DAFx-16, KU Leuven 2025, Carl Hopkins 2007)
@@ -168,9 +168,9 @@ Kill The Ring is a **genuinely impressive** pre-release project. For an early-de
 #### Component Structure (29 components)
 
 ```
-components/kill-the-ring/
-  KillTheRing.tsx              — Root orchestrator
-  KillTheRingClient.tsx        — Client-side wrapper (use client)
+components/analyzer/
+  AudioAnalyzer.tsx              — Root orchestrator
+  AudioAnalyzerClient.tsx        — Client-side wrapper (use client)
   SpectrumCanvas.tsx           — Main spectrum visualization (canvas)
   GEQBarView.tsx               — Graphic EQ bar overlay
   IssuesList.tsx               — Active advisory list
@@ -257,7 +257,7 @@ Canvas render                        └─ Classifier + EQ Advisor
 
 ### 3.1 Algorithm Stack
 
-Kill The Ring uses a **7-algorithm weighted fusion** approach, which is significantly more sophisticated than any competitor:
+DoneWell Audio uses a **7-algorithm weighted fusion** approach, which is significantly more sophisticated than any competitor:
 
 | Algorithm | Source | What It Detects | Weight |
 |-----------|--------|-----------------|--------|
@@ -487,9 +487,9 @@ Based on competitor analysis and pro audio community forums:
 | User accounts | **Missing** | High (for monetization) |
 | i18n (multi-language) | **Missing** | Medium |
 
-### 4.2 What Competitors Have That Kill The Ring Doesn't
+### 4.2 What Competitors Have That DoneWell Audio Doesn't
 
-| Feature | Waves Feedback Hunter | Waves X-FDBK | dbx AFS2 | Kill The Ring |
+| Feature | Waves Feedback Hunter | Waves X-FDBK | dbx AFS2 | DoneWell Audio |
 |---------|----------------------|--------------|----------|---------------|
 | Real-time detection | Setup only | Yes | Yes | **Yes** |
 | Auto-EQ application | Yes | Yes | Yes | **No** (analysis only) |
@@ -502,7 +502,7 @@ Based on competitor analysis and pro audio community forums:
 | Session recording | No | No | No | **No** |
 | Price | $99-149 | $79-149 | $300+ | **Free (PWA)** |
 
-### 4.3 Kill The Ring's Unique Advantages
+### 4.3 DoneWell Audio's Unique Advantages
 
 1. **Zero-install PWA** — Works on any device with a browser, no plugin host needed
 2. **Analysis-only approach** — Non-destructive, educational, shows the "why"
@@ -579,11 +579,11 @@ The pro audio market intersects several segments:
 - **Sound sensor market**: Projected $2.86B by 2035 (SNS Insider)
 - **Audio measurement software**: Growing but fragmented
 
-**Kill The Ring's addressable market** sits at the intersection of live sound + software + mobile + SaaS — a niche with no dominant player.
+**DoneWell Audio's addressable market** sits at the intersection of live sound + software + mobile + SaaS — a niche with no dominant player.
 
 ### 6.2 Target Segments (Ranked by Size & Accessibility)
 
-| Segment | Size | Pain Point | KTR Fit | Price Sensitivity |
+| Segment | Size | Pain Point | DWA Fit | Price Sensitivity |
 |---------|------|-----------|---------|-------------------|
 | **Church/worship volunteers** | Very Large | Untrained; need guidance | Perfect (educational) | High — Free/Pro |
 | **Freelance live sound engineers** | Large | Need portable tools | Strong (PWA) | Moderate — Pro |
@@ -599,31 +599,31 @@ The pro audio market intersects several segments:
 - **How it works:** Uses white noise injection to analyze the mic-speaker-room relationship during setup. Creates a corrective EQ curve.
 - **Strengths:** Fast setup (30 seconds), integrates with Waves ecosystem (LV1, SuperRack), trusted brand
 - **Weaknesses:** Setup-time only (not real-time during show), requires plugin host, no mobile, no educational display, no analysis transparency
-- **KTR advantage:** Real-time during performance, works on any device, shows the "why"
+- **DWA advantage:** Real-time during performance, works on any device, shows the "why"
 
 #### Waves X-FDBK ($79-149)
 - **How it works:** Real-time automatic notch filter — detects feedback frequencies and applies narrow notches during live performance.
 - **Strengths:** Truly real-time, automatic, integrates with Waves chains
 - **Weaknesses:** Plugin-only (needs host), no mobile, limited analysis display, black-box approach
-- **KTR advantage:** Cross-platform PWA, educational transparency, academic-grade analysis
+- **DWA advantage:** Cross-platform PWA, educational transparency, academic-grade analysis
 
 #### AlphaLabs De-Feedback (~$99)
 - **How it works:** VST3 plugin for real-time feedback elimination with zero latency.
 - **Strengths:** Zero latency, real-time elimination
 - **Weaknesses:** Requires dedicated hardware (NUC recommended), no mobile, limited to VST3 hosts
-- **KTR advantage:** Runs on any device, no special hardware, analysis-focused approach
+- **DWA advantage:** Runs on any device, no special hardware, analysis-focused approach
 
 #### dbx AFS2 ($300+)
 - **How it works:** Hardware unit with 24 feedback filters per channel using AFS (Advanced Feedback Suppression) algorithm.
 - **Strengths:** Dedicated hardware (reliable), 24 filters/channel, industry standard
 - **Weaknesses:** Separate purchase, fixed hardware, no analysis/history, no mobile companion
-- **KTR advantage:** Software-based (always with you), educational display, session history, free tier
+- **DWA advantage:** Software-based (always with you), educational display, session history, free tier
 
 #### Built-in Mixer DSP (Yamaha, QSC, etc.)
 - **How it works:** Automatic feedback suppression built into digital mixer firmware.
 - **Strengths:** No additional cost, integrated into workflow
 - **Weaknesses:** Black box, no analysis, no recommendations, no history, can't learn from
-- **KTR advantage:** Transparency, education, cross-mixer compatibility, historical analytics
+- **DWA advantage:** Transparency, education, cross-mixer compatibility, historical analytics
 
 ### 6.4 Competitive Positioning Matrix
 
@@ -631,7 +631,7 @@ The pro audio market intersects several segments:
                     Analysis Depth
                          ▲
                          │
-        Kill The Ring    │    (No competitor)
+        DoneWell Audio    │    (No competitor)
         ●────────────────┼───────────────────
                          │
                          │
@@ -643,7 +643,7 @@ The pro audio market intersects several segments:
                          │         Automation Level
 ```
 
-Kill The Ring occupies a unique position: **high analysis depth, moderate automation** (recommendations but not auto-application). The roadmap moves it toward high automation (mixer control) while maintaining its analysis depth advantage.
+DoneWell Audio occupies a unique position: **high analysis depth, moderate automation** (recommendations but not auto-application). The roadmap moves it toward high automation (mixer control) while maintaining its analysis depth advantage.
 
 ---
 
@@ -746,11 +746,11 @@ Kill The Ring occupies a unique position: **high analysis depth, moderate automa
 | `severityUtils.ts` | ~100 | Severity level mapping | Simple mapping; minimal risk | No changes needed |
 | `feedbackHistory.ts` | ~200 | Session history | Tested via integration tests | No changes needed |
 
-### Components (`components/kill-the-ring/`)
+### Components (`components/analyzer/`)
 
 | File | Purpose | Issues | Recommendations |
 |------|---------|--------|-----------------|
-| `KillTheRing.tsx` | Root orchestrator | Clean; memo-wrapped | No changes |
+| `AudioAnalyzer.tsx` | Root orchestrator | Clean; memo-wrapped | No changes |
 | `SpectrumCanvas.tsx` | Canvas visualization | Complex; canvas perf critical | Profile for unnecessary redraws |
 | `MobileLayout.tsx` | Mobile layout | WAI-ARIA tabs pattern | Verify roving tabindex on all screen sizes |
 | `DesktopLayout.tsx` | Desktop layout | `landscape:flex` CSS toggle | No changes (never modify for mobile) |
@@ -769,4 +769,4 @@ Kill The Ring occupies a unique position: **high analysis depth, moderate automa
 
 ---
 
-*This audit was conducted by Claude Opus 4.6 on 2026-03-14 against Kill The Ring v0.95.0. All findings are based on static code analysis, test execution results, and market research. No runtime testing was performed.*
+*This audit was conducted by Claude Opus 4.6 on 2026-03-14 against DoneWell Audio v0.95.0. All findings are based on static code analysis, test execution results, and market research. No runtime testing was performed.*

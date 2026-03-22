@@ -23,7 +23,7 @@ const INGEST_URL = '/api/v1/ingest'
 const RATE_LIMIT_MS = 10_000
 const MAX_SESSION_BYTES = 5 * 1024 * 1024 // 5MB
 const RETRY_DELAYS_MS = [1000, 2000, 4000] // Exponential backoff
-const IDB_DB_NAME = 'ktr-snapshots'
+const IDB_DB_NAME = 'dwa-snapshots'
 const IDB_STORE_NAME = 'pending'
 const IDB_VERSION = 1
 

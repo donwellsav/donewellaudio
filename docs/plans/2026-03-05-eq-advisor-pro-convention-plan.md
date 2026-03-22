@@ -570,7 +570,7 @@ git commit -m "feat(eq): thread PHPR from detector through worker to advisory ou
 ### Task 10: Update HelpMenu documentation
 
 **Files:**
-- Modify: `components/kill-the-ring/HelpMenu.tsx:753-765`
+- Modify: `components/analyzer/HelpMenu.tsx:753-765`
 
 **Step 1: Update EQ Presets section**
 
@@ -600,7 +600,7 @@ Expected: No errors.
 **Step 3: Commit**
 
 ```bash
-git add components/kill-the-ring/HelpMenu.tsx
+git add components/analyzer/HelpMenu.tsx
 git commit -m "docs: update EQ preset values in HelpMenu to match new pro convention"
 ```
 

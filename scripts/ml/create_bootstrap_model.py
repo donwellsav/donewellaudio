@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Create bootstrap ONNX model for KTR false positive filtering.
+Create bootstrap ONNX model for DoneWell Audio false positive filtering.
 
 Encodes existing gate logic (IHR, PTMR, formant-like patterns) as a small MLP
 (11->32->16->1) and exports to ONNX format for browser-side inference.
@@ -27,7 +27,7 @@ Usage:
   pip install numpy onnx
   python scripts/ml/create_bootstrap_model.py
 
-Output: public/models/ktr-fp-filter-v1.onnx
+Output: public/models/dwa-fp-filter-v1.onnx
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ from pathlib import Path
 
 def generate_gate_training_data(n_samples: int = 20000) -> tuple[np.ndarray, np.ndarray]:
     """
-    Generate synthetic training data encoding existing KTR gate logic.
+    Generate synthetic training data encoding existing DWA gate logic.
 
     The target score reflects what the existing multiplicative gates do:
     - IHR gate: IHR > 0.35 + comb > 0.3 -> x0.65 (instrument suppression)
@@ -287,7 +287,7 @@ def export_onnx(model: NumpyMLP, output_path: Path) -> None:
 
     graph = helper.make_graph(
         nodes,
-        "ktr-fp-filter",
+        "dwa-fp-filter",
         [input_def],
         [output_def],
         initializer=initializers,
@@ -323,9 +323,9 @@ def verify_model(model: NumpyMLP) -> None:
 # -- Main -----------------------------------------------------------------
 
 def main():
-    output_path = Path(__file__).parent.parent.parent / "public" / "models" / "ktr-fp-filter-v1.onnx"
+    output_path = Path(__file__).parent.parent.parent / "public" / "models" / "dwa-fp-filter-v1.onnx"
 
-    print("=== KTR Bootstrap Model Creator ===\n")
+    print("=== DWA Bootstrap Model Creator ===\n")
     model = train_model()
 
     print("\nVerification:")

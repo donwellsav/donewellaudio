@@ -27,7 +27,7 @@
  *    feedback without its two heaviest algorithms.
  *
  * References:
- *   - ChatGPT-5.4 with KTR-LIVE master prompt (March 2026)
+ *   - ChatGPT-5.4 with DWA-LIVE master prompt (March 2026)
  *   - algorithmFusion.ts lines 438-503 (runtime weight accumulation)
  *   - algorithmFusion.ts lines 509-516 (confidence agreement list)
  *   - workerFft.ts lines 73-92 (computeExistingScore composition)

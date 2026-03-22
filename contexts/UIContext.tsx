@@ -13,7 +13,7 @@ import {
 } from 'react'
 import { useFullscreen } from '@/hooks/useFullscreen'
 import { useEngine } from '@/contexts/EngineContext'
-import { clearPanelLayouts } from '@/lib/storage/ktrStorage'
+import { clearPanelLayouts } from '@/lib/storage/dwaStorage'
 
 // ── Context value ───────────────────────────────────────────────────────────
 

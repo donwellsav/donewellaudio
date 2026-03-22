@@ -128,7 +128,7 @@ def export_data(output_path: Path, min_events: int = 10) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Export KTR training data from Supabase")
+    parser = argparse.ArgumentParser(description="Export DWA training data from Supabase")
     parser.add_argument(
         "--output", "-o",
         default="data/training.csv",

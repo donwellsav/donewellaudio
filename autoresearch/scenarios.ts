@@ -1,5 +1,5 @@
 /**
- * Autoresearch Scenario Dataset — Kill the Ring
+ * Autoresearch Scenario Dataset — DoneWell Audio
  *
  * Ground-truth labeled scenarios for autonomous optimization of fusion weights.
  * Each scenario specifies what the system SHOULD produce (desired verdict),

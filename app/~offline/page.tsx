@@ -7,7 +7,7 @@ export default function OfflinePage() {
         <div className="text-5xl">🎤</div>
         <h1 className="text-2xl font-bold tracking-tight">You&apos;re Offline</h1>
         <p className="text-muted-foreground max-w-sm">
-          Kill The Ring couldn&apos;t load from cache. Try refreshing, or if this
+          DoneWell Audio couldn&apos;t load from cache. Try refreshing, or if this
           persists, clear site data and reload over Wi-Fi to re-cache the app.
         </p>
         <button

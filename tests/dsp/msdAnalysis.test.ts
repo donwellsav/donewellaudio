@@ -1,5 +1,5 @@
 /**
- * MSD (Magnitude Slope Deviation) Tests — Kill the Ring
+ * MSD (Magnitude Slope Deviation) Tests — DoneWell Audio
  *
  * Tests the MSDHistoryBuffer class from msdAnalysis.ts against
  * the DAFx-16 paper's mathematical definition:

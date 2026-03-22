@@ -1,6 +1,6 @@
-# Kill The Ring — AI Context Document
+# DoneWell Audio — AI Context Document
 
-> **Purpose:** Structured context file optimized for AI model consumption. Feed this document to any AI assistant working on the Kill The Ring codebase.
+> **Purpose:** Structured context file optimized for AI model consumption. Feed this document to any AI assistant working on the DoneWell Audio codebase.
 > **Version:** 1.0 | **Date:** 2026-03-14 | **App Version:** 0.95.0
 
 ---
@@ -8,8 +8,8 @@
 ## 1. Project Manifest
 
 ### Identity
-- **Name:** Kill The Ring
-- **Domain:** killthering.com
+- **Name:** DoneWell Audio
+- **Domain:** donewellaudio.com
 - **Purpose:** Real-time acoustic feedback detection and analysis for live sound engineers
 - **Key constraint:** Analysis-only — never outputs or modifies audio
 
@@ -48,15 +48,15 @@
 ├── vitest.config.ts                   # V8 coverage, 80/80/70% thresholds
 ├── app/
 │   ├── layout.tsx                     # Root layout with metadata
-│   ├── page.tsx                       # Entry point → KillTheRing
+│   ├── page.tsx                       # Entry point → AudioAnalyzer
 │   ├── global-error.tsx               # Sentry error boundary
 │   ├── sw.ts                          # Serwist service worker
 │   ├── ~offline/page.tsx              # Offline fallback
 │   └── api/v1/ingest/route.ts         # Spectral data ingest (POST)
 ├── components/
-│   ├── kill-the-ring/                 # Domain components (22 files + barrel index.ts)
-│   │   ├── KillTheRing.tsx            # Root orchestrator
-│   │   ├── KillTheRingClient.tsx      # Client wrapper ('use client')
+│   ├── analyzer/                      # Domain components (22 files + barrel index.ts)
+│   │   ├── AudioAnalyzer.tsx            # Root orchestrator
+│   │   ├── AudioAnalyzerClient.tsx      # Client wrapper ('use client')
 │   │   ├── SpectrumCanvas.tsx         # Canvas visualization
 │   │   ├── GEQBarView.tsx             # GEQ overlay
 │   │   ├── IssuesList.tsx             # Advisory list
@@ -118,7 +118,7 @@
 │   │   ├── advancedDetection.ts      #   Barrel re-export
 │   │   └── __tests__/                #   7 unit test files
 │   ├── export/                        # PDF/TXT/CSV/JSON export (3 files)
-│   ├── storage/ktrStorage.ts          # Typed localStorage
+│   ├── storage/dwaStorage.ts          # Typed localStorage
 │   └── utils/                         # Math helpers, pitch utilities
 ├── types/
 │   ├── advisory.ts                    # Core DSP types (~200 lines)
@@ -457,4 +457,4 @@ npx tsc --noEmit      # Type-check (run before build)
 
 ---
 
-*This context document is designed to be fed to AI assistants (Claude, ChatGPT, Gemini) when working on the Kill The Ring codebase. It provides the minimum necessary context for accurate code generation and review.*
+*This context document is designed to be fed to AI assistants (Claude, ChatGPT, Gemini) when working on the DoneWell Audio codebase. It provides the minimum necessary context for accurate code generation and review.*

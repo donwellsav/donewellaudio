@@ -1,4 +1,4 @@
-"""Generate the Kill The Ring Deep Audit & Bug Bible PDF."""
+"""Generate the DoneWell Audio Deep Audit & Bug Bible PDF."""
 import os
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -20,7 +20,7 @@ GREEN = HexColor('#16a34a')
 AMBER = HexColor('#d97706')
 
 def build_pdf():
-    output_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'KTR_Deep_Audit_Bug_Bible.pdf')
+    output_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'DWA_Deep_Audit_Bug_Bible.pdf')
     doc = SimpleDocTemplate(
         output_path,
         pagesize=letter,
@@ -80,7 +80,7 @@ def build_pdf():
 
     # ── Title Page ──────────────────────────────────────────────
     story.append(Spacer(1, 2*inch))
-    story.append(Paragraph('Kill The Ring', styles['DocTitle']))
+    story.append(Paragraph('DoneWell Audio', styles['DocTitle']))
     story.append(Paragraph('Deep Audit &amp; Bug Bible', styles['DocTitle']))
     story.append(Spacer(1, 12))
     story.append(Paragraph('Architecture Audit | Bug Catalog | Known Issues &amp; Recommendations', styles['DocSubtitle']))
@@ -137,7 +137,7 @@ def build_pdf():
     # Executive Summary
     story.append(Paragraph('Executive Summary', styles['SubHead']))
     story.append(Paragraph(
-        'The Kill The Ring codebase demonstrates <b>excellent engineering discipline</b> across its '
+        'The DoneWell Audio codebase demonstrates <b>excellent engineering discipline</b> across its '
         '161 TypeScript files, 476 tests, and complex real-time audio processing pipeline. '
         'The architecture is sound with proper buffer pooling, worker backpressure, '
         'zero-allocation hot paths, and comprehensive error handling.',

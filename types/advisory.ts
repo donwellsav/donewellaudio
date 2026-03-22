@@ -1,4 +1,4 @@
-// KillTheRing2 Types - Full type definitions for the feedback detection system
+// DoneWell Audio Types - Full type definitions for the feedback detection system
 
 // Re-export algorithm types defined in advancedDetection.ts so consumers
 // can import everything from '@/types/advisory'

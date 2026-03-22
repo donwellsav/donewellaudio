@@ -1,4 +1,4 @@
-# Kill The Ring — Known Issues & Recommendations
+# DoneWell Audio — Known Issues & Recommendations
 
 > **Last updated:** March 19, 2026 | **Version:** 0.151.0
 

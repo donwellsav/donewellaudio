@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { deviceStorage } from '@/lib/storage/ktrStorage'
+import { deviceStorage } from '@/lib/storage/dwaStorage'
 
 export interface AudioDevice {
   deviceId: string

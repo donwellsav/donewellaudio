@@ -11,7 +11,7 @@ import type {
 } from '@/types/calibration'
 import { EMPTY_ROOM_PROFILE } from '@/types/calibration'
 import { downsampleSpectrum } from '@/lib/calibration'
-import { roomStorage } from '@/lib/storage/ktrStorage'
+import { roomStorage } from '@/lib/storage/dwaStorage'
 
 const SAMPLE_INTERVAL_MS = 60_000 // 60 seconds
 

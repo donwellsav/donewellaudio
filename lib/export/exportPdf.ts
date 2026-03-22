@@ -1,5 +1,5 @@
 /**
- * PDF Report Generator for Kill The Ring feedback history.
+ * PDF Report Generator for DoneWell Audio feedback history.
  * Produces a professional multi-page report with charts and tables.
  * Uses dynamic imports to keep jsPDF out of the initial bundle.
  */
@@ -92,7 +92,7 @@ function drawHeader(doc: jsPDF): number {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(22)
   setColor(doc, COLORS.white)
-  doc.text('KILL THE RING', MARGIN, 17)
+  doc.text('DONEWELL AUDIO', MARGIN, 17)
 
   // Subtitle
   doc.setFont('helvetica', 'normal')
@@ -334,7 +334,7 @@ function drawFooter(doc: jsPDF) {
     setColor(doc, COLORS.muted)
 
     // Left: app name
-    doc.text(`Kill The Ring${version ? ` v${version}` : ''}`, MARGIN, PAGE_H - 9)
+    doc.text(`DoneWell Audio${version ? ` v${version}` : ''}`, MARGIN, PAGE_H - 9)
 
     // Center: page number
     doc.text(`Page ${i} of ${pageCount}`, PAGE_W / 2, PAGE_H - 9, { align: 'center' })

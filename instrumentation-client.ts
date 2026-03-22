@@ -30,7 +30,7 @@ Sentry.init({
 
   // Tag all events with the app version for release tracking
   release: process.env.NEXT_PUBLIC_APP_VERSION
-    ? `killthering@${process.env.NEXT_PUBLIC_APP_VERSION}`
+    ? `donewellaudio@${process.env.NEXT_PUBLIC_APP_VERSION}`
     : undefined,
 
   environment: process.env.NODE_ENV,

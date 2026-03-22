@@ -1,4 +1,4 @@
-// KillTheRing2 EQ Advisor - GEQ/PEQ recommendations with pitch translation
+// DoneWell Audio EQ Advisor - GEQ/PEQ recommendations with pitch translation
 // Enhanced with MINDS (MSD-Inspired Notch Depth Setting) from DAFx-16 paper
 
 import { ISO_31_BANDS, EQ_PRESETS, ERB_SETTINGS, SPECTRAL_TRENDS, VIZ_COLORS, VIZ_COLORS_LIGHT } from './constants'

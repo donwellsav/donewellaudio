@@ -1,5 +1,5 @@
 /**
- * Spectral Flatness + Compression Detection Tests — Kill the Ring
+ * Spectral Flatness + Compression Detection Tests — DoneWell Audio
  *
  * Tests calculateSpectralFlatness (Wiener entropy) and AmplitudeHistoryBuffer
  * (compression detection via crest factor + dynamic range).

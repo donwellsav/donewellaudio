@@ -85,7 +85,7 @@ jobs:
 
           git checkout -b "$BRANCH"
           git add public/models/
-          git commit -m "ml: train ktr-fp-${VERSION} on ${ROWS} labeled events
+          git commit -m "ml: train dwa-fp-${VERSION} on ${ROWS} labeled events
 
           Trained FP filter model from production user feedback data.
           See public/models/manifest.json for metrics."
@@ -96,12 +96,12 @@ jobs:
             --title "ML: Update FP filter to ${VERSION} (${ROWS} samples)" \
             --body "## ML Model Update
 
-          - **Version:** ktr-fp-${VERSION}
+          - **Version:** dwa-fp-${VERSION}
           - **Training samples:** ${ROWS}
           - **Trigger:** ${{ github.event_name }}
 
           ### Changes
-          - Updated ONNX model at \`public/models/ktr-fp-filter-${VERSION}.onnx\`
+          - Updated ONNX model at \`public/models/dwa-fp-filter-${VERSION}.onnx\`
           - Updated \`public/models/manifest.json\`
 
           ### Verification

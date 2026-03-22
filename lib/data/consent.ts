@@ -21,7 +21,7 @@
 import type { ConsentState, ConsentStatus } from '@/types/data'
 import { CONSENT_VERSION } from '@/types/data'
 
-const STORAGE_KEY = 'ktr-data-consent'
+const STORAGE_KEY = 'dwa-data-consent'
 
 // ─── Read / Write ───────────────────────────────────────────────────────────
 

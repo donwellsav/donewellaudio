@@ -1,4 +1,4 @@
-# Kill The Ring — Monetization Strategy & Business Plan
+# DoneWell Audio — Monetization Strategy & Business Plan
 
 > **Version:** 1.0 | **Date:** 2026-03-14 | **App Version:** 0.95.0
 
@@ -30,7 +30,7 @@ Every live sound engineer faces acoustic feedback. It's the single most common p
 
 ### 1.2 Total Addressable Market (TAM)
 
-| Segment | Estimated Size (Global) | Annual Spend on Audio Tools | KTR Potential |
+| Segment | Estimated Size (Global) | Annual Spend on Audio Tools | DWA Potential |
 |---------|------------------------|----------------------------|---------------|
 | Churches/worship | ~400,000 with sound systems | $500-5,000/year on tech | Very High |
 | Freelance live sound | ~200,000 active | $1,000-10,000/year on tools | High |
@@ -78,11 +78,11 @@ Every live sound engineer faces acoustic feedback. It's the single most common p
 
 ### 2.3 Pricing Strategy Rationale
 
-Kill The Ring should use a **freemium model with optional subscriptions** rather than one-time purchase because:
+DoneWell Audio should use a **freemium model with optional subscriptions** rather than one-time purchase because:
 
 1. **Zero friction for adoption** — free tier removes all barriers
 2. **Recurring revenue** — more valuable than one-time sales for sustainability
-3. **Feature expansion justifies ongoing cost** — unlike a static plugin, KTR continuously improves
+3. **Feature expansion justifies ongoing cost** — unlike a static plugin, DWA continuously improves
 4. **Church/education markets** prefer predictable monthly costs over large upfront purchases
 5. **Data flywheel** — more users = more spectral data = better algorithms = more value
 
@@ -308,7 +308,7 @@ Key moments where free users experience the value of upgrading:
 1. **Build in public** — share development updates on X/Twitter, r/livesound, ProSoundWeb forums
 2. **Beta access list** — collect emails from interested sound engineers
 3. **Content marketing** — write articles about feedback detection algorithms, DSP education
-4. **Community engagement** — answer feedback-related questions on forums, link to KTR as tool
+4. **Community engagement** — answer feedback-related questions on forums, link to DWA as tool
 
 #### Launch (v1.0)
 
@@ -343,13 +343,13 @@ Key moments where free users experience the value of upgrading:
 ### 6.3 Positioning Statements
 
 **For church worship teams:**
-> "Stop fighting feedback. Kill The Ring tells you exactly which frequency is ringing, which EQ band to cut, and how deep — so your volunteers can sound like pros."
+> "Stop fighting feedback. DoneWell Audio tells you exactly which frequency is ringing, which EQ band to cut, and how deep — so your volunteers can sound like pros."
 
 **For freelance engineers:**
 > "Your pocket-sized feedback analysis toolkit. No hardware to carry, no plugin host to set up. Open your phone, detect feedback, get EQ recommendations instantly."
 
 **For system engineers:**
-> "Monitor 16 channels, control your mixer EQ remotely, and track feedback patterns across shows. Kill The Ring integrates with your Behringer, Yamaha, or Dante system."
+> "Monitor 16 channels, control your mixer EQ remotely, and track feedback patterns across shows. DoneWell Audio integrates with your Behringer, Yamaha, or Dante system."
 
 **For educators:**
 > "Teach acoustic feedback with real-time analysis. Students see exactly how feedback develops, which algorithms detect it, and why specific EQ corrections work."
@@ -365,7 +365,7 @@ Key moments where free users experience the value of upgrading:
 | **Hosting (Vercel Pro)** | $20 | $50 | $150 | Scales with traffic |
 | **Supabase (auth + DB)** | $25 | $75 | $200 | User accounts, sessions |
 | **Sentry** | $26 | $26 | $80 | Error reporting |
-| **Domain + SSL** | $3 | $3 | $3 | killthering.com |
+| **Domain + SSL** | $3 | $3 | $3 | donewellaudio.com |
 | **Email (Resend/Postmark)** | $0 | $20 | $50 | Transactional emails |
 | **CDN/assets** | $0 | $10 | $30 | Static assets |
 | **Payment processing** | Variable | Variable | Variable | Stripe: 2.9% + $0.30 |
@@ -424,7 +424,7 @@ Key moments where free users experience the value of upgrading:
 - `lib/auth/authHelpers.ts` — Auth utility functions
 - `contexts/AuthContext.tsx` — Authentication state context
 - `hooks/useAuth.ts` — Auth hook with login/logout/signup
-- `components/kill-the-ring/AuthDialog.tsx` — Login/signup modal
+- `components/analyzer/AuthDialog.tsx` — Login/signup modal
 - `middleware.ts` — Route protection for Pro/Enterprise features
 
 ### 8.3 Feature Gating Implementation
@@ -462,4 +462,4 @@ export interface UserSubscription {
 
 ---
 
-*This monetization strategy was developed based on competitive analysis of the pro audio market, SaaS pricing best practices, and the unique positioning of Kill The Ring as a PWA-based feedback detection tool. Revenue projections are conservative estimates based on typical B2C SaaS metrics in niche technical markets.*
+*This monetization strategy was developed based on competitive analysis of the pro audio market, SaaS pricing best practices, and the unique positioning of DoneWell Audio as a PWA-based feedback detection tool. Revenue projections are conservative estimates based on typical B2C SaaS metrics in niche technical markets.*

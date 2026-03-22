@@ -1,4 +1,4 @@
-// KillTheRing2 Math Utilities - Zero-allocation helpers for DSP
+// DoneWell Audio Math Utilities - Zero-allocation helpers for DSP
 
 import { LN10_OVER_10 } from '@/lib/dsp/constants'
 

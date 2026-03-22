@@ -1,4 +1,4 @@
-// KillTheRing2 Feedback Detector - Core DSP engine for peak detection
+// DoneWell Audio Feedback Detector - Core DSP engine for peak detection
 // Adapted from FeedbackDetector.js with TypeScript and enhancements
 
 import { A_WEIGHTING, MIC_CALIBRATION_PROFILES, EXP_LUT, HARMONIC_SETTINGS, MSD_SETTINGS, PERSISTENCE_SCORING, SIGNAL_GATE, HYSTERESIS, PHPR_SETTINGS, TEMPORAL_ENVELOPE } from './constants'
@@ -440,7 +440,7 @@ export class FeedbackDetector {
     // NOTE: holdTimeMs is UI-side "how long to show advisory cards after peak clears"
     // clearMs is DSP-side "how long to wait before declaring a peak dead"
     // These are DIFFERENT concepts - holdTimeMs should NOT be mapped to clearMs
-    // The UI handles holdTimeMs display logic in KillTheRing.tsx advisory rendering
+    // The UI handles holdTimeMs display logic in AudioAnalyzer.tsx advisory rendering
     if (settings.eqPreset !== undefined) {
       mappedConfig.preset = settings.eqPreset
     }

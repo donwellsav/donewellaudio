@@ -1,5 +1,5 @@
 /**
- * Kill The Ring — PWA Icon Generator
+ * DoneWell Audio — PWA Icon Generator
  * Generates all icon sizes from a single SVG master design.
  *
  * Design: Spectrum peak with crosshair reticle
@@ -135,7 +135,7 @@ const icons = [
 ];
 
 async function main() {
-  console.log('Generating Kill The Ring PWA icons...\n');
+  console.log('Generating DoneWell Audio PWA icons...\n');
 
   // Save the SVG favicon (dark/light with media query)
   const svgFavicon = generateFaviconSVG();

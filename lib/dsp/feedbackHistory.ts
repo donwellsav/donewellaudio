@@ -72,7 +72,7 @@ export interface SessionSummary {
 // CONSTANTS
 // ============================================================================
 
-const STORAGE_KEY = 'killTheRing_feedbackHistory'
+const STORAGE_KEY = 'doneWellAudio_feedbackHistory'
 const FREQUENCY_GROUPING_CENTS = 100 // Group frequencies within 100 cents (match track association tolerance)
 const REPEAT_OFFENDER_THRESHOLD = 3 // 3+ occurrences = repeat offender
 const MAX_EVENTS_PER_SESSION = 500 // Limit memory usage

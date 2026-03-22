@@ -1,4 +1,4 @@
-// KillTheRing2 Audio Analyzer - Manages Web Audio API setup and analysis pipeline
+// DoneWell Audio Analyzer - Manages Web Audio API setup and analysis pipeline
 // DSP post-processing (classification, EQ advisory) is offloaded to a Web Worker
 // via AudioAnalyzerCallbacks.onPeakDetected / onPeakCleared wiring in useAudioAnalyzer.
 

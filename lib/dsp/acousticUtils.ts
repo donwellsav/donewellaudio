@@ -1,5 +1,5 @@
 /**
- * Acoustic Utilities for Kill The Ring
+ * Acoustic Utilities for DoneWell Audio
  * Based on "Sound Insulation" by Carl Hopkins (2007)
  * 
  * These utilities implement key acoustic formulas for improved feedback detection:

@@ -1,4 +1,4 @@
-# Kill The Ring — Technical Reference
+# DoneWell Audio — Technical Reference
 
 > **Audience:** Developers, contributors, and technical users
 > **Version:** 1.0 | **Date:** 2026-03-14 | **App Version:** 0.95.0
@@ -21,7 +21,7 @@
 
 ### 1.1 System Architecture
 
-Kill The Ring is a client-side Progressive Web App that processes audio in the browser. The architecture separates concerns across three execution contexts:
+DoneWell Audio is a client-side Progressive Web App that processes audio in the browser. The architecture separates concerns across three execution contexts:
 
 ```
 ┌─ Main Thread ──────────────────────────────────────────────────┐
@@ -100,7 +100,7 @@ Kill The Ring is a client-side Progressive Web App that processes audio in the b
   <AdvisoryProvider>             ← Advisory state, dismiss/clear actions
     <UIProvider>                 ← Mobile tab, freeze, fullscreen, layout
       <PortalContainerProvider>  ← Portal mount point for mobile overlays
-        <KillTheRing />          ← Root component
+        <AudioAnalyzer />          ← Root component
       </PortalContainerProvider>
     </UIProvider>
   </AdvisoryProvider>
@@ -113,7 +113,7 @@ Kill The Ring is a client-side Progressive Web App that processes audio in the b
 
 ### 2.1 Algorithm Fusion Engine
 
-Kill The Ring uses a weighted fusion of 7 independent detection algorithms:
+DoneWell Audio uses a weighted fusion of 7 independent detection algorithms:
 
 #### MSD (Magnitude Slope Deviation) — DAFx-16
 - **What it measures:** Frame-to-frame consistency of a peak's magnitude slope
@@ -266,7 +266,7 @@ Manages advisory state as a `Map<string, Advisory>`.
 
 ### 3.2 Key Components
 
-#### `KillTheRing`
+#### `AudioAnalyzer`
 Root orchestrator. Wraps all providers and renders either `DesktopLayout` or `MobileLayout` based on viewport.
 
 #### `SpectrumCanvas`
@@ -384,8 +384,8 @@ The service worker (`app/sw.ts`) handles:
 ### 6.1 Development Setup
 
 ```bash
-git clone https://github.com/donwellsav/killthering.git
-cd killthering
+git clone https://github.com/donwellsav/donewellaudio.git
+cd donewellaudio
 pnpm install
 pnpm dev              # http://localhost:3000
 ```
@@ -435,7 +435,7 @@ pnpm build            # Must succeed — production build completes
 
 ### 6.5 Adding a New UI Component
 
-1. Create: `components/kill-the-ring/MyComponent.tsx`
+1. Create: `components/analyzer/MyComponent.tsx`
    ```tsx
    'use client'
    import { memo } from 'react'
@@ -448,7 +448,7 @@ pnpm build            # Must succeed — production build completes
    })
    ```
 
-2. Export from barrel: `components/kill-the-ring/index.ts`
+2. Export from barrel: `components/analyzer/index.ts`
    ```ts
    export { MyComponent } from './MyComponent'
    ```
@@ -512,4 +512,4 @@ pnpm build            # Must succeed — production build completes
 
 ---
 
-*This technical reference covers the core architecture and development workflows for Kill The Ring. For AI-specific context, see `docs/AI_CONTEXT.md`. For monetization and business strategy, see `docs/MONETIZATION.md`. For hardware integration specs, see `docs/INTEGRATIONS.md`.*
+*This technical reference covers the core architecture and development workflows for DoneWell Audio. For AI-specific context, see `docs/AI_CONTEXT.md`. For monetization and business strategy, see `docs/MONETIZATION.md`. For hardware integration specs, see `docs/INTEGRATIONS.md`.*

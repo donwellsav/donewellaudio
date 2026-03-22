@@ -109,7 +109,7 @@ git commit -m "feat: add changelog data with retroactive entries v1.0.0-1.0.5"
 ### Task 2: Add Changes tab to HelpMenu
 
 **Files:**
-- Modify: `components/kill-the-ring/HelpMenu.tsx`
+- Modify: `components/analyzer/HelpMenu.tsx`
 
 **Step 1: Add import**
 
@@ -188,7 +188,7 @@ Change line 4:
 **Step 7: Commit**
 
 ```bash
-git add components/kill-the-ring/HelpMenu.tsx
+git add components/analyzer/HelpMenu.tsx
 git commit -m "feat: add Changes tab to help menu with version-grouped changelog"
 ```
 

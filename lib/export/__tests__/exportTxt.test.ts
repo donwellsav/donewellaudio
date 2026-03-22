@@ -64,7 +64,7 @@ function makeSummary(overrides: Partial<SessionSummary> = {}): SessionSummary {
 describe('generateTxtReport', () => {
   it('includes the report title', () => {
     const report = generateTxtReport(makeSummary(), [makeHotspot()])
-    expect(report).toContain('KILL THE RING - FEEDBACK ANALYSIS REPORT')
+    expect(report).toContain('DONEWELL AUDIO - FEEDBACK ANALYSIS REPORT')
   })
 
   it('includes session info section with duration', () => {

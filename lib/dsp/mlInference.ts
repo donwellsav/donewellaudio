@@ -201,9 +201,9 @@ export class MLInferenceEngine {
       }
 
       this._session = session
-      // Extract version from model path: /models/ktr-fp-filter-v1.onnx → ktr-fp-v1
-      const pathMatch = ML_SETTINGS.MODEL_PATH.match(/ktr-fp-filter-(v\d+)/)
-      this._modelVersion = pathMatch ? `ktr-fp-${pathMatch[1]}` : 'ktr-fp-v1'
+      // Extract version from model path: /models/dwa-fp-filter-v1.onnx → dwa-fp-v1
+      const pathMatch = ML_SETTINGS.MODEL_PATH.match(/dwa-fp-filter-(v\d+)/)
+      this._modelVersion = pathMatch ? `dwa-fp-${pathMatch[1]}` : 'dwa-fp-v1'
       this._available = true
       console.debug(`[MLInference] Model loaded: ${this._modelVersion}`)
     } catch (err) {

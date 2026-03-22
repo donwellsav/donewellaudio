@@ -21,7 +21,7 @@ import {
 } from '../consent'
 import { CONSENT_VERSION } from '@/types/data'
 
-const STORAGE_KEY = 'ktr-data-consent'
+const STORAGE_KEY = 'dwa-data-consent'
 
 beforeEach(() => {
   localStorage.clear()

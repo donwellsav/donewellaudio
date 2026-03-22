@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git mv:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm test:*)",
+      "Bash(grep -ri \"ktr\\\\b\\\\|KTR\\\\b\\\\|ktrStorage\\\\|KtrLogo\\\\|KillTheRing\\\\|killthering\\\\|kill-the-ring\" --include=*.ts --include=*.tsx --include=*.js --include=*.mjs --include=*.json --include=*.yml --include=*.py .)",
+      "Bash(grep -ri \"kill the ring\\\\|kill.the.ring\" --include=*.ts --include=*.tsx --include=*.js --include=*.json .)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh auth:*)",
+      "Bash(gh repo:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

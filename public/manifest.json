@@ -1,7 +1,7 @@
 {
-  "name": "Kill The Ring",
-  "short_name": "KillTheRing",
-  "description": "Real-time acoustic feedback and ring detection for live sound engineers",
+  "name": "DoneWell Audio",
+  "short_name": "DoneWellAudio",
+  "description": "Real-time acoustic feedback detection and EQ advisory for live sound engineers",
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",

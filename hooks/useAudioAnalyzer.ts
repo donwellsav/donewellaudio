@@ -1,4 +1,4 @@
-// KillTheRing2 React Hook - Manages audio analyzer lifecycle
+// DoneWell Audio React Hook - Manages audio analyzer lifecycle
 // DSP post-processing (classification, EQ advisory) runs in a Web Worker via useDSPWorker.
 // Advisory state management (Map, sorting, dedup) delegated to useAdvisoryMap.
 
@@ -16,7 +16,7 @@ import type {
 } from '@/types/advisory'
 import type { RoomDimensionEstimate } from '@/types/calibration'
 import { DEFAULT_SETTINGS, ROOM_ESTIMATION } from '@/lib/dsp/constants'
-import { customDefaultsStorage } from '@/lib/storage/ktrStorage'
+import { customDefaultsStorage } from '@/lib/storage/dwaStorage'
 
 /** Early warning for predicted feedback frequencies based on comb pattern detection */
 export interface EarlyWarning {
