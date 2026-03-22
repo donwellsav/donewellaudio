@@ -25,6 +25,22 @@ import { MSD_SETTINGS } from './constants'
 import { MLInferenceEngine } from './mlInference'
 import type { ContentType, DetectedPeak, Track } from '@/types/advisory'
 
+// ── dB-to-linear LUT (replaces Math.pow(10, db/10) in hot loops) ────────────
+// 1001-entry table: index = (db + 100) * 10, range [-100, 0] dB
+const EXP_LUT = /* @__PURE__ */ (() => {
+  const table = new Float32Array(1001)
+  for (let i = 0; i <= 1000; i++) {
+    table[i] = Math.pow(10, (i / 10 - 100) / 10)
+  }
+  return table
+})()
+
+/** Convert dB to linear power via LUT. ~3x faster than Math.pow(10, db/10). */
+function dbToLinear(db: number): number {
+  const idx = ((db + 100) * 10 + 0.5) | 0
+  return EXP_LUT[idx < 0 ? 0 : idx > 1000 ? 1000 : idx]
+}
+
 // ── Extracted magic numbers ─────────────────────────────────────────────────
 
 const SIDEBAND_NOISE_OFFSET_DB = 3
@@ -50,16 +66,16 @@ export function computeNoiseSidebandScore(spectrum: Float32Array, peakBin: numbe
   let nearPower = 0
   let nearCount = 0
   for (let offset = 5; offset <= 15; offset++) {
-    if (peakBin + offset < n) { nearPower += Math.pow(10, spectrum[peakBin + offset] / 10); nearCount++ }
-    if (peakBin - offset >= 0) { nearPower += Math.pow(10, spectrum[peakBin - offset] / 10); nearCount++ }
+    if (peakBin + offset < n) { nearPower += dbToLinear(spectrum[peakBin + offset]); nearCount++ }
+    if (peakBin - offset >= 0) { nearPower += dbToLinear(spectrum[peakBin - offset]); nearCount++ }
   }
 
   // Far sidebands (±20 to ±40 bins): reference "clean" spectral floor
   let farPower = 0
   let farCount = 0
   for (let offset = 20; offset <= 40; offset++) {
-    if (peakBin + offset < n) { farPower += Math.pow(10, spectrum[peakBin + offset] / 10); farCount++ }
-    if (peakBin - offset >= 0) { farPower += Math.pow(10, spectrum[peakBin - offset] / 10); farCount++ }
+    if (peakBin + offset < n) { farPower += dbToLinear(spectrum[peakBin + offset]); farCount++ }
+    if (peakBin - offset >= 0) { farPower += dbToLinear(spectrum[peakBin - offset]); farCount++ }
   }
 
   if (nearCount === 0 || farCount === 0) return 0
@@ -242,6 +258,8 @@ export class AlgorithmEngine {
   private specMax = -Infinity
   private rmsDb = -100
   private _mlEngine = new MLInferenceEngine()
+  /** Pre-allocated buffer for ML feature vector (11 features, reused every frame) */
+  private _mlFeatures = new Float32Array(11)
   /** Previous frame's fused probability — fed into ML feature vector (1-frame lag) */
   private _lastFusedProb = 0.5
   /** Previous frame's fused confidence — fed into ML feature vector (1-frame lag) */
@@ -287,7 +305,7 @@ export class AlgorithmEngine {
     let validBins = 0
     for (let i = startBin; i <= endBin; i++) {
       if (spectrum[i] > this.specMax) this.specMax = spectrum[i]
-      sumLinearPower += Math.pow(10, spectrum[i] / 10)
+      sumLinearPower += dbToLinear(spectrum[i])
       validBins++
     }
     this.rmsDb = validBins > 0 ? 10 * Math.log10(sumLinearPower / validBins) : -100
@@ -370,21 +388,20 @@ export class AlgorithmEngine {
     // Phase coherence for this specific peak bin
     const phaseResult = this.phaseBuffer?.calculateCoherence(binIndex) ?? null
 
-    // ML meta-model: build feature vector from 6 algo scores + fusion context
-    const mlFeatures = new Float32Array([
-      msdResult?.feedbackScore ?? 0.5,
-      phaseResult?.feedbackScore ?? 0.5,
-      spectralResult?.feedbackScore ?? 0.5,
-      combResult?.hasPattern ? combResult.confidence : 0,
-      ihrResult?.feedbackScore ?? 0.5,
-      ptmrResult?.feedbackScore ?? 0.5,
-      this._lastFusedProb,
-      this._lastFusedConf,
-      contentType === 'speech' ? 1 : 0,
-      contentType === 'music' ? 1 : 0,
-      contentType === 'compressed' ? 1 : 0,
-    ])
-    const mlResult = this._mlEngine.predictCached(mlFeatures)
+    // ML meta-model: fill pre-allocated feature vector (zero-alloc hot path)
+    const f = this._mlFeatures
+    f[0] = msdResult?.feedbackScore ?? 0.5
+    f[1] = phaseResult?.feedbackScore ?? 0.5
+    f[2] = spectralResult?.feedbackScore ?? 0.5
+    f[3] = combResult?.hasPattern ? combResult.confidence : 0
+    f[4] = ihrResult?.feedbackScore ?? 0.5
+    f[5] = ptmrResult?.feedbackScore ?? 0.5
+    f[6] = this._lastFusedProb
+    f[7] = this._lastFusedConf
+    f[8] = contentType === 'speech' ? 1 : 0
+    f[9] = contentType === 'music' ? 1 : 0
+    f[10] = contentType === 'compressed' ? 1 : 0
+    const mlResult = this._mlEngine.predictCached(f)
 
     const algorithmScores: AlgorithmScores = {
       msd: msdResult,

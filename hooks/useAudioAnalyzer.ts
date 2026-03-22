@@ -287,6 +287,7 @@ export function useAudioAnalyzer(
 
     return () => {
       analyzer.stop({ releaseMic: true })
+      if (roomAutoStopRef.current) clearTimeout(roomAutoStopRef.current)
     }
   }, []) // Only create once
 

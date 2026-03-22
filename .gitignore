@@ -6,7 +6,9 @@ __v0_jsx-dev-runtime.ts
 # Common ignores
 node_modules/
 .next/
+.env
 .env*.local
+.env.sentry-build-plugin
 .DS_Store
 
 # Serwist generated service worker

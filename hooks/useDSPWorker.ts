@@ -18,7 +18,7 @@
 
 'use client'
 
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useMemo } from 'react'
 import * as Sentry from '@sentry/nextjs'
 import type {
   Advisory,
@@ -371,7 +371,9 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
     busyRef.current = false
   }, [])
 
-  return {
+  // Stable handle — all methods are useCallback, getters read from refs.
+  // Without useMemo, EngineContext consumers re-render every frame.
+  return useMemo(() => ({
     get isReady() { return isReadyRef.current },
     get isCrashed() { return crashedRef.current },
     getBackpressureStats: () => ({
@@ -390,5 +392,5 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
     sendUserFeedback,
     startRoomMeasurement,
     stopRoomMeasurement,
-  }
+  }), [init, updateSettings, processPeak, clearPeak, reset, terminate, enableCollection, disableCollection, sendUserFeedback, startRoomMeasurement, stopRoomMeasurement])
 }

@@ -45,7 +45,6 @@ export const DwaLogo = memo(function DwaLogo({ className, audioLevel }: DwaLogoP
         fill
         className="object-contain"
         priority
-        unoptimized
       />
     </div>
   )

@@ -151,7 +151,7 @@ function validateBatch(batch: unknown): string | null {
   const b = batch as Record<string, unknown>
 
   if (b.version !== '1.0' && b.version !== '1.1' && b.version !== '1.2') return 'Unsupported version'
-  if (typeof b.sessionId !== 'string' || b.sessionId.length < 10) return 'Invalid sessionId'
+  if (typeof b.sessionId !== 'string' || b.sessionId.length < 10 || b.sessionId.length > 64 || !/^[a-zA-Z0-9_-]+$/.test(b.sessionId)) return 'Invalid sessionId'
   if (typeof b.fftSize !== 'number' || ![4096, 8192, 16384].includes(b.fftSize)) return 'Invalid fftSize'
   if (typeof b.sampleRate !== 'number' || b.sampleRate < 8000 || b.sampleRate > 96000) return 'Invalid sampleRate'
   if (typeof b.binsPerSnapshot !== 'number' || b.binsPerSnapshot !== 512) return 'binsPerSnapshot must be 512'

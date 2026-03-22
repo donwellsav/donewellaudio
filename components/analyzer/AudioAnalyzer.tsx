@@ -110,6 +110,8 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
 
   // Ring-out wizard state
   const [isWizardActive, setIsWizardActive] = useState(false)
+  const startWizard = useCallback(() => setIsWizardActive(true), [])
+  const finishWizard = useCallback(() => setIsWizardActive(false), [])
 
   const handleStartRingOut = useCallback(() => {
     handleModeChange('ringOut')
@@ -305,9 +307,9 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
       pendingSettingsRef.current = {}
       settingsDebounceRef.current = null
       updateSettings(merged)
-      calibration.onSettingsChange(merged)
+      calibrationRef.current.onSettingsChange(merged)
     }, 100)
-  }, [updateSettings, calibration])
+  }, [updateSettings])
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
@@ -446,8 +448,8 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
             calibration={calibrationTabProps}
             dataCollection={dataCollectionTabProps}
             isWizardActive={isWizardActive}
-            onStartWizard={() => setIsWizardActive(true)}
-            onFinishWizard={() => setIsWizardActive(false)}
+            onStartWizard={startWizard}
+            onFinishWizard={finishWizard}
             onStartRingOut={handleStartRingOut}
           />
 
@@ -465,8 +467,8 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
             calibration={calibrationTabProps}
             dataCollection={dataCollectionTabProps}
             isWizardActive={isWizardActive}
-            onStartWizard={() => setIsWizardActive(true)}
-            onFinishWizard={() => setIsWizardActive(false)}
+            onStartWizard={startWizard}
+            onFinishWizard={finishWizard}
             onStartRingOut={handleStartRingOut}
           />
         </FullscreenPortalGate>
