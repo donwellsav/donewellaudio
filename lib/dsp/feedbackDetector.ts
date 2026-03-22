@@ -77,8 +77,8 @@ export class FeedbackDetector {
   private analyser: AnalyserNode | null = null
 
   // Preallocated buffers
-  private freqDb: Float32Array | null = null
-  private timeDomain: Float32Array | null = null // Raw waveform for phase coherence FFT
+  private freqDb: Float32Array<ArrayBuffer> | null = null
+  private timeDomain: Float32Array<ArrayBuffer> | null = null // Raw waveform for phase coherence FFT
   private power: Float32Array | null = null
   private prefix: Float64Array | null = null
   private holdMs: Float32Array | null = null
