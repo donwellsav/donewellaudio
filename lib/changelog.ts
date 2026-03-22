@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.3.3',
+    date: '2026-03-22',
+    changes: [
+      { type: 'feat', description: 'feat: regenerate PWA icons from DW Audio logo' },
+    ],
+  },
+  {
     version: '0.3.2',
     date: '2026-03-22',
     changes: [
