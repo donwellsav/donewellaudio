@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState, useCallback, useRef, useEffect, memo } from 'react'
-import { formatFrequency, formatPitch } from '@/lib/utils/pitchUtils'
+import { formatFrequency, formatFrequencyRange, formatPitch } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { getSeverityText } from '@/lib/dsp/classifier'
 import { getFeedbackHistory } from '@/lib/dsp/feedbackHistory'
@@ -312,12 +312,15 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
 
   // Memoize derived values that only change when the advisory object changes
   const {
-    severityColor, pitchStr, exactFreqStr,
+    severityColor, pitchStr, exactFreqStr, isClustered,
     velocity, isRunaway, isWarning, isResolved, timeToClipStr,
   } = useMemo(() => {
     const _severityColor = getSeverityColor(advisory.severity, isDark)
     const _pitchStr = advisory.advisory?.pitch ? formatPitch(advisory.advisory.pitch) : null
-    const _exactFreqStr = advisory.trueFrequencyHz != null ? formatFrequency(advisory.trueFrequencyHz) : '---'
+    const _isClustered = (advisory.clusterCount ?? 1) > 1 && advisory.clusterMinHz != null && advisory.clusterMaxHz != null
+    const _exactFreqStr = advisory.trueFrequencyHz != null
+      ? (_isClustered ? formatFrequencyRange(advisory.clusterMinHz!, advisory.clusterMaxHz!) : formatFrequency(advisory.trueFrequencyHz))
+      : '---'
     const _velocity = advisory.velocityDbPerSec ?? 0
     const _isRunaway = _velocity >= RUNAWAY_VELOCITY_THRESHOLD || advisory.isRunaway
     const _isWarning = _velocity >= WARNING_VELOCITY_THRESHOLD && !_isRunaway
@@ -333,7 +336,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
     return {
       severityColor: _severityColor, pitchStr: _pitchStr, exactFreqStr: _exactFreqStr,
       velocity: _velocity, isRunaway: _isRunaway, isWarning: _isWarning,
-      isResolved: _isResolved, timeToClipStr: _timeToClipStr,
+      isResolved: _isResolved, timeToClipStr: _timeToClipStr, isClustered: _isClustered,
     }
   }, [advisory, isDark])
 
@@ -572,18 +575,17 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                 </TooltipProvider>
               )}
 
-              {(advisory.clusterCount ?? 1) > 1 && (
+              {isClustered && (
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="inline-flex items-center text-sm text-sky-400 bg-sky-500/20 px-1.5 py-0.5 rounded-sm leading-none border border-sky-500/30">
-                        +{(advisory.clusterCount ?? 1) - 1}
+                        {advisory.clusterCount} peaks
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-sm">
-                      {advisory.clusterCount} peaks merged{advisory.clusterMinHz && advisory.clusterMaxHz
-                        ? ` (${Math.round(advisory.clusterMinHz)}–${Math.round(advisory.clusterMaxHz)} Hz)`
-                        : ''}
+                      Merged cluster — Q widened to cover range.
+                      Center: {advisory.trueFrequencyHz != null ? formatFrequency(advisory.trueFrequencyHz) : '---'}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

@@ -78,6 +78,13 @@ export function formatFrequency(hz: number): string {
   return `${(hz / 1000).toFixed(2)}kHz`
 }
 
+/** Format a frequency range for display (e.g., "820 - 1000 Hz" or "1.2 - 2.5 kHz") */
+export function formatFrequencyRange(minHz: number, maxHz: number): string {
+  if (minHz >= 1000 && maxHz >= 1000) return `${(minHz / 1000).toFixed(1)} - ${(maxHz / 1000).toFixed(1)} kHz`
+  if (minHz < 1000 && maxHz < 1000) return `${minHz.toFixed(0)} - ${maxHz.toFixed(0)} Hz`
+  return `${minHz.toFixed(0)} Hz - ${(maxHz / 1000).toFixed(1)} kHz`
+}
+
 /**
  * Get musical interval name from cents
  */
