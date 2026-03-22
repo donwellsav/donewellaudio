@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.2',
+    date: '2026-03-22',
+    changes: [
+      { type: 'fix', description: 'docs: update remaining KTR references in docs/ to DoneWell Audio' },
+    ],
+  },
+  {
     version: '1.0.1',
     date: '2026-03-22',
     changes: [
