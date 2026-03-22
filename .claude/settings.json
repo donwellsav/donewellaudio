@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c \"echo $TOOL_INPUT | grep -qi 'git push' && echo 'BLOCKED: git push is not allowed without explicit user permission. Ask the user first.' && exit 1 || exit 0\""
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-commit-gate.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You are a fabrication detector. Your ONLY job is to catch invented content. Examine ALL content in $ARGUMENTS regardless of file type. There are NO exceptions — .js, .ts, .tsx, .md, .docx generators, ANY file.\n\nBLOCK if the content contains ANY of these:\n\n1. Email addresses that were not explicitly provided by the user in conversation (any @domain email embedded in string literals, text content, or metadata)\n2. Physical locations, cities, states, countries, ZIP codes used as author affiliations or metadata\n3. Patent claims of any kind — filed, pending, USPTO, docket numbers, patent application language\n4. Journal or conference submission claims — submitted, accepted, peer-reviewed, convention paper\n5. Market sizing data — dollar amounts ($XB, $XM), TAM, SAM, SOM, market size estimates\n6. Statistics presented as facts — percentages, population counts (X% of, XM worldwide, XK+)\n7. Source attributions to research firms — Grand View Research, NCCS, Verified Market Research, or any firm name paired with fabricated data\n8. Biographical details — titles (CEO, CTO, Founder, Fellow, Dr.), expertise claims, career descriptions\n9. Academic references that look suspicious — check if journal name + year + volume are plausible. If the citation includes a journal that did not exist at the stated date (e.g. JAES before 1953), BLOCK.\n10. Pricing the user did not specify — subscription tiers, monthly costs, enterprise pricing\n11. Invented company names, product names, or brand names the user did not provide\n12. Fake URLs or domains that may not exist (donewellaudio.com, etc. unless user confirmed)\n13. Invented acknowledgments — thanking people or institutions the user did not mention\n14. ANY content presented as fact that was not provided by the user or traced from source code\n\nNO EXCEPTIONS. No file type is exempt. No but it is just a code file excuse. Fabrication in a .js string literal is the same as fabrication in a .docx.\n\nIf ANY fabrication is found: decision BLOCK, quote the exact fabricated text, explain why it is fabricated.\nIf content is clean: decision ALLOW.",
+            "timeout": 30,
+            "statusMessage": "Checking for fabricated content..."
+          }
+        ]
+      }
+    ]
+  }
+}

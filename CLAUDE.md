@@ -1,6 +1,6 @@
 # CLAUDE.md — Kill The Ring Project Intelligence
 
-> **Last updated March 2026. 168 TypeScript/TSX files, 662 tests (657 pass, 4 skip, 1 todo), 32 suites. Version 0.185.0.**
+> **Last updated March 2026. 168 TypeScript/TSX files, 662 tests (657 pass, 4 skip, 1 todo), 32 suites. Version 0.186.0.**
 > Notch overlay opacity set to 42%.
 
 ## CRITICAL RULES
@@ -8,6 +8,31 @@
 - **NEVER run `git push` unless the user explicitly says "push" or "send to GitHub".** Committing locally is fine. Pushing is NOT. No exceptions.
 - **Build verification after every change:** `npx tsc --noEmit && pnpm test`
 - **Do not modify audio output.** KTR is analysis-only. It listens and advises. It never modifies the audio signal.
+
+## Risk-First Planning
+
+When the user asks you to plan, design, build, or change anything non-trivial:
+
+1. **RISK ASSESSMENT first.** Before proposing HOW, identify WHAT COULD GO WRONG:
+   - Which of the 16 Change Impact Audit systems does this touch? List them.
+   - What are 2-3 failure modes, edge cases, or unintended consequences?
+   - What assumptions are we making? What DON'T we know?
+   - What is the blast radius if this goes wrong? (isolated file vs. hot path vs. entire audio pipeline)
+   - Are there ordering dependencies? (e.g., "must update types before updating consumers")
+
+2. **Challenge your own plan.** After presenting the implementation approach, add a "Devil's Advocate" section:
+   - "A skeptic would ask: ..."
+   - "This could fail if: ..."
+   - "We're assuming X, but if X is wrong: ..."
+
+3. **Scope declaration.** Before writing any code, declare the PLANNED SCOPE:
+   - Files to modify (full paths)
+   - Systems affected (from Change Impact Audit table)
+   - Files explicitly NOT being modified
+
+This scope declaration becomes the baseline for scope drift detection during implementation.
+
+For trivial changes (typo, comment, single-value tweak), say "TRIVIAL — skipping risk assessment" and proceed.
 
 ## Git Workflow
 
@@ -274,9 +299,16 @@ scripts/ml/                     # ML training pipeline
 - **Build gate:** `npx tsc --noEmit && pnpm test` — both must pass before committing.
 - **Canvas changes** require visual verification in the browser (type-check won't catch drawing bugs).
 
-## Change Impact Audit
+## Change Impact Audit (MANDATORY — enforced by hooks)
 
 After making **any non-trivial change** to the codebase, produce a **Change Impact Audit** before committing. The audit classifies the change as POSITIVE, NEGATIVE, or NEUTRAL across every affected system. Evidence-backed, not opinion-based.
+
+**Pre-commit workflow (enforced by `.claude/hooks/pre-commit-gate.js`):**
+1. Run `npx tsc --noEmit && pnpm test` — the build gate hook writes a marker on success
+2. Produce the CIA in conversation AND write it to a temp file: `Write the CIA audit to the OS temp directory as claude-cia-audit.md`
+3. Only then run `git commit` — the pre-commit hook checks both markers exist
+
+If either marker is missing, the commit will be **mechanically blocked**. This is not optional.
 
 ### When to produce an audit
 

@@ -9,7 +9,7 @@ const eslintConfig = [
   ...coreWebVitals,
   ...typescript,
   {
-    ignores: ['.claude/**', 'public/**'],
+    ignores: ['.claude/**', 'public/**', 'docs/**', 'autoresearch/**'],
   },
   {
     rules: {
