@@ -48,19 +48,11 @@ export const HeaderBar = memo(function HeaderBar() {
           </button>
         </div>
 
-        <div className="flex flex-col justify-center gap-[2px] sm:gap-[3px] min-w-0">
-          <div className="flex items-baseline gap-1 sm:gap-1.5 leading-none">
-            <span className="font-mono text-sm sm:text-base font-black tracking-[0.15em] sm:tracking-[0.2em] text-foreground/90">DONEWELL</span>
-            <span className="font-mono text-base sm:text-lg font-black tracking-[0.15em] sm:tracking-[0.2em] text-primary drop-shadow-[0_0_10px_rgba(37,99,235,0.3)] dark:drop-shadow-[0_0_10px_rgba(75,146,255,0.4)]">AUDIO</span>
-          </div>
-          <span className="sm:hidden text-xs font-mono font-medium tracking-[0.2em] sm:tracking-[0.25em] text-muted-foreground uppercase leading-none">
-            DoneWell Audio
-          </span>
-          <span className="sm:hidden text-xs font-mono font-medium tracking-[0.2em] sm:tracking-[0.25em] text-muted-foreground uppercase leading-none">
+        <div className="flex flex-col justify-center gap-0 min-w-0 leading-none">
+          <span className="font-mono text-sm sm:text-base font-black tracking-[0.15em] sm:tracking-[0.2em] text-foreground/90">DONEWELL</span>
+          <span className="font-mono text-base sm:text-lg font-black tracking-[0.15em] sm:tracking-[0.2em] text-primary drop-shadow-[0_0_10px_rgba(37,99,235,0.3)] dark:drop-shadow-[0_0_10px_rgba(75,146,255,0.4)]">AUDIO</span>
+          <span className="text-[7px] sm:text-[8px] font-mono font-light tracking-[0.1em] text-muted-foreground/40 mt-[1px]">
             v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0'}
-          </span>
-          <span className="hidden sm:inline text-xs sm:text-sm font-mono font-medium tracking-[0.25em] text-muted-foreground uppercase leading-none">
-            DoneWell Audio v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0'}
           </span>
         </div>
       </div>
