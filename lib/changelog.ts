@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.8.1',
+    date: '2026-03-23',
+    changes: [
+      { type: 'fix', description: 'Fix Sentry setup and add ONNX runtime dependency' },
+    ],
+  },
+  {
     version: '0.8.0',
     date: '2026-03-23',
     changes: [
