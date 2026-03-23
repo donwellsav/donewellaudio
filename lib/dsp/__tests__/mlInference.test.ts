@@ -4,8 +4,8 @@
  * Tests the MLInferenceEngine class for graceful degradation,
  * feature vector validation, and cached prediction behavior.
  *
- * Note: ONNX Runtime Web is not installed in the test environment,
- * so we test the unavailable/fallback paths and validate the public API.
+ * Note: These tests exercise the public API and fallback behavior without
+ * depending on a successful ONNX model load inside the Node test runtime.
  */
 import { describe, it, expect } from 'vitest'
 import { MLInferenceEngine } from '../mlInference'

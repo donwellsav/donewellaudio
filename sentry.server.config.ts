@@ -1,27 +1,19 @@
-/**
- * Sentry server-side initialization — runs in the Node.js runtime.
- *
- * Captures errors from:
- *  - API routes (app/api/*)
- *  - React Server Components
- *  - Server Actions
- *
- * DoneWell Audio is primarily client-side, so server errors are rare.
- * The ingest API route is the main server-side code path.
- */
+// This file configures the initialization of Sentry on the server.
+// The config you add here will be used whenever the server handles a request.
+// https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import * as Sentry from '@sentry/nextjs'
+import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: "https://14440e525ce83db2e024a2c1491ae1d9@o4511038802952192.ingest.us.sentry.io/4511088677748736",
 
-  enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+  tracesSampleRate: 1,
 
-  tracesSampleRate: process.env.NODE_ENV === 'development' ? 1.0 : 0.1,
+  // Enable logs to be sent to Sentry
+  enableLogs: true,
 
-  release: process.env.NEXT_PUBLIC_APP_VERSION
-    ? `donewellaudio@${process.env.NEXT_PUBLIC_APP_VERSION}`
-    : undefined,
-
-  environment: process.env.NODE_ENV,
-})
+  // Enable sending user PII (Personally Identifiable Information)
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
+  sendDefaultPii: true,
+});

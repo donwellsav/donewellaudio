@@ -1,5 +1,5 @@
 /**
- * Sentry client-side initialization — runs in the browser runtime.
+ * Sentry client-side initialization - runs in the browser runtime.
  *
  * This captures:
  *  - Unhandled exceptions and promise rejections
@@ -8,27 +8,29 @@
  *  - Console errors (if enabled)
  *
  * Configuration:
- *  - Set NEXT_PUBLIC_SENTRY_DSN in .env.local
+ *  - Set NEXT_PUBLIC_SENTRY_DSN in .env.local, or rely on the current Sentry project DSN fallback
  *  - Tracing: 10% of sessions in production, 100% in dev
  *  - Replay: 10% baseline, 100% on error sessions
  */
 
 import * as Sentry from '@sentry/nextjs'
 
+const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
+  ?? 'https://14440e525ce83db2e024a2c1491ae1d9@o4511038802952192.ingest.us.sentry.io/4511088677748736'
+
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: SENTRY_DSN,
 
-  // Disable SDK gracefully when no DSN is configured
-  enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+  enabled: Boolean(SENTRY_DSN),
 
-  // Performance: sample 100% in dev, 10% in production
   tracesSampleRate: process.env.NODE_ENV === 'development' ? 1.0 : 0.1,
 
-  // Session Replay: capture 10% of sessions, 100% when errors occur
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 
-  // Tag all events with the app version for release tracking
+  enableLogs: true,
+  sendDefaultPii: true,
+
   release: process.env.NEXT_PUBLIC_APP_VERSION
     ? `donewellaudio@${process.env.NEXT_PUBLIC_APP_VERSION}`
     : undefined,
@@ -39,11 +41,9 @@ Sentry.init({
     Sentry.replayIntegration(),
   ],
 
-  // Filter noisy errors that aren't actionable
   beforeSend(event) {
-    // Ignore ResizeObserver errors (browser quirk, not a real bug)
     if (event.exception?.values?.some(
-      (v) => v.value?.includes('ResizeObserver loop')
+      (value) => value.value?.includes('ResizeObserver loop')
     )) {
       return null
     }

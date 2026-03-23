@@ -38,7 +38,9 @@
       "Bash(python3 /c/Users/dwell/.claude/skills/ui-ux-pro-max/scripts/search.py \"dark mode industrial equipment dashboard\" --domain style -n 5)",
       "Bash(PYTHONIOENCODING=utf-8 python3 /c/Users/dwell/.claude/skills/ui-ux-pro-max/scripts/search.py \"dark mode industrial equipment dashboard\" --domain style -n 3)",
       "Bash(PYTHONIOENCODING=utf-8 python3 /c/Users/dwell/.claude/skills/ui-ux-pro-max/scripts/search.py \"header brand logo layout spacing\" --domain ux -n 5)",
-      "Bash(node -e \"const fs = require\\(''fs''\\); const os = require\\(''os''\\); const path = require\\(''path''\\); fs.writeFileSync\\(path.join\\(os.tmpdir\\(\\), ''claude-build-gate-passed''\\), Date.now\\(\\).toString\\(\\)\\); fs.writeFileSync\\(path.join\\(os.tmpdir\\(\\), ''claude-cia-audit.md''\\), ''CHANGE: v0.6.0 release — deep audit fixes, bundle optimization, header layout, Companion design\\\\nCLASSIFICATION: POSITIVE\\\\nSCOPE: Build/CI, UI, Performance, Security\\\\nVerdict: 15 improvements across perf, security, UI, and documentation. All tests pass. No regressions.''\\)\")"
+      "Bash(node -e \"const fs = require\\(''fs''\\); const os = require\\(''os''\\); const path = require\\(''path''\\); fs.writeFileSync\\(path.join\\(os.tmpdir\\(\\), ''claude-build-gate-passed''\\), Date.now\\(\\).toString\\(\\)\\); fs.writeFileSync\\(path.join\\(os.tmpdir\\(\\), ''claude-cia-audit.md''\\), ''CHANGE: v0.6.0 release — deep audit fixes, bundle optimization, header layout, Companion design\\\\nCLASSIFICATION: POSITIVE\\\\nSCOPE: Build/CI, UI, Performance, Security\\\\nVerdict: 15 improvements across perf, security, UI, and documentation. All tests pass. No regressions.''\\)\")",
+      "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__get_project",
+      "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__list_projects"
     ]
   }
 }
