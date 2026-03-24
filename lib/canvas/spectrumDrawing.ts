@@ -79,7 +79,22 @@ export const DB_ALL = [...DB_MAJOR, ...DB_MINOR].sort((a, b) => a - b)
 
 export const FREQ_LABELS = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]
 
-/** Peak hold decay rate: ~0.5 dB per frame at 60fps (~30 dB/sec) */
+/**
+ * Peak hold decay rate in dB per second (frame-rate-independent).
+ * At the canvas target of ~25 fps this yields ~0.5 dB/frame, matching pre-v0.8.0 visuals.
+ * Using elapsed time instead of a fixed per-frame constant ensures consistent decay
+ * across varying frame rates (throttled tabs, high-refresh monitors, etc.).
+ */
+export const PEAK_HOLD_DECAY_DB_PER_SEC = 12.5
+
+/**
+ * Maximum delta-time (seconds) used for peak hold decay calculation.
+ * Clamps large gaps (e.g. returning from a backgrounded tab) so peaks
+ * don't instantly vanish in a single frame.
+ */
+export const PEAK_HOLD_MAX_DT_SEC = 0.25
+
+/** @deprecated Use PEAK_HOLD_DECAY_DB_PER_SEC with time-based decay instead. */
 export const PEAK_HOLD_DECAY_DB = 0.5
 
 /** Frequency->dB points describing a realistic idle room noise shape */
@@ -343,6 +358,7 @@ export function drawSpectrum(
   peakHoldRef: { current: Float32Array | null },
   warmMode: boolean = false,
   theme: CanvasTheme = DARK_CANVAS_THEME,
+  dtSeconds: number = 0.04,
 ) {
   if (!spectrum?.freqDb || !spectrum.sampleRate || !spectrum.fftSize) return
 
@@ -350,7 +366,9 @@ export function drawSpectrum(
   const hzPerBin = spectrum.sampleRate / spectrum.fftSize
   const n = freqDb.length
 
-  // ── Update peak hold buffer ──────────────────────────────────
+  // ── Update peak hold buffer (frame-rate-independent decay) ───
+  const clampedDt = Math.min(dtSeconds, PEAK_HOLD_MAX_DT_SEC)
+  const decayDb = PEAK_HOLD_DECAY_DB_PER_SEC * clampedDt
   let peakHold = peakHoldRef.current
   if (!peakHold || peakHold.length !== n) {
     peakHold = new Float32Array(n)
@@ -358,7 +376,7 @@ export function drawSpectrum(
     peakHoldRef.current = peakHold
   } else {
     for (let i = 0; i < n; i++) {
-      peakHold[i] = Math.max(freqDb[i], peakHold[i] - PEAK_HOLD_DECAY_DB)
+      peakHold[i] = Math.max(freqDb[i], peakHold[i] - decayDb)
     }
   }
 

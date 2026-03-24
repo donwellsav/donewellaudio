@@ -1529,7 +1529,13 @@ export class FeedbackDetector {
    * Calculate PHPR (Peak-to-Harmonic Power Ratio) for a detected peak.
    * Feedback is sinusoidal (no harmonics), music has rich harmonics.
    *
-   * PHPR = peakPower - mean(harmonicPowers) in dB
+   * PHPR = peakDb - 10 * log10( mean( 10^(harmonicDb_i / 10) ) )
+   *
+   * Harmonic powers are averaged in the linear domain (not dB) to avoid
+   * overweighting quiet harmonics. Arithmetic dB averaging is nonlinear and
+   * introduces up to 3-5 dB error when harmonics span 20+ dB.
+   * Ref: Van Waterschoot & Moonen (2011), "50 years of acoustic feedback control"
+   *
    * High PHPR (>15 dB) = likely feedback (pure tone)
    * Low PHPR (<8 dB) = likely music/speech (harmonics present)
    *
@@ -1542,7 +1548,7 @@ export class FeedbackDetector {
 
     const n = spectrum.length
     const peakDb = spectrum[freqBin]
-    let harmonicSum = 0
+    let linearSum = 0
     let harmonicCount = 0
 
     for (let h = 2; h <= PHPR_SETTINGS.NUM_HARMONICS + 1; h++) {
@@ -1559,13 +1565,17 @@ export class FeedbackDetector {
         }
       }
 
-      harmonicSum += maxHarmonicDb
+      // Convert dB → linear power via EXP_LUT (clamped to [-100, 0] dB range)
+      const lutIdx = ((maxHarmonicDb + 100) * 10 + 0.5) | 0
+      linearSum += EXP_LUT[lutIdx < 0 ? 0 : lutIdx > 1000 ? 1000 : lutIdx]
       harmonicCount++
     }
 
     if (harmonicCount === 0) return undefined
 
-    const meanHarmonicDb = harmonicSum / harmonicCount
+    // Convert mean linear power back to dB: 10 * log10(meanLinearPower)
+    const meanLinearPower = linearSum / harmonicCount
+    const meanHarmonicDb = 10 * Math.log10(meanLinearPower)
     return peakDb - meanHarmonicDb
   }
 

@@ -134,6 +134,130 @@ const COMB_STABILITY_WINDOW = 16       // Frames of history (~320ms at 50fps)
 const COMB_STABILITY_CV_THRESHOLD = 0.05 // CV above this = sweeping effect
 const COMB_SWEEP_PENALTY = 0.25        // Reduce comb confidence when sweeping
 
+/** Maximum entries in the comb history cache (LRU eviction). */
+const COMB_HISTORY_CACHE_MAX = 32
+/** Time-to-live for cached comb history entries (5 seconds). */
+const COMB_HISTORY_CACHE_TTL_MS = 5000
+
+/**
+ * Quantize a frequency to the nearest MIDI semitone bin.
+ * Two frequencies within ~50 cents of each other map to the same bin.
+ * Returns the MIDI note number (integer).
+ */
+function quantizeFreqToSemitone(hz: number): number {
+  if (hz <= 0) return 0
+  // MIDI note = 69 + 12 * log2(hz / 440)
+  return Math.round(69 + 12 * Math.log2(hz / 440))
+}
+
+/** Cached comb spacing history for a recently-pruned track. */
+interface CombHistoryEntry {
+  spacings: number[]
+  cachedAt: number   // Date.now() when entry was stored
+  lastUsed: number   // Date.now() when entry was last accessed (LRU)
+}
+
+/**
+ * Short-term cache for comb tracker history.
+ *
+ * When a track is pruned, its spacing history is saved here keyed by
+ * quantized frequency (semitone bin). If a new track appears at a nearby
+ * frequency within the TTL, the cached history warm-starts the new tracker
+ * so it doesn't lose evidence of whether the comb pattern was stable or sweeping.
+ *
+ * Bounded at {@link COMB_HISTORY_CACHE_MAX} entries with LRU eviction.
+ * Entries expire after {@link COMB_HISTORY_CACHE_TTL_MS}.
+ */
+export class CombHistoryCache {
+  private _entries = new Map<number, CombHistoryEntry>()
+  private _maxEntries: number
+  private _ttlMs: number
+
+  constructor(maxEntries = COMB_HISTORY_CACHE_MAX, ttlMs = COMB_HISTORY_CACHE_TTL_MS) {
+    this._maxEntries = maxEntries
+    this._ttlMs = ttlMs
+  }
+
+  /**
+   * Save a tracker's spacing history before it is pruned.
+   * @param frequencyHz The track's frequency in Hz.
+   * @param spacings The spacing history array (will be copied).
+   */
+  save(frequencyHz: number, spacings: readonly number[]): void {
+    if (spacings.length === 0) return
+
+    const key = quantizeFreqToSemitone(frequencyHz)
+    const now = Date.now()
+
+    // Evict expired entries first
+    this._evictExpired(now)
+
+    // If at capacity and this key is new, evict LRU
+    if (!this._entries.has(key) && this._entries.size >= this._maxEntries) {
+      this._evictLRU()
+    }
+
+    this._entries.set(key, {
+      spacings: spacings.slice(),
+      cachedAt: now,
+      lastUsed: now,
+    })
+  }
+
+  /**
+   * Look up cached history for a frequency. Returns the spacing array
+   * if a non-expired entry exists within one semitone, or null.
+   * Consumes (deletes) the entry on hit.
+   */
+  retrieve(frequencyHz: number): number[] | null {
+    const key = quantizeFreqToSemitone(frequencyHz)
+    const entry = this._entries.get(key)
+    if (!entry) return null
+
+    const now = Date.now()
+    if (now - entry.cachedAt > this._ttlMs) {
+      this._entries.delete(key)
+      return null
+    }
+
+    // Consume on hit — one warm-start per cached entry
+    this._entries.delete(key)
+    return entry.spacings
+  }
+
+  /** Number of entries currently in the cache. */
+  get size(): number {
+    return this._entries.size
+  }
+
+  /** Clear all cached entries. */
+  clear(): void {
+    this._entries.clear()
+  }
+
+  /** Remove all entries older than TTL. */
+  private _evictExpired(now: number): void {
+    for (const [key, entry] of this._entries) {
+      if (now - entry.cachedAt > this._ttlMs) {
+        this._entries.delete(key)
+      }
+    }
+  }
+
+  /** Remove the least-recently-used entry. */
+  private _evictLRU(): void {
+    let oldestKey: number | null = null
+    let oldestTime = Infinity
+    for (const [key, entry] of this._entries) {
+      if (entry.lastUsed < oldestTime) {
+        oldestTime = entry.lastUsed
+        oldestKey = key
+      }
+    }
+    if (oldestKey !== null) this._entries.delete(oldestKey)
+  }
+}
+
 export class CombStabilityTracker {
   private _history: number[] = []
   private _maxLen: number
@@ -156,6 +280,25 @@ export class CombStabilityTracker {
   /** Number of observations collected so far. */
   get length(): number {
     return this._history.length
+  }
+
+  /** Read-only view of the current spacing history (for caching on prune). */
+  get spacings(): readonly number[] {
+    return this._history
+  }
+
+  /**
+   * Warm-start this tracker with previously cached spacings.
+   * Appended values are capped at maxLen. Existing history is preserved
+   * (cached values are prepended).
+   */
+  warmStart(cachedSpacings: readonly number[]): void {
+    // Prepend cached spacings, then cap at maxLen
+    const merged = [...cachedSpacings, ...this._history]
+    // Keep only the most recent maxLen entries
+    this._history = merged.length > this._maxLen
+      ? merged.slice(merged.length - this._maxLen)
+      : merged
   }
 
   /**
@@ -383,19 +526,35 @@ export function analyzeInterHarmonicRatio(
   let harmonicEnergy = 0
   let interHarmonicEnergy = 0
   let harmonicsFound = 0
-  const halfBinWidth = Math.max(1, Math.round(fundamentalBin * 0.02))
+  /** Maximum relative deviation for a peak to count as a validated harmonic.
+   *  Matches the search window tolerance (2% of expected bin position). */
+  const HARMONIC_VALIDATION_TOLERANCE = 0.02
+  const halfBinWidth = Math.max(1, Math.round(fundamentalBin * HARMONIC_VALIDATION_TOLERANCE))
 
   for (let k = 1; k <= maxHarmonic; k++) {
     const expectedBin = Math.round(fundamentalBin * k)
     if (expectedBin >= nyquistBin) break
 
     let hPeak = -Infinity
+    let hPeakBin = expectedBin
     for (let b = Math.max(0, expectedBin - halfBinWidth); b <= Math.min(maxBin, expectedBin + halfBinWidth); b++) {
-      if (spectrum[b] > hPeak) hPeak = spectrum[b]
+      if (spectrum[b] > hPeak) {
+        hPeak = spectrum[b]
+        hPeakBin = b
+      }
     }
     const hPower = Math.pow(10, hPeak / 10)
     harmonicEnergy += hPower
-    if (hPeak > -80) harmonicsFound++
+
+    // Validate: peak must be within tolerance of exact integer multiple of f0
+    // to count toward the harmonic series. Coincidental near-harmonic peaks
+    // that happen to fall in the search window but deviate from k*f0 are excluded.
+    if (hPeak > -80) {
+      const relDev = Math.abs(hPeakBin - fundamentalBin * k) / (fundamentalBin * k)
+      if (relDev <= HARMONIC_VALIDATION_TOLERANCE) {
+        harmonicsFound++
+      }
+    }
 
     if (k < maxHarmonic) {
       const midBin = Math.round(fundamentalBin * (k + 0.5))

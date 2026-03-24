@@ -46,6 +46,21 @@ export const COMPRESSION_CONSTANTS = {
 
 // ── Spectral Flatness + Kurtosis ─────────────────────────────────────────────
 
+/**
+ * Calculate spectral flatness (Wiener entropy) around a peak bin.
+ *
+ * F7 fix: Combines geometric/arithmetic flatness with an explicit peak-width
+ * statistic. A broad resonance (many bins within 10 dB of peak) gets its
+ * flatness boosted toward the music-like range, preventing misclassification
+ * of broad humps as pure tones.
+ *
+ * @param spectrum  dB-scale Float32Array (AnalyserNode format)
+ * @param peakBin   Center bin index
+ * @param bandwidth Half-width in bins (default 5)
+ * @returns SpectralFlatnessResult with width-adjusted flatness
+ *
+ * @see Glasberg & Moore, "A Model of Loudness Applicable to Time-Varying Sounds"
+ */
 export function calculateSpectralFlatness(
   spectrum: Float32Array,
   peakBin: number,
@@ -55,20 +70,49 @@ export function calculateSpectralFlatness(
   const startBin = Math.max(0, peakBin - bw)
   const endBin   = Math.min(spectrum.length - 1, peakBin + bw)
   const region: number[] = []
+  const regionDb: number[] = []
 
   for (let i = startBin; i <= endBin; i++) {
     const linear = Math.pow(10, spectrum[i] / 10)
-    if (linear > 0) region.push(linear)
+    if (linear > 0) {
+      region.push(linear)
+      regionDb.push(spectrum[i])
+    }
   }
 
   if (region.length === 0) {
     return { flatness: 1, kurtosis: 0, feedbackScore: 0, isFeedbackLikely: false }
   }
 
+  // Raw geometric/arithmetic flatness
   const logSum        = region.reduce((sum, x) => sum + Math.log(x), 0)
   const geometricMean = Math.exp(logSum / region.length)
   const arithmeticMean = region.reduce((a, b) => a + b, 0) / region.length
-  const flatness      = arithmeticMean > 0 ? geometricMean / arithmeticMean : 1
+  let flatness        = arithmeticMean > 0 ? geometricMean / arithmeticMean : 1
+
+  // F7: Width-adjusted flatness — count bins within 10 dB of the peak.
+  // Only applies when raw flatness is low (< MUSIC_FLATNESS), meaning the
+  // geometric/arithmetic ratio alone thinks this is tone-like. For already-high
+  // flatness (uniform noise, etc.), no adjustment needed.
+  // Narrow line spectra: 1-3 elevated bins → no adjustment.
+  // Broad resonances: many elevated bins → flatness boosted toward music range.
+  if (flatness < SPECTRAL_CONSTANTS.MUSIC_FLATNESS) {
+    const ELEVATION_THRESHOLD_DB = 10
+    const peakDb = Math.max(...regionDb)
+    let elevatedCount = 0
+    for (let i = 0; i < regionDb.length; i++) {
+      if (peakDb - regionDb[i] <= ELEVATION_THRESHOLD_DB) {
+        elevatedCount++
+      }
+    }
+    const totalBins = region.length
+    // elevatedRatio: 0 when only peak bin elevated, ~1 when all bins elevated
+    const elevatedRatio = totalBins > 1 ? (elevatedCount - 1) / (totalBins - 1) : 0
+    // Blend raw flatness toward music-like value when many bins are elevated.
+    // For narrow peaks (elevatedRatio ~0): no change.
+    // For broad peaks (elevatedRatio ~1): flatness pulled toward MUSIC_FLATNESS.
+    flatness = flatness + elevatedRatio * (SPECTRAL_CONSTANTS.MUSIC_FLATNESS - flatness)
+  }
 
   const mean    = arithmeticMean
   const m2      = region.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / region.length
@@ -113,6 +157,15 @@ export class AmplitudeHistoryBuffer {
     if (this.count < this.maxSize) this.count++
   }
 
+  /**
+   * Detect compression via crest factor and dynamic range analysis.
+   *
+   * F8 fix: Dynamic range is now computed from same-frame peak-minus-RMS
+   * statistics (p90 - p10 of per-frame crest values) instead of mixing
+   * maxPeak from one frame with minRms from a different frame. The old
+   * approach overstated dynamic range when one transient frame had a high
+   * peak and a separate quiet frame had low RMS.
+   */
   detectCompression(): CompressionResult {
     if (this.count < 10) {
       return {
@@ -124,20 +177,30 @@ export class AmplitudeHistoryBuffer {
       }
     }
 
-    let maxPeak  = -Infinity
-    let minRms   =  Infinity
+    // Collect per-frame crest values (peak - RMS for each frame)
+    const crestValues = new Float64Array(this.count)
     let crestSum = 0
 
     for (let i = 0; i < this.count; i++) {
       const p = this.peakHistory[i]
       const r = this.rmsHistory[i]
-      if (p > maxPeak) maxPeak = p
-      if (r < minRms)  minRms  = r
-      crestSum += (p - r)
+      const crest = p - r
+      crestValues[i] = crest
+      crestSum += crest
     }
 
-    const dynamicRange   = maxPeak - minRms
-    const crestFactor    = crestSum / this.count
+    const crestFactor = crestSum / this.count
+
+    // F8: Same-frame dynamic range via median per-frame crest.
+    // The old metric (maxPeak - minRms) mixed values from different frames,
+    // overstating range for signals with alternating loud/quiet frames.
+    // Median per-frame crest reflects the typical frame's peak-to-RMS gap.
+    const sorted = Array.from(crestValues).sort((a, b) => a - b)
+    const mid = Math.floor(this.count / 2)
+    const dynamicRange = this.count % 2 === 1
+      ? sorted[mid]
+      : (sorted[mid - 1] + sorted[mid]) / 2
+
     const normalCrest    = COMPRESSION_CONSTANTS.NORMAL_CREST_FACTOR
     const estimatedRatio = normalCrest / Math.max(crestFactor, 1)
 

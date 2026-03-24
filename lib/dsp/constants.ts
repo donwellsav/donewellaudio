@@ -332,6 +332,18 @@ export const SPECTRAL_TRENDS = {
   HARSH_FREQ_LOW: 6000,
   HARSH_FREQ_HIGH: 10000,
   HARSH_EXCESS_DB: 5,
+  /**
+   * Shelf flatness guard: minimum peak-to-mean energy ratio within a shelf region.
+   * When the ratio of the peak bin energy to the mean bin energy in the region
+   * is below this threshold, the spectral shape is too flat (broadband) for a
+   * shelf to be effective — energy is spread uniformly rather than tilted.
+   * In that case, skip the shelf recommendation.
+   *
+   * Value of 1.5 means the loudest bin must be at least 1.5× (~1.8 dB above)
+   * the region mean. Below that, a shelf cut just lowers overall level without
+   * targeting the concentration.
+   */
+  SHELF_FLATNESS_PEAK_TO_MEAN_MIN: 1.5,
 } as const
 
 // Track history settings
@@ -974,6 +986,38 @@ export const HYSTERESIS = {
 // Hotspot event cooldown — prevents inflated occurrence counts from rapid re-triggers
 export const HOTSPOT_COOLDOWN_MS = 3000
 
+/**
+ * Per-mode hotspot cooldown durations (ms).
+ * Monitors/ringOut need fastest re-detection; liveMusic needs longest to avoid
+ * counting musical content as repeat offenders.
+ *
+ * Rationale:
+ *   monitors/ringOut: 1s — engineer is actively hunting feedback, needs immediate re-check
+ *   broadcast/theater: 2s — quiet environments, moderate re-detection speed
+ *   speech/worship/outdoor: 3s — default pace, filters transient re-triggers
+ *   liveMusic: 5s — dense harmonic content causes more transient peaks; longer
+ *     cooldown prevents musical peaks from inflating hotspot counts
+ */
+export const HOTSPOT_COOLDOWN_BY_MODE: Record<string, number> = {
+  monitors: 1000,
+  ringOut: 1000,
+  broadcast: 2000,
+  theater: 2000,
+  speech: 3000,
+  worship: 3000,
+  outdoor: 3000,
+  liveMusic: 5000,
+}
+
+/**
+ * Post-cut cooldown override (ms).
+ * After a user confirms/applies an EQ cut on a frequency, the hotspot cooldown
+ * for that frequency is shortened to this value. This allows faster re-detection
+ * if the applied cut was insufficient — the feedback condition has changed, so
+ * we should re-evaluate sooner.
+ */
+export const POST_CUT_COOLDOWN_MS = 500
+
 // Phase coherence from KU Leuven/Nyquist analysis
 export const PHASE_SETTINGS = {
   /** High coherence indicates feedback (pure tone maintains phase) */
@@ -1050,6 +1094,17 @@ export const ROOM_ESTIMATION = {
   MIN_DIMENSION_M: 1.5,
   /** Minimum confidence to report an estimate */
   MIN_CONFIDENCE: 0.3,
+} as const
+
+// Early-Warning dP/dt annotation constants (metadata only, no advisory creation)
+export const EARLY_WARNING = {
+  DPDT_EMA_ALPHA: 0.35,
+  BUILDING_DPDT_THRESHOLD: 0.05,
+  BUILDING_PROBABILITY_THRESHOLD: 0.3,
+  GROWING_DPDT_THRESHOLD: 0.15,
+  GROWING_PROBABILITY_THRESHOLD: 0.5,
+  CLEAR_DPDT_THRESHOLD: 0.02,
+  CLEAR_FRAME_COUNT: 3,
 } as const
 
 // FUSION_WEIGHTS: canonical definition is in advancedDetection.ts (the only consumer)
