@@ -29,6 +29,7 @@ import type {
   PTMRResult,
   MINDSResult,
 } from '../algorithmFusion'
+import { buildScores } from '@/tests/helpers/mockAlgorithmScores'
 
 // ── detectCombPattern ──────────────────────────────────────────────────────
 
@@ -782,5 +783,48 @@ describe('FUSION_WEIGHTS', () => {
 
   it('COMPRESSED mode upweights Phase over MSD', () => {
     expect(FUSION_WEIGHTS.COMPRESSED.phase).toBeGreaterThan(FUSION_WEIGHTS.COMPRESSED.msd)
+  })
+})
+
+// ── Confidence/probability consistency ────────────────────────────────────────
+
+describe('Fusion confidence uses transformed scores', () => {
+  it('low-frequency phase suppression reduces confidence, not just probability', () => {
+    const scores = buildScores({ msd: 0.7, phase: 0.9, spectral: 0.5, ihr: 0.8, ptmr: 0.7 })
+
+    const highFreq = fuseAlgorithmResults(scores, 'unknown', 0.5, DEFAULT_FUSION_CONFIG, 1000)
+    const lowFreq = fuseAlgorithmResults(scores, 'unknown', 0.5, DEFAULT_FUSION_CONFIG, 100)
+
+    // Phase is suppressed at 100 Hz, so both probability AND confidence should drop
+    expect(lowFreq.feedbackProbability).toBeLessThan(highFreq.feedbackProbability)
+    expect(lowFreq.confidence).toBeLessThan(highFreq.confidence)
+  })
+
+  it('inactive algorithms do not affect confidence', () => {
+    const scores = buildScores({ msd: 0.8, phase: 0.7, spectral: 0.6, ihr: 0.5, ptmr: 0.5 })
+
+    // MSD-only mode: only MSD, IHR, PTMR, ML active
+    const msdOnly = fuseAlgorithmResults(scores, 'unknown', 0.5, {
+      ...DEFAULT_FUSION_CONFIG,
+      mode: 'msd',
+    })
+
+    // Combined mode: all algorithms active
+    const combined = fuseAlgorithmResults(scores, 'unknown', 0.5, {
+      ...DEFAULT_FUSION_CONFIG,
+      mode: 'combined',
+    })
+
+    // Different modes should produce different confidence values
+    // because different algorithm sets contribute
+    expect(msdOnly.confidence).not.toBeCloseTo(combined.confidence, 2)
+  })
+
+  it('confidence never exceeds probability', () => {
+    const scores = buildScores({ msd: 0.3, phase: 0.4, spectral: 0.2, ihr: 0.3, ptmr: 0.2 })
+    const result = fuseAlgorithmResults(scores)
+    // confidence = probability * (0.5 + 0.5 * agreement), agreement <= 1
+    // so confidence <= probability
+    expect(result.confidence).toBeLessThanOrEqual(result.feedbackProbability)
   })
 })
