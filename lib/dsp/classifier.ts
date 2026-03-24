@@ -476,9 +476,19 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings, ac
     modalAnalysis.feedbackProbabilityBoost,
     cumulativeGrowth.severity
   )
-  
+
+  // F5 fix: apply adjustedPFeedback and renormalize so the posterior
+  // and confidence describe the same model state.
+  pFeedback = calibratedResult.adjustedPFeedback
+  const postCalibTotal = pFeedback + pWhistle + pInstrument
+  if (postCalibTotal > 0) {
+    pFeedback /= postCalibTotal
+    pWhistle /= postCalibTotal
+    pInstrument /= postCalibTotal
+  }
+
   const confidence = calibratedResult.confidence
-  const pUnknown = 1 - confidence
+  // pUnknown is computed after severity overrides (below) to maintain posterior consistency
 
   // ==================== Classification ====================
 
@@ -523,9 +533,16 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings, ac
     severity = 'RESONANCE'
   }
 
-  // Overrides above are final — no re-normalization after severity boosts.
-  // The first normalization (before classification) already ensured valid
-  // probabilities; severity overrides intentionally shift the distribution.
+  // F5: Renormalize after severity overrides so the posterior sums to 1.
+  // Severity overrides (e.g. RUNAWAY Math.max(pFeedback, 0.85)) can push
+  // the class sum above 1.0 — renormalize to maintain a valid distribution.
+  const postSeverityTotal = pFeedback + pWhistle + pInstrument
+  if (postSeverityTotal > 1) {
+    pFeedback /= postSeverityTotal
+    pWhistle /= postSeverityTotal
+    pInstrument /= postSeverityTotal
+  }
+  const pUnknown = Math.max(0, 1 - (pFeedback + pWhistle + pInstrument))
 
   // Determine label
   if (pWhistle >= CLASSIFIER_WEIGHTS.WHISTLE_THRESHOLD && pWhistle > pFeedback) {
