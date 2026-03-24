@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.16.0',
+    date: '2026-03-24',
+    changes: [
+      { type: 'feat', description: 'Merge pull request #15 from donwellsav/main' },
+    ],
+  },
+  {
     version: '0.14.0',
     date: '2026-03-24',
     highlights: 'Control surface cleanup + worker-owned content-type + hot-path test harness',
