@@ -174,7 +174,9 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
   // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only on theme change
   }, [resolvedTheme])
 
-  const render = useCallback(() => {
+  const render = useCallback((deltaTimeMs: number, _timestamp: number) => {
+    // Convert RAF delta (ms) to seconds for frame-rate-independent peak hold decay
+    const dtSeconds = deltaTimeMs > 0 ? deltaTimeMs / 1000 : 0.04 // fallback ~25fps
     const spectrum = isFrozenRef.current ? frozenSpectrumRef.current : spectrumRef.current
 
     // Dirty check: skip frame if nothing changed since last draw
@@ -242,7 +244,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
       effectiveThreshYRef.current = ((range.dbMax - spectrum.effectiveThresholdDb) / dbSpan) * plotHeight
     }
 
-    drawSpectrum(ctx, plotWidth, plotHeight, range, spectrum, gradientRef, gradientHeightRef, spectrumLineWidthProp ?? 0.5, peakHoldRef, spectrumWarmMode, canvasThemeRef.current)
+    drawSpectrum(ctx, plotWidth, plotHeight, range, spectrum, gradientRef, gradientHeightRef, spectrumLineWidthProp ?? 0.5, peakHoldRef, spectrumWarmMode, canvasThemeRef.current, dtSeconds)
 
     // Store padding for pointer event calculations
     paddingRef.current = { left: padding.left, top: padding.top, plotWidth, plotHeight }

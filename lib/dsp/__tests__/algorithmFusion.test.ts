@@ -156,6 +156,138 @@ describe('analyzeInterHarmonicRatio', () => {
   })
 })
 
+// ── analyzeInterHarmonicRatio — Harmonic Series Validation ────────────────
+
+describe('analyzeInterHarmonicRatio — harmonic series validation', () => {
+  const sampleRate = 48000
+  const fftSize = 8192
+  const numBins = fftSize / 2
+
+  it('real harmonic series at exact multiples passes validation and triggers music-like gate', () => {
+    // Source: analyzeInterHarmonicRatio lines 382-432 in algorithmFusion.ts
+    // fundamentalBin=100, halfBinWidth = max(1, round(100*0.02)) = 2
+    // Peaks placed at exact k*100 bins => relDev = 0 for each => all pass
+    // IHR = interHarmonicEnergy / harmonicEnergy. For isMusicLike we need IHR > 0.35
+    // Harmonic at -20 dB each: 6 * 10^(-20/10) = 6 * 0.01 = 0.06
+    // Inter-harmonic at -15 dB each: 5 * 10^(-15/10) = 5 * 0.0316 = 0.158
+    // IHR = 0.158 / 0.06 = 2.63 >> 0.35
+    const fundamentalBin = 100
+    const arr = new Float32Array(numBins)
+    arr.fill(-90)
+    // Place 6 harmonics at equal level (all above -80 dB threshold)
+    for (let k = 1; k <= 6; k++) {
+      const bin = Math.round(fundamentalBin * k)
+      if (bin < numBins) arr[bin] = -20
+    }
+    // Strong inter-harmonic energy to push IHR well above 0.35
+    for (let k = 1; k < 6; k++) {
+      const midBin = Math.round(fundamentalBin * (k + 0.5))
+      if (midBin < numBins) arr[midBin] = -15
+    }
+
+    const result = analyzeInterHarmonicRatio(arr, fundamentalBin, sampleRate, fftSize)
+    // All 6 exact harmonics should pass relDev <= 0.02 check
+    expect(result.harmonicsFound).toBeGreaterThanOrEqual(3)
+    expect(result.isMusicLike).toBe(true)
+    expect(result.interHarmonicRatio).toBeGreaterThan(0.35)
+  })
+
+  it('coincidental clutter peaks outside search window do not inflate harmonic count', () => {
+    // fundamentalBin=50, halfBinWidth = max(1, round(50*0.02)) = 1
+    // Place "harmonic" peaks offset by ceil(k*50*0.025) bins from expected position
+    // These offsets exceed the +-1 bin search window so peaks are not found at all
+    const fundamentalBin = 50
+    const arr = new Float32Array(numBins)
+    arr.fill(-90)
+    arr[fundamentalBin] = -10 // Exact fundamental
+    for (let k = 2; k <= 6; k++) {
+      const expectedBin = Math.round(fundamentalBin * k)
+      const offset = Math.ceil(fundamentalBin * k * 0.025)
+      const clutterBin = expectedBin + offset
+      if (clutterBin < numBins) arr[clutterBin] = -15
+    }
+    for (let k = 1; k < 6; k++) {
+      const midBin = Math.round(fundamentalBin * (k + 0.5))
+      if (midBin < numBins) arr[midBin] = -35
+    }
+
+    const result = analyzeInterHarmonicRatio(arr, fundamentalBin, sampleRate, fftSize)
+    // Only the exact fundamental passes; clutter is outside search window
+    expect(result.harmonicsFound).toBeLessThan(3)
+    expect(result.isMusicLike).toBe(false)
+  })
+
+  it('validated count drives feedbackScore branching, not raw peak count', () => {
+    // When only 1 validated harmonic exists (fundamental), feedbackScore
+    // uses the harmonicsFound<=1 branch: max(0, 1 - ihr*5)
+    // Source: algorithmFusion.ts lines 416-423
+    const fundamentalBin = 200
+    const arr = new Float32Array(numBins)
+    arr.fill(-90)
+    arr[fundamentalBin] = -10 // Only the fundamental is exact
+    const halfBinWidth = Math.max(1, Math.round(fundamentalBin * 0.02))
+    // Place other "harmonics" beyond the search window
+    for (let k = 2; k <= 5; k++) {
+      const expectedBin = Math.round(fundamentalBin * k)
+      const outsideBin = expectedBin + halfBinWidth + 2
+      if (outsideBin < numBins) arr[outsideBin] = -15
+    }
+    for (let k = 1; k < 5; k++) {
+      const midBin = Math.round(fundamentalBin * (k + 0.5))
+      if (midBin < numBins) arr[midBin] = -35
+    }
+
+    const result = analyzeInterHarmonicRatio(arr, fundamentalBin, sampleRate, fftSize)
+    expect(result.harmonicsFound).toBeLessThan(3)
+    expect(result.isMusicLike).toBe(false)
+    // feedbackScore should be > 0 since only 1 harmonic found
+    expect(result.feedbackScore).toBeGreaterThan(0)
+  })
+
+  it('IHR energy ratio is unchanged by harmonic count validation', () => {
+    // Energy calculation sums all peaks found in the search window regardless
+    // of validation. Source: algorithmFusion.ts lines 396-397 (energy always added)
+    const fundamentalBin = 100
+    const arr = new Float32Array(numBins)
+    arr.fill(-90)
+    for (let k = 1; k <= 5; k++) {
+      const bin = Math.round(fundamentalBin * k)
+      if (bin < numBins) arr[bin] = -10 - (k - 1) * 5
+    }
+    for (let k = 1; k < 5; k++) {
+      const midBin = Math.round(fundamentalBin * (k + 0.5))
+      if (midBin < numBins) arr[midBin] = -35
+    }
+
+    const result = analyzeInterHarmonicRatio(arr, fundamentalBin, sampleRate, fftSize)
+    // IHR reflects energy ratio, not harmonic count
+    expect(result.interHarmonicRatio).toBeGreaterThan(0)
+    expect(result.interHarmonicRatio).toBeLessThan(1)
+  })
+
+  it('small fundamentalBin with exact harmonics still validates correctly', () => {
+    // fundamentalBin=30, halfBinWidth = max(1, round(30*0.02)) = 1
+    // Exact multiples have relDev=0, all pass
+    // For isMusicLike: need IHR > 0.35 and harmonicsFound >= 3
+    // Harmonics at -20 dB, inter-harmonics at -15 dB => IHR >> 0.35
+    const fundamentalBin = 30
+    const arr = new Float32Array(numBins)
+    arr.fill(-90)
+    for (let k = 1; k <= 5; k++) {
+      const bin = Math.round(fundamentalBin * k)
+      if (bin < numBins) arr[bin] = -20
+    }
+    for (let k = 1; k < 5; k++) {
+      const midBin = Math.round(fundamentalBin * (k + 0.5))
+      if (midBin < numBins) arr[midBin] = -15
+    }
+
+    const result = analyzeInterHarmonicRatio(arr, fundamentalBin, sampleRate, fftSize)
+    expect(result.harmonicsFound).toBeGreaterThanOrEqual(3)
+    expect(result.isMusicLike).toBe(true)
+  })
+})
+
 // ── calculatePTMR ──────────────────────────────────────────────────────────
 
 describe('calculatePTMR', () => {

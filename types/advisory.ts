@@ -137,6 +137,8 @@ export interface Track {
   beatFrequencies?: number[] // Beat frequencies in Hz
   clusterCenterHz?: number // Center of the frequency cluster
   clusterWidthHz?: number // Width of the cluster
+  // Early-warning dP/dt annotation — rising probability trajectory
+  earlyWarning?: 'BUILDING' | 'GROWING' | null
 }
 
 export interface ClassificationResult {

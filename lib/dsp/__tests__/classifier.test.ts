@@ -457,3 +457,105 @@ describe('Mains hum gate', () => {
     expect(result.reasons.some(r => r.includes('Mains hum gate'))).toBe(true)
   })
 })
+
+// ── Smooth Schroeder Penalty ────────────────────────────────────────────────
+
+describe('Smooth Schroeder penalty (sigmoid transition)', () => {
+  // Configure a room so the Schroeder penalty is active.
+  // RT60=1.0, Volume=400 gives a Schroeder frequency via calculateSchroederFrequency.
+  // Zero out room dimensions so the room mode proximity penalty (step 10a) is inactive.
+  const roomSettings = makeSettings({
+    roomPreset: 'medium_hall' as DetectorSettings['roomPreset'],
+    roomRT60: 1.0,
+    roomVolume: 400,
+    roomLengthM: 0,
+    roomWidthM: 0,
+    roomHeightM: 0,
+  })
+
+  function trackAtFreq(frequencyHz: number) {
+    return makeTrack({
+      trueFrequencyHz: frequencyHz,
+      features: {
+        stabilityCentsStd: 5,
+        harmonicityScore: 0.2,
+        modulationScore: 0.1,
+        noiseSidebandScore: 0.05,
+        meanQ: 30,
+        minQ: 20,
+        meanVelocityDbPerSec: 0.3,
+        maxVelocityDbPerSec: 0.5,
+        persistenceMs: 1000,
+      },
+      velocityDbPerSec: 0.3,
+      prominenceDb: 15,
+      qEstimate: 30,
+    })
+  }
+
+  function pFeedbackWithRoom(frequencyHz: number): number {
+    return classifyTrack(trackAtFreq(frequencyHz), roomSettings).pFeedback
+  }
+
+  it('well below Schroeder has lower pFeedback than well above', () => {
+    const pBelow = pFeedbackWithRoom(50)
+    const pAbove = pFeedbackWithRoom(200)
+    expect(pAbove).toBeGreaterThan(pBelow)
+  })
+
+  it('well above Schroeder: negligible penalty difference between 200 Hz and 250 Hz', () => {
+    const p200 = pFeedbackWithRoom(200)
+    const p250 = pFeedbackWithRoom(250)
+    expect(Math.abs(p200 - p250)).toBeLessThan(0.01)
+  })
+
+  it('monotonic: pFeedback increases as frequency rises through transition zone', () => {
+    const frequencies = [60, 70, 80, 90, 100, 110, 120, 130, 140]
+    const values = frequencies.map(f => pFeedbackWithRoom(f))
+    for (let i = 1; i < values.length; i++) {
+      expect(values[i]).toBeGreaterThanOrEqual(values[i - 1] - 0.001)
+    }
+  })
+
+  it('no Schroeder reason when roomPreset is none', () => {
+    const noRoomSettings = makeSettings({ roomPreset: 'none' as DetectorSettings['roomPreset'] })
+    const result = classifyTrack(trackAtFreq(50), noRoomSettings)
+    expect(result.reasons.some(r => r.includes('Schroeder'))).toBe(false)
+  })
+
+  it('at Schroeder frequency: partial weight between well-below and well-above', () => {
+    const pWellBelow = pFeedbackWithRoom(50)
+    const pAtSchroeder = pFeedbackWithRoom(100)
+    const pWellAbove = pFeedbackWithRoom(200)
+    // At the Schroeder frequency the penalty should be partial,
+    // so pFeedback sits between the well-below and well-above values.
+    expect(pAtSchroeder).toBeGreaterThan(pWellBelow)
+    expect(pAtSchroeder).toBeLessThan(pWellAbove)
+  })
+
+  it('reason string includes weight value', () => {
+    const result = classifyTrack(trackAtFreq(80), roomSettings)
+    const schroederReason = result.reasons.find(r => r.includes('Schroeder'))
+    expect(schroederReason).toBeDefined()
+    expect(schroederReason).toMatch(/weight \d+\.\d+/)
+  })
+
+  it('well below Schroeder: reason weight is near 1.00', () => {
+    const result = classifyTrack(trackAtFreq(50), roomSettings)
+    const schroederReason = result.reasons.find(r => r.includes('Schroeder'))
+    expect(schroederReason).toBeDefined()
+    // Extract weight from "weight 0.98" pattern
+    const match = schroederReason!.match(/weight (\d+\.\d+)/)
+    expect(match).not.toBeNull()
+    const weight = parseFloat(match![1])
+    expect(weight).toBeGreaterThan(0.95)
+  })
+
+  it('well above Schroeder: no Schroeder reason (weight below threshold)', () => {
+    const result = classifyTrack(trackAtFreq(200), roomSettings)
+    const schroederReason = result.reasons.find(r => r.includes('Schroeder'))
+    // At 200 Hz with Schroeder at 100 Hz, the sigmoid weight should be negligible
+    // and the reason should not appear (bw <= 0.001 check in code)
+    expect(schroederReason).toBeUndefined()
+  })
+})
