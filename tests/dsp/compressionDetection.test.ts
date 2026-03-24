@@ -48,10 +48,38 @@ describe('calculateSpectralFlatness', () => {
     expect(result.flatness).toBeLessThan(SPECTRAL_CONSTANTS.PURE_TONE_FLATNESS)
   })
 
-  // TODO: Pre-existing failure — broad peak flatness calculation returns 0.035
-  // instead of >0.2. The spectral flatness formula may need revisiting for
-  // wide peaks vs narrow peaks. Not related to fusion weight changes.
-  it.todo('broad peak (many bins elevated) → higher flatness (music-like)')
+  it('broad peak (many bins elevated) → higher flatness (music-like)', () => {
+    // F7: A broad resonant hump with many elevated bins should produce
+    // flatness above PURE_TONE_FLATNESS, distinguishing it from a narrow
+    // feedback peak. All 11 bins in the region are within 6 dB of the peak.
+    const spectrum = new Float32Array(128).fill(-80)
+    // Broad hump: bins 59–69 all elevated (11 bins within ~6 dB)
+    spectrum[59] = -30
+    spectrum[60] = -27
+    spectrum[61] = -25
+    spectrum[62] = -24
+    spectrum[63] = -23
+    spectrum[64] = -22 // Peak
+    spectrum[65] = -23
+    spectrum[66] = -24
+    spectrum[67] = -25
+    spectrum[68] = -27
+    spectrum[69] = -30
+    const result = calculateSpectralFlatness(spectrum, 64, 5)
+    // Broad peak: width-adjusted flatness should exceed pure-tone threshold
+    expect(result.flatness).toBeGreaterThan(SPECTRAL_CONSTANTS.PURE_TONE_FLATNESS)
+    // Should NOT be flagged as feedback
+    expect(result.isFeedbackLikely).toBe(false)
+  })
+
+  it('narrow peak (1-3 bins elevated) → low flatness (feedback-like)', () => {
+    // F7 counterpart: a narrow spike should still produce low flatness
+    const spectrum = new Float32Array(128).fill(-80)
+    spectrum[64] = -20 // Single strong peak, rest at -80 (60 dB below)
+    const result = calculateSpectralFlatness(spectrum, 64, 5)
+    expect(result.flatness).toBeLessThan(SPECTRAL_CONSTANTS.PURE_TONE_FLATNESS)
+    expect(result.isFeedbackLikely).toBe(true)
+  })
 
   it('kurtosis is high for peaky distribution', () => {
     const spectrum = new Float32Array(128).fill(-80)
@@ -153,6 +181,52 @@ describe('AmplitudeHistoryBuffer', () => {
       }
       const result = buffer.detectCompression()
       expect(result.thresholdMultiplier).toBe(1)
+    })
+  })
+
+  describe('F8: Same-frame dynamic range', () => {
+    it('alternating high-peak/low-RMS frames do not overstate dynamic range', () => {
+      // F8 regression test: the old metric used maxPeak from frame A and
+      // minRms from frame B, overstating range. The new metric uses
+      // per-frame crest (peak-RMS) percentile spread, which stays small
+      // when individual frame crest is consistent.
+      const buffer = new AmplitudeHistoryBuffer(100)
+
+      // Alternating frames:
+      // Frame type A: high peak (-5), high RMS (-10) → crest = 5 dB
+      // Frame type B: low peak (-30), low RMS (-35) → crest = 5 dB
+      // Old metric: dynamicRange = maxPeak(-5) - minRms(-35) = 30 dB (WRONG)
+      // New metric: all per-frame crests are 5 dB, so p90-p10 ≈ 0 dB
+      for (let i = 0; i < 50; i++) {
+        if (i % 2 === 0) {
+          buffer.addSample(-5, -10)   // Loud frame, crest=5
+        } else {
+          buffer.addSample(-30, -35)  // Quiet frame, crest=5
+        }
+      }
+
+      const result = buffer.detectCompression()
+      // Per-frame crest is uniformly 5 dB → median crest = 5 dB
+      // Dynamic range (median crest) should be 5, which is < COMPRESSED_DYNAMIC_RANGE (8)
+      expect(result.dynamicRange).toBeLessThan(COMPRESSION_CONSTANTS.COMPRESSED_DYNAMIC_RANGE)
+      expect(result.dynamicRange).toBeCloseTo(5, 0)
+      // Mean crest factor is 5 dB (< COMPRESSED_CREST_FACTOR of 6)
+      expect(result.crestFactor).toBeCloseTo(5, 0)
+    })
+
+    it('genuinely uncompressed audio has high median crest (large dynamic range)', () => {
+      // When per-frame crest is consistently high, median crest reflects that
+      const buffer = new AmplitudeHistoryBuffer(100)
+
+      // Uncompressed: peak-to-RMS gap of ~15 dB consistently
+      for (let i = 0; i < 50; i++) {
+        buffer.addSample(-5, -20)  // crest = 15 dB
+      }
+
+      const result = buffer.detectCompression()
+      // Median crest = 15 dB, well above COMPRESSED_DYNAMIC_RANGE (8)
+      expect(result.dynamicRange).toBeGreaterThan(COMPRESSION_CONSTANTS.COMPRESSED_DYNAMIC_RANGE)
+      expect(result.dynamicRange).toBeCloseTo(15, 0)
     })
   })
 

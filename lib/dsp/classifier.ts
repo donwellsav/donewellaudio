@@ -41,6 +41,12 @@ const PRIOR_INSTRUMENT = 0.27
 const CLUSTERING_BANDWIDTH_MULTIPLIER = 3
 const MODE_PRESENCE_BONUS = 0.12
 const MODE_ABSENCE_PENALTY = 0.05
+const SCHROEDER_TRANSITION_HZ = 12.5
+
+/** Sigmoid weight: ~1 below Schroeder, ~0 above. */
+function belowSchroederWeight(freq: number, schroederHz: number): number {
+  return 1 / (1 + Math.exp((freq - schroederHz) / SCHROEDER_TRANSITION_HZ))
+}
 
 /**
  * Formant gate constants — suppresses sustained vowel false positives.
@@ -408,10 +414,13 @@ export function classifyTrack(track: TrackInput, settings?: DetectorSettings, ac
   // prominence floor (up to 1.5× via modal density) and the LOW band
   // multipliers (1.4× prominence, 1.5× sustain) already provide robust
   // room-mode filtering without this severe a classifier penalty.
-  if (roomConfigured && freqBand.band === 'LOW') {
-    pFeedback   -= MODE_PRESENCE_BONUS
-    pInstrument += MODE_ABSENCE_PENALTY
-    reasons.push(`Below Schroeder boundary (${schroederFreq.toFixed(0)} Hz) — possible room mode`)
+  if (roomConfigured && schroederFreq > 0) {
+    const bw = belowSchroederWeight(features.frequencyHz, schroederFreq)
+    if (bw > 0.001) {
+      pFeedback   -= MODE_PRESENCE_BONUS * bw
+      pInstrument += MODE_ABSENCE_PENALTY * bw
+      reasons.push(`Below Schroeder boundary (${schroederFreq.toFixed(0)} Hz, weight ${bw.toFixed(2)}) — possible room mode`)
+    }
   }
 
   // 10a. Room mode proximity — compare against calculated eigenfrequencies

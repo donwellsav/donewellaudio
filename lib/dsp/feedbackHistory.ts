@@ -11,7 +11,7 @@
  */
 
 import { hzToCents } from '@/lib/utils/pitchUtils'
-import { HOTSPOT_COOLDOWN_MS } from '@/lib/dsp/constants'
+import { HOTSPOT_COOLDOWN_MS, HOTSPOT_COOLDOWN_BY_MODE, POST_CUT_COOLDOWN_MS } from '@/lib/dsp/constants'
 
 // ============================================================================
 // TYPES
@@ -87,11 +87,54 @@ export class FeedbackHistory {
   private startTime: number
   private events: FeedbackEvent[] = []
   private hotspots: Map<string, FrequencyHotspot> = new Map()
-  
+  private _mode: string = 'speech'
+  /** Per-hotspot post-cut cooldown override expiry timestamps (keyed by hotspot map key) */
+  private _postCutCooldowns: Map<string, number> = new Map()
+
   constructor() {
     this.sessionId = this.generateSessionId()
     this.startTime = Date.now()
     this.loadFromStorage()
+  }
+
+  /**
+   * Set the current operation mode (e.g. 'speech', 'liveMusic', 'monitors').
+   * Affects per-mode hotspot cooldown duration via HOTSPOT_COOLDOWN_BY_MODE.
+   */
+  setMode(mode: string): void {
+    this._mode = mode
+  }
+
+  /**
+   * Get the current operation mode.
+   */
+  getMode(): string {
+    return this._mode
+  }
+
+  /**
+   * Get the effective cooldown duration (ms) for the current mode.
+   * Returns the per-mode value from HOTSPOT_COOLDOWN_BY_MODE, falling back
+   * to the global HOTSPOT_COOLDOWN_MS if the mode is not mapped.
+   */
+  getEffectiveCooldown(): number {
+    return HOTSPOT_COOLDOWN_BY_MODE[this._mode] ?? HOTSPOT_COOLDOWN_MS
+  }
+
+  /**
+   * Mark that an EQ cut was applied at a given frequency.
+   * Sets a short post-cut cooldown (POST_CUT_COOLDOWN_MS) for the matching
+   * hotspot so the system can quickly re-detect if the cut was insufficient.
+   */
+  markCutApplied(frequencyHz: number): void {
+    for (const [key, hotspot] of this.hotspots.entries()) {
+      const cents = Math.abs(hzToCents(frequencyHz, hotspot.centerFrequencyHz))
+      if (cents <= FREQUENCY_GROUPING_CENTS) {
+        // Store expiry time: events arriving after this time revert to normal cooldown
+        this._postCutCooldowns.set(key, Date.now() + POST_CUT_COOLDOWN_MS)
+        return
+      }
+    }
   }
 
   /**
@@ -250,6 +293,7 @@ export class FeedbackHistory {
   clear(): void {
     this.events = []
     this.hotspots.clear()
+    this._postCutCooldowns.clear()
     this.sessionId = this.generateSessionId()
     this.startTime = Date.now()
     this.saveToStorage()
@@ -282,6 +326,20 @@ export class FeedbackHistory {
     return undefined
   }
 
+  /**
+   * Find the Map key for the hotspot matching a frequency.
+   * Used internally for post-cut cooldown lookups.
+   */
+  private findHotspotKey(frequencyHz: number): string | undefined {
+    for (const [key, hotspot] of this.hotspots.entries()) {
+      const cents = Math.abs(hzToCents(frequencyHz, hotspot.centerFrequencyHz))
+      if (cents <= FREQUENCY_GROUPING_CENTS) {
+        return key
+      }
+    }
+    return undefined
+  }
+
   private updateHotspot(event: FeedbackEvent): void {
     // Find existing hotspot or create new one
     let hotspot = this.findHotspotForFrequency(event.frequencyHz)
@@ -306,9 +364,22 @@ export class FeedbackHistory {
       this.hotspots.set(key, hotspot)
     }
 
-    // Cooldown — skip if same hotspot fired too recently (prevents inflated counts)
-    if (hotspot.lastEventTime > 0 && (event.timestamp - hotspot.lastEventTime) < HOTSPOT_COOLDOWN_MS) {
-      return
+    // Cooldown — skip if same hotspot fired too recently (prevents inflated counts).
+    // Uses per-mode cooldown from HOTSPOT_COOLDOWN_BY_MODE, with a shorter
+    // POST_CUT_COOLDOWN_MS override when a cut was recently applied.
+    if (hotspot.lastEventTime > 0) {
+      const hotspotKey = this.findHotspotKey(event.frequencyHz)
+      const postCutExpiry = hotspotKey ? this._postCutCooldowns.get(hotspotKey) : undefined
+      const cooldown = (postCutExpiry !== undefined && event.timestamp < postCutExpiry)
+        ? POST_CUT_COOLDOWN_MS
+        : this.getEffectiveCooldown()
+      if ((event.timestamp - hotspot.lastEventTime) < cooldown) {
+        return
+      }
+      // Clean up expired post-cut cooldown
+      if (hotspotKey && postCutExpiry !== undefined && event.timestamp >= postCutExpiry) {
+        this._postCutCooldowns.delete(hotspotKey)
+      }
     }
 
     // Update hotspot statistics
