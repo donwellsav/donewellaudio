@@ -357,7 +357,7 @@ export const TRACK_SETTINGS = {
 // Harmonic detection settings
 export const HARMONIC_SETTINGS = {
   MAX_HARMONIC: 8, // Check overtones up to this partial (2nd–8th)
-  TOLERANCE_CENTS: 200, // ±200 cents = whole tone; synced with ASSOCIATION_TOLERANCE_CENTS
+  TOLERANCE_CENTS: 200, // ±200 cents = whole tone; 2× ASSOCIATION_TOLERANCE_CENTS — wider for inharmonic overtones
   // Sub-harmonic check: if new peak F and an active track is near F*k, new peak may be the fundamental
   CHECK_SUB_HARMONICS: true,
 } as const
@@ -653,7 +653,7 @@ export const DEFAULT_SETTINGS: DetectorSettings = {
   autoGainEnabled: false, // Auto-gain off by default — user clicks venue pill to start calibration
   autoGainTargetDb: -18, // Target post-gain peak level (-18 dBFS = 18 dB headroom, balanced for detection)
   graphFontSize: 15, // Default label size for canvas graphs (8–26 px)
-  harmonicToleranceCents: 200, // ±200 cents for harmonic matching; synced with ASSOCIATION_TOLERANCE_CENTS
+  harmonicToleranceCents: 200, // ±200 cents for harmonic matching; 2× ASSOCIATION_TOLERANCE_CENTS — wider for inharmonic overtones
   showTooltips: true, // Show help tooltips (useful for AV techs)
   aWeightingEnabled: true, // A-WEIGHTING ON — prioritizes speech intelligibility band (2–5 kHz)
   micCalibrationProfile: 'none' as const, // Measurement mic compensation profile ('none' | 'ecm8000' | 'rta-m')
@@ -671,6 +671,7 @@ export const DEFAULT_SETTINGS: DetectorSettings = {
   // TUNED FOR FAST DETECTION (accepts more false positives for speed)
   algorithmMode: 'auto' as const, // Content-adaptive algorithm selection
   enabledAlgorithms: ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr', 'ml'] as ('msd' | 'phase' | 'spectral' | 'comb' | 'ihr' | 'ptmr' | 'ml')[], // All on for custom mode
+  mlEnabled: true, // ML algorithm enabled by default; when false, excluded from all mode branches
   showAlgorithmScores: false, // Hide advanced scores by default
   showPeqDetails: false, // Hide PEQ recommendation on cards by default
   showFreqZones: false, // Frequency zone overlay on RTA (Sub/Voice/Presence/Air)

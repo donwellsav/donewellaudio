@@ -247,6 +247,14 @@ export const SoundTab = memo(function SoundTab({
         badge={<span className="expert-badge">Expert</span>}
       >
         <div className="space-y-2">
+          {/* ML Toggle — independent of Auto/Custom algorithm grid */}
+          <LEDToggle
+            checked={settings.mlEnabled}
+            onChange={(checked) => onSettingsChange({ mlEnabled: checked })}
+            label="ML Scoring"
+            tooltip={settings.showTooltips ? 'Enable machine learning false-positive filter (7th algorithm). Disable for deterministic 6-algorithm detection.' : undefined}
+          />
+
           {/* Algorithms */}
           <div className="space-y-1">
             <span className="section-label text-muted-foreground">Algorithms</span>

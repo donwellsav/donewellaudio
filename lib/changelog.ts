@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.18.0',
+    date: '2026-03-25',
+    changes: [
+      { type: 'feat', description: 'Add ML Scoring toggle to Advanced settings in SoundTab — works in all modes including Auto' },
+    ],
+  },
+  {
     version: '0.16.0',
     date: '2026-03-24',
     changes: [

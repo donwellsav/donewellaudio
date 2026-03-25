@@ -99,6 +99,8 @@ export interface FusionConfig {
   phaseThreshold: number
   enableCompressionDetection: boolean
   feedbackThreshold: number
+  /** When false, ML algorithm is excluded from all mode branches including Auto. */
+  mlEnabled?: boolean
 }
 
 export interface MINDSResult {
@@ -732,6 +734,11 @@ export function fuseAlgorithmResults(
     case 'custom':
       activeAlgorithms = config.enabledAlgorithms ?? ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr', 'ml']
       break
+  }
+
+  // When mlEnabled is explicitly false, remove ML from all mode branches
+  if (config.mlEnabled === false) {
+    activeAlgorithms = activeAlgorithms.filter(a => a !== 'ml')
   }
 
   let weightedSum  = 0

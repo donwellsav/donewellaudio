@@ -151,6 +151,9 @@ export class MLInferenceEngine {
     )
 
     void this._session.run({ input: tensor }).then(output => {
+      // Fix 7 (AI Fight Club): Guard against stale write after dispose().
+      // An in-flight inference promise can complete after dispose() nulls everything.
+      if (this._disposed) return
       const score = output.output?.data[0] ?? 0.5
       this._lastPrediction = {
         feedbackScore: Math.max(0, Math.min(1, score)),

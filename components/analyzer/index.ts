@@ -4,7 +4,7 @@ export { SpectrumCanvas } from "./SpectrumCanvas";
 export { GEQBarView } from "./GEQBarView";
 export { IssuesList } from "./IssuesList";
 export { SettingsPanel } from "./settings/SettingsPanel";
-export { SettingsPanel as UnifiedControls } from "./settings/SettingsPanel";
+
 export { LandscapeSettingsSheet } from "./LandscapeSettingsSheet";
 export { HelpMenu } from "./HelpMenu";
 export { InputMeterSlider } from "./InputMeterSlider";
