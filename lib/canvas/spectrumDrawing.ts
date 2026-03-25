@@ -212,7 +212,8 @@ export function drawFreqZones(
     ctx.fillStyle = `rgba(${zone.rgb}, ${alphas[z]})`
     ctx.fillRect(x1, 0, x2 - x1, plotHeight)
 
-    // Separator line at zone boundary
+    // Fix 12 (AI Fight Club): save/restore to prevent alpha leakage on exception
+    ctx.save()
     ctx.strokeStyle = theme.zoneLabel
     ctx.globalAlpha = 0.25
     ctx.lineWidth = 0.5
@@ -220,7 +221,7 @@ export function drawFreqZones(
     ctx.moveTo(x1, 0)
     ctx.lineTo(x1, plotHeight)
     ctx.stroke()
-    ctx.globalAlpha = 1
+    ctx.restore()
 
     // Label at top center of zone
     const centerX = (x1 + x2) / 2
@@ -258,7 +259,8 @@ export function drawIndicatorLines(
     ctx.fillStyle = `${VIZ_COLORS.NOISE_FLOOR}0D` // ~5% opacity
     ctx.fillRect(0, floorY, plotWidth, plotHeight - floorY)
 
-    // Noise floor line
+    // Fix 12 (AI Fight Club): save/restore to prevent alpha/dash leakage on exception
+    ctx.save()
     ctx.strokeStyle = VIZ_COLORS.NOISE_FLOOR
     ctx.globalAlpha = 0.6
     ctx.lineWidth = 1
@@ -267,7 +269,6 @@ export function drawIndicatorLines(
     ctx.moveTo(0, floorY)
     ctx.lineTo(plotWidth, floorY)
     ctx.stroke()
-    ctx.setLineDash([])
 
     // Right-aligned label
     ctx.font = `${Math.max(8, fontSize - 2)}px monospace`
@@ -275,8 +276,7 @@ export function drawIndicatorLines(
     ctx.globalAlpha = 0.85
     ctx.textAlign = 'right'
     ctx.fillText('Floor', plotWidth - 4, floorY - 4)
-    ctx.globalAlpha = 1
-    ctx.textAlign = 'left'
+    ctx.restore()
   }
 
   // Effective threshold

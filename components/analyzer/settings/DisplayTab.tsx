@@ -6,7 +6,7 @@ import { GraduationCap } from 'lucide-react'
 import { ConsoleSlider } from '@/components/ui/console-slider'
 import { LEDToggle } from '@/components/ui/led-toggle'
 import { ChannelSection } from '@/components/ui/channel-section'
-import { PillToggle } from '@/components/ui/pill-toggle'
+
 import type { TabSettingsProps } from './SettingsShared'
 import { onboardingStorage } from '@/lib/storage/dwaStorage'
 
@@ -47,8 +47,8 @@ export const DisplayTab = memo(function DisplayTab({
         <LEDToggle
           checked={settings.swipeLabeling}
           onChange={(checked) => onSettingsChange({ swipeLabeling: checked })}
-          label="Swipe to Label"
-          tooltip={settings.showTooltips ? 'Enable swipe gestures on issue cards: left = dismiss, right = confirm, long-press = false positive.' : undefined}
+          label="Swipe to Label (Desktop)"
+          tooltip={settings.showTooltips ? 'Enable swipe gestures on desktop issue cards: left = dismiss, right = confirm, long-press = false positive. Mobile always uses swipe for space.' : undefined}
         />
       </div>
 
@@ -80,23 +80,7 @@ export const DisplayTab = memo(function DisplayTab({
             min={8} max={26} step={1} sliderValue={settings.graphFontSize}
             onChange={(v) => onSettingsChange({ graphFontSize: v })} />
 
-          <LEDToggle
-            checked={settings.showThresholdLine}
-            onChange={(checked) => onSettingsChange({ showThresholdLine: checked })}
-            label="Show Threshold Line"
-            tooltip={settings.showTooltips ? 'Display the detection threshold as a dashed line on the RTA spectrum.' : undefined}
-          />
-
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-xs text-muted-foreground font-mono uppercase tracking-wide">Fader Mode</span>
-            <PillToggle
-              checked={settings.faderMode === 'sensitivity'}
-              onChange={(isSensitivity) => onSettingsChange({ faderMode: isSensitivity ? 'sensitivity' : 'gain' })}
-              labelOn="Sensitivity"
-              labelOff="Input Gain"
-              tooltip={settings.showTooltips ? 'Sensitivity adjusts detection threshold. Input Gain adjusts mic input level.' : undefined}
-            />
-          </div>
+          {/* showThresholdLine and faderMode controls live in SoundTab (Sensitivity & Range) — removed duplicate here */}
         </div>
       </ChannelSection>
 

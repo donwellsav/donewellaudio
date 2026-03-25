@@ -139,6 +139,7 @@ function makeSettings(overrides: Partial<DetectorSettings> = {}): DetectorSettin
     roomDimensionsUnit: 'meters',
     algorithmMode: 'auto',
     enabledAlgorithms: ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr', 'ml'],
+    mlEnabled: true,
     showAlgorithmScores: false,
     showPeqDetails: true,
     showFreqZones: false,

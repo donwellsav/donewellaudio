@@ -154,8 +154,15 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
           break
         case 'returnBuffers':
           busyRef.current = false  // Also clears backpressure (fixes stall on early-break paths)
-          // Return buffers to the appropriate pool based on source
-          if (msg.spectrum.buffer.byteLength > 0) specPoolRef.current.push(msg.spectrum)
+          // Fix 3 + 14 (AI Fight Club): Route buffers to the correct pool based on source,
+          // and guard against wrong-size buffers from in-flight FFT size changes.
+          if (msg.spectrum.buffer.byteLength > 0 && msg.spectrum.length === poolFftSizeRef.current) {
+            if (msg.source === 'spectrumUpdate') {
+              specUpdatePoolRef.current.push(msg.spectrum)
+            } else {
+              specPoolRef.current.push(msg.spectrum)
+            }
+          }
           if (msg.timeDomain && msg.timeDomain.buffer.byteLength > 0) tdPoolRef.current.push(msg.timeDomain)
           break
         case 'snapshotBatch':
@@ -240,7 +247,16 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
 
     return () => {
       if (restartTimerRef.current) clearTimeout(restartTimerRef.current)
-      worker.terminate()
+      // Fix 2 (AI Fight Club): Terminate the CURRENT worker, not the closed-over original.
+      // After crash-restart, workerRef.current is the replacement; the original is already dead.
+      const current = workerRef.current
+      if (current && current !== worker) {
+        // Replacement worker exists — terminate both
+        worker.terminate()
+        current.terminate()
+      } else {
+        worker.terminate()
+      }
       workerRef.current = null
       isReadyRef.current = false
     }
@@ -276,6 +292,14 @@ export function useDSPWorker(callbacks: DSPWorkerCallbacks): DSPWorkerHandle {
 
   const updateSettings = useCallback(
     (settings: Partial<DetectorSettings>) => {
+      // Fix 1 (AI Fight Club): Keep restart snapshot in sync with live settings.
+      // Without this, a crash-restart replays stale settings from lastInitRef.
+      if (lastInitRef.current) {
+        lastInitRef.current = {
+          ...lastInitRef.current,
+          settings: { ...lastInitRef.current.settings, ...settings },
+        }
+      }
       postMessage({ type: 'updateSettings', settings })
     },
     [postMessage]
