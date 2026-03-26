@@ -19,11 +19,11 @@ import { AlertTriangle, Settings2, Expand, Shrink } from 'lucide-react'
 import type { DetectorSettings } from '@/types/advisory'
 import type { CalibrationTabProps } from './settings/CalibrationTab'
 import { MOBILE_MAX_DISPLAYED_ISSUES } from '@/lib/dsp/constants'
+import { MODE_BASELINES } from '@/lib/settings/modeBaselines'
 
 const TAB_ORDER = ['issues', 'settings'] as const
 
 interface MobileLayoutProps {
-  onSettingsChange: (s: Partial<DetectorSettings>) => void
   calibration?: Omit<CalibrationTabProps, 'settings' | 'onSettingsChange'>
   dataCollection?: DataCollectionTabProps
   isWizardActive?: boolean
@@ -33,13 +33,12 @@ interface MobileLayoutProps {
 }
 
 export const MobileLayout = memo(function MobileLayout({
-  onSettingsChange,
   calibration,
   dataCollection,
   isWizardActive, onStartWizard, onFinishWizard, onStartRingOut,
 }: MobileLayoutProps) {
   const { isRunning, isStarting, error, start, stop } = useEngine()
-  const { settings, handleModeChange, resetSettings, handleFreqRangeChange } = useSettings()
+  const { settings, handleModeChange, resetSettings, handleFreqRangeChange, setInputGain, setAutoGain, updateDisplay, setSensitivityOffset, session } = useSettings()
   const { spectrumRef, inputLevel, isAutoGain, autoGainDb, autoGainLocked, noiseFloorDb } = useMetering()
 
   const { isFrozen, toggleFreeze, mobileTab, setMobileTab, rtaContainerRef, isRtaFullscreen, toggleRtaFullscreen } = useUI()
@@ -212,7 +211,7 @@ export const MobileLayout = memo(function MobileLayout({
 
               {inlineGraphMode === 'rta' ? (
                 <div ref={rtaContainerRef} className="w-full h-full">
-                  <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} showFreqZones={settings.showFreqZones} spectrumWarmMode={settings.spectrumWarmMode} onThresholdChange={(db) => onSettingsChange({ feedbackThresholdDb: db })} />
+                  <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} showFreqZones={settings.showFreqZones} spectrumWarmMode={settings.spectrumWarmMode} onThresholdChange={(db) => { const bl = MODE_BASELINES[session.modeId]; const eo = session.environment.feedbackOffsetDb; const ce = bl.feedbackThresholdDb + eo + session.liveOverrides.sensitivityOffsetDb; const d = db - ce; if (d !== 0) setSensitivityOffset(session.liveOverrides.sensitivityOffsetDb + d) }} />
                 </div>
               ) : (
                 <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
@@ -279,20 +278,20 @@ export const MobileLayout = memo(function MobileLayout({
               <h3 className="section-label mb-2">Input Gain</h3>
               <InputMeterSlider
                 value={settings.inputGainDb}
-                onChange={(v) => onSettingsChange({ inputGainDb: v })}
+                onChange={(v) => setInputGain(v)}
                 level={inputLevel}
                 fullWidth
                 autoGainEnabled={isAutoGain}
                 autoGainDb={autoGainDb}
                 autoGainLocked={autoGainLocked}
-                onAutoGainToggle={(enabled) => onSettingsChange({ autoGainEnabled: enabled })}
+                onAutoGainToggle={(enabled) => setAutoGain(enabled)}
               />
             </section>
             <div className="border-t border-border" />
             <SettingsPanel
               settings={settings}
               onModeChange={handleModeChange}
-              onSettingsChange={onSettingsChange}
+              
               onReset={resetSettings}
               calibration={calibration}
               dataCollection={dataCollection}
@@ -304,18 +303,18 @@ export const MobileLayout = memo(function MobileLayout({
         <div className="flex-shrink-0 w-12 min-[375px]:w-16 border-l border-border/50 channel-strip">
           <VerticalGainFader
             value={settings.inputGainDb}
-            onChange={(v) => onSettingsChange({ inputGainDb: v })}
+            onChange={(v) => setInputGain(v)}
             level={inputLevel}
             autoGainEnabled={isAutoGain}
             autoGainDb={autoGainDb}
             autoGainLocked={autoGainLocked}
-            onAutoGainToggle={(enabled) => onSettingsChange({ autoGainEnabled: enabled })}
+            onAutoGainToggle={(enabled) => setAutoGain(enabled)}
             isRunning={isRunning}
             noiseFloorDb={noiseFloorDb}
             faderMode={settings.faderMode}
-            onFaderModeChange={(mode) => onSettingsChange({ faderMode: mode })}
+            onFaderModeChange={(mode) => updateDisplay({ faderMode: mode })}
             sensitivityValue={settings.feedbackThresholdDb}
-            onSensitivityChange={(db) => onSettingsChange({ feedbackThresholdDb: db })}
+            onSensitivityChange={(db) => { const bl = MODE_BASELINES[session.modeId]; const eo = session.environment.feedbackOffsetDb; const ce = bl.feedbackThresholdDb + eo + session.liveOverrides.sensitivityOffsetDb; const d = db - ce; if (d !== 0) setSensitivityOffset(session.liveOverrides.sensitivityOffsetDb + d) }}
             activeAdvisoryCount={activeAdvisoryCount}
           />
         </div>
@@ -336,7 +335,7 @@ export const MobileLayout = memo(function MobileLayout({
           </div>
           <div className="flex-1 min-h-0 flex flex-col gap-0.5 p-0.5">
             <div className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden">
-              <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} showFreqZones={settings.showFreqZones} spectrumWarmMode={settings.spectrumWarmMode} onThresholdChange={(db) => onSettingsChange({ feedbackThresholdDb: db })} />
+              <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} showFreqZones={settings.showFreqZones} spectrumWarmMode={settings.spectrumWarmMode} onThresholdChange={(db) => { const bl = MODE_BASELINES[session.modeId]; const eo = session.environment.feedbackOffsetDb; const ce = bl.feedbackThresholdDb + eo + session.liveOverrides.sensitivityOffsetDb; const d = db - ce; if (d !== 0) setSensitivityOffset(session.liveOverrides.sensitivityOffsetDb + d) }} />
             </div>
             <div className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden">
               <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
@@ -357,7 +356,7 @@ export const MobileLayout = memo(function MobileLayout({
               </span>
               <LandscapeSettingsSheet
                 settings={settings}
-                onSettingsChange={onSettingsChange}
+                
                 onModeChange={handleModeChange}
                 onReset={resetSettings}
                 calibration={calibration}
@@ -430,7 +429,7 @@ export const MobileLayout = memo(function MobileLayout({
                 Clear
               </button>
             )}
-            <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning && !isStarting ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} showFreqZones={settings.showFreqZones} spectrumWarmMode={settings.spectrumWarmMode} onThresholdChange={(db) => onSettingsChange({ feedbackThresholdDb: db })} />
+            <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning && !isStarting ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} showFreqZones={settings.showFreqZones} spectrumWarmMode={settings.spectrumWarmMode} onThresholdChange={(db) => { const bl = MODE_BASELINES[session.modeId]; const eo = session.environment.feedbackOffsetDb; const ce = bl.feedbackThresholdDb + eo + session.liveOverrides.sensitivityOffsetDb; const d = db - ce; if (d !== 0) setSensitivityOffset(session.liveOverrides.sensitivityOffsetDb + d) }} />
           </div>
           {/* GEQ — bottom half */}
           <div className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
@@ -450,18 +449,18 @@ export const MobileLayout = memo(function MobileLayout({
         <div className="w-[5%] min-w-[3rem] flex-shrink-0 border-l border-border/50 channel-strip">
           <VerticalGainFader
             value={settings.inputGainDb}
-            onChange={(v) => onSettingsChange({ inputGainDb: v })}
+            onChange={(v) => setInputGain(v)}
             level={inputLevel}
             autoGainEnabled={isAutoGain}
             autoGainDb={autoGainDb}
             autoGainLocked={autoGainLocked}
-            onAutoGainToggle={(enabled) => onSettingsChange({ autoGainEnabled: enabled })}
+            onAutoGainToggle={(enabled) => setAutoGain(enabled)}
             isRunning={isRunning}
             noiseFloorDb={noiseFloorDb}
             faderMode={settings.faderMode}
-            onFaderModeChange={(mode) => onSettingsChange({ faderMode: mode })}
+            onFaderModeChange={(mode) => updateDisplay({ faderMode: mode })}
             sensitivityValue={settings.feedbackThresholdDb}
-            onSensitivityChange={(db) => onSettingsChange({ feedbackThresholdDb: db })}
+            onSensitivityChange={(db) => { const bl = MODE_BASELINES[session.modeId]; const eo = session.environment.feedbackOffsetDb; const ce = bl.feedbackThresholdDb + eo + session.liveOverrides.sensitivityOffsetDb; const d = db - ce; if (d !== 0) setSensitivityOffset(session.liveOverrides.sensitivityOffsetDb + d) }}
             activeAdvisoryCount={activeAdvisoryCount}
           />
         </div>

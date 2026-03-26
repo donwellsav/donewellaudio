@@ -21,9 +21,9 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import type { ImperativePanelHandle } from 'react-resizable-panels'
 import type { DetectorSettings } from '@/types/advisory'
 import type { CalibrationTabProps } from './settings/CalibrationTab'
+import { MODE_BASELINES } from '@/lib/settings/modeBaselines'
 
 interface DesktopLayoutProps {
-  onSettingsChange: (s: Partial<DetectorSettings>) => void
   issuesPanelOpen: boolean
   issuesPanelRef: React.RefObject<ImperativePanelHandle | null>
   activeSidebarTab: 'issues' | 'controls'
@@ -42,7 +42,6 @@ interface DesktopLayoutProps {
 }
 
 export const DesktopLayout = memo(function DesktopLayout({
-  onSettingsChange,
   issuesPanelOpen, issuesPanelRef,
   activeSidebarTab, setActiveSidebarTab,
   openIssuesPanel, closeIssuesPanel, setIssuesPanelOpen,
@@ -51,7 +50,7 @@ export const DesktopLayout = memo(function DesktopLayout({
   isWizardActive, onStartWizard, onFinishWizard, onStartRingOut,
 }: DesktopLayoutProps) {
   const { isRunning, isStarting, error, start, stop } = useEngine()
-  const { settings, handleModeChange, handleFreqRangeChange, resetSettings } = useSettings()
+  const { settings, handleModeChange, handleFreqRangeChange, resetSettings, setInputGain, setAutoGain, updateDisplay, setSensitivityOffset, session } = useSettings()
   const { spectrumRef, spectrumStatus, noiseFloorDb, inputLevel, isAutoGain, autoGainDb, autoGainLocked } = useMetering()
 
   const { isFrozen, toggleFreeze, layoutKey, rtaContainerRef, isRtaFullscreen, toggleRtaFullscreen } = useUI()
@@ -179,7 +178,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                 )}
                 {activeSidebarTab === 'controls' && (
                   <div className="animate-in fade-in-0 duration-150">
-                    <SettingsPanel settings={settings} onModeChange={handleModeChange} onSettingsChange={onSettingsChange} onReset={resetSettings} calibration={calibration} dataCollection={dataCollection} />
+                    <SettingsPanel settings={settings} onModeChange={handleModeChange} onReset={resetSettings} calibration={calibration} dataCollection={dataCollection} />
                   </div>
                 )}
               </div>
@@ -292,7 +291,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                     </div>
                   </div>
                   <div className="flex-1 min-h-0">
-                    <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning && !isStarting ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} showFreqZones={settings.showFreqZones} spectrumWarmMode={settings.spectrumWarmMode} onThresholdChange={(db) => onSettingsChange({ feedbackThresholdDb: db })} />
+                    <SpectrumCanvas spectrumRef={spectrumRef} advisories={advisories} isRunning={isRunning} isStarting={isStarting} error={error} graphFontSize={settings.graphFontSize} onStart={!isRunning && !isStarting ? start : undefined} earlyWarning={earlyWarning} rtaDbMin={settings.rtaDbMin} rtaDbMax={settings.rtaDbMax} spectrumLineWidth={settings.spectrumLineWidth} clearedIds={rtaClearedIds} minFrequency={settings.minFrequency} maxFrequency={settings.maxFrequency} onFreqRangeChange={handleFreqRangeChange} showThresholdLine={settings.showThresholdLine} feedbackThresholdDb={settings.feedbackThresholdDb} isFrozen={isFrozen} canvasTargetFps={settings.canvasTargetFps} showFreqZones={settings.showFreqZones} spectrumWarmMode={settings.spectrumWarmMode} onThresholdChange={(db) => { const bl = MODE_BASELINES[session.modeId]; const eo = session.environment.feedbackOffsetDb; const ce = bl.feedbackThresholdDb + eo + session.liveOverrides.sensitivityOffsetDb; const d = db - ce; if (d !== 0) setSensitivityOffset(session.liveOverrides.sensitivityOffsetDb + d) }} />
                   </div>
                 </div>
               </div>
@@ -328,18 +327,18 @@ export const DesktopLayout = memo(function DesktopLayout({
       <div className="flex-shrink-0 w-16 border-l border-border/50 channel-strip">
         <VerticalGainFader
           value={settings.inputGainDb}
-          onChange={(v) => onSettingsChange({ inputGainDb: v })}
+          onChange={(v) => setInputGain(v)}
           level={inputLevel}
           autoGainEnabled={isAutoGain}
           autoGainDb={autoGainDb}
           autoGainLocked={autoGainLocked}
-          onAutoGainToggle={(enabled) => onSettingsChange({ autoGainEnabled: enabled })}
+          onAutoGainToggle={(enabled) => setAutoGain(enabled)}
           isRunning={isRunning}
           noiseFloorDb={noiseFloorDb}
           faderMode={settings.faderMode}
-          onFaderModeChange={(mode) => onSettingsChange({ faderMode: mode })}
+          onFaderModeChange={(mode) => updateDisplay({ faderMode: mode })}
           sensitivityValue={settings.feedbackThresholdDb}
-          onSensitivityChange={(db) => onSettingsChange({ feedbackThresholdDb: db })}
+          onSensitivityChange={(db) => { const bl = MODE_BASELINES[session.modeId]; const eo = session.environment.feedbackOffsetDb; const ce = bl.feedbackThresholdDb + eo + session.liveOverrides.sensitivityOffsetDb; const d = db - ce; if (d !== 0) setSensitivityOffset(session.liveOverrides.sensitivityOffsetDb + d) }}
           activeAdvisoryCount={activeAdvisoryCount}
         />
       </div>

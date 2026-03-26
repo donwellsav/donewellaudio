@@ -18,6 +18,7 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react'
 
+import { getRoomParametersFromDimensions } from '@/lib/dsp/acousticUtils'
 import { deriveDetectorSettings } from '@/lib/settings/deriveSettings'
 import {
   DEFAULT_DIAGNOSTICS,
@@ -32,7 +33,7 @@ import {
   displayStorageV2,
   sessionStorageV2,
 } from '@/lib/storage/settingsStorageV2'
-import type { DetectorSettings, MicCalibrationProfile, OperationMode } from '@/types/advisory'
+import type { DetectorSettings, MicCalibrationProfile } from '@/types/advisory'
 import type {
   DiagnosticsProfile,
   DisplayPrefs,
@@ -44,35 +45,7 @@ import type {
   RoomTemplateId,
 } from '@/types/settings'
 
-// ─── Keys used to detect legacy call patterns ────────────────────────────────
-
-/** Fields that are owned by the mode baseline (written by handleModeChange) */
-const MODE_OWNED_KEYS = new Set([
-  'feedbackThresholdDb', 'ringThresholdDb', 'growthRateThreshold',
-  'fftSize', 'minFrequency', 'maxFrequency', 'sustainMs', 'clearMs',
-  'confidenceThreshold', 'prominenceDb', 'eqPreset', 'aWeightingEnabled',
-  'inputGainDb', 'ignoreWhistle',
-])
-
-/** Fields owned by display preferences */
-const DISPLAY_KEYS = new Set([
-  'maxDisplayedIssues', 'graphFontSize', 'showTooltips', 'showAlgorithmScores',
-  'showPeqDetails', 'showFreqZones', 'spectrumWarmMode', 'rtaDbMin', 'rtaDbMax',
-  'spectrumLineWidth', 'showThresholdLine', 'canvasTargetFps', 'faderMode', 'swipeLabeling',
-])
-
-/** Fields owned by diagnostics */
-const DIAGNOSTICS_KEYS = new Set([
-  'algorithmMode', 'enabledAlgorithms', 'mlEnabled', 'thresholdMode',
-  'noiseFloorAttackMs', 'noiseFloorReleaseMs', 'maxTracks', 'trackTimeoutMs',
-  'harmonicToleranceCents', 'peakMergeCents',
-])
-
-/** Fields owned by room/environment */
-const ROOM_KEYS = new Set([
-  'roomPreset', 'roomLengthM', 'roomWidthM', 'roomHeightM', 'roomTreatment',
-  'roomDimensionsUnit',
-])
+// Legacy key sets and shim removed in Phase 6c — all controls now use semantic actions directly
 
 // ─── Return type ─────────────────────────────────────────────────────────────
 
@@ -98,13 +71,6 @@ export interface UseLayeredSettingsReturn {
   updateLiveOverrides: (partial: Partial<LiveOverrides>) => void
   resetAll: () => void
 
-  // ── Legacy compatibility ─────────────────────────────────────────────
-  /**
-   * Routes a legacy Partial<DetectorSettings> to the appropriate semantic
-   * actions. Used by the transition-period shim in useAudioAnalyzer.
-   * Will be removed in Phase 6.
-   */
-  applyLegacyPartial: (partial: Partial<DetectorSettings>) => void
 }
 
 // ─── Hook ────────────────────────────────────────────────────────────────────
@@ -118,11 +84,15 @@ export function useLayeredSettings(): UseLayeredSettingsReturn {
   const sessionRef = useRef(session)
   sessionRef.current = session
 
-  // ── Persist on change ──────────────────────────────────────────────────
+  // ── Persist on change (debounced to 100ms for slider performance) ─────
+  const sessionPersistRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const displayPersistRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+
   const updateSession = useCallback((updater: (prev: DwaSessionState) => DwaSessionState) => {
     setSession(prev => {
       const next = updater(prev)
-      sessionStorageV2.save(next)
+      clearTimeout(sessionPersistRef.current)
+      sessionPersistRef.current = setTimeout(() => sessionStorageV2.save(next), 100)
       return next
     })
   }, [])
@@ -130,7 +100,8 @@ export function useLayeredSettings(): UseLayeredSettingsReturn {
   const updateDisplayState = useCallback((updater: (prev: DisplayPrefs) => DisplayPrefs) => {
     setDisplay(prev => {
       const next = updater(prev)
-      displayStorageV2.save(next)
+      clearTimeout(displayPersistRef.current)
+      displayPersistRef.current = setTimeout(() => displayStorageV2.save(next), 100)
       return next
     })
   }, [])
@@ -171,11 +142,22 @@ export function useLayeredSettings(): UseLayeredSettingsReturn {
         }
         return { ...prev, environment: merged }
       }
-      // Custom or unknown template: apply partial directly
-      return {
-        ...prev,
-        environment: { ...prev.environment, ...partial },
+      // Custom or unknown template: apply partial, recompute room params from dimensions
+      const merged: EnvironmentSelection = { ...prev.environment, ...partial }
+      if (partial.dimensionsM || partial.treatment || partial.displayUnit) {
+        const dims = merged.dimensionsM ?? { length: 15, width: 12, height: 5 }
+        const treatment = merged.treatment ?? prev.environment.treatment
+        const unit = merged.displayUnit ?? prev.environment.displayUnit
+        // Convert to meters if dimensions are stored in feet
+        const FEET_TO_METERS = 0.3048
+        const lM = unit === 'feet' ? dims.length * FEET_TO_METERS : dims.length
+        const wM = unit === 'feet' ? dims.width * FEET_TO_METERS : dims.width
+        const hM = unit === 'feet' ? dims.height * FEET_TO_METERS : dims.height
+        const params = getRoomParametersFromDimensions(lM, wM, hM, treatment)
+        merged.roomRT60 = Math.round(params.rt60 * 10) / 10
+        merged.roomVolume = Math.round(params.volume)
       }
+      return { ...prev, environment: merged }
     })
   }, [updateSession])
 
@@ -241,137 +223,18 @@ export function useLayeredSettings(): UseLayeredSettingsReturn {
   }, [updateSession])
 
   const resetAll = useCallback(() => {
+    // Cancel any in-flight debounced persistence to prevent stale data
+    // from overwriting the clean defaults after reset (P1 race condition fix)
+    clearTimeout(sessionPersistRef.current)
+    clearTimeout(displayPersistRef.current)
     setSession(DEFAULT_SESSION_STATE)
     setDisplay(DEFAULT_DISPLAY_PREFS)
     sessionStorageV2.save(DEFAULT_SESSION_STATE)
     displayStorageV2.save(DEFAULT_DISPLAY_PREFS)
   }, [])
 
-  // ── Legacy shim ────────────────────────────────────────────────────────
-
-  const applyLegacyPartial = useCallback((partial: Partial<DetectorSettings>) => {
-    const keys = Object.keys(partial) as (keyof DetectorSettings)[]
-
-    // 1. If `mode` is present, this is a mode change — route to setMode()
-    //    All other mode-owned keys in the same partial are from the preset
-    //    and will be derived from the new mode baseline.
-    if ('mode' in partial && partial.mode) {
-      setMode(partial.mode as ModeId)
-      // Still process non-mode keys from the same partial
-      const remaining = { ...partial }
-      delete remaining.mode
-      for (const k of MODE_OWNED_KEYS) {
-        delete remaining[k as keyof DetectorSettings]
-      }
-      if (Object.keys(remaining).length > 0) {
-        applyLegacyPartial(remaining)
-      }
-      return
-    }
-
-    // 2. Route display-only fields
-    const displayPartial: Partial<DisplayPrefs> = {}
-    let hasDisplay = false
-    for (const k of keys) {
-      if (DISPLAY_KEYS.has(k)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (displayPartial as Record<string, unknown>)[k] = (partial as Record<string, unknown>)[k]
-        hasDisplay = true
-      }
-    }
-    if (hasDisplay) updateDisplay(displayPartial)
-
-    // 3. Route diagnostics fields
-    const diagPartial: Partial<DiagnosticsProfile> = {}
-    let hasDiag = false
-    for (const k of keys) {
-      if (DIAGNOSTICS_KEYS.has(k)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (diagPartial as Record<string, unknown>)[k] = (partial as Record<string, unknown>)[k]
-        hasDiag = true
-      }
-    }
-    if (hasDiag) updateDiagnostics(diagPartial)
-
-    // 4. Route room/environment fields
-    if (keys.some(k => ROOM_KEYS.has(k))) {
-      const envUpdate: Partial<EnvironmentSelection> & { templateId?: RoomTemplateId | string } = {}
-
-      if ('roomPreset' in partial && partial.roomPreset) {
-        envUpdate.templateId = partial.roomPreset as RoomTemplateId
-      }
-      if ('roomLengthM' in partial || 'roomWidthM' in partial || 'roomHeightM' in partial) {
-        const current = sessionRef.current.environment
-        envUpdate.dimensionsM = {
-          length: (partial.roomLengthM as number) ?? current.dimensionsM?.length ?? 15,
-          width: (partial.roomWidthM as number) ?? current.dimensionsM?.width ?? 12,
-          height: (partial.roomHeightM as number) ?? current.dimensionsM?.height ?? 5,
-        }
-        // If only dimensions changed (no preset), mark as custom
-        if (!('roomPreset' in partial)) {
-          envUpdate.templateId = 'custom'
-          envUpdate.provenance = 'manual'
-        }
-      }
-      if ('roomTreatment' in partial && partial.roomTreatment) {
-        envUpdate.treatment = partial.roomTreatment
-      }
-      if ('roomDimensionsUnit' in partial && partial.roomDimensionsUnit) {
-        envUpdate.displayUnit = partial.roomDimensionsUnit
-      }
-
-      setEnvironment(envUpdate)
-    }
-
-    // 5. Route live override fields
-    if ('feedbackThresholdDb' in partial && partial.feedbackThresholdDb !== undefined) {
-      // Compute the delta from current derived threshold to new value
-      const baseline = MODE_BASELINES[sessionRef.current.modeId]
-      const envOffset = sessionRef.current.environment.feedbackOffsetDb
-      const currentEffective = baseline.feedbackThresholdDb + envOffset + sessionRef.current.liveOverrides.sensitivityOffsetDb
-      const delta = partial.feedbackThresholdDb - currentEffective
-      if (delta !== 0) {
-        setSensitivityOffset(sessionRef.current.liveOverrides.sensitivityOffsetDb + delta)
-      }
-    }
-
-    if ('inputGainDb' in partial && partial.inputGainDb !== undefined) {
-      setInputGain(partial.inputGainDb)
-    }
-
-    if ('autoGainEnabled' in partial) {
-      setAutoGain(
-        partial.autoGainEnabled ?? false,
-        partial.autoGainTargetDb,
-      )
-    } else if ('autoGainTargetDb' in partial && partial.autoGainTargetDb !== undefined) {
-      setAutoGain(sessionRef.current.liveOverrides.autoGainEnabled, partial.autoGainTargetDb)
-    }
-
-    if (('minFrequency' in partial || 'maxFrequency' in partial) && !('mode' in partial)) {
-      const baseline = MODE_BASELINES[sessionRef.current.modeId]
-      const current = sessionRef.current.liveOverrides.focusRange
-      let minHz: number
-      let maxHz: number
-
-      if (current.kind === 'custom') {
-        minHz = partial.minFrequency ?? current.minHz
-        maxHz = partial.maxFrequency ?? current.maxHz
-      } else {
-        minHz = partial.minFrequency ?? baseline.minFrequency
-        maxHz = partial.maxFrequency ?? baseline.maxFrequency
-      }
-      setFocusRange({ kind: 'custom', minHz, maxHz })
-    }
-
-    if ('eqPreset' in partial && partial.eqPreset && !('mode' in partial)) {
-      setEqStyle(partial.eqPreset)
-    }
-
-    if ('micCalibrationProfile' in partial && partial.micCalibrationProfile) {
-      setMicProfile(partial.micCalibrationProfile)
-    }
-  }, [setMode, setEnvironment, setSensitivityOffset, setInputGain, setAutoGain, setFocusRange, setEqStyle, setMicProfile, updateDisplay, updateDiagnostics])
+  // Legacy shim (applyLegacyPartial) removed in Phase 6c.
+  // All UI controls now call semantic actions directly.
 
   // ── Derive DetectorSettings ────────────────────────────────────────────
 
@@ -405,6 +268,5 @@ export function useLayeredSettings(): UseLayeredSettingsReturn {
     updateDiagnostics,
     updateLiveOverrides,
     resetAll,
-    applyLegacyPartial,
   }
 }

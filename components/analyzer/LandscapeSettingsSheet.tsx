@@ -15,7 +15,6 @@ import type { CalibrationTabProps } from './settings/CalibrationTab'
 
 interface LandscapeSettingsSheetProps {
   settings: DetectorSettings
-  onSettingsChange: (s: Partial<DetectorSettings>) => void
   onModeChange: (mode: OperationMode) => void
   onReset: () => void
   calibration?: Omit<CalibrationTabProps, 'settings' | 'onSettingsChange'>
@@ -24,7 +23,6 @@ interface LandscapeSettingsSheetProps {
 
 export const LandscapeSettingsSheet = memo(function LandscapeSettingsSheet({
   settings,
-  onSettingsChange,
   onModeChange,
   onReset,
   calibration,
@@ -46,7 +44,6 @@ export const LandscapeSettingsSheet = memo(function LandscapeSettingsSheet({
         <SheetTitle className="sr-only">Settings</SheetTitle>
         <SettingsPanel
           settings={settings}
-          onSettingsChange={onSettingsChange}
           onModeChange={onModeChange}
           onReset={onReset}
           calibration={calibration}

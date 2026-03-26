@@ -53,7 +53,7 @@ export function deriveDetectorSettings(
     baseline.feedbackThresholdDb + environment.feedbackOffsetDb + live.sensitivityOffsetDb,
   )
 
-  const ringThresholdDb = Math.max(
+  const ringThresholdDb = diagnostics.ringThresholdDbOverride ?? Math.max(
     MIN_THRESHOLD_DB,
     baseline.ringThresholdDb + environment.ringOffsetDb,
   )
@@ -93,8 +93,8 @@ export function deriveDetectorSettings(
     // Mode identity
     mode: baseline.modeId,
 
-    // FFT (baseline, overridable by diagnostics in future)
-    fftSize: baseline.fftSize,
+    // FFT (baseline, overridable by diagnostics)
+    fftSize: diagnostics.fftSizeOverride ?? baseline.fftSize,
     smoothingTimeConstant,
 
     // Frequency range (from focus range resolution)
@@ -106,13 +106,13 @@ export function deriveDetectorSettings(
     ringThresholdDb,
     growthRateThreshold,
 
-    // Timing (from baseline)
-    sustainMs: baseline.sustainMs,
-    clearMs: baseline.clearMs,
+    // Timing (baseline, overridable by diagnostics)
+    sustainMs: diagnostics.sustainMsOverride ?? baseline.sustainMs,
+    clearMs: diagnostics.clearMsOverride ?? baseline.clearMs,
 
     // Report gate
     confidenceThreshold,
-    prominenceDb: baseline.prominenceDb,
+    prominenceDb: diagnostics.prominenceDbOverride ?? baseline.prominenceDb,
 
     // EQ
     eqPreset,
@@ -123,12 +123,12 @@ export function deriveDetectorSettings(
     autoGainTargetDb,
 
     // A-weighting and calibration
-    aWeightingEnabled: baseline.aWeightingEnabled,
+    aWeightingEnabled: diagnostics.aWeightingOverride ?? baseline.aWeightingEnabled,
     micCalibrationProfile,
 
     // Harmonic
     harmonicToleranceCents: diagnostics.harmonicToleranceCents,
-    ignoreWhistle: baseline.ignoreWhistle,
+    ignoreWhistle: diagnostics.ignoreWhistleOverride ?? baseline.ignoreWhistle,
 
     // Room (pass through for classifier/worker consumption)
     roomPreset: environment.templateId as DetectorSettings['roomPreset'],

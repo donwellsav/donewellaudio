@@ -175,6 +175,13 @@ export interface DiagnosticsProfile {
   confidenceThresholdOverride?: number
   growthRateThresholdOverride?: number
   smoothingTimeConstantOverride?: number
+  sustainMsOverride?: number
+  clearMsOverride?: number
+  prominenceDbOverride?: number
+  aWeightingOverride?: boolean
+  ignoreWhistleOverride?: boolean
+  fftSizeOverride?: 4096 | 8192 | 16384
+  ringThresholdDbOverride?: number
 }
 
 // ─── Rig Preset ───────────────────────────────────────────────────────────────

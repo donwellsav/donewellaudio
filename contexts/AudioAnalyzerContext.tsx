@@ -9,6 +9,7 @@ import {
 import { useAudioAnalyzer } from '@/hooks/useAudioAnalyzer'
 import { useAudioDevices } from '@/hooks/useAudioDevices'
 import type { OperationMode } from '@/types/advisory'
+import type { ModeId } from '@/types/settings'
 import type { SnapshotBatch } from '@/types/data'
 
 // ── Sub-contexts ────────────────────────────────────────────────────────────
@@ -68,7 +69,6 @@ export function AudioAnalyzerProvider({
     start,
     stop,
     switchDevice,
-    updateSettings,
     resetSettings,
     dspWorker,
     roomEstimate,
@@ -103,15 +103,14 @@ export function AudioAnalyzerProvider({
 
   // ── Pure convenience callbacks ────────────────────────────────────────
 
-  // Mode change: legacy shim detects 'mode' key and calls setMode() internally,
-  // which applies the full baseline and resets live overrides (except gain).
+  // Mode change: calls setMode directly (no longer via legacy shim)
   const handleModeChange = useCallback((mode: OperationMode) => {
-    updateSettings({ mode })
-  }, [updateSettings])
+    layered.setMode(mode as ModeId)
+  }, [layered])
 
   const handleFreqRangeChange = useCallback((min: number, max: number) => {
-    updateSettings({ minFrequency: min, maxFrequency: max })
-  }, [updateSettings])
+    layered.setFocusRange({ kind: 'custom', minHz: min, maxHz: max })
+  }, [layered])
 
   const handleDeviceChange = useCallback((deviceId: string) => {
     setSelectedDeviceId(deviceId)
@@ -160,7 +159,6 @@ export function AudioAnalyzerProvider({
 
   const settingsValue = useMemo<SettingsContextValue>(() => ({
     settings,
-    updateSettings,
     resetSettings,
     handleModeChange,
     handleFreqRangeChange,
@@ -180,7 +178,6 @@ export function AudioAnalyzerProvider({
     updateLiveOverrides: layered.updateLiveOverrides,
   }), [
     settings,
-    updateSettings,
     resetSettings,
     handleModeChange,
     handleFreqRangeChange,

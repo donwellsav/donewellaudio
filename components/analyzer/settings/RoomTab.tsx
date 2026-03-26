@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, memo } from 'react'
+import { useMemo, memo } from 'react'
 import { Mic, Square, X } from 'lucide-react'
 import { calculateRoomModes, formatRoomModesForDisplay } from '@/lib/dsp/acousticUtils'
-import { getRoomParametersFromDimensions, feetToMeters, calculateSchroederFrequency } from '@/lib/dsp/acousticUtils'
+import { calculateSchroederFrequency } from '@/lib/dsp/acousticUtils'
 import { ROOM_PRESETS, ROOM_ESTIMATION } from '@/lib/dsp/constants'
 import type { RoomPresetKey } from '@/lib/dsp/constants'
 import type { DetectorSettings } from '@/types/advisory'
@@ -241,7 +241,7 @@ function AutoDetectRoom({
 // ── Room Tab ────────────────────────────────────────────────────────────────────
 
 interface RoomTabProps extends TabSettingsProps {
-  setEnvironment?: (env: Partial<EnvironmentSelection> & { templateId?: RoomTemplateId | string }) => void
+  setEnvironment: (env: Partial<EnvironmentSelection> & { templateId?: RoomTemplateId | string }) => void
 }
 
 export const RoomTab = memo(function RoomTab({
@@ -249,42 +249,10 @@ export const RoomTab = memo(function RoomTab({
   onSettingsChange,
   setEnvironment: setEnvAction,
 }: RoomTabProps) {
-  // Wrapper: use semantic action when available, legacy shim as fallback
-  const applyEnv = setEnvAction ?? ((env: Partial<EnvironmentSelection> & { templateId?: RoomTemplateId | string }) => {
-    // Legacy fallback: route through onSettingsChange which hits applyLegacyPartial
-    const updates: Partial<DetectorSettings> = {}
-    if (env.templateId) updates.roomPreset = env.templateId as RoomPresetKey
-    if (env.dimensionsM) {
-      updates.roomLengthM = env.dimensionsM.length
-      updates.roomWidthM = env.dimensionsM.width
-      updates.roomHeightM = env.dimensionsM.height
-    }
-    if (env.treatment) updates.roomTreatment = env.treatment
-    if (env.displayUnit) updates.roomDimensionsUnit = env.displayUnit
-    onSettingsChange(updates)
-  })
+  const applyEnv = setEnvAction
 
-  // Auto-derive RT60 and Volume from dimensions + treatment whenever they change
-  useEffect(() => {
-    if (settings.roomPreset === 'none') return
-    const l = settings.roomLengthM
-    const w = settings.roomWidthM
-    const h = settings.roomHeightM
-    if (l <= 0 || w <= 0 || h <= 0) return
-    const lM = settings.roomDimensionsUnit === 'feet' ? feetToMeters(l) : l
-    const wM = settings.roomDimensionsUnit === 'feet' ? feetToMeters(w) : w
-    const hM = settings.roomDimensionsUnit === 'feet' ? feetToMeters(h) : h
-    const params = getRoomParametersFromDimensions(lM, wM, hM, settings.roomTreatment)
-    // When semantic action is available, RT60/volume are computed in derivation.
-    // For legacy path, push through onSettingsChange.
-    if (!setEnvAction) {
-      onSettingsChange({
-        roomRT60: Math.round(params.rt60 * 10) / 10,
-        roomVolume: Math.round(params.volume),
-      })
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.roomLengthM, settings.roomWidthM, settings.roomHeightM, settings.roomTreatment, settings.roomDimensionsUnit, settings.roomPreset])
+  // RT60 and Volume are now computed in the layered derivation engine (deriveSettings.ts).
+  // No useEffect needed — the derivation pipeline handles it.
 
   return (
     <div className="mt-4 space-y-4">

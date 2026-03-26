@@ -24,6 +24,7 @@ import type { DetectorSettings, OperationMode, AlgorithmMode, Algorithm } from '
 import type { CalibrationTabProps } from './CalibrationTab'
 import { FREQ_RANGE_PRESETS } from '@/lib/dsp/constants'
 import { roundFreqToNice } from '@/lib/utils/mathHelpers'
+import { MODE_BASELINES } from '@/lib/settings/modeBaselines'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -71,19 +72,44 @@ export const SoundTab = memo(function SoundTab({
   customPresets, showSaveInput, setShowSaveInput,
   presetName, setPresetName, handleSavePreset, handleDeletePreset, handleLoadPreset,
 }: SoundTabProps) {
-  // Pull semantic actions from context for child component wiring
   const ctx = useSettings()
+
+  /** Sensitivity slider writes absolute dB; compute delta for layered model */
+  const handleSensitivityChange = useCallback((v: number) => {
+    const absoluteDb = 52 - v
+    const baseline = MODE_BASELINES[ctx.session.modeId]
+    const envOffset = ctx.session.environment.feedbackOffsetDb
+    const currentEffective = baseline.feedbackThresholdDb + envOffset + ctx.session.liveOverrides.sensitivityOffsetDb
+    const delta = absoluteDb - currentEffective
+    if (delta !== 0) {
+      ctx.setSensitivityOffset(ctx.session.liveOverrides.sensitivityOffsetDb + delta)
+    }
+  }, [ctx])
 
   const handleFreqSliderChange = useCallback(([logMin, logMax]: number[]) => {
     const newMin = roundFreqToNice(Math.pow(10, logMin))
     const newMax = roundFreqToNice(Math.pow(10, logMax))
-    onSettingsChange({ minFrequency: newMin, maxFrequency: newMax })
-  }, [onSettingsChange])
+    ctx.setFocusRange({ kind: 'custom', minHz: newMin, maxHz: newMax })
+  }, [ctx])
+
+  const handleFreqPresetClick = useCallback((minFrequency: number, maxFrequency: number) => {
+    ctx.setFocusRange({ kind: 'custom', minHz: minFrequency, maxHz: maxFrequency })
+  }, [ctx])
+
+  // Diagnostics shorthand — routes directly to layered diagnostics
+  const diag = useCallback((field: string, value: unknown) => {
+    ctx.updateDiagnostics({ [field]: value } as Record<string, unknown>)
+  }, [ctx])
+
+  // Display shorthand — routes directly to layered display
+  const disp = useCallback((field: string, value: unknown) => {
+    ctx.updateDisplay({ [field]: value } as Record<string, unknown>)
+  }, [ctx])
 
   return (
     <div className="space-y-1">
 
-      {/* ═══ ALWAYS VISIBLE: Mode chips ═══ */}
+      {/* Mode chips */}
       <div className="grid grid-cols-4 gap-1 py-1">
         {MODES.map(([mode, label]) => (
           <button
@@ -100,7 +126,7 @@ export const SoundTab = memo(function SoundTab({
         ))}
       </div>
 
-      {/* ═══ ALWAYS VISIBLE: Sensitivity slider (hero control) ═══ */}
+      {/* Sensitivity slider */}
       <ConsoleSlider
         label="Sensitivity"
         value={`${settings.feedbackThresholdDb}dB`}
@@ -108,16 +134,16 @@ export const SoundTab = memo(function SoundTab({
         showTooltip={settings.showTooltips}
         min={2} max={50} step={1}
         sliderValue={52 - settings.feedbackThresholdDb}
-        onChange={(v) => onSettingsChange({ feedbackThresholdDb: 52 - v })}
+        onChange={handleSensitivityChange}
       />
 
-      {/* ═══ ALWAYS VISIBLE: Fader control + Show on RTA ═══ */}
+      {/* Fader control + Show on RTA */}
       <div className="flex items-center justify-between gap-2 py-1">
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wide">Fader:</span>
           <PillToggle
             checked={settings.faderMode === 'sensitivity'}
-            onChange={(isSensitivity) => onSettingsChange({ faderMode: isSensitivity ? 'sensitivity' : 'gain' })}
+            onChange={(isSensitivity) => disp('faderMode', isSensitivity ? 'sensitivity' : 'gain')}
             labelOn="Sensitivity"
             labelOff="Input Gain"
             tooltip={settings.showTooltips ? 'Sensitivity adjusts detection threshold. Input Gain adjusts mic input level.' : undefined}
@@ -125,20 +151,20 @@ export const SoundTab = memo(function SoundTab({
         </div>
         <LEDToggle
           checked={settings.showThresholdLine}
-          onChange={(checked) => onSettingsChange({ showThresholdLine: checked })}
+          onChange={(checked) => disp('showThresholdLine', checked)}
           label="Show on RTA"
           tooltip={settings.showTooltips ? 'Display the detection threshold line on the spectrum.' : undefined}
           className="w-auto"
         />
       </div>
 
-      {/* ═══ ALWAYS VISIBLE: Frequency range presets + slider ═══ */}
+      {/* Frequency range presets + slider */}
       <div className="space-y-1 py-1">
         <div className="flex items-center gap-1 flex-wrap">
           {FREQ_RANGE_PRESETS.map((preset) => {
             const isActive = settings.minFrequency === preset.minFrequency && settings.maxFrequency === preset.maxFrequency
             return (
-              <button key={preset.label} onClick={() => onSettingsChange({ minFrequency: preset.minFrequency, maxFrequency: preset.maxFrequency })}
+              <button key={preset.label} onClick={() => handleFreqPresetClick(preset.minFrequency, preset.maxFrequency)}
                 className={`min-h-11 px-3 rounded text-xs font-mono font-bold tracking-wide transition-all cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                   isActive
                     ? 'bg-primary/20 text-primary border border-primary/40 btn-glow'
@@ -158,30 +184,30 @@ export const SoundTab = memo(function SoundTab({
         <Slider value={[Math.log10(Math.max(20, settings.minFrequency)), Math.log10(Math.min(20000, settings.maxFrequency))]} onValueChange={handleFreqSliderChange} min={LOG_MIN} max={LOG_MAX} step={0.005} minStepsBetweenThumbs={0.1} />
       </div>
 
-      {/* ═══ SECTION: Detection ═══ */}
+      {/* Detection */}
       <ChannelSection title="Detection" defaultOpen>
         <div className="space-y-1">
           <ConsoleSlider label="Ring" value={`${settings.ringThresholdDb}dB`}
             tooltip={settings.showTooltips ? 'Resonance detection. 2-3 dB ring out/monitors, 4-5 dB normal, 6+ dB live music/outdoor.' : undefined}
             min={1} max={12} step={0.5} sliderValue={settings.ringThresholdDb}
-            onChange={(v) => onSettingsChange({ ringThresholdDb: v })} />
+            onChange={(v) => diag('ringThresholdDbOverride', v)} />
 
           <ConsoleSlider label="Growth" value={`${settings.growthRateThreshold.toFixed(1)}dB/s`}
             tooltip={settings.showTooltips ? 'How fast feedback must grow. 0.5-1dB/s catches early, 3+dB/s only runaway.' : undefined}
             min={0.5} max={8} step={0.5} sliderValue={settings.growthRateThreshold}
-            onChange={(v) => onSettingsChange({ growthRateThreshold: v })} />
+            onChange={(v) => diag('growthRateThresholdOverride', v)} />
 
           {settings.autoGainEnabled && (
             <ConsoleSlider label="AG Target" value={`${settings.autoGainTargetDb} dBFS`}
               tooltip={settings.showTooltips ? 'Post-gain peak target. -12 hot (ring out), -18 balanced, -24 conservative (broadcast).' : undefined}
               min={-30} max={-6} step={1} sliderValue={settings.autoGainTargetDb}
-              onChange={(v) => onSettingsChange({ autoGainTargetDb: v })} />
+              onChange={(v) => ctx.setAutoGain(settings.autoGainEnabled, v)} />
           )}
 
           <ConsoleSlider label="Confidence" value={`${Math.round((settings.confidenceThreshold ?? 0.35) * 100)}%`}
             tooltip={settings.showTooltips ? 'Minimum confidence to flag. 25-35% aggressive, 45-55% balanced, 60%+ conservative.' : undefined}
             min={0.2} max={0.8} step={0.05} sliderValue={settings.confidenceThreshold ?? 0.35}
-            onChange={(v) => onSettingsChange({ confidenceThreshold: v })} />
+            onChange={(v) => diag('confidenceThresholdOverride', v)} />
 
           {/* EQ style */}
           <div className="space-y-1 pt-1">
@@ -196,7 +222,7 @@ export const SoundTab = memo(function SoundTab({
             </div>
             <div className="flex items-center gap-1">
               {([['surgical', 'Surgical'], ['heavy', 'Heavy']] as const).map(([style, label]) => (
-                <button key={style} onClick={() => onSettingsChange({ eqPreset: style })}
+                <button key={style} onClick={() => ctx.setEqStyle(style)}
                   className={`min-h-11 flex-1 px-2 rounded text-xs font-mono font-bold tracking-wide transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                     settings.eqPreset === style ? 'bg-primary/20 text-primary border border-primary/40' : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
                   }`}
@@ -205,55 +231,54 @@ export const SoundTab = memo(function SoundTab({
             </div>
           </div>
 
-          <LEDToggle checked={settings.aWeightingEnabled} onChange={(checked) => onSettingsChange({ aWeightingEnabled: checked })} label="A-Weighting (IEC 61672-1)"
-            tooltip={settings.showTooltips ? 'Apply IEC 61672-1 A-weighting curve. Emphasizes 1–5 kHz where hearing is most sensitive.' : undefined} />
-          <LEDToggle checked={settings.ignoreWhistle} onChange={(checked) => onSettingsChange({ ignoreWhistle: checked })} label="Ignore Whistle"
+          <LEDToggle checked={settings.aWeightingEnabled} onChange={(checked) => diag('aWeightingOverride', checked)} label="A-Weighting (IEC 61672-1)"
+            tooltip={settings.showTooltips ? 'Apply IEC 61672-1 A-weighting curve. Emphasizes 1-5 kHz where hearing is most sensitive.' : undefined} />
+          <LEDToggle checked={settings.ignoreWhistle} onChange={(checked) => diag('ignoreWhistleOverride', checked)} label="Ignore Whistle"
             tooltip={settings.showTooltips ? 'Suppress alerts from deliberate whistling or single-tone test signals.' : undefined} />
         </div>
       </ChannelSection>
 
-      {/* ═══ SECTION: Timing (single source of truth — no duplicates) ═══ */}
+      {/* Timing */}
       <ChannelSection title="Timing">
         <div className="space-y-1">
           <ConsoleSlider label="Sustain" value={`${settings.sustainMs}ms`}
             tooltip={settings.showTooltips ? 'How long a peak must persist before flagging. 100-200ms aggressive, 300-500ms balanced.' : undefined}
             min={100} max={1000} step={50} sliderValue={settings.sustainMs}
-            onChange={(v) => onSettingsChange({ sustainMs: v })} />
+            onChange={(v) => diag('sustainMsOverride', v)} />
 
           <ConsoleSlider label="Clear" value={`${settings.clearMs}ms`}
             tooltip={settings.showTooltips ? 'How fast resolved issues disappear.' : undefined}
             min={100} max={2000} step={50} sliderValue={settings.clearMs}
-            onChange={(v) => onSettingsChange({ clearMs: v })} />
+            onChange={(v) => diag('clearMsOverride', v)} />
 
           <ConsoleSlider label="Max Issues" value={`${settings.maxDisplayedIssues}`}
             tooltip={settings.showTooltips ? 'How many feedback issues display at once.' : undefined}
             min={3} max={12} step={1} sliderValue={settings.maxDisplayedIssues}
-            onChange={(v) => onSettingsChange({ maxDisplayedIssues: v })} />
+            onChange={(v) => disp('maxDisplayedIssues', v)} />
         </div>
       </ChannelSection>
 
-      {/* ═══ SECTION: Room (absorbs old RoomTab) ═══ */}
+      {/* Room */}
       <ChannelSection title="Room">
         <RoomTab settings={settings} onSettingsChange={onSettingsChange} setEnvironment={ctx.setEnvironment} />
       </ChannelSection>
 
-      {/* ═══ SECTION: Calibration (conditional) ═══ */}
+      {/* Calibration */}
       {calibration && (
         <ChannelSection title="Calibration">
-          <CalibrationTab settings={settings} onSettingsChange={onSettingsChange} setMicProfile={ctx.setMicProfile} {...calibration} />
+          <CalibrationTab settings={settings} onSettingsChange={onSettingsChange} {...calibration} />
         </ChannelSection>
       )}
 
-      {/* ═══ SECTION: Advanced (collapsed, expert badge) ═══ */}
+      {/* Advanced */}
       <ChannelSection
         title="Advanced"
         badge={<span className="expert-badge">Expert</span>}
       >
         <div className="space-y-2">
-          {/* ML Toggle — independent of Auto/Custom algorithm grid */}
           <LEDToggle
             checked={settings.mlEnabled}
-            onChange={(checked) => onSettingsChange({ mlEnabled: checked })}
+            onChange={(checked) => diag('mlEnabled', checked)}
             label="ML Scoring"
             tooltip={settings.showTooltips ? 'Enable machine learning false-positive filter (7th algorithm). Disable for deterministic 6-algorithm detection.' : undefined}
           />
@@ -262,7 +287,7 @@ export const SoundTab = memo(function SoundTab({
           <div className="space-y-1">
             <span className="section-label text-muted-foreground">Algorithms</span>
             <button
-              onClick={() => onSettingsChange({ algorithmMode: (settings.algorithmMode !== 'auto' ? 'auto' : 'custom') as AlgorithmMode })}
+              onClick={() => diag('algorithmMode', settings.algorithmMode !== 'auto' ? 'auto' : 'custom')}
               className={`min-h-11 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full px-1.5 rounded text-xs font-mono font-bold tracking-wide transition-colors ${
                 settings.algorithmMode === 'auto' ? 'bg-primary/20 text-primary border border-primary/40' : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
               }`}
@@ -277,9 +302,9 @@ export const SoundTab = memo(function SoundTab({
                       if (isAuto) return
                       const current = settings.enabledAlgorithms ?? ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr', 'ml']
                       let next: Algorithm[]
-                      if (enabled) { next = current.filter(a => a !== key); if (next.length === 0) { onSettingsChange({ algorithmMode: 'auto' as AlgorithmMode }); return } }
+                      if (enabled) { next = current.filter(a => a !== key); if (next.length === 0) { diag('algorithmMode', 'auto' as AlgorithmMode); return } }
                       else { next = [...current, key] }
-                      onSettingsChange({ enabledAlgorithms: next })
+                      diag('enabledAlgorithms', next)
                     }}
                     className={`min-h-11 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-1 rounded text-xs font-mono font-bold text-center transition-colors ${
                       isAuto ? 'text-primary/60 border border-primary/20 bg-transparent'
@@ -297,23 +322,23 @@ export const SoundTab = memo(function SoundTab({
             <span className="section-label text-muted-foreground">Noise Floor</span>
             <ConsoleSlider label="Attack" value={`${settings.noiseFloorAttackMs}ms`}
               min={50} max={1000} step={25} sliderValue={settings.noiseFloorAttackMs}
-              onChange={(v) => onSettingsChange({ noiseFloorAttackMs: v })} />
+              onChange={(v) => diag('noiseFloorAttackMs', v)} />
             <ConsoleSlider label="Release" value={`${settings.noiseFloorReleaseMs}ms`}
               min={200} max={5000} step={100} sliderValue={settings.noiseFloorReleaseMs}
-              onChange={(v) => onSettingsChange({ noiseFloorReleaseMs: v })} />
+              onChange={(v) => diag('noiseFloorReleaseMs', v)} />
           </div>
 
           {/* Peak Detection */}
           <div className="space-y-1 pt-1 panel-groove">
             <span className="section-label text-muted-foreground">Peak Detection</span>
-            <ConsoleSlider label="Merge Window" value={`${settings.peakMergeCents}¢`}
+            <ConsoleSlider label="Merge Window" value={`${settings.peakMergeCents}c`}
               min={10} max={150} step={5} sliderValue={settings.peakMergeCents}
-              onChange={(v) => onSettingsChange({ peakMergeCents: v })} />
+              onChange={(v) => diag('peakMergeCents', v)} />
 
             <Section title="Threshold Mode" showTooltip={settings.showTooltips}
               tooltip="Absolute: fixed dB. Relative: above noise floor. Hybrid: both (recommended).">
               <Select value={settings.thresholdMode}
-                onValueChange={(v) => onSettingsChange({ thresholdMode: v as DetectorSettings['thresholdMode'] })}>
+                onValueChange={(v) => diag('thresholdMode', v)}>
                 <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="absolute">Absolute - Fixed dB</SelectItem>
@@ -325,7 +350,7 @@ export const SoundTab = memo(function SoundTab({
 
             <ConsoleSlider label="Prominence" value={`${settings.prominenceDb}dB`}
               min={4} max={30} step={1} sliderValue={settings.prominenceDb}
-              onChange={(v) => onSettingsChange({ prominenceDb: v })} />
+              onChange={(v) => diag('prominenceDbOverride', v)} />
           </div>
 
           {/* Track Management */}
@@ -333,18 +358,18 @@ export const SoundTab = memo(function SoundTab({
             <span className="section-label text-muted-foreground">Track Management</span>
             <ConsoleSlider label="Max Tracks" value={`${settings.maxTracks}`}
               min={8} max={128} step={8} sliderValue={settings.maxTracks}
-              onChange={(v) => onSettingsChange({ maxTracks: v })} />
+              onChange={(v) => diag('maxTracks', v)} />
             <ConsoleSlider label="Track Timeout" value={`${settings.trackTimeoutMs}ms`}
               min={200} max={5000} step={100} sliderValue={settings.trackTimeoutMs}
-              onChange={(v) => onSettingsChange({ trackTimeoutMs: v })} />
+              onChange={(v) => diag('trackTimeoutMs', v)} />
           </div>
 
-          {/* FFT / Smoothing / Harmonic Tolerance */}
+          {/* DSP */}
           <div className="space-y-1 pt-1 panel-groove">
             <span className="section-label text-muted-foreground">DSP</span>
             <Section title="FFT Size" showTooltip={settings.showTooltips}
               tooltip="4096 fast, 8192 balanced, 16384 high-res low-end.">
-              <Select value={settings.fftSize.toString()} onValueChange={(v) => onSettingsChange({ fftSize: parseInt(v) as 4096 | 8192 | 16384 })}>
+              <Select value={settings.fftSize.toString()} onValueChange={(v) => diag('fftSizeOverride', parseInt(v))}>
                 <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="4096">4096 - Fast</SelectItem>
@@ -355,13 +380,13 @@ export const SoundTab = memo(function SoundTab({
             </Section>
             <ConsoleSlider label="Smoothing" value={`${(settings.smoothingTimeConstant * 100).toFixed(0)}%`}
               min={0} max={0.95} step={0.05} sliderValue={settings.smoothingTimeConstant}
-              onChange={(v) => onSettingsChange({ smoothingTimeConstant: v })} />
-            <ConsoleSlider label="Harmonic Tol." value={`${settings.harmonicToleranceCents}¢`}
+              onChange={(v) => diag('smoothingTimeConstantOverride', v)} />
+            <ConsoleSlider label="Harmonic Tol." value={`${settings.harmonicToleranceCents}c`}
               min={25} max={400} step={25} sliderValue={settings.harmonicToleranceCents}
-              onChange={(v) => onSettingsChange({ harmonicToleranceCents: v })} />
+              onChange={(v) => diag('harmonicToleranceCents', v)} />
           </div>
 
-          {/* Data Collection (from old AdvancedTab) */}
+          {/* Data Collection */}
           {dataCollection?.consentStatus !== undefined && (
             <div className="pt-1 panel-groove">
               <AdvancedTab settings={settings} onSettingsChange={onSettingsChange} {...dataCollection} />

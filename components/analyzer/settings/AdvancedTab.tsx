@@ -12,6 +12,7 @@ import {
 import { PillToggle } from '@/components/ui/pill-toggle'
 import { Database, Shield } from 'lucide-react'
 import { Section, SettingsGrid, type TabSettingsProps } from './SettingsShared'
+import { useSettings } from '@/contexts/SettingsContext'
 import type { ThresholdMode } from '@/types/advisory'
 import type { ConsentStatus } from '@/types/data'
 
@@ -34,6 +35,11 @@ export const AdvancedTab = memo(function AdvancedTab({
   onEnableCollection,
   onDisableCollection,
 }: AdvancedTabProps) {
+  const ctx = useSettings()
+  const diag = (field: string, value: unknown) => {
+    ctx.updateDiagnostics({ [field]: value } as Record<string, unknown>)
+  }
+
   return (
     <div className="mt-4">
       <SettingsGrid>
@@ -52,7 +58,7 @@ export const AdvancedTab = memo(function AdvancedTab({
             </div>
             <Slider
               value={[settings.noiseFloorAttackMs]}
-              onValueChange={([v]) => onSettingsChange({ noiseFloorAttackMs: v })}
+              onValueChange={([v]) => diag('noiseFloorAttackMs', v)}
               min={50} max={1000} step={25}
             />
             <div className="flex justify-between text-sm text-muted-foreground font-mono">
@@ -67,7 +73,7 @@ export const AdvancedTab = memo(function AdvancedTab({
             </div>
             <Slider
               value={[settings.noiseFloorReleaseMs]}
-              onValueChange={([v]) => onSettingsChange({ noiseFloorReleaseMs: v })}
+              onValueChange={([v]) => diag('noiseFloorReleaseMs', v)}
               min={200} max={5000} step={100}
             />
             <div className="flex justify-between text-sm text-muted-foreground font-mono">
@@ -91,7 +97,7 @@ export const AdvancedTab = memo(function AdvancedTab({
             </div>
             <Slider
               value={[settings.peakMergeCents]}
-              onValueChange={([v]) => onSettingsChange({ peakMergeCents: v })}
+              onValueChange={([v]) => diag('peakMergeCents', v)}
               min={10} max={150} step={5}
             />
             <div className="flex justify-between text-sm text-muted-foreground font-mono">
@@ -106,7 +112,7 @@ export const AdvancedTab = memo(function AdvancedTab({
             </div>
             <Slider
               value={[settings.sustainMs]}
-              onValueChange={([v]) => onSettingsChange({ sustainMs: v })}
+              onValueChange={([v]) => diag('sustainMsOverride', v)}
               min={100} max={2000} step={50}
             />
             <div className="flex justify-between text-sm text-muted-foreground font-mono">
@@ -121,7 +127,7 @@ export const AdvancedTab = memo(function AdvancedTab({
             </div>
             <Slider
               value={[settings.clearMs]}
-              onValueChange={([v]) => onSettingsChange({ clearMs: v })}
+              onValueChange={([v]) => diag('clearMsOverride', v)}
               min={100} max={2000} step={50}
             />
             <div className="flex justify-between text-sm text-muted-foreground font-mono">
@@ -136,7 +142,7 @@ export const AdvancedTab = memo(function AdvancedTab({
           >
             <Select
               value={settings.thresholdMode}
-              onValueChange={(v) => onSettingsChange({ thresholdMode: v as ThresholdMode })}
+              onValueChange={(v) => diag('thresholdMode', v)}
             >
               <SelectTrigger className="h-8 text-sm">
                 <SelectValue />
@@ -156,7 +162,7 @@ export const AdvancedTab = memo(function AdvancedTab({
             </div>
             <Slider
               value={[settings.prominenceDb]}
-              onValueChange={([v]) => onSettingsChange({ prominenceDb: v })}
+              onValueChange={([v]) => diag('prominenceDbOverride', v)}
               min={4} max={30} step={1}
             />
             <div className="flex justify-between text-sm text-muted-foreground font-mono">

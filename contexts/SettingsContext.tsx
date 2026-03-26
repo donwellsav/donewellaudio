@@ -18,8 +18,6 @@ import type {
 export interface SettingsContextValue {
   /** Current detector settings (derived from layered state) */
   settings: DetectorSettings
-  /** Partially update detector settings (legacy shim — routes to semantic actions) */
-  updateSettings: (s: Partial<DetectorSettings>) => void
   /** Reset all settings to defaults */
   resetSettings: () => void
   /** Switch operation mode (applies full preset) */
@@ -27,35 +25,35 @@ export interface SettingsContextValue {
   /** Update frequency range bounds */
   handleFreqRangeChange: (min: number, max: number) => void
 
-  // ── Layered state (Phase 3+) ──────────────────────────────────────────
-  /** Direct access to layered session state — for new UI surfaces */
-  session?: DwaSessionState
-  /** Direct access to layered display preferences — for new UI surfaces */
-  displayPrefs?: DisplayPrefs
+  // ── Layered state ──────────────────────────────────────────────────────
+  /** Direct access to layered session state */
+  session: DwaSessionState
+  /** Direct access to layered display preferences */
+  displayPrefs: DisplayPrefs
 
-  // ── Semantic actions (Phase 5+) ───────────────────────────────────────
+  // ── Semantic actions ───────────────────────────────────────────────────
   /** Set operation mode — applies full baseline, resets live overrides */
-  setMode?: (modeId: ModeId) => void
+  setMode: (modeId: ModeId) => void
   /** Set environment — applies room template or custom offsets */
-  setEnvironment?: (env: Partial<EnvironmentSelection> & { templateId?: RoomTemplateId | string }) => void
+  setEnvironment: (env: Partial<EnvironmentSelection> & { templateId?: RoomTemplateId | string }) => void
   /** Set live sensitivity offset (dB above baseline + environment) */
-  setSensitivityOffset?: (db: number) => void
+  setSensitivityOffset: (db: number) => void
   /** Set input gain (dB) */
-  setInputGain?: (db: number) => void
+  setInputGain: (db: number) => void
   /** Set auto-gain mode */
-  setAutoGain?: (enabled: boolean, targetDb?: number) => void
+  setAutoGain: (enabled: boolean, targetDb?: number) => void
   /** Set focus frequency range */
-  setFocusRange?: (range: FocusRange) => void
+  setFocusRange: (range: FocusRange) => void
   /** Set EQ recommendation style */
-  setEqStyle?: (style: LiveOverrides['eqStyle']) => void
+  setEqStyle: (style: LiveOverrides['eqStyle']) => void
   /** Set mic calibration profile */
-  setMicProfile?: (profile: MicCalibrationProfile) => void
+  setMicProfile: (profile: MicCalibrationProfile) => void
   /** Update display preferences (partial merge) */
-  updateDisplay?: (partial: Partial<DisplayPrefs>) => void
+  updateDisplay: (partial: Partial<DisplayPrefs>) => void
   /** Update diagnostics profile (partial merge) */
-  updateDiagnostics?: (partial: Partial<DiagnosticsProfile>) => void
+  updateDiagnostics: (partial: Partial<DiagnosticsProfile>) => void
   /** Update live overrides (partial merge) */
-  updateLiveOverrides?: (partial: Partial<LiveOverrides>) => void
+  updateLiveOverrides: (partial: Partial<LiveOverrides>) => void
 }
 
 export const SettingsContext = createContext<SettingsContextValue | null>(null)

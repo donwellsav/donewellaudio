@@ -98,7 +98,7 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
   rootEl,
 }: AudioAnalyzerInnerProps) {
   const { isRunning, error, workerError, start, stop, dspWorker } = useEngine()
-  const { settings, updateSettings, resetSettings, handleModeChange } = useSettings()
+  const { settings, resetSettings, handleModeChange, setMicProfile } = useSettings()
   const { spectrumRef, spectrumStatus, noiseFloorDb, sampleRate, fftSize } = useMetering()
   const { advisories } = useDetection()
 
@@ -265,38 +265,26 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
     return merged
   }, [fpIds, calibration.calibrationEnabled, calibration.falsePositiveIds])
 
-  // ── Calibration settings wrapper ────────────────────────────────────────
-
-  // Debounce settings updates (100ms) to prevent per-frame calls during slider drag.
-  // Accumulates partial updates so no intermediate values are lost.
-  const settingsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pendingSettingsRef = useRef<Partial<typeof settings>>({})
-
-  const handleSettingsChange = useCallback((newSettings: Partial<typeof settings>) => {
-    // Merge into pending so rapid calls don't drop keys
-    pendingSettingsRef.current = { ...pendingSettingsRef.current, ...newSettings }
-
-    if (settingsDebounceRef.current !== null) {
-      clearTimeout(settingsDebounceRef.current)
-    }
-
-    settingsDebounceRef.current = setTimeout(() => {
-      const merged = pendingSettingsRef.current
-      pendingSettingsRef.current = {}
-      settingsDebounceRef.current = null
-      updateSettings(merged)
-      calibrationRef.current.onSettingsChange(merged)
-    }, 100)
-  }, [updateSettings])
-
-  // Cleanup debounce timer on unmount
+  // ── Calibration bridge — notify calibration session of settings changes (debounced diff)
+  const prevSettingsRef = useRef(settings)
   useEffect(() => {
-    return () => {
-      if (settingsDebounceRef.current !== null) {
-        clearTimeout(settingsDebounceRef.current)
+    const timer = setTimeout(() => {
+      const delta: Partial<typeof settings> = {}
+      let hasDelta = false
+      for (const key of Object.keys(settings) as (keyof typeof settings)[]) {
+        if (settings[key] !== prevSettingsRef.current[key]) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(delta as Record<string, unknown>)[key] = settings[key]
+          hasDelta = true
+        }
       }
-    }
-  }, [])
+      if (hasDelta) {
+        calibrationRef.current.onSettingsChange(delta)
+      }
+      prevSettingsRef.current = settings
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [settings])
 
   // ── Auto-apply smartphone MEMS mic calibration on mobile devices ───────
 
@@ -306,9 +294,9 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
   useEffect(() => {
     if (isMobile && !mobileCalAppliedRef.current && settings.micCalibrationProfile === 'none') {
       mobileCalAppliedRef.current = true
-      updateSettings({ micCalibrationProfile: 'smartphone' })
+      setMicProfile('smartphone')
     }
-  }, [isMobile, settings.micCalibrationProfile, updateSettings])
+  }, [isMobile, settings.micCalibrationProfile, setMicProfile])
 
   // ── Panel management ────────────────────────────────────────────────────
 
@@ -342,7 +330,8 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
     spectrumRef,
     stats: calibration.stats,
     onExport: handleCalibrationExport,
-  }), [calibration, spectrumRef, handleCalibrationExport])
+    setMicProfile,
+  }), [calibration, spectrumRef, handleCalibrationExport, setMicProfile])
 
   const dataCollectionTabProps = useMemo(() => ({
     consentStatus: dataCollection.consentStatus,
@@ -422,7 +411,6 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
 
           <HeaderBar />
           <MobileLayout
-            onSettingsChange={handleSettingsChange}
             calibration={calibrationTabProps}
             dataCollection={dataCollectionTabProps}
             isWizardActive={isWizardActive}
@@ -432,7 +420,6 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
           />
 
           <DesktopLayout
-            onSettingsChange={handleSettingsChange}
             issuesPanelOpen={issuesPanelOpen}
             issuesPanelRef={issuesPanelRef}
             activeSidebarTab={activeSidebarTab}

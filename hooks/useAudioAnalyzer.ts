@@ -71,7 +71,6 @@ export interface UseAudioAnalyzerReturn extends UseAudioAnalyzerState {
   start: (options?: { deviceId?: string }) => Promise<void>
   stop: () => void
   switchDevice: (deviceId: string) => Promise<void>
-  updateSettings: (settings: Partial<DetectorSettings>) => void
   resetSettings: () => void
   settings: DetectorSettings
   /** Direct ref to latest SpectrumData — canvas reads this imperatively each frame */
@@ -377,10 +376,6 @@ export function useAudioAnalyzer(
     }
   }, [])
 
-  const updateSettings = useCallback((newSettings: Partial<DetectorSettings>) => {
-    layered.applyLegacyPartial(newSettings)
-  }, [layered.applyLegacyPartial])
-
   const resetSettings = useCallback(() => {
     layered.resetAll()
   }, [layered.resetAll])
@@ -418,7 +413,6 @@ export function useAudioAnalyzer(
     start,
     stop,
     switchDevice,
-    updateSettings,
     resetSettings,
     spectrumRef,
     tracksRef,

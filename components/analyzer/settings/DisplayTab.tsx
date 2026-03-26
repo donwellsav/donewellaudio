@@ -15,21 +15,15 @@ import type { TabSettingsProps } from './SettingsShared'
 
 interface DisplayTabProps {
   settings: TabSettingsProps['settings']
-  /** @deprecated Legacy — use updateDisplay instead */
-  onSettingsChange?: TabSettingsProps['onSettingsChange']
-  /** Semantic action: update display preferences directly */
-  updateDisplay?: (partial: Partial<DisplayPrefs>) => void
+  /** Semantic action: update display preferences */
+  updateDisplay: (partial: Partial<DisplayPrefs>) => void
 }
 
 export const DisplayTab = memo(function DisplayTab({
   settings,
-  onSettingsChange,
   updateDisplay,
 }: DisplayTabProps) {
-  // Use semantic action when available, fall back to legacy shim
-  const setDisplay = updateDisplay ?? ((partial: Partial<DisplayPrefs>) => {
-    onSettingsChange?.(partial as Record<string, unknown> as Parameters<NonNullable<typeof onSettingsChange>>[0])
-  })
+  const setDisplay = updateDisplay
 
   return (
     <div className="space-y-1 pt-1">

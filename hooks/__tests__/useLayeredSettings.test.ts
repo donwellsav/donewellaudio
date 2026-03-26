@@ -11,7 +11,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useLayeredSettings } from '@/hooks/useLayeredSettings'
 import { OPERATION_MODES } from '@/lib/dsp/constants'
 import { MODE_BASELINES } from '@/lib/settings/modeBaselines'
@@ -136,85 +136,55 @@ describe('useLayeredSettings — semantic actions', () => {
   })
 })
 
-// ─── Legacy shim ─────────────────────────────────────────────────────────────
+// ─── Regression tests (GPT cross-review findings) ───────────────────────────
 
-describe('useLayeredSettings — applyLegacyPartial shim', () => {
-  it('routes mode change and derives all fields from baseline', () => {
+describe('useLayeredSettings — regression', () => {
+  beforeEach(() => { vi.useFakeTimers() })
+  afterEach(() => { vi.useRealTimers() })
+
+  it('resetAll cancels in-flight debounced persistence (P1 fix)', () => {
     const { result } = renderHook(() => useLayeredSettings())
 
-    act(() => {
-      result.current.applyLegacyPartial({
-        mode: 'monitors',
-        feedbackThresholdDb: OPERATION_MODES.monitors.feedbackThresholdDb,
-        fftSize: OPERATION_MODES.monitors.fftSize,
-      })
-    })
+    act(() => result.current.setMode('liveMusic'))
+    act(() => result.current.resetAll())
+    act(() => { vi.advanceTimersByTime(200) })
 
-    const ds = result.current.derivedSettings
-    expect(ds.mode).toBe('monitors')
-    // Threshold comes from baseline, not from the partial's value
-    expect(ds.feedbackThresholdDb).toBe(MODE_BASELINES.monitors.feedbackThresholdDb)
+    const stored = JSON.parse(localStorage.getItem('dwa-v2-session') ?? '{}')
+    expect(stored.modeId).toBe('speech')
+    expect(result.current.derivedSettings.mode).toBe('speech')
   })
 
-  it('routes display-only fields', () => {
+  it('setEnvironment with displayUnit triggers recomputation (P2 fix)', () => {
     const { result } = renderHook(() => useLayeredSettings())
 
-    act(() => {
-      result.current.applyLegacyPartial({
-        showAlgorithmScores: true,
-        showFreqZones: true,
-      })
-    })
+    act(() => result.current.setEnvironment({
+      templateId: 'custom',
+      provenance: 'manual',
+      dimensionsM: { length: 10, width: 8, height: 3 },
+      treatment: 'typical',
+      displayUnit: 'meters',
+    }))
 
-    expect(result.current.derivedSettings.showAlgorithmScores).toBe(true)
-    expect(result.current.derivedSettings.showFreqZones).toBe(true)
-  })
+    act(() => result.current.setEnvironment({ displayUnit: 'feet' }))
 
-  it('routes feedbackThresholdDb as sensitivity offset delta', () => {
-    const { result } = renderHook(() => useLayeredSettings())
-
-    // Simulate dragging threshold line from 27 to 32 (speech mode baseline = 27)
-    act(() => {
-      result.current.applyLegacyPartial({ feedbackThresholdDb: 32 })
-    })
-
-    expect(result.current.derivedSettings.feedbackThresholdDb).toBe(32)
-    expect(result.current.session.liveOverrides.sensitivityOffsetDb).toBe(5)
-  })
-
-  it('routes diagnostics fields', () => {
-    const { result } = renderHook(() => useLayeredSettings())
-
-    act(() => {
-      result.current.applyLegacyPartial({
-        mlEnabled: false,
-        algorithmMode: 'custom' as const,
-      })
-    })
-
-    expect(result.current.derivedSettings.mlEnabled).toBe(false)
-    expect(result.current.derivedSettings.algorithmMode).toBe('custom')
-  })
-
-  it('routes room preset selection', () => {
-    const { result } = renderHook(() => useLayeredSettings())
-
-    act(() => {
-      result.current.applyLegacyPartial({ roomPreset: 'arena' })
-    })
-
-    expect(result.current.derivedSettings.roomPreset).toBe('arena')
-    expect(result.current.session.environment.templateId).toBe('arena')
+    expect(result.current.session.environment.displayUnit).toBe('feet')
+    expect(result.current.derivedSettings.roomRT60).toBeGreaterThan(0)
+    expect(result.current.derivedSettings.roomVolume).toBeGreaterThan(0)
   })
 })
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
 describe('useLayeredSettings — persistence', () => {
+  beforeEach(() => { vi.useFakeTimers() })
+  afterEach(() => { vi.useRealTimers() })
+
   it('session state persists to v2 storage and reloads on remount', () => {
     const { result, unmount } = renderHook(() => useLayeredSettings())
 
     act(() => result.current.setMode('worship'))
+    // Flush debounced persistence
+    act(() => { vi.advanceTimersByTime(200) })
     unmount()
 
     const { result: result2 } = renderHook(() => useLayeredSettings())
@@ -228,6 +198,8 @@ describe('useLayeredSettings — persistence', () => {
       result.current.setMode('liveMusic')
       result.current.updateDisplay({ graphFontSize: 25 })
     })
+    // Flush debounced persistence
+    act(() => { vi.advanceTimersByTime(200) })
     unmount()
 
     // Clear only session storage

@@ -413,3 +413,74 @@ describe('deriveDetectorSettings — full mode × room matrix', () => {
     }
   }
 })
+
+// ─── Phase 6a: Diagnostics override tests ──────────────────────────────────
+
+describe('Diagnostics override fields', () => {
+  const baseline = MODE_BASELINES.speech
+
+  it('sustainMsOverride takes precedence over baseline', () => {
+    const diag = { ...DEFAULT_DIAGNOSTICS, sustainMsOverride: 999 }
+    const derived = deriveDetectorSettings(baseline, DEFAULT_ENVIRONMENT, DEFAULT_LIVE_OVERRIDES, DEFAULT_DISPLAY_PREFS, diag, 'none')
+    expect(derived.sustainMs).toBe(999)
+  })
+
+  it('sustainMs uses baseline when override absent', () => {
+    const derived = deriveForMode('speech')
+    expect(derived.sustainMs).toBe(baseline.sustainMs)
+  })
+
+  it('clearMsOverride takes precedence over baseline', () => {
+    const diag = { ...DEFAULT_DIAGNOSTICS, clearMsOverride: 5000 }
+    const derived = deriveDetectorSettings(baseline, DEFAULT_ENVIRONMENT, DEFAULT_LIVE_OVERRIDES, DEFAULT_DISPLAY_PREFS, diag, 'none')
+    expect(derived.clearMs).toBe(5000)
+  })
+
+  it('prominenceDbOverride takes precedence over baseline', () => {
+    const diag = { ...DEFAULT_DIAGNOSTICS, prominenceDbOverride: 15 }
+    const derived = deriveDetectorSettings(baseline, DEFAULT_ENVIRONMENT, DEFAULT_LIVE_OVERRIDES, DEFAULT_DISPLAY_PREFS, diag, 'none')
+    expect(derived.prominenceDb).toBe(15)
+  })
+
+  it('aWeightingOverride takes precedence over baseline', () => {
+    const diag = { ...DEFAULT_DIAGNOSTICS, aWeightingOverride: false }
+    const derived = deriveDetectorSettings(baseline, DEFAULT_ENVIRONMENT, DEFAULT_LIVE_OVERRIDES, DEFAULT_DISPLAY_PREFS, diag, 'none')
+    expect(derived.aWeightingEnabled).toBe(false)
+  })
+
+  it('ignoreWhistleOverride takes precedence over baseline', () => {
+    const diag = { ...DEFAULT_DIAGNOSTICS, ignoreWhistleOverride: false }
+    const derived = deriveDetectorSettings(baseline, DEFAULT_ENVIRONMENT, DEFAULT_LIVE_OVERRIDES, DEFAULT_DISPLAY_PREFS, diag, 'none')
+    expect(derived.ignoreWhistle).toBe(false)
+  })
+
+  it('fftSizeOverride takes precedence over baseline', () => {
+    const diag = { ...DEFAULT_DIAGNOSTICS, fftSizeOverride: 16384 as const }
+    const derived = deriveDetectorSettings(baseline, DEFAULT_ENVIRONMENT, DEFAULT_LIVE_OVERRIDES, DEFAULT_DISPLAY_PREFS, diag, 'none')
+    expect(derived.fftSize).toBe(16384)
+  })
+
+  it('ringThresholdDbOverride takes precedence over baseline + environment', () => {
+    const diag = { ...DEFAULT_DIAGNOSTICS, ringThresholdDbOverride: 42 }
+    const env = { ...DEFAULT_ENVIRONMENT, ringOffsetDb: 10 }
+    const derived = deriveDetectorSettings(baseline, env, DEFAULT_LIVE_OVERRIDES, DEFAULT_DISPLAY_PREFS, diag, 'none')
+    // Override should win regardless of env offset
+    expect(derived.ringThresholdDb).toBe(42)
+  })
+
+  it('ringThresholdDb uses baseline + env when override absent', () => {
+    const env = { ...DEFAULT_ENVIRONMENT, ringOffsetDb: 3 }
+    const derived = deriveDetectorSettings(baseline, env, DEFAULT_LIVE_OVERRIDES, DEFAULT_DISPLAY_PREFS, DEFAULT_DIAGNOSTICS, 'none')
+    expect(derived.ringThresholdDb).toBe(baseline.ringThresholdDb + 3)
+  })
+
+  it('all overrides absent → all values from baseline', () => {
+    const derived = deriveForMode('speech')
+    expect(derived.sustainMs).toBe(baseline.sustainMs)
+    expect(derived.clearMs).toBe(baseline.clearMs)
+    expect(derived.prominenceDb).toBe(baseline.prominenceDb)
+    expect(derived.aWeightingEnabled).toBe(baseline.aWeightingEnabled)
+    expect(derived.ignoreWhistle).toBe(baseline.ignoreWhistle)
+    expect(derived.fftSize).toBe(baseline.fftSize)
+  })
+})

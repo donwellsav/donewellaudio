@@ -14,6 +14,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.20.0',
+    date: '2026-03-25',
+    highlights: 'Legacy shim removal — all controls use semantic actions, dead-code fallbacks stripped',
+    changes: [
+      { type: 'fix', description: 'Fix resetAll() debounce race condition — stale persistence timer could resurrect pre-reset settings on reload (P1, GPT cross-review)' },
+      { type: 'fix', description: 'Fix setEnvironment unit toggle — changing m/ft now triggers room param recomputation (P2, GPT cross-review)' },
+      { type: 'refactor', description: 'Remove legacy applyLegacyPartial shim from useLayeredSettings — all UI controls route through semantic actions' },
+      { type: 'refactor', description: 'Strip dead-code defensive fallback guards from SoundTab, AdvancedTab, DisplayTab, RoomTab, CalibrationTab' },
+      { type: 'refactor', description: 'Remove legacy useEffect RT60 recomputation from RoomTab — derivation engine handles it' },
+      { type: 'refactor', description: 'Make setMicProfile and setEnvironment required props (no longer optional)' },
+    ],
+  },
+  {
     version: '0.19.0',
     date: '2026-03-25',
     highlights: 'Layered settings architecture — mode, environment, live, display, and diagnostics ownership model',

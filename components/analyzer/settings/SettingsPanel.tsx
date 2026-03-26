@@ -1,7 +1,7 @@
 'use client'
 
-import React, { memo, useCallback, useState, useEffect } from 'react'
-import { BarChart3, Monitor, RotateCcw, Download, FileJson } from 'lucide-react'
+import React, { memo, useCallback, useState } from 'react'
+import { BarChart3, Monitor, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ResetConfirmDialog } from '../ResetConfirmDialog'
@@ -12,7 +12,7 @@ import { useRigPresets } from '@/hooks/useRigPresets'
 import type { DetectorSettings, OperationMode } from '@/types/advisory'
 import type { CalibrationTabProps } from './CalibrationTab'
 import type { AdvancedTabProps } from './AdvancedTab'
-import { customDefaultsStorage } from '@/lib/storage/dwaStorage'
+// customDefaultsStorage removed in Phase 6c — v2 auto-persistence replaces it
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,7 +24,6 @@ type SettingsTab = 'sound' | 'display'
 export interface SettingsPanelProps {
   settings: DetectorSettings
   onModeChange: (mode: OperationMode) => void
-  onSettingsChange: (settings: Partial<DetectorSettings>) => void
   onReset: () => void
   calibration?: Omit<CalibrationTabProps, 'settings' | 'onSettingsChange'>
   dataCollection?: DataCollectionTabProps
@@ -42,7 +41,6 @@ const TABS: { id: SettingsTab; label: string; Icon: typeof BarChart3 }[] = [
 export const SettingsPanel = memo(function SettingsPanel({
   settings,
   onModeChange,
-  onSettingsChange,
   onReset,
   calibration,
   dataCollection,
@@ -90,50 +88,12 @@ export const SettingsPanel = memo(function SettingsPanel({
     if (preset._rigId) {
       // Semantic recall — calls setMode → setEnvironment → updateLiveOverrides
       rigPresets.loadPreset(preset._rigId)
-    } else {
-      // Legacy fallback for any old-format presets
-      onSettingsChange(preset.settings)
     }
-  }, [rigPresets, onSettingsChange])
+    // Old-format presets without _rigId are no longer supported after Phase 6c
+  }, [rigPresets])
 
-  // ── Save/Load defaults ────────────────────────────────────────────────
-  const [hasSavedDefaults, setHasSavedDefaults] = useState(false)
-
-  useEffect(() => {
-    const saved = customDefaultsStorage.load()
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init from localStorage
-    setHasSavedDefaults(saved !== null)
-  }, [])
-
-  const handleSaveAsDefaults = useCallback(() => {
-    customDefaultsStorage.save(settings)
-    setHasSavedDefaults(true)
-  }, [settings])
-
-  const handleLoadDefaults = useCallback(() => {
-    const defaults = customDefaultsStorage.load()
-    if (defaults) {
-      // Backward compat: strip removed fields
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const d = defaults as any
-      delete d.roomModesEnabled
-      if (d.micCalibrationEnabled !== undefined) {
-        d.micCalibrationProfile = d.micCalibrationEnabled ? 'ecm8000' : 'none'
-        delete d.micCalibrationEnabled
-      }
-      if (!defaults.roomTreatment) defaults.roomTreatment = 'typical'
-      if (!defaults.roomPreset) defaults.roomPreset = 'none'
-      if (defaults.algorithmMode && defaults.algorithmMode !== 'auto' && defaults.algorithmMode !== 'custom') {
-        const allAlgos = ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr', 'ml'] as const
-        const modeMap: Record<string, typeof allAlgos[number][]> = {
-          msd: ['msd'], phase: ['phase'], combined: [...allAlgos], all: [...allAlgos],
-        }
-        defaults.enabledAlgorithms = modeMap[defaults.algorithmMode] ?? [...allAlgos]
-        defaults.algorithmMode = 'custom'
-      }
-      onSettingsChange(defaults)
-    }
-  }, [onSettingsChange])
+  // Save/Load Defaults removed in Phase 6c — v2 session auto-persistence replaces this feature.
+  // "Reset to Defaults" (onReset) is preserved.
 
   return (
     <TooltipProvider delayDuration={400}>
@@ -163,7 +123,7 @@ export const SettingsPanel = memo(function SettingsPanel({
         {activeTab === 'sound' && (
           <SoundTab
             settings={settings}
-            onSettingsChange={onSettingsChange}
+            onSettingsChange={() => {}} // legacy prop — all controls use semantic actions via context
             onModeChange={onModeChange}
             calibration={calibration}
             dataCollection={dataCollection}
@@ -179,11 +139,11 @@ export const SettingsPanel = memo(function SettingsPanel({
         )}
 
         {activeTab === 'display' && (
-          <DisplayTab settings={settings} onSettingsChange={onSettingsChange} updateDisplay={ctx.updateDisplay} />
+          <DisplayTab settings={settings} updateDisplay={ctx.updateDisplay} />
         )}
 
-        {/* ── Footer: Reset / Save / Load ─────────────────────────── */}
-        <div className="border-t border-border/40 pt-2 mt-2 space-y-1.5">
+        {/* ── Footer: Reset ─────────────────────────── */}
+        <div className="border-t border-border/40 pt-2 mt-2">
           <ResetConfirmDialog
             onConfirm={onReset}
             trigger={
@@ -193,23 +153,6 @@ export const SettingsPanel = memo(function SettingsPanel({
               </Button>
             }
           />
-          <div className="flex gap-1.5">
-            <Button variant="secondary" size="sm" className="flex-1 h-7 text-xs" onClick={handleSaveAsDefaults}>
-              <Download className="h-3 w-3 mr-1" />
-              Save
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-1 h-7 text-xs"
-              onClick={handleLoadDefaults}
-              disabled={!hasSavedDefaults}
-              title={hasSavedDefaults ? 'Load your saved defaults' : 'No saved defaults yet'}
-            >
-              <FileJson className="h-3 w-3 mr-1" />
-              Load
-            </Button>
-          </div>
         </div>
       </div>
     </TooltipProvider>
