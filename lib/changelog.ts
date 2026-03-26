@@ -32,6 +32,13 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    version: '0.20.1',
+    date: '2026-03-26',
+    changes: [
+      { type: 'fix', description: 'release: v0.20.0 — Legacy shim removal + GPT cross-review bug fixes' },
+    ],
+  },
+  {
     version: '0.20.0',
     date: '2026-03-25',
     highlights: 'Legacy shim removal — all controls use semantic actions, dead-code fallbacks stripped',
