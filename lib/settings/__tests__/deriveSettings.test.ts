@@ -136,7 +136,8 @@ describe('deriveDetectorSettings — diagnostics', () => {
     expect(derived.noiseFloorAttackMs).toBe(DEFAULT_DIAGNOSTICS.noiseFloorAttackMs)
     expect(derived.noiseFloorReleaseMs).toBe(DEFAULT_DIAGNOSTICS.noiseFloorReleaseMs)
     expect(derived.maxTracks).toBe(DEFAULT_DIAGNOSTICS.maxTracks)
-    expect(derived.trackTimeoutMs).toBe(DEFAULT_DIAGNOSTICS.trackTimeoutMs)
+    // trackTimeoutMs resolves 'mode-default' sentinel to mode baseline value
+    expect(derived.trackTimeoutMs).toBe(MODE_BASELINES.speech.defaultTrackTimeoutMs)
     expect(derived.harmonicToleranceCents).toBe(DEFAULT_DIAGNOSTICS.harmonicToleranceCents)
     expect(derived.peakMergeCents).toBe(DEFAULT_DIAGNOSTICS.peakMergeCents)
   })

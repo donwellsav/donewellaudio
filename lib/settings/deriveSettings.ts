@@ -156,7 +156,9 @@ export function deriveDetectorSettings(
 
     // Track management
     maxTracks: diagnostics.maxTracks,
-    trackTimeoutMs: diagnostics.trackTimeoutMs,
+    trackTimeoutMs: diagnostics.trackTimeoutMs === 'mode-default'
+      ? baseline.defaultTrackTimeoutMs
+      : diagnostics.trackTimeoutMs,
     peakMergeCents: diagnostics.peakMergeCents,
 
     // Gate multiplier overrides (expert-only, from DiagnosticsProfile)

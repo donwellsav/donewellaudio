@@ -1,7 +1,7 @@
 # CLAUDE.md — DoneWell Audio Project Intelligence
 
-> **Last updated March 2026. 169 TypeScript/TSX files, 944 tests (940 pass, 4 skip), 43 suites. Version 0.21.0.**
-> Room mode lines on live RTA. 4-tab control surface. Storage backfill for existing users. Notch overlay opacity 42%.
+> **Last updated March 2026. 169 TypeScript/TSX files, 944 tests (940 pass, 4 skip), 43 suites. Version 0.22.0.**
+> Ring-out room mode hints. Per-mode track timeouts. Deploy guard hook. Notch overlay opacity 42%.
 
 ## CRITICAL RULES
 
@@ -120,7 +120,7 @@ Mic -> getUserMedia -> GainNode -> AnalyserNode (8192 FFT)
 3. `UIContext` — Mobile tab, freeze, fullscreen, layout reset
 4. `PortalContainerContext` — Portal mount for mobile overlays
 
-## Six Detection Algorithms
+## Seven Detection Algorithms (Six Classical + ML)
 
 | # | Algorithm | Source | What It Measures | DEFAULT | SPEECH | MUSIC | COMP |
 |---|-----------|--------|-----------------|---------|--------|-------|------|
@@ -165,16 +165,18 @@ app/                          # Next.js App Router
   sw.ts (38)                  #   Serwist service worker
   api/v1/ingest/route.ts (160)#   Spectral snapshot ingest (v1.0/1.1/1.2 schema, rate-limited, IP-stripped)
 components/
-  analyzer/ (23 files)        # Domain components + barrel index.ts
+  analyzer/ (28 files)        # Domain components + barrel index.ts
     help/ (6 files)           # Help tab components (mirrors settings/ pattern)
-    KillTheRing.tsx (473)     #   Root orchestrator, settings debounce, FP handling
+    AudioAnalyzer.tsx         #   Root orchestrator, settings debounce, FP handling
     HeaderBar.tsx (191)       #   Header bar (zero props, permanent Clear All)
     IssuesList.tsx (440)      #   Advisory cards with swipe gestures, 3s stability
-    UnifiedControls.tsx (760) #   All settings: icon sub-tabs, accordion sections, container queries
+    DesktopLayout.tsx         #   Desktop 3-panel layout with room mode computation
+    MobileLayout.tsx          #   Mobile portrait/landscape layouts (3 SpectrumCanvas instances)
+    SpectrumCanvas.tsx        #   RTA canvas with room mode lines, notch overlays, markers
     KtrLogo.tsx               #   Brand SVG logo (frequency analyzer crosshair + EQ bars)
     RingOutWizard.tsx         #   Guided ring-out workflow with step tracking
     LandscapeSettingsSheet.tsx (58) # Bottom Sheet wrapper for mobile landscape settings
-    settings/ (5 files)       # Settings sub-tab components (Display, Room, Advanced, Calibration, Shared)
+    settings/ (8 files)       # 4-tab settings: LiveTab, SetupTab, DisplayTab, AdvancedTab, CalibrationTab, RoomTab, SettingsPanel, SettingsShared
   ui/ (21 files)              # shadcn/ui primitives (includes accordion)
 contexts/ (8 files)           # React context providers
   AudioAnalyzerContext (195)  #   Compound provider: nests Engine/Settings/Metering/Detection
@@ -498,7 +500,7 @@ Then when user says "PR and merge":
 
 ### Layout & Navigation
 - **Dual entry point:** Two start buttons — "Press to Start Analysis" (normal mode) and "Ring Out Room" (ring-out wizard). No settings menu required to switch modes.
-- **Desktop layout:** 3-panel — Controls sidebar | Issues panel | RTA + GEQ graphs. Unified settings with icon sub-tabs (Detect | Display | Room | Advanced | Calibrate) and accordion sections.
+- **Desktop layout:** 3-panel — Controls sidebar | Issues panel | RTA + GEQ graphs. 4-tab settings (Live | Setup | Display | Advanced) with accordion sections per tab.
 - **Mobile portrait (2-tab):** Tab 1 = Issues + inline resizable RTA/GEQ graph (drag handle to resize, swipe to switch RTA↔GEQ). Tab 2 = Settings. Graph tab removed — graphs are inline above cards.
 - **Mobile landscape:** 40/55/5 split (Issues/Graph/Controls). `LandscapeSettingsSheet.tsx` for bottom-sheet settings.
 - **Fullscreen:** Separate app fullscreen (Maximize2 icon) and RTA fullscreen (Expand icon). Distinct icons and behavior.

@@ -5,6 +5,7 @@ import { formatFrequency } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { AlertTriangle, Check, ChevronRight, Download, SkipForward, X } from 'lucide-react'
 import type { Advisory } from '@/types/advisory'
+import type { RoomMode } from '@/lib/dsp/acousticUtils'
 
 interface NotchedFreq {
   frequencyHz: number
@@ -13,12 +14,25 @@ interface NotchedFreq {
   q: number
   severity: string
   timestamp: number
+  modeAdjacent?: string // e.g. "1,0,0" if near a room mode
 }
 
 interface RingOutWizardProps {
   advisories: Advisory[]
   onFinish: () => void
   isRunning: boolean
+  roomModes?: RoomMode[] | null
+}
+
+/** Check if a frequency is near a room mode. Threshold: max(1.5 Hz, 50 cents), cap 5 Hz */
+function findAdjacentMode(freqHz: number, modes: RoomMode[] | null | undefined): RoomMode | null {
+  if (!modes || modes.length === 0) return null
+  for (const mode of modes) {
+    const centsHz = mode.frequency * (Math.pow(2, 50 / 1200) - 1)
+    const thresh = Math.min(Math.max(1.5, centsHz), 5)
+    if (Math.abs(freqHz - mode.frequency) <= thresh) return mode
+  }
+  return null
 }
 
 type WizardPhase = 'listening' | 'detected' | 'summary'
@@ -27,6 +41,7 @@ export const RingOutWizard = memo(function RingOutWizard({
   advisories,
   onFinish,
   isRunning,
+  roomModes,
 }: RingOutWizardProps) {
   const [phase, setPhase] = useState<WizardPhase>('listening')
   const [notched, setNotched] = useState<NotchedFreq[]>([])
@@ -67,6 +82,7 @@ export const RingOutWizard = memo(function RingOutWizard({
   const handleNext = useCallback(() => {
     if (!currentAdvisory) return
     const pitchInfo = currentAdvisory.advisory.pitch
+    const adjacent = findAdjacentMode(currentAdvisory.trueFrequencyHz, roomModes)
     setNotched(prev => [...prev, {
       frequencyHz: currentAdvisory.trueFrequencyHz,
       pitch: `${pitchInfo.note}${pitchInfo.octave}`,
@@ -74,6 +90,7 @@ export const RingOutWizard = memo(function RingOutWizard({
       q: currentAdvisory.advisory.peq.q,
       severity: currentAdvisory.severity,
       timestamp: Date.now(),
+      modeAdjacent: adjacent?.label,
     }])
     setCurrentAdvisory(null)
     setPhase('listening')
@@ -227,6 +244,20 @@ export const RingOutWizard = memo(function RingOutWizard({
           </div>
         </div>
 
+        {(() => {
+          const adjacent = findAdjacentMode(trueFrequencyHz, roomModes)
+          if (adjacent) {
+            return (
+              <div className="glass-card rounded-lg p-2.5 border-amber-500/30 bg-amber-500/5">
+                <p className="font-mono text-[11px] text-amber-400 text-center leading-relaxed">
+                  ⚠ {formatFrequency(trueFrequencyHz)} is near room mode {adjacent.label} ({Math.round(adjacent.frequency)} Hz).
+                  Consider broadband treatment or mic repositioning before notching.
+                </p>
+              </div>
+            )
+          }
+          return null
+        })()}
         <p className="font-mono text-xs text-muted-foreground text-center">
           Apply this cut on your console, then click Next
         </p>

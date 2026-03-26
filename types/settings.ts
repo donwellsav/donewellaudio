@@ -55,6 +55,8 @@ export interface ModeBaseline {
   /** Only ringOut and broadcast override this; others inherit DEFAULT_SETTINGS value */
   readonly defaultAutoGainTargetDb?: number
   readonly ignoreWhistle: boolean
+  /** Per-mode track inactivity timeout. Used when diagnostics.trackTimeoutMs is 'mode-default'. */
+  readonly defaultTrackTimeoutMs: number
 }
 
 // ─── Environment / Room ───────────────────────────────────────────────────────
@@ -173,7 +175,7 @@ export interface DiagnosticsProfile {
   noiseFloorAttackMs: number
   noiseFloorReleaseMs: number
   maxTracks: number
-  trackTimeoutMs: number
+  trackTimeoutMs: number | 'mode-default'
   harmonicToleranceCents: number
   peakMergeCents: number
   // Optional overrides — when present, take precedence over mode baseline

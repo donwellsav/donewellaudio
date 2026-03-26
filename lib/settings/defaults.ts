@@ -71,7 +71,7 @@ export const DEFAULT_DIAGNOSTICS: DiagnosticsProfile = {
   noiseFloorAttackMs: 200,
   noiseFloorReleaseMs: 1000,
   maxTracks: 64,
-  trackTimeoutMs: 1000,
+  trackTimeoutMs: 'mode-default' as const,
   harmonicToleranceCents: 200,
   peakMergeCents: 100,
 }
