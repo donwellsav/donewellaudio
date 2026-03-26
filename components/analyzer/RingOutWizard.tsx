@@ -94,7 +94,7 @@ export const RingOutWizard = memo(function RingOutWizard({
     }])
     setCurrentAdvisory(null)
     setPhase('listening')
-  }, [currentAdvisory])
+  }, [currentAdvisory, roomModes])
 
   const handleSkip = useCallback(() => {
     setCurrentAdvisory(null)
