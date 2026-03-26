@@ -6,6 +6,7 @@
 
 import { hzToPitch, formatFrequency, formatPitch } from '@/lib/utils/pitchUtils'
 import type { SessionSummary, FrequencyHotspot } from '@/lib/dsp/feedbackHistory'
+import type { ExportMetadata } from '@/types/export'
 import type { jsPDF } from 'jspdf'
 
 // ============================================================================
@@ -110,7 +111,7 @@ function drawHeader(doc: jsPDF): number {
   return 48 // y position after header
 }
 
-function drawSessionInfo(doc: jsPDF, summary: SessionSummary, y: number): number {
+function drawSessionInfo(doc: jsPDF, summary: SessionSummary, y: number, metadata?: ExportMetadata): number {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(13)
   setColor(doc, COLORS.text)
@@ -127,11 +128,16 @@ function drawSessionInfo(doc: jsPDF, summary: SessionSummary, y: number): number
   doc.setFontSize(9)
   setColor(doc, COLORS.textLight)
 
-  const info = [
+  const info: [string, string][] = [
     ['Date', formatDateFull(summary.startTime)],
     ['Time', `${formatTimestamp(summary.startTime)} — ${formatTimestamp(summary.endTime)}`],
     ['Duration', formatDurationMs(summary.startTime, summary.endTime)],
   ]
+
+  // Append metadata fields when provided
+  if (metadata?.venueName)    info.push(['Venue', metadata.venueName])
+  if (metadata?.engineerName) info.push(['Engineer', metadata.engineerName])
+  if (metadata?.notes)        info.push(['Notes', metadata.notes])
 
   for (const [label, value] of info) {
     doc.setFont('helvetica', 'bold')
@@ -351,6 +357,7 @@ function drawFooter(doc: jsPDF) {
 export async function generatePdfReport(
   summary: SessionSummary,
   hotspots: FrequencyHotspot[],
+  metadata?: ExportMetadata,
 ): Promise<Blob> {
   // Dynamic imports
   const { jsPDF } = await import('jspdf')
@@ -360,7 +367,7 @@ export async function generatePdfReport(
 
   // ── Page 1: Summary ──────────────────────────────────────────────────────
   let y = drawHeader(doc)
-  y = drawSessionInfo(doc, summary, y)
+  y = drawSessionInfo(doc, summary, y, metadata)
   y = drawMetricsRow(doc, summary, y)
   y = drawBandBreakdown(doc, summary, y)
   y = drawHotspotChart(doc, hotspots, y)

@@ -5,6 +5,7 @@
 
 import { hzToPitch, formatFrequency, formatPitch } from '@/lib/utils/pitchUtils'
 import type { SessionSummary, FrequencyHotspot, FeedbackEvent } from '@/lib/dsp/feedbackHistory'
+import type { ExportMetadata } from '@/types/export'
 
 const LINE = '=' .repeat(76)
 const THIN = '-'.repeat(76)
@@ -51,6 +52,7 @@ function pct(count: number, total: number): string {
 export function generateTxtReport(
   summary: SessionSummary,
   hotspots: FrequencyHotspot[],
+  metadata?: ExportMetadata,
 ): string {
   const lines: string[] = []
   const w = (s: string) => lines.push(s)
@@ -73,6 +75,16 @@ export function generateTxtReport(
   w(`  Hotspots:       ${hotspots.length}`)
   w(`  Repeat Offenders: ${summary.repeatOffenders.length}`)
   blank()
+
+  // Session metadata (optional — venue, engineer, notes)
+  if (metadata && (metadata.venueName || metadata.engineerName || metadata.notes)) {
+    w('SESSION METADATA')
+    w(THIN)
+    if (metadata.venueName)    w(`  Venue:          ${metadata.venueName}`)
+    if (metadata.engineerName) w(`  Engineer:       ${metadata.engineerName}`)
+    if (metadata.notes)        w(`  Notes:          ${metadata.notes}`)
+    blank()
+  }
 
   // Frequency band breakdown
   const total = summary.totalEvents

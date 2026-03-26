@@ -17,6 +17,7 @@ import type {
 import type { RoomDimensionEstimate } from '@/types/calibration'
 import { ROOM_ESTIMATION } from '@/lib/dsp/constants'
 import { useLayeredSettings } from '@/hooks/useLayeredSettings'
+import { useSessionHistory } from '@/hooks/useSessionHistory'
 
 /** Early warning for predicted feedback frequencies based on comb pattern detection */
 export interface EarlyWarning {
@@ -138,6 +139,16 @@ export function useAudioAnalyzer(
   })
 
   const analyzerRef = useRef<AudioAnalyzer | null>(null)
+
+  // ── Session history — archives session summaries on stop / tab close ─────
+  const { endSession, resetGuard, updateContext } = useSessionHistory({
+    isRunning: state.isRunning,
+  })
+
+  // Keep session context in sync with current mode
+  useEffect(() => {
+    updateContext({ mode: settings.mode })
+  }, [settings.mode, updateContext])
 
   // Hot-path refs: written every frame, read imperatively by canvas
   const spectrumRef = useRef<SpectrumData | null>(null)
@@ -319,6 +330,8 @@ export function useAudioAnalyzer(
     const deviceId = options.deviceId ?? deviceIdRef.current
 
     try {
+      // Re-arm session archive guard for the new session
+      resetGuard()
       // Clear previous advisories + worker state when starting fresh analysis
       tracksRef.current = []
       clearMap()
@@ -350,10 +363,12 @@ export function useAudioAnalyzer(
         hasPermission: false,
       }))
     }
-  }, [clearMap]) // clearMap is stable (useCallback with [] deps)
+  }, [clearMap, resetGuard]) // clearMap + resetGuard are stable (useCallback with [] deps)
 
   const stop = useCallback(() => {
     if (!analyzerRef.current) return
+    // Archive session BEFORE clearing state — endSession reads FeedbackHistory
+    endSession()
     analyzerRef.current.stop({ releaseMic: false })
     // Keep advisories visible until next start - only clear running state
     tracksRef.current = []
@@ -361,7 +376,7 @@ export function useAudioAnalyzer(
       ...prev,
       isRunning: false,
     }))
-  }, [])
+  }, [endSession])
 
   const switchDevice = useCallback(async (deviceId: string) => {
     deviceIdRef.current = deviceId

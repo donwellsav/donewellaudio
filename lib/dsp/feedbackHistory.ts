@@ -454,6 +454,19 @@ export class FeedbackHistory {
     }
   }
 
+  /**
+   * Force an immediate synchronous write to localStorage.
+   * Cancels any pending debounced save. Use in endSession / beforeunload
+   * where we cannot rely on the 1s debounce completing.
+   */
+  flush(): void {
+    if (this._saveTimer) {
+      clearTimeout(this._saveTimer)
+      this._saveTimer = null
+    }
+    this._flushToStorage()
+  }
+
   private loadFromStorage(): void {
     if (typeof window === 'undefined') return
 

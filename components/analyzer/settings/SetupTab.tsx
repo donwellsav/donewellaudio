@@ -1,16 +1,27 @@
 'use client'
 
-import React, { memo } from 'react'
-import { HelpCircle, Save, Trash2, X } from 'lucide-react'
+import React, { memo, useState, useCallback } from 'react'
+import { HelpCircle, Save, Trash2, X, Download, FileText, FileJson, FileSpreadsheet, Loader2, ChevronDown } from 'lucide-react'
 import { ConsoleSlider } from '@/components/ui/console-slider'
 import { ChannelSection } from '@/components/ui/channel-section'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { RoomTab } from './RoomTab'
 import { CalibrationTab } from './CalibrationTab'
 import { useSettings } from '@/contexts/SettingsContext'
 import { useEngine } from '@/contexts/EngineContext'
+import { getFeedbackHistory } from '@/lib/dsp/feedbackHistory'
+import { downloadFile } from '@/lib/export/downloadFile'
+import { generateTxtReport } from '@/lib/export/exportTxt'
+import { typedStorage } from '@/lib/storage/dwaStorage'
 import type { DetectorSettings, OperationMode } from '@/types/advisory'
 import type { CalibrationTabProps } from './CalibrationTab'
+import type { ExportMetadata } from '@/types/export'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,6 +40,8 @@ interface SetupTabProps {
   handleLoadPreset: (preset: { name: string; settings: Partial<DetectorSettings> }) => void
 }
 
+const metadataStorage = typedStorage<ExportMetadata>('dwa-export-metadata', {})
+
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const MODES = [
@@ -38,7 +51,7 @@ const MODES = [
 
 // ── SetupTab ─────────────────────────────────────────────────────────────────
 // Soundcheck and pre-show controls: mode, EQ style, AG target, room,
-// calibration, and rig presets.
+// calibration, rig presets, and session export.
 
 export const SetupTab = memo(function SetupTab({
   settings, onSettingsChange, onModeChange,
@@ -48,6 +61,48 @@ export const SetupTab = memo(function SetupTab({
 }: SetupTabProps) {
   const ctx = useSettings()
   const { isRunning } = useEngine()
+
+  // Export metadata — persisted across sessions for same venue/engineer
+  const [metadata, setMetadata] = useState<ExportMetadata>(() => metadataStorage.load())
+  const [isExporting, setIsExporting] = useState(false)
+
+  const updateMetadata = useCallback((patch: Partial<ExportMetadata>) => {
+    setMetadata(prev => {
+      const next = { ...prev, ...patch }
+      metadataStorage.save(next)
+      return next
+    })
+  }, [])
+
+  const dateSlug = () => new Date().toISOString().slice(0, 10)
+
+  const handleExportTxt = useCallback(() => {
+    const history = getFeedbackHistory()
+    const txt = generateTxtReport(history.getSessionSummary(), history.getHotspots(), metadata)
+    downloadFile(new Blob([txt], { type: 'text/plain' }), `feedback-report-${dateSlug()}.txt`)
+  }, [metadata])
+
+  const handleExportCSV = useCallback(() => {
+    const csv = getFeedbackHistory().exportToCSV()
+    downloadFile(new Blob([csv], { type: 'text/csv' }), `feedback-history-${dateSlug()}.csv`)
+  }, [])
+
+  const handleExportJSON = useCallback(() => {
+    const json = getFeedbackHistory().exportToJSON()
+    downloadFile(new Blob([json], { type: 'application/json' }), `feedback-history-${dateSlug()}.json`)
+  }, [])
+
+  const handleExportPdf = useCallback(async () => {
+    setIsExporting(true)
+    try {
+      const { generatePdfReport } = await import('@/lib/export/exportPdf')
+      const history = getFeedbackHistory()
+      const blob = await generatePdfReport(history.getSessionSummary(), history.getHotspots(), metadata)
+      downloadFile(blob, `feedback-report-${dateSlug()}.pdf`)
+    } finally {
+      setIsExporting(false)
+    }
+  }, [metadata])
 
   return (
     <div className="space-y-1">
@@ -154,6 +209,53 @@ export const SetupTab = memo(function SetupTab({
               </button>
             )
           )}
+        </div>
+      </ChannelSection>
+
+      {/* Session Export */}
+      <ChannelSection title="Session Export">
+        <div className="space-y-2">
+          <input
+            value={metadata.venueName ?? ''}
+            onChange={(e) => updateMetadata({ venueName: e.target.value })}
+            placeholder="Venue name (optional)"
+            maxLength={60}
+            className="w-full px-2 py-1.5 rounded text-sm bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <input
+            value={metadata.engineerName ?? ''}
+            onChange={(e) => updateMetadata({ engineerName: e.target.value })}
+            placeholder="Engineer (optional)"
+            maxLength={40}
+            className="w-full px-2 py-1.5 rounded text-sm bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                disabled={isExporting}
+                className="min-h-11 w-full cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 inline-flex items-center justify-center gap-1.5 px-3 rounded text-sm font-medium bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30 disabled:opacity-40 transition-colors"
+              >
+                {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                Export Session
+                <ChevronDown className="w-3 h-3 ml-auto" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem onClick={handleExportTxt}>
+                <FileText className="w-4 h-4 mr-2" /> Plain Text (.txt)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportCSV}>
+                <FileSpreadsheet className="w-4 h-4 mr-2" /> CSV (.csv)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportJSON}>
+                <FileJson className="w-4 h-4 mr-2" /> JSON (.json)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportPdf} disabled={isExporting}>
+                {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+                PDF Report (.pdf)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </ChannelSection>
 
