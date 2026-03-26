@@ -14,6 +14,22 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.21.0',
+    date: '2026-03-26',
+    changes: [
+      { type: 'feat', description: 'Ring-out wizard warns when detected frequency is near an axial room mode' },
+      { type: 'feat', description: 'Per-mode track timeout via sentinel type (worship 2s, liveMusic 5s, monitors 500ms)' },
+      { type: 'feat', description: 'Deploy guard hook with one-shot atomic marker pattern' },
+      { type: 'feat', description: 'Dead code removal (ALGORITHM_MODES, MIN_FRAMES_ROCK)' },
+      { type: 'feat', description: 'CLAUDE.md freshness (7 algorithms, 4-tab layout, file counts)' },
+      { type: 'feat', description: '8 rounds of GPT adversarial plan review' },
+      { type: 'feat', description: '[x] tsc clean, 940/944 tests pass' },
+      { type: 'feat', description: '[x] Sentinel derivation test updated and passing' },
+      { type: 'feat', description: '[x] Deploy guard marker consumed atomically on use' },
+      { type: 'feat', description: '[x] All 4 wizard instances wired with roomModes prop' },
+    ],
+  },
+  {
     version: '0.20.0',
     date: '2026-03-26',
     changes: [
