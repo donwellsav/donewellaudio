@@ -34,6 +34,7 @@ export const MODE_BASELINES: Readonly<Record<ModeId, ModeBaseline>> = {
     aWeightingEnabled: true,
     defaultInputGainDb: 0,
     ignoreWhistle: true,
+    defaultTrackTimeoutMs: 1000,
   },
   worship: {
     modeId: 'worship',
@@ -53,6 +54,7 @@ export const MODE_BASELINES: Readonly<Record<ModeId, ModeBaseline>> = {
     aWeightingEnabled: false,
     defaultInputGainDb: 2,
     ignoreWhistle: true,
+    defaultTrackTimeoutMs: 2000,
   },
   liveMusic: {
     modeId: 'liveMusic',
@@ -72,6 +74,7 @@ export const MODE_BASELINES: Readonly<Record<ModeId, ModeBaseline>> = {
     aWeightingEnabled: false,
     defaultInputGainDb: 0,
     ignoreWhistle: false,
+    defaultTrackTimeoutMs: 5000,
   },
   theater: {
     modeId: 'theater',
@@ -91,6 +94,7 @@ export const MODE_BASELINES: Readonly<Record<ModeId, ModeBaseline>> = {
     aWeightingEnabled: true,
     defaultInputGainDb: 4,
     ignoreWhistle: true,
+    defaultTrackTimeoutMs: 1000,
   },
   monitors: {
     modeId: 'monitors',
@@ -110,6 +114,7 @@ export const MODE_BASELINES: Readonly<Record<ModeId, ModeBaseline>> = {
     aWeightingEnabled: false,
     defaultInputGainDb: 0,
     ignoreWhistle: false,
+    defaultTrackTimeoutMs: 500,
   },
   ringOut: {
     modeId: 'ringOut',
@@ -130,6 +135,7 @@ export const MODE_BASELINES: Readonly<Record<ModeId, ModeBaseline>> = {
     defaultInputGainDb: 0,
     defaultAutoGainTargetDb: -12,
     ignoreWhistle: true,
+    defaultTrackTimeoutMs: 500,
   },
   broadcast: {
     modeId: 'broadcast',
@@ -150,6 +156,7 @@ export const MODE_BASELINES: Readonly<Record<ModeId, ModeBaseline>> = {
     defaultInputGainDb: 0,
     defaultAutoGainTargetDb: -24,
     ignoreWhistle: true,
+    defaultTrackTimeoutMs: 1000,
   },
   outdoor: {
     modeId: 'outdoor',
@@ -169,5 +176,6 @@ export const MODE_BASELINES: Readonly<Record<ModeId, ModeBaseline>> = {
     aWeightingEnabled: true,
     defaultInputGainDb: 0,
     ignoreWhistle: true,
+    defaultTrackTimeoutMs: 2000,
   },
 } as const

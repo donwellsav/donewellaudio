@@ -249,6 +249,7 @@ export const MobileLayout = memo(function MobileLayout({
                   advisories={advisories}
                   onFinish={() => onFinishWizard?.()}
                   isRunning={isRunning}
+                  roomModes={roomModes}
                 />
               ) : (
                 <>
@@ -381,6 +382,7 @@ export const MobileLayout = memo(function MobileLayout({
                 advisories={advisories}
                 onFinish={() => onFinishWizard?.()}
                 isRunning={isRunning}
+                roomModes={roomModes}
               />
             ) : (
               <IssuesList

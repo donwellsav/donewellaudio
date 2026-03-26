@@ -831,7 +831,6 @@ export const MSD_SETTINGS = {
   MIN_FRAMES_SPEECH: 7,
   /** Minimum frames for classical music (100% accuracy per paper) */
   MIN_FRAMES_MUSIC: 13,
-  // MIN_FRAMES_ROCK removed — defined but never referenced in code paths (dead code, verified by GPT cross-review)
   /** Default minimum frames */
   DEFAULT_MIN_FRAMES: 12, // ~200ms at 60fps — balanced between early detection and statistical confidence
   /** Maximum frames — must match HISTORY_SIZE so both MSD paths use the same depth */
@@ -1093,11 +1092,3 @@ export const EARLY_WARNING = {
 // FUSION_WEIGHTS: canonical definition is in advancedDetection.ts (the only consumer)
 // Removed duplicate from here to avoid conflicting values.
 
-// Algorithm mode options for UI
-export const ALGORITHM_MODES = {
-  auto: { label: 'Auto', description: 'Automatic algorithm selection based on content' },
-  msd: { label: 'MSD Only', description: 'Magnitude Slope Deviation (best for speech)' },
-  phase: { label: 'Phase Only', description: 'Phase coherence analysis' },
-  combined: { label: 'MSD + Phase', description: 'Combined analysis (recommended)' },
-  all: { label: 'All Algorithms', description: 'Maximum accuracy, higher CPU usage' },
-} as const

@@ -154,6 +154,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                         advisories={advisories}
                         onFinish={() => onFinishWizard?.()}
                         isRunning={isRunning}
+                        roomModes={roomModes}
                       />
                     ) : (
                       <>
@@ -238,6 +239,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                   advisories={advisories}
                   onFinish={() => onFinishWizard?.()}
                   isRunning={isRunning}
+                  roomModes={roomModes}
                 />
               ) : (
                 <>
