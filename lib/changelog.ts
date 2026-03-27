@@ -14,6 +14,25 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.23.0',
+    date: '2026-03-27',
+    changes: [
+      { type: 'feat', description: '**Mixer profile system** — auto-configures OSC/TCP for X32, Midas M32, Yamaha TF/CL/QL, A&H dLive/SQ, PA2, Generic' },
+      { type: 'feat', description: '**Smart PEQ slot manager** — multi-slot tracking (up to 8), severity-based replacement, 1/3-octave dedup, auto-clear on resolve' },
+      { type: 'feat', description: '**PA2 Bridge** — direct integration via Companion HTTP bridge with settings UI, header status, advisory card buttons' },
+      { type: 'feat', description: '**Closed-loop GEQ** — send correction, read PA2 RTA, verify, auto-deepen' },
+      { type: 'feat', description: '**ML training from PA2** — AFS cross-validation labels, RTA notch verification, dual-mic training snapshots' },
+      { type: 'feat', description: '**Session export** — venue profile JSON with all PA2 actions logged' },
+      { type: 'feat', description: '**PA2 companion module fixes** — topology-aware PEQ routing, frequency dedup, Q passthrough' },
+      { type: 'feat', description: '[x] tsc --noEmit passes' },
+      { type: 'feat', description: '[x] pnpm test — 940 passed, 4 skipped, 0 failures' },
+      { type: 'feat', description: '[x] Companion module builds clean' },
+      { type: 'feat', description: '[x] Detection works with PA2 Bridge disabled' },
+      { type: 'feat', description: '[ ] PA2 Bridge connects to Companion (CSP fix needed for production)' },
+      { type: 'feat', description: '[ ] End-to-end: detect feedback, send to PA2, verify notch placed' },
+    ],
+  },
+  {
     version: '0.24.0',
     date: '2026-03-27',
     highlights: 'PA2 deep integration, mixer profiles, smart PEQ slot management, ML training from hardware',
