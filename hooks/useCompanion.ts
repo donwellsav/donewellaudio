@@ -5,41 +5,48 @@ import type { Advisory } from '@/types/advisory'
 import type { CompanionSettings } from '@/types/companion'
 import { DEFAULT_COMPANION_SETTINGS } from '@/types/companion'
 import { companionStorage } from '@/lib/companion/companionStorage'
-import { CompanionBridge } from '@/lib/companion/companionBridge'
+import { CompanionBridge, generatePairingCode } from '@/lib/companion/companionBridge'
 
 interface UseCompanionReturn {
   /** Current companion settings */
   settings: CompanionSettings
   /** Update settings (partial merge, auto-persists) */
   updateSettings: (partial: Partial<CompanionSettings>) => void
-  /** Whether Companion module is currently reachable */
+  /** Whether relay is reachable (always true — same origin) */
   connected: boolean
   /** Last error message, or null */
   lastError: string | null
-  /** Send a single advisory to Companion. Returns true if accepted. */
+  /** Send a single advisory to the relay. Returns true if accepted. */
   sendAdvisory: (advisory: Advisory) => Promise<boolean>
-  /** Check Companion connection (called automatically on enable) */
+  /** Check relay connection */
   checkConnection: () => Promise<boolean>
+  /** Generate a new pairing code */
+  regenerateCode: () => void
 }
 
 export function useCompanion(): UseCompanionReturn {
-  const [settings, setSettings] = useState<CompanionSettings>(() =>
-    companionStorage.load(),
-  )
+  const [settings, setSettings] = useState<CompanionSettings>(() => {
+    const saved = companionStorage.load()
+    // Generate a pairing code on first use
+    if (!saved.pairingCode) {
+      saved.pairingCode = generatePairingCode()
+      companionStorage.save(saved)
+    }
+    return saved
+  })
   const [connected, setConnected] = useState(false)
   const [lastError, setLastError] = useState<string | null>(null)
 
   const bridgeRef = useRef<CompanionBridge | null>(null)
 
-  // Create/update bridge when settings change
   const bridge = useMemo(() => {
     if (!bridgeRef.current) {
-      bridgeRef.current = new CompanionBridge(settings.url, settings.instanceName)
+      bridgeRef.current = new CompanionBridge(settings.pairingCode)
     } else {
-      bridgeRef.current.configure(settings.url, settings.instanceName)
+      bridgeRef.current.configure(settings.pairingCode)
     }
     return bridgeRef.current
-  }, [settings.url, settings.instanceName])
+  }, [settings.pairingCode])
 
   const updateSettings = useCallback((partial: Partial<CompanionSettings>) => {
     setSettings((prev) => {
@@ -70,6 +77,11 @@ export function useCompanion(): UseCompanionReturn {
     [bridge, settings.enabled, settings.minConfidence],
   )
 
+  const regenerateCode = useCallback(() => {
+    const newCode = generatePairingCode()
+    updateSettings({ pairingCode: newCode })
+  }, [updateSettings])
+
   // Check connection on enable
   useEffect(() => {
     if (settings.enabled) {
@@ -87,6 +99,7 @@ export function useCompanion(): UseCompanionReturn {
     lastError,
     sendAdvisory,
     checkConnection,
+    regenerateCode,
   }
 }
 

@@ -275,7 +275,7 @@ export const AdvancedTab = memo(function AdvancedTab({
 // ── Companion Section (extracted for clarity) ──────────────────────────────
 
 const CompanionSection = memo(function CompanionSection({ showTooltips }: { showTooltips: boolean }) {
-  const { settings: cs, updateSettings, connected, lastError, checkConnection } = useCompanion()
+  const { settings: cs, updateSettings, connected, lastError, checkConnection, regenerateCode } = useCompanion()
 
   return (
     <Section title="Companion" fullWidth showTooltip={showTooltips}
@@ -288,25 +288,23 @@ const CompanionSection = memo(function CompanionSection({ showTooltips }: { show
         {cs.enabled && (
           <>
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground font-mono">Companion URL</label>
-              <input type="text" value={cs.url}
-                onChange={(e) => updateSettings({ url: e.target.value })}
-                className="w-full rounded bg-background border border-border px-2 py-1 text-xs font-mono focus:outline-none focus:ring-[3px] focus:ring-ring/50"
-                placeholder="http://localhost:8000" />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground font-mono">Module Instance Name</label>
-              <input type="text" value={cs.instanceName}
-                onChange={(e) => updateSettings({ instanceName: e.target.value })}
-                className="w-full rounded bg-background border border-border px-2 py-1 text-xs font-mono focus:outline-none focus:ring-[3px] focus:ring-ring/50"
-                placeholder="donewell-audio" />
+              <label className="text-xs text-muted-foreground font-mono">Pairing Code</label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 rounded bg-muted border border-border px-3 py-1.5 text-sm font-mono font-bold tracking-[0.2em] text-center select-all">
+                  {cs.pairingCode}
+                </div>
+                <button type="button" onClick={regenerateCode}
+                  className="text-xs font-mono text-muted-foreground hover:text-foreground cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 rounded px-1.5 py-1 border border-border">
+                  New Code
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground/60 font-mono">Enter this code in the Companion module to pair.</p>
             </div>
 
             <div className="flex items-center gap-2 pt-1">
               <div className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-500' : 'bg-red-500'}`} />
               <span className={`text-xs font-mono ${connected ? 'text-emerald-500' : 'text-red-500'}`}>
-                {connected ? 'Connected' : lastError ?? 'Disconnected'}
+                {connected ? 'Relay active' : lastError ?? 'Disconnected'}
               </span>
               <button type="button" onClick={() => checkConnection()}
                 className="ml-auto text-xs font-mono text-muted-foreground hover:text-foreground cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 rounded px-1.5 py-0.5 border border-border">

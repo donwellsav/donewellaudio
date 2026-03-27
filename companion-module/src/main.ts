@@ -3,10 +3,6 @@ import {
   InstanceStatus,
   runEntrypoint,
 } from '@companion-module/base'
-import type {
-  CompanionHTTPRequest,
-  CompanionHTTPResponse,
-} from '@companion-module/base'
 
 import { GetConfigFields } from './config.js'
 import type { ModuleConfig } from './config.js'
@@ -16,7 +12,7 @@ import { UpdateVariableDefinitions } from './variables.js'
 import { UpdatePresets } from './presets.js'
 import { UpgradeScripts } from './upgrades.js'
 
-/** Advisory payload received from DoneWell Audio PWA */
+/** Advisory payload received from the cloud relay */
 interface DwaAdvisory {
   id: string
   trueFrequencyHz: number
@@ -27,27 +23,19 @@ interface DwaAdvisory {
   pitch: { note: string; octave: number; cents: number; midi: number }
 }
 
-const SEVERITY_RANK: Record<string, number> = {
-  RUNAWAY: 4,
-  GROWING: 3,
-  RESONANCE: 2,
-  POSSIBLE_RING: 1,
-}
-
 export class ModuleInstance extends InstanceBase<ModuleConfig> {
   config: ModuleConfig = {
-    minConfidence: 0.5,
-    minSeverity: 'POSSIBLE_RING',
+    siteUrl: '',
+    pairingCode: '',
+    pollIntervalMs: 500,
     maxCutDb: -12,
-    autoAckSeconds: 0,
   }
 
   pendingAdvisories: DwaAdvisory[] = []
-  private autoAckTimer: ReturnType<typeof setTimeout> | null = null
+  private pollTimer: ReturnType<typeof setInterval> | null = null
 
   async init(config: ModuleConfig): Promise<void> {
     this.config = config
-    this.updateStatus(InstanceStatus.Ok)
 
     UpdateActions(this)
     UpdateFeedbacks(this)
@@ -55,15 +43,17 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
     UpdatePresets(this)
 
     this.resetVariables()
-    this.log('info', 'DoneWell Audio module initialized — waiting for advisories')
+    this.startPolling()
+    this.log('info', 'Module initialized — polling for advisories')
   }
 
   async configUpdated(config: ModuleConfig): Promise<void> {
     this.config = config
+    this.startPolling()
   }
 
   async destroy(): Promise<void> {
-    if (this.autoAckTimer) clearTimeout(this.autoAckTimer)
+    this.stopPolling()
     this.pendingAdvisories = []
   }
 
@@ -71,87 +61,57 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
     return GetConfigFields()
   }
 
-  // ── HTTP Handler ─────────────────────────────────────────────
-  // DoneWell PWA posts advisories here:
-  //   POST /instance/<instance-name>/advisory
-  //   GET  /instance/<instance-name>/status
+  // ── Polling ──────────────────────────────────────────────────
 
-  handleHttpRequest(
-    request: CompanionHTTPRequest,
-  ): CompanionHTTPResponse {
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+  private startPolling(): void {
+    this.stopPolling()
+
+    if (!this.config.siteUrl || !this.config.pairingCode) {
+      this.updateStatus(InstanceStatus.BadConfig, 'Missing site URL or pairing code')
+      return
     }
 
-    // CORS preflight
-    if (request.method === 'OPTIONS') {
-      return { status: 204, headers: corsHeaders, body: '' }
-    }
+    this.updateStatus(InstanceStatus.Connecting)
 
-    if (request.path === '/advisory' && request.method === 'POST') {
-      return this.handleAdvisory(request, corsHeaders)
-    }
+    const url = `${this.config.siteUrl.replace(/\/$/, '')}/api/companion/relay/${this.config.pairingCode}`
 
-    if (request.path === '/status') {
-      return {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        body: JSON.stringify({
-          ok: true,
-          pendingCount: this.pendingAdvisories.length,
-        }),
+    this.pollTimer = setInterval(async () => {
+      try {
+        const response = await fetch(url, { signal: AbortSignal.timeout(3000) })
+
+        if (!response.ok) {
+          this.updateStatus(InstanceStatus.ConnectionFailure, `HTTP ${response.status}`)
+          return
+        }
+
+        const data = (await response.json()) as {
+          ok: boolean
+          advisories: DwaAdvisory[]
+          pendingCount: number
+        }
+
+        this.updateStatus(InstanceStatus.Ok)
+
+        if (data.advisories && data.advisories.length > 0) {
+          for (const advisory of data.advisories) {
+            this.processAdvisory(advisory)
+          }
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Poll failed'
+        this.updateStatus(InstanceStatus.ConnectionFailure, msg)
       }
-    }
-
-    return { status: 404, headers: corsHeaders, body: 'Not found' }
+    }, this.config.pollIntervalMs)
   }
 
-  private handleAdvisory(
-    request: CompanionHTTPRequest,
-    corsHeaders: Record<string, string>,
-  ): CompanionHTTPResponse {
-    let advisory: DwaAdvisory
-    try {
-      advisory = JSON.parse(request.body ?? '{}') as DwaAdvisory
-    } catch {
-      return {
-        status: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Invalid JSON' }),
-      }
+  private stopPolling(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer)
+      this.pollTimer = null
     }
+  }
 
-    // Validate required fields
-    if (!advisory.peq || !advisory.geq || !advisory.pitch) {
-      return {
-        status: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Missing peq, geq, or pitch' }),
-      }
-    }
-
-    // Confidence gate
-    if (advisory.confidence < this.config.minConfidence) {
-      return {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        body: JSON.stringify({ accepted: false, reason: 'Below confidence threshold' }),
-      }
-    }
-
-    // Severity gate
-    const advisorySeverityRank = SEVERITY_RANK[advisory.severity] ?? 0
-    const minSeverityRank = SEVERITY_RANK[this.config.minSeverity] ?? 0
-    if (advisorySeverityRank < minSeverityRank) {
-      return {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        body: JSON.stringify({ accepted: false, reason: 'Below severity threshold' }),
-      }
-    }
-
+  private processAdvisory(advisory: DwaAdvisory): void {
     // Clamp cut depth to safety limit
     advisory.peq.gainDb = Math.max(advisory.peq.gainDb, this.config.maxCutDb)
     advisory.geq.suggestedDb = Math.max(advisory.geq.suggestedDb, this.config.maxCutDb)
@@ -179,21 +139,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
     // Update feedbacks (button colors)
     this.checkFeedbacks('advisory_pending', 'severity_runaway', 'severity_growing')
 
-    this.log('info', `Advisory received: ${Math.round(advisory.peq.hz)}Hz ${advisory.severity} (${advisory.peq.gainDb}dB)`)
-
-    // Auto-acknowledge timer
-    if (this.config.autoAckSeconds > 0) {
-      if (this.autoAckTimer) clearTimeout(this.autoAckTimer)
-      this.autoAckTimer = setTimeout(() => {
-        this.acknowledgeAll()
-      }, this.config.autoAckSeconds * 1000)
-    }
-
-    return {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      body: JSON.stringify({ accepted: true, pendingCount: this.pendingAdvisories.length }),
-    }
+    this.log('info', `Advisory: ${Math.round(advisory.peq.hz)}Hz ${advisory.severity} (${advisory.peq.gainDb}dB)`)
   }
 
   // ── Public methods (called by actions) ───────────────────────
