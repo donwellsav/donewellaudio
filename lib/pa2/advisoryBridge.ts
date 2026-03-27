@@ -153,11 +153,9 @@ export function advisoriesToDetectPayload(
     if (adv.confidence < minConfidence) continue
     if (adv.resolved) continue
 
-    // Map DWA severity to detect type
-    const isFeedback = adv.severity === 'RUNAWAY' ||
-      adv.severity === 'GROWING' ||
-      adv.severity === 'POSSIBLE_RING' ||
-      adv.severity === 'WHISTLE'
+    // Map DWA severity to detect type — all actionable severities sent as 'feedback'
+    // so the Companion module will write PEQ notches (it skips 'resonance' type)
+    const isFeedback = adv.severity !== 'INSTRUMENT'
 
     payload.push({
       hz: Math.round(adv.trueFrequencyHz),

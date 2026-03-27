@@ -110,6 +110,8 @@ const INITIAL_STATE: PA2BridgeState = {
   error: null,
   notchSlotsUsed: 0,
   notchSlotsAvailable: 8,
+  lastAutoSendResult: null,
+  lastAutoSendError: null,
 }
 
 // ═══ Hook ═══
@@ -181,6 +183,8 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
           error: null,
           notchSlotsUsed: s.notchSlotsUsed,
           notchSlotsAvailable: s.notchSlotsAvailable,
+          lastAutoSendResult: s.lastAutoSendResult,
+          lastAutoSendError: s.lastAutoSendError,
         }))
       } catch (err) {
         if (!mountedRef.current) return
@@ -224,8 +228,20 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
 
   // ── Auto-send advisory forwarding ──
 
+  // Helpers to track auto-send results in state
+  const recordAutoSendSuccess = (type: 'geq' | 'peq' | 'both', count: number) => {
+    if (!mountedRef.current) return
+    setState((s) => ({ ...s, lastAutoSendResult: { timestamp: Date.now(), type, count }, lastAutoSendError: null }))
+  }
+  const recordAutoSendError = (err: unknown) => {
+    if (!mountedRef.current) return
+    const msg = err instanceof Error ? err.message : 'Unknown error'
+    setState((s) => ({ ...s, lastAutoSendError: msg }))
+  }
+
   useEffect(() => {
     if (autoSend === 'off' || !clientRef.current || state.status !== 'connected') return
+    if (!state.pa2Connected) return // Don't send if PA2 hardware isn't connected
     if (advisories.length === 0) return
 
     const now = Date.now()
@@ -238,7 +254,9 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
       const corrections = advisoriesToGEQCorrections(advisories, autoSendMinConfidence)
       if (Object.keys(corrections).length > 0) {
         const merged = mergeGEQCorrections(state.geq.bands, corrections)
-        client.setGEQBands(merged).catch(console.error)
+        client.setGEQBands(merged)
+          .then(() => recordAutoSendSuccess('geq', Object.keys(corrections).length))
+          .catch(recordAutoSendError)
       }
     } else if (autoSend === 'peq') {
       const payload = advisoriesToDetectPayload(advisories, autoSendMinConfidence)
@@ -250,10 +268,12 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
                 ...s,
                 notchSlotsUsed: res.slots_used,
                 notchSlotsAvailable: res.slots_available,
+                lastAutoSendResult: { timestamp: Date.now(), type: 'peq', count: payload.length },
+                lastAutoSendError: null,
               }))
             }
           })
-          .catch(console.error)
+          .catch(recordAutoSendError)
       }
     } else if (autoSend === 'hybrid') {
       const actions = advisoriesToHybridActions(advisories, autoSendMinConfidence)
@@ -276,20 +296,26 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
         }
       }
 
+      const totalCount = Object.keys(geqCorrections).length + peqPayload.length
       if (Object.keys(geqCorrections).length > 0 && state.geq) {
         const merged = mergeGEQCorrections(state.geq.bands, geqCorrections)
-        client.setGEQBands(merged).catch(console.error)
+        client.setGEQBands(merged)
+          .then(() => recordAutoSendSuccess('both', totalCount))
+          .catch(recordAutoSendError)
       }
       if (peqPayload.length > 0) {
-        client.detect({ frequencies: peqPayload, source: 'donewellaudio' }).catch(console.error)
+        client.detect({ frequencies: peqPayload, source: 'donewellaudio' })
+          .catch(recordAutoSendError)
       }
     } else if (autoSend === 'both') {
       // GEQ for the broad room curve
+      let geqCount = 0
       if (state.geq) {
         const corrections = advisoriesToGEQCorrections(advisories, autoSendMinConfidence)
-        if (Object.keys(corrections).length > 0) {
+        geqCount = Object.keys(corrections).length
+        if (geqCount > 0) {
           const merged = mergeGEQCorrections(state.geq.bands, corrections)
-          client.setGEQBands(merged).catch(console.error)
+          client.setGEQBands(merged).catch(recordAutoSendError)
         }
       }
       // PEQ for surgical feedback notches
@@ -302,13 +328,17 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
                 ...s,
                 notchSlotsUsed: res.slots_used,
                 notchSlotsAvailable: res.slots_available,
+                lastAutoSendResult: { timestamp: Date.now(), type: 'both', count: geqCount + payload.length },
+                lastAutoSendError: null,
               }))
             }
           })
-          .catch(console.error)
+          .catch(recordAutoSendError)
+      } else if (geqCount > 0) {
+        recordAutoSendSuccess('geq', geqCount)
       }
     }
-  }, [advisories, autoSend, autoSendMinConfidence, autoSendIntervalMs, state.status, state.geq])
+  }, [advisories, autoSend, autoSendMinConfidence, autoSendIntervalMs, state.status, state.geq, state.pa2Connected])
 
   // ── Imperative methods ──
 

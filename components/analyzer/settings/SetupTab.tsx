@@ -284,17 +284,26 @@ export const SetupTab = memo(function SetupTab({
             <div className="space-y-1.5">
               <div className="flex items-center gap-2 text-xs">
                 <div className={`h-2 w-2 rounded-full ${
-                  pa2.status === 'connected' ? 'bg-green-500' :
+                  pa2.status === 'connected' && pa2.pa2Connected ? 'bg-green-500' :
+                  pa2.status === 'connected' && !pa2.pa2Connected ? 'bg-amber-500 animate-pulse' :
                   pa2.status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
                   pa2.status === 'error' ? 'bg-red-500' : 'bg-muted-foreground'
                 }`} />
                 <span className="text-muted-foreground">
-                  {pa2.status === 'connected' ? `Connected — PEQ ${pa2.notchSlotsUsed}/${pa2.notchSlotsAvailable + pa2.notchSlotsUsed} slots` :
-                   pa2.status === 'connecting' ? 'Connecting...' :
-                   pa2.status === 'error' ? (pa2.error ?? 'Connection error') :
-                   'Disconnected'}
+                  {pa2.status === 'connected' && pa2.pa2Connected
+                    ? `PA2 Connected — PEQ ${pa2.notchSlotsUsed}/${pa2.notchSlotsAvailable + pa2.notchSlotsUsed} slots`
+                    : pa2.status === 'connected' && !pa2.pa2Connected
+                    ? 'Companion OK — PA2 not connected'
+                    : pa2.status === 'connecting' ? 'Connecting...'
+                    : pa2.status === 'error' ? (pa2.error ?? 'Connection error')
+                    : 'Disconnected'}
                 </span>
               </div>
+              {pa2.status === 'connected' && !pa2.pa2Connected && (
+                <p className="text-[10px] text-amber-500/80">
+                  Check Companion: PA2 IP address and TCP connection (port 19272).
+                </p>
+              )}
               {pa2.status === 'error' && pa2.error?.includes('Mixed content') && (
                 <a
                   href="http://localhost:3000"
@@ -305,7 +314,40 @@ export const SetupTab = memo(function SetupTab({
                   Open localhost:3000 (PA2 Bridge works here)
                 </a>
               )}
+              {/* Auto-send activity */}
+              {pa2.status === 'connected' && pa2.settings.autoSend !== 'off' && (
+                <div className="text-[10px]">
+                  {pa2.lastAutoSendError ? (
+                    <span className="text-red-400">Auto-send failed: {pa2.lastAutoSendError}</span>
+                  ) : pa2.lastAutoSendResult ? (
+                    <span className="text-muted-foreground/70">
+                      Sent {pa2.lastAutoSendResult.count} {pa2.lastAutoSendResult.type === 'both' ? 'PEQ+GEQ' : pa2.lastAutoSendResult.type.toUpperCase()} correction{pa2.lastAutoSendResult.count !== 1 ? 's' : ''}{' '}
+                      {Math.round((Date.now() - pa2.lastAutoSendResult.timestamp) / 1000)}s ago
+                    </span>
+                  ) : pa2.pa2Connected ? (
+                    <span className="text-muted-foreground/50">Listening — no feedback detected yet</span>
+                  ) : null}
+                </div>
+              )}
             </div>
+          )}
+
+          {/* Test button */}
+          {pa2.status === 'connected' && (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await pa2.client?.detect({
+                    frequencies: [{ hz: 2500, confidence: 0.99, type: 'feedback', q: 10 }],
+                    source: 'donewellaudio-test',
+                  })
+                } catch { /* shown in status */ }
+              }}
+              className="w-full min-h-9 px-2 rounded bg-primary/20 text-primary text-xs font-mono font-bold hover:bg-primary/30 transition-colors cursor-pointer"
+            >
+              Test: Send 2.5kHz notch to PA2
+            </button>
           )}
 
           {/* Auto-send mode */}

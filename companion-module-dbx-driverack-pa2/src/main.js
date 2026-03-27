@@ -159,10 +159,10 @@ class PA2Instance extends InstanceBase {
 				id: 'notchMode',
 				label: 'Auto-notch mode',
 				width: 6,
-				default: 'suggest',
+				default: 'auto',
 				choices: [
+					{ id: 'auto', label: 'Auto-apply (write to PA2) (Recommended)' },
 					{ id: 'suggest', label: 'Suggest only (show on Stream Deck)' },
-					{ id: 'auto', label: 'Auto-apply (write to PA2)' },
 					{ id: 'approve', label: 'Require approval (via /approve)' },
 				],
 			},
@@ -1197,17 +1197,8 @@ class PA2Instance extends InstanceBase {
 			})
 		}
 
-		// GET /geq — current GEQ state (all 31 bands + enabled + mode)
-		if (path === 'geq') {
-			return json({
-				enabled: this.pa2State.geq.enabled,
-				mode: this.pa2State.geq.mode,
-				bands: this.pa2State.geq.bands,
-				topology: this.topology.stereoGeq ? 'stereo' : 'dual-mono',
-			})
-		}
-
 		// POST /geq — set GEQ bands (burst mode for speed)
+		// IMPORTANT: POST must be checked BEFORE the GET fallback below
 		// Body: { bands: { 1: -3, 12: -6, 18: +2, ... } }
 		// Or:   { bands: [-12,-12,-10,-8,...] }  (array of 31 values)
 		// Or:   { flat: true }  (flatten all)
@@ -1248,6 +1239,16 @@ class PA2Instance extends InstanceBase {
 			} catch (e) {
 				return { status: 400, headers: { ...cors, 'Content-Type': 'application/json' }, body: JSON.stringify({ ok: false, error: e.message }) }
 			}
+		}
+
+		// GET /geq — current GEQ state (all 31 bands + enabled + mode)
+		if (path === 'geq') {
+			return json({
+				enabled: this.pa2State.geq.enabled,
+				mode: this.pa2State.geq.mode,
+				bands: this.pa2State.geq.bands,
+				topology: this.topology.stereoGeq ? 'stereo' : 'dual-mono',
+			})
 		}
 
 		// GET /meters — all live meter data in one call
