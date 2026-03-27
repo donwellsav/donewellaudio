@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.24.1',
+    date: '2026-03-27',
+    changes: [
+      { type: 'feat', description: 'Separate Companion IP, Port, Instance Label fields in PA2 Bridge settings' },
+    ],
+  },
+  {
     version: '0.24.0',
     date: '2026-03-27',
     highlights: 'PA2 deep integration, Companion module plug-and-play, CSP fix for production',
