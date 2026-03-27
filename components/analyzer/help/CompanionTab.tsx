@@ -76,18 +76,14 @@ export const CompanionTab = memo(function CompanionTab() {
       <div>
         <div className="py-1.5 px-2 section-label panel-groove bg-card/60">How It Works</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-          <HelpSection title="Data Flow">
+          <HelpSection title="Architecture (3 Parts)">
+            <p className="mb-2">The system has three parts that work together:</p>
             <ol className="list-decimal list-inside space-y-2">
-              <li>DoneWell detects feedback at a specific frequency</li>
-              <li>It calculates the EQ cut: frequency, Q, gain, filter type</li>
-              <li>The advisory is sent to the Companion module via HTTP</li>
-              <li>Companion exposes the values as <strong>variables</strong> (e.g., <code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:peq_frequency)</code>)</li>
-              <li>Your Companion trigger fires and applies the EQ to your mixer module</li>
+              <li><strong>This app</strong> detects feedback and calculates EQ cuts. Posts advisories to a cloud relay (same-origin API, no network config needed).</li>
+              <li><strong>Cloud relay</strong> (<code className="font-mono text-xs bg-muted px-1 rounded">/api/companion/relay/[code]</code>) holds advisories until the Companion module polls for them. Paired via a short code.</li>
+              <li><strong>Companion module</strong> polls the relay every 500ms, receives advisories, and exposes the EQ data as Companion <strong>variables</strong>.</li>
             </ol>
-            <p className="mt-2 text-xs text-muted-foreground/70">
-              DoneWell never talks directly to your mixer — Companion is the bridge.
-              DoneWell remains analysis-only and never modifies audio.
-            </p>
+            <p className="mt-2">You then create a <strong>trigger</strong> in Companion that wires those variables to your mixer module. This is the step that actually applies EQ to hardware.</p>
           </HelpSection>
 
           <HelpSection title="Sending EQ Recommendations">
@@ -96,6 +92,9 @@ export const CompanionTab = memo(function CompanionTab() {
               <li><strong>Auto-Send mode:</strong> Every new advisory is sent automatically when it meets the confidence threshold.</li>
               <li><strong>Ring-Out Wizard:</strong> Each step can auto-send its PEQ recommendation as you notch frequencies. &ldquo;Send All&rdquo; button in the summary sends all notched frequencies at once.</li>
             </ul>
+            <p className="mt-3 text-xs text-muted-foreground/70">
+              No raw audio is ever transmitted — only text-based EQ parameters (frequency, Q, gain, filter type, pitch).
+            </p>
           </HelpSection>
         </div>
       </div>
@@ -124,30 +123,58 @@ export const CompanionTab = memo(function CompanionTab() {
         </div>
       </div>
 
-      {/* Group: Wiring in Companion */}
+      {/* Group: Wiring to Your Mixer (THE KEY STEP) */}
       <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Wiring in Companion</div>
+        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Wiring to Your Mixer (Required)</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-          <HelpSection title="Example: Behringer X32">
+          <HelpSection title="Why This Step Matters">
+            <p className="mb-2">
+              The module is an <strong>input source</strong> — it tells Companion <em>what</em> to cut.
+              Your mixer module is the <strong>output</strong> — it <em>does</em> the cutting.
+              You connect them with a <strong>trigger</strong> inside Companion.
+            </p>
+            <p>
+              Without this step, advisories arrive in Companion but nothing reaches your mixer.
+              This is by design — you choose which mixer, which channel, and which EQ band receives the commands.
+            </p>
+          </HelpSection>
+
+          <HelpSection title="Create a Trigger">
             <ol className="list-decimal list-inside space-y-2">
-              <li>Add the <strong>DoneWell Audio</strong> module in Companion</li>
-              <li>Add the <strong>Behringer X32</strong> module and connect to your mixer</li>
-              <li>Create a Companion <strong>trigger</strong>: When a new advisory arrives from DoneWell...</li>
-              <li>Set the trigger action to: <strong>Set X32 Channel EQ</strong> using DoneWell variables:
-                <ul className="list-disc list-inside ml-4 mt-1">
-                  <li>Frequency: <code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:peq_frequency)</code></li>
-                  <li>Q: <code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:peq_q)</code></li>
-                  <li>Gain: <code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:peq_gain)</code></li>
+              <li>In Companion, go to <strong>Triggers</strong> (left sidebar)</li>
+              <li>Click <strong>Add Trigger</strong></li>
+              <li>Set condition: <strong>Variable changed</strong> &rarr; <code className="font-mono text-xs bg-muted px-1 rounded">donewell:peq_frequency</code></li>
+              <li>Add an action from your mixer module (e.g., set PEQ band)</li>
+              <li>In the action fields, use the variables:
+                <ul className="list-disc list-inside ml-4 mt-1 space-y-0.5">
+                  <li>Frequency &rarr; <code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:peq_frequency)</code></li>
+                  <li>Q &rarr; <code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:peq_q)</code></li>
+                  <li>Gain &rarr; <code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:peq_gain)</code></li>
                 </ul>
               </li>
+              <li>Save — every new advisory now automatically applies to your mixer</li>
             </ol>
+          </HelpSection>
+
+          <HelpSection title="For Generic OSC / TCP Devices">
+            <p className="mb-2">For mixers without a dedicated Companion module, use a generic module:</p>
+            <ol className="list-decimal list-inside space-y-1">
+              <li>Add <strong>Generic OSC</strong> or <strong>Generic TCP/UDP</strong> module</li>
+              <li>Configure your device&apos;s IP and port</li>
+              <li>Create a trigger on <code className="font-mono text-xs bg-muted px-1 rounded">donewell:peq_frequency</code></li>
+              <li>Send a raw command using your device&apos;s protocol, embedding the variables in the command string</li>
+            </ol>
+            <p className="mt-2 text-xs text-muted-foreground/70">
+              This requires knowing your device&apos;s control protocol. Check the manufacturer&apos;s documentation.
+            </p>
           </HelpSection>
 
           <HelpSection title="Stream Deck Buttons">
             <ul className="space-y-2">
               <li><strong>Latest Advisory:</strong> Shows frequency, gain, and Q of the latest detection. Press to acknowledge. Turns yellow when pending, red for RUNAWAY severity.</li>
               <li><strong>Clear All:</strong> Clears all pending advisories from the queue.</li>
-              <li><strong>Status:</strong> Shows pending count and current severity. Green when connected, changes color with detections.</li>
+              <li><strong>Status:</strong> Shows pending count and current severity at a glance.</li>
+              <li><strong>Custom buttons:</strong> Use variables like <code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:note)</code> in any button text to show live detection data.</li>
             </ul>
           </HelpSection>
         </div>
@@ -159,20 +186,20 @@ export const CompanionTab = memo(function CompanionTab() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
           <HelpSection title="Companion Module Settings">
             <ul className="space-y-2">
-              <li><strong>Min Confidence (0-1):</strong> Ignore advisories below this threshold. Default: 0.5.</li>
-              <li><strong>Min Severity:</strong> Filter by severity level. Options: Runaway only, Growing and above, Resonance and above, All detections.</li>
-              <li><strong>Max Cut Depth (dB):</strong> Safety clamp — cuts are limited to this maximum. Default: -12 dB. Range: -24 to -3 dB.</li>
-              <li><strong>Auto-Acknowledge (seconds):</strong> Automatically clear advisories after this time. 0 = manual only.</li>
+              <li><strong>Pairing Code:</strong> Must match the code shown in this app.</li>
+              <li><strong>Site URL:</strong> The address of this app (copy from your browser bar).</li>
+              <li><strong>Poll Interval (ms):</strong> How often to check for new advisories. Default: 500ms. Lower = faster response, more traffic.</li>
+              <li><strong>Max Cut Depth (dB):</strong> Safety clamp — all cuts are limited to this maximum. Default: -12 dB.</li>
             </ul>
           </HelpSection>
 
           <HelpSection title="Safety">
             <ul className="space-y-2">
               <li><strong>Manual mode by default:</strong> You must click SEND on each advisory unless auto-send is explicitly enabled.</li>
-              <li><strong>Dual confidence gates:</strong> Both DoneWell (PWA side) and the Companion module filter by confidence independently.</li>
               <li><strong>Max cut depth:</strong> The module clamps all PEQ and GEQ cut recommendations to prevent excessive notching.</li>
-              <li><strong>No audio modification:</strong> DoneWell Audio never touches the audio signal. It only sends text-based EQ recommendations over HTTP.</li>
-              <li><strong>Connection indicator:</strong> Green/red dot in Advanced settings shows whether Companion is reachable. Use the Test button to check.</li>
+              <li><strong>This app never modifies audio.</strong> It only sends text-based EQ parameters. Your mixer module and Companion trigger do the actual EQ changes.</li>
+              <li><strong>Relay is ephemeral:</strong> Advisory data is consumed when polled and the relay expires after inactivity. Nothing is stored permanently.</li>
+              <li><strong>Regenerate pairing code</strong> to instantly disconnect any previous session.</li>
             </ul>
           </HelpSection>
         </div>
@@ -185,30 +212,31 @@ export const CompanionTab = memo(function CompanionTab() {
           <HelpSection title="Common Issues">
             <div className="space-y-3">
               <div>
-                <p className="font-medium text-foreground text-sm mb-1">Connection shows red / disconnected</p>
-                <p className="text-sm">Verify Companion is running. Check the URL matches (default: localhost:8000). Ensure the DoneWell Audio module is added in Companion with the correct instance name.</p>
+                <p className="font-medium text-foreground text-sm mb-1">Relay active but nothing happens on mixer</p>
+                <p className="text-sm">The module only provides data — you need a <strong>trigger</strong> in Companion to wire it to your mixer module. See &ldquo;Wiring to Your Mixer&rdquo; above. This is the most common missed step.</p>
               </div>
               <div>
-                <p className="font-medium text-foreground text-sm mb-1">SEND button not visible</p>
-                <p className="text-sm">Enable the Companion bridge in Advanced &rarr; Companion settings. The button only appears when the bridge is enabled.</p>
+                <p className="font-medium text-foreground text-sm mb-1">Companion module status is red</p>
+                <p className="text-sm">Check the Site URL in the module settings — must be the full address of this app (from your browser bar). Verify the pairing code matches. Check that the app is accessible from the machine running Companion.</p>
               </div>
               <div>
-                <p className="font-medium text-foreground text-sm mb-1">Advisory sent but nothing happens on mixer</p>
-                <p className="text-sm">Check your Companion trigger is wired correctly. Verify the mixer module is connected. Check Companion&apos;s log for the incoming advisory. Ensure the advisory meets the module&apos;s confidence and severity thresholds.</p>
+                <p className="font-medium text-foreground text-sm mb-1">SEND button not visible on cards</p>
+                <p className="text-sm">Enable the Companion bridge in Advanced &rarr; Companion. The SEND button only appears when the bridge is on.</p>
               </div>
               <div>
-                <p className="font-medium text-foreground text-sm mb-1">CORS error in browser console</p>
-                <p className="text-sm">The Companion module includes CORS headers by default. If you see CORS errors, ensure you&apos;re using the DoneWell Audio module (not a generic HTTP module) and that Companion is at least version 3.x.</p>
+                <p className="font-medium text-foreground text-sm mb-1">Variables show &ldquo;--&rdquo; in Companion</p>
+                <p className="text-sm">No advisory has been sent yet. Start analysis, detect some feedback, and click SEND (or enable auto-send). Variables populate on the first advisory.</p>
               </div>
             </div>
           </HelpSection>
 
-          <HelpSection title="Tips">
+          <HelpSection title="Best Practices">
             <ul className="space-y-2">
-              <li><strong>Ring-out workflow:</strong> Enable Ring-Out Auto-Send, then use the Ring Out wizard. Each time you click Next, the PEQ recommendation is sent to your mixer automatically.</li>
-              <li><strong>Live show:</strong> Keep auto-send off. Use the SEND button manually so you confirm each cut before it hits the PA.</li>
-              <li><strong>Stream Deck:</strong> Use the preset buttons for quick visual monitoring. The Latest Advisory button shows what DoneWell is hearing in real time.</li>
-              <li><strong>Multiple mixers:</strong> Add multiple DoneWell Audio module instances in Companion with different instance names. Point each to a different mixer module.</li>
+              <li><strong>Ring-out:</strong> Enable Ring-Out Auto-Send. Each time you click Next in the wizard, the PEQ cut goes to your mixer automatically.</li>
+              <li><strong>Live show:</strong> Keep auto-send <strong>off</strong>. Use the SEND button manually — confirm each cut before it hits the PA.</li>
+              <li><strong>Max cut depth:</strong> Set to -6 or -9 dB for live shows. Deeper cuts can be destructive.</li>
+              <li><strong>Trust your ears first.</strong> This is a tool, not a replacement for the engineer.</li>
+              <li><strong>Multiple mixers:</strong> One pairing code can feed as many Companion triggers as you need — FOH, monitors, broadcast, etc.</li>
             </ul>
           </HelpSection>
         </div>
