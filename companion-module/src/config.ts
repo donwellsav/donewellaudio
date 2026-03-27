@@ -1,5 +1,5 @@
 import type { SomeCompanionConfigField } from '@companion-module/base'
-import { MIXER_MODEL_CHOICES, getMixerProfile } from './mixerProfiles.js'
+import { MIXER_MODEL_CHOICES } from './mixerProfiles.js'
 import type { MixerModelId } from './mixerProfiles.js'
 
 export interface ModuleConfig {

@@ -30,7 +30,6 @@ import type {
   PA2CommandResponse,
   PA2AutoEQRequest,
   PA2AutoEQResponse,
-  PA2CurveRequest,
   PA2DetectRequest,
   PA2DetectResponse,
   PA2RecommendationsResponse,

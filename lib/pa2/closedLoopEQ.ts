@@ -14,7 +14,6 @@
  */
 
 import type { PA2Client } from './pa2Client'
-import type { PA2LoopResponse } from '@/types/pa2'
 import { PA2_GEQ_FREQUENCIES } from '@/types/pa2'
 
 /** Result of a single closed-loop verification cycle */

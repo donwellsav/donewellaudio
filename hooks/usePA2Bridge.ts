@@ -32,11 +32,8 @@ import type { Advisory } from '@/types/advisory'
 import type {
   PA2ConnectionConfig,
   PA2BridgeState,
-  PA2BridgeStatus,
   PA2LoopResponse,
-  PA2GEQState,
   PA2MetersResponse,
-  PA2MuteState,
 } from '@/types/pa2'
 import { createPA2Client, PA2ClientError } from '@/lib/pa2/pa2Client'
 import type { PA2Client } from '@/lib/pa2/pa2Client'

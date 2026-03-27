@@ -83,12 +83,7 @@ export function PA2Provider({ advisories, children }: PA2ProviderProps) {
     ...bridge,
     settings,
     updateSettings,
-  }), [
-    bridge.status, bridge.pa2Connected, bridge.error,
-    bridge.notchSlotsUsed, bridge.notchSlotsAvailable,
-    bridge.lastPollTimestamp,
-    settings, updateSettings,
-  ])
+  }), [bridge, settings, updateSettings])
 
   return (
     <PA2Ctx.Provider value={value}>
