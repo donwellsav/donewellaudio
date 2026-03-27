@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.24.4',
+    date: '2026-03-27',
+    changes: [
+      { type: 'feat', description: 'Auto-enable hybrid mode when PA2 Bridge is turned on' },
+    ],
+  },
+  {
     version: '0.24.3',
     date: '2026-03-27',
     changes: [
