@@ -178,7 +178,15 @@ export const SetupTab = memo(function SetupTab({
             <input
               type="checkbox"
               checked={pa2.settings.enabled}
-              onChange={(e) => pa2.updateSettings({ enabled: e.target.checked })}
+              onChange={(e) => {
+                const enabling = e.target.checked
+                const update: Partial<typeof pa2.settings> = { enabled: enabling }
+                // Auto-set hybrid mode when enabling for the first time
+                if (enabling && pa2.settings.autoSend === 'off') {
+                  update.autoSend = 'hybrid'
+                }
+                pa2.updateSettings(update)
+              }}
               className="h-4 w-4 rounded"
             />
           </label>

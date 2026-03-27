@@ -237,7 +237,7 @@ export const DEFAULT_PA2_SETTINGS: PA2Settings = {
   companionPort: 8000,
   instanceLabel: 'PA2',
   apiKey: '',
-  autoSend: 'off',
+  autoSend: 'hybrid',
   autoSendMinConfidence: 0.7,
   pollIntervalMs: 200,
   ringOutAutoSend: false,
