@@ -118,6 +118,9 @@ export const CompanionTab = memo(function CompanionTab() {
               <div><code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:confidence)</code> — Detection confidence (0-1)</div>
               <div><code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:pending_count)</code> — Unacknowledged advisory count</div>
               <div><code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:last_updated)</code> — Timestamp of last advisory</div>
+              <div><code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:slots_used)</code> — PEQ slots currently in use</div>
+              <div><code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:slots_total)</code> — Total PEQ slots available</div>
+              <div><code className="font-mono text-xs bg-muted px-1 rounded">$(donewell:mixer_model)</code> — Selected mixer model</div>
             </div>
           </HelpSection>
         </div>
@@ -130,22 +133,28 @@ export const CompanionTab = memo(function CompanionTab() {
           <HelpSection title="Built-in Mixer Output (Recommended)">
             <p className="mb-2">The module can send EQ commands directly to your mixer — no separate mixer module or triggers needed.</p>
             <ol className="list-decimal list-inside space-y-2">
-              <li>In the module settings, set <strong>Protocol</strong> to OSC or TCP</li>
-              <li>Enter your mixer&apos;s <strong>IP address</strong> and <strong>port</strong></li>
-              <li>Set the <strong>OSC Channel Prefix</strong> (e.g., <code className="font-mono text-xs bg-muted px-1 rounded">/ch/01/eq</code> for X32 channel 1)</li>
-              <li>Choose the <strong>PEQ Band</strong> number to write to (1-6)</li>
+              <li>In the module settings, choose your <strong>Mixer Model</strong> (X32, Midas M32, Yamaha TF/CL/QL, A&amp;H dLive/SQ, dbx PA2, or Generic OSC)</li>
+              <li>Enter your mixer&apos;s <strong>IP address</strong> — port auto-fills per model</li>
+              <li>Set the <strong>Channel/EQ Prefix</strong> (e.g., <code className="font-mono text-xs bg-muted px-1 rounded">/ch/01/eq</code> for X32 channel 1)</li>
+              <li>Set <strong>PEQ Bands Available</strong> (how many bands the module can use for notch filters)</li>
+              <li>Choose <strong>EQ Output Mode</strong>: PEQ (surgical notches), GEQ (graphic EQ bands), or Both</li>
               <li>Enable <strong>Auto-Apply</strong> — each advisory now goes straight to your mixer</li>
             </ol>
             <p className="mt-2 text-xs text-muted-foreground/70">
-              Or leave Auto-Apply off and use the <strong>Apply Latest EQ</strong> action on a Stream Deck button for manual control.
+              The module manages multiple PEQ slots automatically — up to 8 simultaneous notch filters. When slots are full, the lowest-severity notch is replaced.
             </p>
           </HelpSection>
 
-          <HelpSection title="Supported Protocols">
+          <HelpSection title="Supported Mixers">
             <ul className="space-y-2">
-              <li><strong>OSC (recommended):</strong> Works with Behringer X32/M32, Yamaha CL/QL/TF, Allen &amp; Heath dLive/SQ, Midas M32, and any OSC-compatible mixer. Default port: 10023. Sends frequency, gain, and Q as normalized float values.</li>
-              <li><strong>TCP:</strong> Sends JSON commands over TCP for custom integrations. Works with any device that accepts TCP connections. Useful for dbx, QSC, and devices with proprietary protocols (adapter script may be needed).</li>
-              <li><strong>None:</strong> Variables-only mode. Use Companion triggers to wire variables to other modules manually. Best when you need advanced routing or multiple destinations.</li>
+              <li><strong>Behringer X32 / X-Air:</strong> OSC, port 10023. Normalized freq/gain/Q values.</li>
+              <li><strong>Midas M32 / Pro Series:</strong> Same OSC protocol as X32.</li>
+              <li><strong>Yamaha TF Series:</strong> OSC, port 49280. Direct Hz/dB/Q values.</li>
+              <li><strong>Yamaha CL / QL Series:</strong> OSC, port 49280. Direct Hz/dB/Q values.</li>
+              <li><strong>Allen &amp; Heath dLive:</strong> TCP, port 51325.</li>
+              <li><strong>Allen &amp; Heath SQ:</strong> TCP, port 51326.</li>
+              <li><strong>dbx DriveRack PA2:</strong> TCP, port 19272. Precision PEQ with Q 4-16.</li>
+              <li><strong>Generic OSC:</strong> User-configured. Uses X32-style normalization.</li>
             </ul>
           </HelpSection>
 
@@ -183,10 +192,12 @@ export const CompanionTab = memo(function CompanionTab() {
               <li><strong>Pairing Code:</strong> Must match the code shown in this app.</li>
               <li><strong>Site URL:</strong> The address of this app (copy from your browser bar).</li>
               <li><strong>Poll Interval (ms):</strong> How often to check for advisories. Default: 500ms.</li>
-              <li><strong>Protocol:</strong> None (variables only), OSC (X32/Yamaha/A&amp;H), or TCP (dbx/generic).</li>
-              <li><strong>Mixer IP / Port:</strong> Your mixer&apos;s network address. Default port 10023 (X32 OSC).</li>
-              <li><strong>OSC Channel Prefix:</strong> Which channel/bus EQ to target (e.g., /ch/01/eq).</li>
-              <li><strong>PEQ Band:</strong> Which EQ band to write to (1-6).</li>
+              <li><strong>Mixer Model:</strong> Select your mixer — auto-configures protocol, port, and parameter format.</li>
+              <li><strong>Mixer IP / Port:</strong> Your mixer&apos;s network address. Port auto-fills per model.</li>
+              <li><strong>Channel/EQ Prefix:</strong> Which channel/bus EQ to target (e.g., /ch/01/eq).</li>
+              <li><strong>PEQ Bands Available:</strong> How many PEQ bands the module can use for notch filters (1-8). Manages slots automatically.</li>
+              <li><strong>First PEQ Band:</strong> Starting band number (default 1). Shift to avoid conflicting with bands you set manually.</li>
+              <li><strong>EQ Output Mode:</strong> PEQ (surgical notches), GEQ (graphic EQ bands), or Both.</li>
               <li><strong>Auto-Apply:</strong> Send EQ to mixer automatically on every advisory.</li>
               <li><strong>Max Cut Depth (dB):</strong> Safety clamp. Default: -12 dB.</li>
             </ul>
@@ -200,6 +211,28 @@ export const CompanionTab = memo(function CompanionTab() {
               <li><strong>Relay is ephemeral:</strong> Advisory data is consumed when polled and the relay expires after inactivity. Nothing is stored permanently.</li>
               <li><strong>Regenerate pairing code</strong> to instantly disconnect any previous session.</li>
             </ul>
+          </HelpSection>
+        </div>
+      </div>
+
+      {/* Group: PA2 Bridge */}
+      <div>
+        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">PA2 Bridge</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
+          <HelpSection title="PA2 Bridge">
+            <p className="mb-2">
+              Deep integration with the PA2 Companion module. Enables smart PEQ notching, closed-loop GEQ tuning,
+              panic mute, mode sync, dual-RTA overlay, and ML training data collection.
+            </p>
+            <p>Configure in <strong>Setup &rarr; PA2 Bridge</strong>.</p>
+          </HelpSection>
+          <HelpSection title="PA2 Setup">
+            <ol className="list-decimal list-inside space-y-2">
+              <li>Install the PA2 Companion module</li>
+              <li>Configure it with your PA2&apos;s IP</li>
+              <li>In this app, go to Setup &rarr; PA2 Bridge and enter the Companion URL</li>
+              <li>Enable the bridge and choose auto-send mode</li>
+            </ol>
           </HelpSection>
         </div>
       </div>

@@ -20,6 +20,7 @@ import { useTheme } from 'next-themes'
 import { DwaLogo } from './DwaLogo'
 import { useAdvisories } from '@/contexts/AdvisoryContext'
 import { useEngine } from '@/contexts/EngineContext'
+import { usePA2 } from '@/contexts/PA2Context'
 import { useMetering } from '@/contexts/MeteringContext'
 import { useUI } from '@/contexts/UIContext'
 export const HeaderBar = memo(function HeaderBar() {
@@ -28,6 +29,7 @@ export const HeaderBar = memo(function HeaderBar() {
   const { resetLayout, isFullscreen, toggleFullscreen, isFrozen, toggleFreeze, isRtaFullscreen, toggleRtaFullscreen } = useUI()
   const { advisories, dismissedIds, onClearAll, onClearGEQ, onClearRTA, hasActiveGEQBars, hasActiveRTAMarkers } = useAdvisories()
   const { resolvedTheme, setTheme } = useTheme()
+  const pa2 = usePA2()
   const hasClearableContent = advisories.some(a => !dismissedIds.has(a.id)) || hasActiveGEQBars || hasActiveRTAMarkers
 
   return (
@@ -93,6 +95,29 @@ export const HeaderBar = memo(function HeaderBar() {
 
       {/* ── Action icons (right side) ──────────────────── */}
       <div className="flex items-center justify-end gap-0 sm:gap-1 text-sm text-muted-foreground flex-shrink-0">
+
+        {/* ── PA2 status badge ─────────────────────────── */}
+        {pa2.settings.enabled && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium cursor-default">
+                <div className={`h-1.5 w-1.5 rounded-full ${
+                  pa2.status === 'connected' ? 'bg-green-500' :
+                  pa2.status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                  pa2.status === 'error' ? 'bg-red-500' : 'bg-muted-foreground'
+                }`} />
+                <span className="hidden sm:inline text-muted-foreground">PA2</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              {pa2.status === 'connected'
+                ? `PA2 connected — PEQ ${pa2.notchSlotsUsed}/${pa2.notchSlotsAvailable + pa2.notchSlotsUsed} slots`
+                : pa2.status === 'error'
+                  ? `PA2 error: ${pa2.error ?? 'connection failed'}`
+                  : `PA2 ${pa2.status}`}
+            </TooltipContent>
+          </Tooltip>
+        )}
 
         {/* ── Primary actions group ───────────────────── */}
         <div className="flex items-center gap-0">

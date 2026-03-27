@@ -14,6 +14,28 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.24.0',
+    date: '2026-03-27',
+    highlights: 'PA2 deep integration, mixer profiles, smart PEQ slot management, ML training from hardware',
+    changes: [
+      { type: 'feat', description: '**Mixer profile system** — auto-configures OSC/TCP format for X32, Midas M32, Yamaha TF/CL/QL, A&H dLive/SQ, PA2, and Generic' },
+      { type: 'feat', description: '**Smart PEQ slot manager** — multi-slot tracking, severity-based replacement, 1/3-octave dedup, clear on resolve' },
+      { type: 'feat', description: '**GEQ output mode** — send corrections as graphic EQ bands, parametric notches, or both' },
+      { type: 'feat', description: '**PA2 Bridge** — direct deep integration with dbx PA2 via Companion HTTP bridge' },
+      { type: 'feat', description: '**PA2 settings panel** in Setup tab with connection URL, auto-send mode, confidence slider, panic mute toggle' },
+      { type: 'feat', description: '**PA2 status badge** in header bar — green/yellow/red connection indicator' },
+      { type: 'feat', description: '**PA2 button on advisory cards** — send individual detections to PA2 PEQ' },
+      { type: 'feat', description: '**Closed-loop GEQ tuning** — send correction, read PA2 RTA, verify effectiveness, auto-deepen' },
+      { type: 'feat', description: '**Mode-aware PA2 config** — sync AFS content mode and compressor settings when switching modes' },
+      { type: 'feat', description: '**ML training from PA2** — AFS cross-validation labels, RTA notch verification, dual-mic snapshots' },
+      { type: 'feat', description: '**Session export** — record all PA2 actions during a show, export as venue profile JSON' },
+      { type: 'feat', description: '**Relay lifecycle events** — resolve/dismiss/mode-change notifications clear mixer slots automatically' },
+      { type: 'feat', description: '**PA2 companion module fixes** — topology-aware PEQ routing, 1/3-octave dedup, approve Q passthrough' },
+      { type: 'feat', description: '**CSP updated** for local network Companion connections (http: in connect-src)' },
+      { type: 'feat', description: '**Companion help tab updated** with mixer profiles, slot management docs, PA2 Bridge setup guide' },
+    ],
+  },
+  {
     version: '0.23.0',
     date: '2026-03-27',
     highlights: 'Bitfocus Companion integration with cloud relay and built-in mixer output',

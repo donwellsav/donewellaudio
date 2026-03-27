@@ -15,6 +15,8 @@ import { RoomTab } from './RoomTab'
 import { CalibrationTab } from './CalibrationTab'
 import { useSettings } from '@/contexts/SettingsContext'
 import { useEngine } from '@/contexts/EngineContext'
+import { usePA2 } from '@/contexts/PA2Context'
+import type { PA2AutoSendMode } from '@/types/pa2'
 import { getFeedbackHistory } from '@/lib/dsp/feedbackHistory'
 import { downloadFile } from '@/lib/export/downloadFile'
 import { generateTxtReport } from '@/lib/export/exportTxt'
@@ -61,6 +63,7 @@ export const SetupTab = memo(function SetupTab({
 }: SetupTabProps) {
   const ctx = useSettings()
   const { isRunning } = useEngine()
+  const pa2 = usePA2()
 
   // Export metadata — persisted across sessions for same venue/engineer
   const [metadata, setMetadata] = useState<ExportMetadata>(() => metadataStorage.load())
@@ -165,6 +168,124 @@ export const SetupTab = memo(function SetupTab({
           <CalibrationTab settings={settings} onSettingsChange={onSettingsChange} {...calibration} />
         </ChannelSection>
       )}
+
+      {/* PA2 Companion */}
+      <ChannelSection title="PA2 Bridge">
+        <div className="space-y-3">
+          {/* Enable toggle */}
+          <label className="flex items-center justify-between text-xs">
+            <span>PA2 Bridge</span>
+            <input
+              type="checkbox"
+              checked={pa2.settings.enabled}
+              onChange={(e) => pa2.updateSettings({ enabled: e.target.checked })}
+              className="h-4 w-4 rounded"
+            />
+          </label>
+
+          {/* Base URL */}
+          <label className="block text-xs">
+            <span className="text-muted-foreground">Companion URL</span>
+            <input
+              type="text"
+              value={pa2.settings.baseUrl}
+              onChange={(e) => pa2.updateSettings({ baseUrl: e.target.value })}
+              placeholder="http://localhost:8000/instance/pa2"
+              className="mt-1 block w-full rounded border border-border bg-background px-2 py-1 text-xs font-mono"
+            />
+          </label>
+          <div className="text-[10px] text-muted-foreground/60 space-y-1">
+            <p>Format: <code className="bg-muted px-1 rounded">http://&lt;ip&gt;:&lt;port&gt;/instance/&lt;label&gt;</code></p>
+            <p>Find in Companion: Settings &rarr; HTTP API (must be enabled). Port default: 8000. Label = your connection label (lowercase).</p>
+            <div className="flex gap-1.5 pt-0.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => pa2.updateSettings({ baseUrl: 'http://192.168.0.108:8000/instance/PA2' })}
+                className="px-1.5 py-0.5 rounded bg-muted hover:bg-muted/80 text-[10px] font-mono cursor-pointer"
+              >
+                192.168.0.108:8000 / PA2
+              </button>
+              <button
+                type="button"
+                onClick={() => pa2.updateSettings({ baseUrl: 'http://localhost:8000/instance/PA2' })}
+                className="px-1.5 py-0.5 rounded bg-muted hover:bg-muted/80 text-[10px] font-mono cursor-pointer"
+              >
+                localhost:8000 / PA2
+              </button>
+            </div>
+          </div>
+
+          {/* Connection status */}
+          {pa2.settings.enabled && pa2.settings.baseUrl && (
+            <div className="flex items-center gap-2 text-xs">
+              <div className={`h-2 w-2 rounded-full ${
+                pa2.status === 'connected' ? 'bg-green-500' :
+                pa2.status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                pa2.status === 'error' ? 'bg-red-500' : 'bg-muted-foreground'
+              }`} />
+              <span className="text-muted-foreground">
+                {pa2.status === 'connected' ? `Connected — PEQ ${pa2.notchSlotsUsed}/${pa2.notchSlotsAvailable + pa2.notchSlotsUsed} slots` :
+                 pa2.status === 'connecting' ? 'Connecting...' :
+                 pa2.status === 'error' ? (pa2.error ?? 'Connection error') :
+                 'Disconnected'}
+              </span>
+            </div>
+          )}
+
+          {/* Auto-send mode */}
+          <label className="block text-xs">
+            <span className="text-muted-foreground">Auto-send</span>
+            <select
+              value={pa2.settings.autoSend}
+              onChange={(e) => pa2.updateSettings({ autoSend: e.target.value as PA2AutoSendMode })}
+              className="mt-1 block w-full rounded border border-border bg-background px-2 py-1 text-xs"
+            >
+              <option value="off">Off (manual)</option>
+              <option value="peq">PEQ notches (surgical)</option>
+              <option value="geq">GEQ corrections (broad)</option>
+              <option value="hybrid">Hybrid (auto-pick)</option>
+            </select>
+          </label>
+
+          {/* Confidence threshold */}
+          <ConsoleSlider
+            label="Min confidence"
+            value={`${(pa2.settings.autoSendMinConfidence * 100).toFixed(0)}%`}
+            sliderValue={pa2.settings.autoSendMinConfidence * 100}
+            onChange={(v: number) => pa2.updateSettings({ autoSendMinConfidence: v / 100 })}
+            min={50} max={100} step={5}
+          />
+
+          {/* Toggles */}
+          <label className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Ring-out auto-send</span>
+            <input
+              type="checkbox"
+              checked={pa2.settings.ringOutAutoSend}
+              onChange={(e) => pa2.updateSettings({ ringOutAutoSend: e.target.checked })}
+              className="h-4 w-4 rounded"
+            />
+          </label>
+          <label className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Panic mute on RUNAWAY</span>
+            <input
+              type="checkbox"
+              checked={pa2.settings.panicMuteEnabled}
+              onChange={(e) => pa2.updateSettings({ panicMuteEnabled: e.target.checked })}
+              className="h-4 w-4 rounded"
+            />
+          </label>
+          <label className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Sync mode to PA2</span>
+            <input
+              type="checkbox"
+              checked={pa2.settings.modeSyncEnabled}
+              onChange={(e) => pa2.updateSettings({ modeSyncEnabled: e.target.checked })}
+              className="h-4 w-4 rounded"
+            />
+          </label>
+        </div>
+      </ChannelSection>
 
       {/* Rig Presets */}
       <ChannelSection title="Rig Presets">

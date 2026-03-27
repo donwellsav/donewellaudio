@@ -21,5 +21,10 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
     // State
     { variableId: 'pending_count', name: 'Pending Advisory Count' },
     { variableId: 'last_updated', name: 'Last Advisory Timestamp' },
+
+    // Slot management
+    { variableId: 'slots_used', name: 'PEQ Slots In Use' },
+    { variableId: 'slots_total', name: 'PEQ Slots Available' },
+    { variableId: 'mixer_model', name: 'Mixer Model' },
   ])
 }
