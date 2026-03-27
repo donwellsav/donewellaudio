@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.24.2',
+    date: '2026-03-27',
+    changes: [
+      { type: 'fix', description: 'Detect mixed content blocking, show helpful error + localhost link' },
+    ],
+  },
+  {
     version: '0.24.1',
     date: '2026-03-27',
     changes: [
