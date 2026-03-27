@@ -186,9 +186,19 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
         // Only ignore aborts from component unmount, not from timeouts
         if (err instanceof DOMException && err.name === 'AbortError' && !mountedRef.current) return
 
-        const message = err instanceof PA2ClientError
+        let message = err instanceof PA2ClientError
           ? `HTTP ${err.statusCode}: ${err.message}`
           : err instanceof Error ? err.message : 'Unknown error'
+
+        // Detect mixed content (HTTPS page → HTTP companion)
+        if (
+          message === 'Failed to fetch' &&
+          typeof window !== 'undefined' &&
+          window.location.protocol === 'https:' &&
+          baseUrl.startsWith('http://')
+        ) {
+          message = 'Mixed content blocked — HTTPS sites cannot reach HTTP Companion. Use localhost or enable HTTPS on Companion.'
+        }
 
         setState((s) => ({
           ...s,

@@ -190,7 +190,7 @@ export const SetupTab = memo(function SetupTab({
               type="text"
               value={pa2.settings.companionIp}
               onChange={(e) => {
-                const ip = e.target.value
+                const ip = e.target.value.replace(/^https?:\/\//, '').replace(/\/+$/, '')
                 pa2.updateSettings({
                   companionIp: ip,
                   baseUrl: buildCompanionUrl(ip, pa2.settings.companionPort, pa2.settings.instanceLabel),
@@ -273,18 +273,30 @@ export const SetupTab = memo(function SetupTab({
 
           {/* Connection status */}
           {pa2.settings.enabled && pa2.settings.baseUrl && (
-            <div className="flex items-center gap-2 text-xs">
-              <div className={`h-2 w-2 rounded-full ${
-                pa2.status === 'connected' ? 'bg-green-500' :
-                pa2.status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-                pa2.status === 'error' ? 'bg-red-500' : 'bg-muted-foreground'
-              }`} />
-              <span className="text-muted-foreground">
-                {pa2.status === 'connected' ? `Connected — PEQ ${pa2.notchSlotsUsed}/${pa2.notchSlotsAvailable + pa2.notchSlotsUsed} slots` :
-                 pa2.status === 'connecting' ? 'Connecting...' :
-                 pa2.status === 'error' ? (pa2.error ?? 'Connection error') :
-                 'Disconnected'}
-              </span>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <div className={`h-2 w-2 rounded-full ${
+                  pa2.status === 'connected' ? 'bg-green-500' :
+                  pa2.status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                  pa2.status === 'error' ? 'bg-red-500' : 'bg-muted-foreground'
+                }`} />
+                <span className="text-muted-foreground">
+                  {pa2.status === 'connected' ? `Connected — PEQ ${pa2.notchSlotsUsed}/${pa2.notchSlotsAvailable + pa2.notchSlotsUsed} slots` :
+                   pa2.status === 'connecting' ? 'Connecting...' :
+                   pa2.status === 'error' ? (pa2.error ?? 'Connection error') :
+                   'Disconnected'}
+                </span>
+              </div>
+              {pa2.status === 'error' && pa2.error?.includes('Mixed content') && (
+                <a
+                  href="http://localhost:3000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded bg-primary/20 text-primary text-[10px] font-mono font-bold hover:bg-primary/30 transition-colors"
+                >
+                  Open localhost:3000 (PA2 Bridge works here)
+                </a>
+              )}
             </div>
           )}
 
