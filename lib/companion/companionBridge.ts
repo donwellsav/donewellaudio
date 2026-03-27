@@ -5,7 +5,12 @@
  * This bridge sends those recommendations to a Companion module instance,
  * which exposes them as variables for wiring to any mixer module.
  *
+ * All requests go through /api/companion/proxy to avoid CORS issues —
+ * Companion's HTTP server doesn't return CORS headers, so direct browser
+ * fetch() fails. The proxy runs server-side where CORS doesn't apply.
+ *
  * @see companion-module/src/main.ts for the receiving end
+ * @see app/api/companion/proxy/route.ts for the server-side proxy
  */
 import type { Advisory } from '@/types/advisory'
 
@@ -59,6 +64,23 @@ function toPayload(advisory: Advisory): CompanionAdvisoryPayload {
   }
 }
 
+/**
+ * Send a request through our server-side proxy to avoid CORS.
+ * The proxy at /api/companion/proxy fetches Companion server-side.
+ */
+async function proxyFetch(
+  targetUrl: string,
+  method: string,
+  body?: unknown,
+): Promise<Response> {
+  return fetch('/api/companion/proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: targetUrl, method, body }),
+    signal: AbortSignal.timeout(4000),
+  })
+}
+
 export class CompanionBridge {
   private baseUrl: string
   private instanceName: string
@@ -86,7 +108,7 @@ export class CompanionBridge {
     this._lastError = null
   }
 
-  /** Build the endpoint URL for this module instance */
+  /** Build the Companion endpoint URL for this module instance */
   private endpoint(path: string): string {
     return `${this.baseUrl}/instance/${this.instanceName}${path}`
   }
@@ -96,22 +118,21 @@ export class CompanionBridge {
     const payload = toPayload(advisory)
 
     try {
-      const response = await fetch(this.endpoint('/advisory'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(2000),
-      })
-
-      this._connected = true
-      this._lastError = null
+      const response = await proxyFetch(
+        this.endpoint('/advisory'),
+        'POST',
+        payload,
+      )
 
       if (!response.ok) {
-        const text = await response.text().catch(() => 'Unknown error')
-        this._lastError = `HTTP ${response.status}: ${text}`
+        const data = await response.json().catch(() => ({}))
+        this._connected = false
+        this._lastError = `HTTP ${response.status}: ${(data as Record<string, string>).error ?? 'Unknown error'}`
         return { accepted: false, error: this._lastError }
       }
 
+      this._connected = true
+      this._lastError = null
       return (await response.json()) as SendResult
     } catch (err) {
       this._connected = false
@@ -124,18 +145,18 @@ export class CompanionBridge {
   /** Check if Companion module is reachable */
   async checkStatus(): Promise<CompanionStatusResponse | null> {
     try {
-      const response = await fetch(this.endpoint('/status'), {
-        signal: AbortSignal.timeout(2000),
-      })
+      const response = await proxyFetch(this.endpoint('/status'), 'GET')
 
       if (!response.ok) {
         this._connected = false
+        this._lastError = `HTTP ${response.status}`
         return null
       }
 
-      this._connected = true
-      this._lastError = null
-      return (await response.json()) as CompanionStatusResponse
+      const data = (await response.json()) as CompanionStatusResponse
+      this._connected = data.ok === true
+      this._lastError = this._connected ? null : 'Module not responding'
+      return data
     } catch {
       this._connected = false
       this._lastError = 'Companion not reachable'
