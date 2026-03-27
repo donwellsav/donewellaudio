@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.22.3',
+    date: '2026-03-27',
+    changes: [
+      { type: 'fix', description: 'Merge branch \'main\' of http://127.0.0.1:44007/git/donwellsav/donewellaudio' },
+    ],
+  },
+  {
     version: '0.22.2',
     date: '2026-03-27',
     changes: [
