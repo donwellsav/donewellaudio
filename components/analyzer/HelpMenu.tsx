@@ -13,13 +13,14 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { HelpCircle, BookOpen, SlidersHorizontal, Cpu, List, Info, RotateCcw } from 'lucide-react'
+import { HelpCircle, BookOpen, SlidersHorizontal, Cpu, List, Info, RotateCcw, Radio } from 'lucide-react'
 import { onboardingStorage } from '@/lib/storage/dwaStorage'
 import { GuideTab } from './help/GuideTab'
 import { ModesTab } from './help/ModesTab'
 import { AlgorithmsTab } from './help/AlgorithmsTab'
 import { ReferenceTab } from './help/ReferenceTab'
 import { AboutTab } from './help/AboutTab'
+import { CompanionTab } from './help/CompanionTab'
 
 export const HelpMenu = memo(function HelpMenu() {
   const [open, setOpen] = useState(false)
@@ -67,6 +68,10 @@ export const HelpMenu = memo(function HelpMenu() {
               <List className="w-4 h-4 text-primary" />
               Reference
             </TabsTrigger>
+            <TabsTrigger value="companion" className="flex-1 flex-col gap-0.5 py-2 text-xs rounded-none border-0 border-b-2 border-transparent uppercase tracking-[0.15em] data-[state=active]:bg-primary/5 data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none text-muted-foreground hover:text-foreground transition-all duration-200">
+              <Radio className="w-4 h-4 text-primary" />
+              Companion
+            </TabsTrigger>
             <TabsTrigger value="about" className="flex-1 flex-col gap-0.5 py-2 text-xs rounded-none border-0 border-b-2 border-transparent uppercase tracking-[0.15em] data-[state=active]:bg-primary/5 data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none text-muted-foreground hover:text-foreground transition-all duration-200">
               <Info className="w-4 h-4 text-primary" />
               About
@@ -87,6 +92,10 @@ export const HelpMenu = memo(function HelpMenu() {
 
           <TabsContent value="reference" className="mt-4 space-y-4">
             <ReferenceTab />
+          </TabsContent>
+
+          <TabsContent value="companion" className="mt-4 space-y-4">
+            <CompanionTab />
           </TabsContent>
 
           <TabsContent value="about" className="mt-4 space-y-4">

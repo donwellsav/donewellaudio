@@ -67,6 +67,7 @@ export const GuideTab = memo(function GuideTab() {
               <li><strong>FALSE+:</strong> Flag a detection as a false positive. Feeds into ML training data for better future accuracy.</li>
               <li><strong>CONFIRM:</strong> Confirm a detection as real feedback. Symmetric labeling alongside FALSE+ for balanced training data.</li>
               <li><strong>Swipe to Label:</strong> Enable in Display settings. Swipe a card left for FALSE+, right for CONFIRM. Hides the buttons for a cleaner layout. Works with touch input on any screen size — phones, tablets, and touchscreen monitors.</li>
+              <li><strong>SEND:</strong> Send this advisory&apos;s EQ recommendation to your hardware mixer via Bitfocus Companion. Only visible when Companion bridge is enabled in Advanced settings. See the <strong>Companion</strong> help tab for setup.</li>
             </ul>
           </HelpSection>
 
@@ -91,7 +92,7 @@ export const GuideTab = memo(function GuideTab() {
               <li><strong>Live:</strong> Sensitivity and frequency range — the only controls you need during a show.</li>
               <li><strong>Setup:</strong> Mode selector, EQ style, auto-gain target, room environment (presets, dimensions, treatment), calibration (mic profile, ambient capture, venue metadata, session recording), and rig presets (save/load).</li>
               <li><strong>Display:</strong> Threshold line visibility, fader mode, max issues (desktop), tooltips, graph settings (RTA range, line width, FPS, font size), swipe-to-label, frequency zone overlay, warm spectrum, algorithm scores, PEQ details.</li>
-              <li><strong>Advanced:</strong> Detection policy (ring, growth, confidence, A-weighting, whistle), timing (sustain, clear), algorithms (ML toggle, custom grid), noise floor, peak detection, DSP (FFT, smoothing), track management, data collection.</li>
+              <li><strong>Advanced:</strong> Detection policy (ring, growth, confidence, A-weighting, whistle), timing (sustain, clear), algorithms (ML toggle, custom grid), noise floor, peak detection, DSP (FFT, smoothing), track management, data collection, Companion bridge (send EQ to mixer).</li>
             </ul>
           </HelpSection>
 
