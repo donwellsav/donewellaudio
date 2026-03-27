@@ -20,10 +20,17 @@ export const CompanionTab = memo(function CompanionTab() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
           <HelpSection title="Get the Module">
             <p className="mb-2">The Companion module is a standalone package you install on whatever machine runs Companion — it does not need to be this machine.</p>
+            <a
+              href="/downloads/companion-module-donewell-audio.zip"
+              download
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary text-primary-foreground text-xs font-mono font-bold tracking-wider uppercase hover:bg-primary/90 transition-colors"
+            >
+              Download Companion Module (.zip)
+            </a>
             <div className="mt-3 space-y-2">
               <p className="font-medium text-foreground text-sm">Install steps:</p>
               <ol className="list-decimal list-inside space-y-1">
-                <li>Download the module from the project&apos;s GitHub releases page (look for <code className="font-mono text-xs bg-muted px-1 rounded">companion-module-donewell-audio.zip</code>)</li>
+                <li>Click the download button above</li>
                 <li>Unzip the downloaded file</li>
                 <li>In Companion, go to <strong>Connections</strong> &rarr; <strong>Add module</strong></li>
                 <li>Click <strong>Developer modules path</strong> at the bottom</li>
