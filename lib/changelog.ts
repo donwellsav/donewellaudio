@@ -14,45 +14,66 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.22.7',
+    date: '2026-03-27',
+    highlights: 'CORS proxy fix for Companion bridge',
+    changes: [
+      { type: 'fix', description: 'Added **server-side proxy** (`/api/companion/proxy`) to bypass CORS — Companion HTTP server does not return CORS headers, so direct browser fetch was blocked' },
+      { type: 'fix', description: 'Bridge now routes all requests through the Next.js API proxy where CORS does not apply' },
+    ],
+  },
+  {
     version: '0.22.6',
     date: '2026-03-27',
+    highlights: 'Companion module zip with bundled dependencies',
     changes: [
-      { type: 'fix', description: 'Merge branch \'main\' of http://127.0.0.1:45665/git/donwellsav/donewellaudio' },
+      { type: 'fix', description: 'Companion module zip now includes **pre-installed node_modules** — no npm/yarn install step needed' },
+      { type: 'fix', description: 'Removed npm install requirement from help tab install instructions' },
     ],
   },
   {
     version: '0.22.5',
     date: '2026-03-27',
+    highlights: 'Companion manifest fix',
     changes: [
-      { type: 'fix', description: 'Merge branch \'main\' of http://127.0.0.1:42279/git/donwellsav/donewellaudio' },
+      { type: 'fix', description: 'Added missing **runtime block** to Companion `manifest.json` (`type: node22`, `api: nodejs-ipc`, `entrypoint: dist/main.js`) — module was not loading in Companion without it' },
+      { type: 'fix', description: 'Added `$schema`, `maintainers`, `bugs`, and `legacyIds` fields to match official Companion module template' },
     ],
   },
   {
     version: '0.22.4',
     date: '2026-03-27',
+    highlights: 'Pre-built companion module zip',
     changes: [
-      { type: 'fix', description: 'Merge branch \'main\' of http://127.0.0.1:39687/git/donwellsav/donewellaudio' },
+      { type: 'feat', description: 'Companion module zip now includes **pre-built dist/** folder — no build step required' },
+      { type: 'fix', description: 'Updated install instructions to reflect simpler setup (unzip + point Companion to folder)' },
     ],
   },
   {
     version: '0.22.3',
     date: '2026-03-27',
+    highlights: 'Downloadable companion module',
     changes: [
-      { type: 'fix', description: 'Merge branch \'main\' of http://127.0.0.1:44007/git/donwellsav/donewellaudio' },
+      { type: 'feat', description: 'Added **downloadable zip** at `/downloads/companion-module-donewell-audio.zip` for direct in-app download' },
+      { type: 'feat', description: 'Download button in Help → Companion tab with step-by-step install instructions' },
     ],
   },
   {
     version: '0.22.2',
     date: '2026-03-27',
+    highlights: 'Companion download and install docs',
     changes: [
-      { type: 'fix', description: 'Merge branch \'main\' of http://127.0.0.1:39705/git/donwellsav/donewellaudio' },
+      { type: 'feat', description: 'Added **Download & Setup** section to Companion help tab with install steps and quick start guide' },
+      { type: 'feat', description: 'Separated **App Settings** reference into its own help section' },
     ],
   },
   {
     version: '0.22.1',
     date: '2026-03-27',
+    highlights: 'Companion help tab',
     changes: [
-      { type: 'fix', description: 'docs: add Companion tab to help menu with full integration manual' },
+      { type: 'feat', description: 'New **Companion** tab in Help menu with full integration manual — setup, data flow, variables reference, wiring examples, Stream Deck presets, module config, safety, and troubleshooting' },
+      { type: 'feat', description: 'Updated **GuideTab** with SEND button documentation and Companion mention in Advanced settings' },
     ],
   },
   {
