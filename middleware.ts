@@ -25,8 +25,8 @@ export function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
     "worker-src 'self' blob:",
     isDev
-      ? "connect-src 'self' ws: https://*.ingest.us.sentry.io"
-      : "connect-src 'self' https://*.ingest.us.sentry.io",
+      ? "connect-src 'self' ws: http: https://*.ingest.us.sentry.io"
+      : "connect-src 'self' http: https://*.ingest.us.sentry.io",
     "img-src 'self' data: blob:",
     "media-src 'self' blob: mediastream:",
     "font-src 'self'",

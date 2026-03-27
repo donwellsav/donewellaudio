@@ -115,6 +115,48 @@ export class CompanionBridge {
     }
   }
 
+  /** Notify relay that an advisory was resolved (feedback stopped) */
+  async sendResolve(advisoryId: string): Promise<void> {
+    try {
+      await fetch(this.relayUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'resolve', advisoryId }),
+        signal: AbortSignal.timeout(3000),
+      })
+    } catch {
+      // Best effort — don't fail on resolve notification
+    }
+  }
+
+  /** Notify relay that an advisory was dismissed by the user */
+  async sendDismiss(advisoryId: string): Promise<void> {
+    try {
+      await fetch(this.relayUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'dismiss', advisoryId }),
+        signal: AbortSignal.timeout(3000),
+      })
+    } catch {
+      // Best effort
+    }
+  }
+
+  /** Notify relay of a mode change so Companion can reconfigure the mixer */
+  async sendModeChange(mode: string): Promise<void> {
+    try {
+      await fetch(this.relayUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'mode_change', mode }),
+        signal: AbortSignal.timeout(3000),
+      })
+    } catch {
+      // Best effort
+    }
+  }
+
   /** Check if the relay is reachable (always works — same origin) */
   async checkStatus(): Promise<{ ok: boolean; pendingCount: number } | null> {
     try {

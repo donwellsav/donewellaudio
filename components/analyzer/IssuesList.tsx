@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { swipeHintStorage } from '@/lib/storage/dwaStorage'
 import type { Advisory } from '@/types/advisory'
 import { useCompanion } from '@/hooks/useCompanion'
+import { usePA2 } from '@/contexts/PA2Context'
 
 // Velocity thresholds for runaway prediction
 const RUNAWAY_VELOCITY_THRESHOLD = 15 // dB/s
@@ -43,6 +44,7 @@ interface IssuesListProps {
 
 export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onClearAll, onClearResolved, touchFriendly, isRunning, onStart, onFalsePositive, falsePositiveIds, onConfirmFeedback, confirmedIds, isLowSignal, swipeLabeling, showAlgorithmScores, showPeqDetails, onStartRingOut, onDismiss }: IssuesListProps) {
   const companion = useCompanion()
+  const pa2 = usePA2()
 
   // Auto-send new advisories to Companion when enabled
   const sentIdsRef = useRef(new Set<string>())
@@ -55,6 +57,9 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
       }
     }
   }, [advisories, companion])
+
+  // Auto-send new advisories to PA2 when enabled (handled by usePA2Bridge internally)
+  // The hook's autoSend mode handles forwarding — no extra effect needed here
 
   // Filter dismissed, sort repeat offenders to top by hit count, then slice to max.
   // We attach occurrenceCount here so IssueCard doesn't need to re-query feedbackHistory.
@@ -270,6 +275,8 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               showPeqDetails={showPeqDetails}
               onDismiss={onDismiss}
               onSendToMixer={companion.settings.enabled ? companion.sendAdvisory : undefined}
+              onSendToPA2={pa2.settings.enabled && pa2.status === 'connected' ? pa2.sendDetections : undefined}
+              pa2Connected={pa2.settings.enabled && pa2.status === 'connected'}
             />
           ))}
         </>
@@ -327,9 +334,11 @@ interface IssueCardProps {
   showPeqDetails?: boolean
   onDismiss?: (advisoryId: string) => void
   onSendToMixer?: (advisory: Advisory) => void
+  onSendToPA2?: () => Promise<void>
+  pa2Connected?: boolean
 }
 
-const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFriendly, onFalsePositive, isFalsePositive, onConfirmFeedback, isConfirmed, swipeLabeling, showAlgorithmScores, showPeqDetails, onDismiss, onSendToMixer }: IssueCardProps) {
+const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFriendly, onFalsePositive, isFalsePositive, onConfirmFeedback, isConfirmed, swipeLabeling, showAlgorithmScores, showPeqDetails, onDismiss, onSendToMixer, onSendToPA2, pa2Connected }: IssueCardProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme !== 'light'
 
@@ -694,16 +703,27 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              {/* Row 3: Send to Mixer (Companion) */}
-              {onSendToMixer && (
-                <div className="flex items-center">
-                  <button
-                    onClick={() => onSendToMixer(advisory)}
-                    aria-label={`Send ${exactFreqStr} EQ recommendation to mixer via Companion`}
-                    className="rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1.5 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-8 min-w-[44px] text-blue-400/60 hover:text-blue-400 hover:bg-blue-500/10 border border-transparent"
-                  >
-                    SEND
-                  </button>
+              {/* Row 3: Send to Mixer (Companion) / PA2 */}
+              {(onSendToMixer || pa2Connected) && (
+                <div className="flex items-center gap-1">
+                  {onSendToMixer && (
+                    <button
+                      onClick={() => onSendToMixer(advisory)}
+                      aria-label={`Send ${exactFreqStr} EQ recommendation to mixer via Companion`}
+                      className="rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1.5 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-8 min-w-[44px] text-blue-400/60 hover:text-blue-400 hover:bg-blue-500/10 border border-transparent"
+                    >
+                      SEND
+                    </button>
+                  )}
+                  {pa2Connected && onSendToPA2 && (
+                    <button
+                      onClick={() => onSendToPA2()}
+                      aria-label={`Send ${exactFreqStr} to PA2 via Companion`}
+                      className="rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1.5 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-8 min-w-[44px] text-cyan-400/60 hover:text-cyan-400 hover:bg-cyan-500/10 border border-transparent"
+                    >
+                      PA2
+                    </button>
+                  )}
                 </div>
               )}
               {copied && <span className="sr-only" role="status">Frequency info copied</span>}

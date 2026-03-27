@@ -22,12 +22,14 @@ import { MeteringContext, useMetering } from '@/contexts/MeteringContext'
 import type { MeteringContextValue } from '@/contexts/MeteringContext'
 import { DetectionContext, useDetection } from '@/contexts/DetectionContext'
 import type { DetectionContextValue } from '@/contexts/DetectionContext'
+import { PA2Provider, usePA2 } from '@/contexts/PA2Context'
+import type { PA2ContextValue } from '@/contexts/PA2Context'
 
 // Re-export hooks for convenience and backward compatibility
-export { useEngine, useSettings, useMetering, useDetection }
+export { useEngine, useSettings, useMetering, useDetection, usePA2 }
 
 // Re-export types consumers may need
-export type { EngineContextValue, SettingsContextValue, MeteringContextValue, DetectionContextValue }
+export type { EngineContextValue, SettingsContextValue, MeteringContextValue, DetectionContextValue, PA2ContextValue }
 
 /**
  * @deprecated Use `EngineContextValue`, `SettingsContextValue`, `MeteringContextValue`,
@@ -234,7 +236,9 @@ export function AudioAnalyzerProvider({
       <SettingsContext.Provider value={settingsValue}>
         <DetectionContext.Provider value={detectionValue}>
           <MeteringContext.Provider value={meteringValue}>
-            {children}
+            <PA2Provider advisories={advisories}>
+              {children}
+            </PA2Provider>
           </MeteringContext.Provider>
         </DetectionContext.Provider>
       </SettingsContext.Provider>

@@ -29,13 +29,16 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
     siteUrl: '',
     pairingCode: '',
     pollIntervalMs: 500,
+    mixerModel: 'x32',
     outputProtocol: 'none',
     mixerHost: '',
     mixerPort: 10023,
     oscPrefix: '/ch/01/eq',
-    oscEqBandParam: 1,
     autoApply: false,
     maxCutDb: -12,
+    peqBandCount: 6,
+    peqBandStart: 1,
+    outputMode: 'peq',
   }
 
   pendingAdvisories: DwaAdvisory[] = []
@@ -98,6 +101,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
         const data = (await response.json()) as {
           ok: boolean
           advisories: DwaAdvisory[]
+          events?: Array<{ type: string; advisoryId?: string; mode?: string }>
           pendingCount: number
         }
 
@@ -107,6 +111,24 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
           for (const advisory of data.advisories) {
             this.processAdvisory(advisory)
           }
+        }
+
+        // Handle lifecycle events (resolve, dismiss, mode change)
+        if (data.events && data.events.length > 0) {
+          for (const event of data.events) {
+            if ((event.type === 'resolve' || event.type === 'dismiss') && event.advisoryId && this.mixerOutput) {
+              this.mixerOutput.clearByAdvisoryId(event.advisoryId).then((cleared) => {
+                if (cleared) {
+                  const summary = this.mixerOutput!.getSlotSummary()
+                  this.setVariableValues({ slots_used: String(summary.used) })
+                  this.log('info', `Cleared slot for ${event.type}d advisory ${event.advisoryId}`)
+                }
+              })
+              // Remove from pending
+              this.pendingAdvisories = this.pendingAdvisories.filter(a => a.id !== event.advisoryId)
+            }
+          }
+          this.refreshState()
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Poll failed'
@@ -152,9 +174,17 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
     this.log('info', `Advisory: ${Math.round(advisory.peq.hz)}Hz ${advisory.severity} (${advisory.peq.gainDb}dB)`)
 
-    // Auto-apply EQ to mixer if configured
-    if (this.config.autoApply && this.config.outputProtocol !== 'none' && this.mixerOutput) {
-      this.mixerOutput.applyAdvisory(advisory).catch((err) => {
+    // Auto-apply EQ to mixer if configured (uses outputMode: peq/geq/both)
+    if (this.config.autoApply && this.config.mixerModel !== ('none' as string) && this.mixerOutput) {
+      this.mixerOutput.applyWithMode(advisory).then((slot) => {
+        if (slot) {
+          const summary = this.mixerOutput!.getSlotSummary()
+          this.setVariableValues({
+            slots_used: String(summary.used),
+            slots_total: String(summary.total),
+          })
+        }
+      }).catch((err) => {
         const msg = err instanceof Error ? err.message : 'Apply failed'
         this.log('error', `Auto-apply failed: ${msg}`)
       })
@@ -183,11 +213,19 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
       this.log('info', 'No advisory to apply')
       return
     }
-    if (this.config.outputProtocol === 'none' || !this.mixerOutput) {
-      this.log('warn', 'No mixer output configured — set Protocol in module settings')
+    if (this.config.mixerModel === ('none' as string) || !this.mixerOutput) {
+      this.log('warn', 'No mixer output configured — set Mixer Model in module settings')
       return
     }
-    this.mixerOutput.applyAdvisory(latest).catch((err) => {
+    this.mixerOutput.applyWithMode(latest).then((slot) => {
+      if (slot) {
+        const summary = this.mixerOutput!.getSlotSummary()
+        this.setVariableValues({
+          slots_used: String(summary.used),
+          slots_total: String(summary.total),
+        })
+      }
+    }).catch((err) => {
       const msg = err instanceof Error ? err.message : 'Apply failed'
       this.log('error', `Apply failed: ${msg}`)
     })

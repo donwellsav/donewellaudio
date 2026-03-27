@@ -1,4 +1,6 @@
 import type { SomeCompanionConfigField } from '@companion-module/base'
+import { MIXER_MODEL_CHOICES } from './mixerProfiles.js'
+import type { MixerModelId } from './mixerProfiles.js'
 
 export interface ModuleConfig {
   // Input: relay connection
@@ -7,13 +9,20 @@ export interface ModuleConfig {
   pollIntervalMs: number
 
   // Output: mixer connection
+  mixerModel: MixerModelId
   outputProtocol: 'none' | 'osc' | 'tcp'
   mixerHost: string
   mixerPort: number
   oscPrefix: string
-  oscEqBandParam: number
   autoApply: boolean
   maxCutDb: number
+
+  // Slot management
+  peqBandCount: number
+  peqBandStart: number
+
+  // Output mode
+  outputMode: 'peq' | 'geq' | 'both'
 }
 
 export function GetConfigFields(): SomeCompanionConfigField[] {
@@ -61,13 +70,12 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
     },
     {
       type: 'dropdown',
-      id: 'outputProtocol',
-      label: 'Protocol',
-      default: 'none',
+      id: 'mixerModel',
+      label: 'Mixer Model',
+      default: 'x32',
       choices: [
         { id: 'none', label: 'None (variables only)' },
-        { id: 'osc', label: 'OSC (X32, Yamaha, Allen & Heath)' },
-        { id: 'tcp', label: 'TCP (dbx, generic)' },
+        ...MIXER_MODEL_CHOICES,
       ],
       width: 6,
     },
@@ -81,7 +89,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
     {
       type: 'number',
       id: 'mixerPort',
-      label: 'Mixer Port',
+      label: 'Mixer Port (auto-set by model, override here)',
       default: 10023,
       min: 1,
       max: 65535,
@@ -90,17 +98,38 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
     {
       type: 'textinput',
       id: 'oscPrefix',
-      label: 'OSC Channel Prefix (e.g. /ch/01/eq or /bus/01/eq)',
+      label: 'Channel/EQ Prefix (e.g. /ch/01/eq)',
       default: '/ch/01/eq',
       width: 6,
     },
     {
       type: 'number',
-      id: 'oscEqBandParam',
-      label: 'PEQ Band Number (1-6)',
+      id: 'peqBandCount',
+      label: 'PEQ Bands Available (for slot management)',
+      default: 6,
+      min: 1,
+      max: 8,
+      width: 6,
+    },
+    {
+      type: 'number',
+      id: 'peqBandStart',
+      label: 'First PEQ Band Number',
       default: 1,
       min: 1,
-      max: 6,
+      max: 8,
+      width: 6,
+    },
+    {
+      type: 'dropdown',
+      id: 'outputMode',
+      label: 'EQ Output Mode',
+      default: 'peq',
+      choices: [
+        { id: 'peq', label: 'PEQ (parametric notches)' },
+        { id: 'geq', label: 'GEQ (graphic EQ bands)' },
+        { id: 'both', label: 'Both PEQ + GEQ' },
+      ],
       width: 6,
     },
     {

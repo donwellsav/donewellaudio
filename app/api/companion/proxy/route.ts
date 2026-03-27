@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: response.status })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Proxy request failed'
+    console.error('[companion-proxy] Error:', message, 'URL:', (await request.clone().json().catch(() => ({}))).url)
     return NextResponse.json({ error: message }, { status: 502 })
   }
 }
