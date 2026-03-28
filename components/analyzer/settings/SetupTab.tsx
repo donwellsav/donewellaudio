@@ -187,7 +187,7 @@ export const SetupTab = memo(function SetupTab({
                 }
                 pa2.updateSettings(update)
               }}
-              className="h-4 w-4 rounded"
+              className="h-4 w-4 rounded accent-[var(--console-green)] cursor-pointer"
             />
           </label>
 
@@ -399,7 +399,7 @@ export const SetupTab = memo(function SetupTab({
                 type="checkbox"
                 checked={pa2.settings.ringOutAutoSend}
                 onChange={(e) => pa2.updateSettings({ ringOutAutoSend: e.target.checked })}
-                className="h-4 w-4 rounded"
+                className="h-4 w-4 rounded accent-[var(--console-green)] cursor-pointer"
               />
             </label>
             <p className="text-[10px] text-muted-foreground/50 mt-0.5">Auto-send ring-out detections to PA2 during calibration mode.</p>
@@ -411,7 +411,7 @@ export const SetupTab = memo(function SetupTab({
                 type="checkbox"
                 checked={pa2.settings.panicMuteEnabled}
                 onChange={(e) => pa2.updateSettings({ panicMuteEnabled: e.target.checked })}
-                className="h-4 w-4 rounded"
+                className="h-4 w-4 rounded accent-[var(--console-green)] cursor-pointer"
               />
             </label>
             <p className="text-[10px] text-muted-foreground/50 mt-0.5">Instantly mute all PA2 outputs if runaway feedback is detected. Safety net for live shows.</p>
@@ -423,7 +423,7 @@ export const SetupTab = memo(function SetupTab({
                 type="checkbox"
                 checked={pa2.settings.modeSyncEnabled}
                 onChange={(e) => pa2.updateSettings({ modeSyncEnabled: e.target.checked })}
-                className="h-4 w-4 rounded"
+                className="h-4 w-4 rounded accent-[var(--console-green)] cursor-pointer"
               />
             </label>
             <p className="text-[10px] text-muted-foreground/50 mt-0.5">When you switch modes (Speech, Worship, etc.), auto-configure PA2 AFS and compressor to match.</p>
