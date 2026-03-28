@@ -76,7 +76,7 @@ export const AdvancedTab = memo(function AdvancedTab({
               <span className="text-sm font-mono tabular-nums">{settings.sustainMs}ms</span>
             </div>
             <Slider value={[settings.sustainMs]} onValueChange={([v]) => diag('sustainMsOverride', v)} min={100} max={2000} step={50} />
-            <div className="flex justify-between text-sm text-muted-foreground font-mono"><span>Fast confirm</span><span>Cautious</span></div>
+            <div className="flex justify-between text-xs text-muted-foreground font-mono"><span className="flex-shrink-0">Fast confirm</span><span className="text-right">Cautious</span></div>
           </div>
           <div className="space-y-1">
             <div className="flex justify-between items-center">
@@ -84,7 +84,7 @@ export const AdvancedTab = memo(function AdvancedTab({
               <span className="text-sm font-mono tabular-nums">{settings.clearMs}ms</span>
             </div>
             <Slider value={[settings.clearMs]} onValueChange={([v]) => diag('clearMsOverride', v)} min={100} max={2000} step={50} />
-            <div className="flex justify-between text-sm text-muted-foreground font-mono"><span>Quick clear</span><span>Persistent</span></div>
+            <div className="flex justify-between text-xs text-muted-foreground font-mono"><span className="flex-shrink-0">Quick clear</span><span className="text-right">Persistent</span></div>
           </div>
         </div>
       </Section>
@@ -98,7 +98,7 @@ export const AdvancedTab = memo(function AdvancedTab({
           <div className="space-y-1">
             <button onClick={() => diag('algorithmMode', settings.algorithmMode !== 'auto' ? 'auto' : 'custom')}
               className={`min-h-11 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full px-1.5 rounded text-xs font-mono font-bold tracking-wide transition-colors ${
-                settings.algorithmMode === 'auto' ? 'bg-primary/20 text-primary border border-primary/40' : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
+                settings.algorithmMode === 'auto' ? 'bg-[var(--console-amber)]/15 text-[var(--console-amber)] border border-[var(--console-amber)]/35' : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
               }`}>Auto</button>
             <div className={`grid grid-cols-3 gap-1 ${settings.algorithmMode === 'auto' ? 'pointer-events-none' : ''}`}>
               {([['msd', 'MSD'], ['phase', 'Phase'], ['spectral', 'Spectral'], ['comb', 'Comb'], ['ihr', 'IHR'], ['ptmr', 'PTMR'], ['ml', 'ML']] as const).map(([key, label]) => {
@@ -114,8 +114,8 @@ export const AdvancedTab = memo(function AdvancedTab({
                     diag('enabledAlgorithms', next)
                   }}
                     className={`min-h-11 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-1 rounded text-xs font-mono font-bold text-center transition-colors ${
-                      isAuto ? 'text-primary/60 border border-primary/20 bg-transparent'
-                        : enabled ? 'bg-primary/20 text-primary border border-primary/40'
+                      isAuto ? 'text-[var(--console-amber)]/50 border border-[var(--console-amber)]/20 bg-transparent'
+                        : enabled ? 'bg-[var(--console-amber)]/15 text-[var(--console-amber)] border border-[var(--console-amber)]/35'
                         : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
                     }`}>{label}</button>
                 )
@@ -135,7 +135,7 @@ export const AdvancedTab = memo(function AdvancedTab({
               <span className="text-sm font-mono tabular-nums">{settings.noiseFloorAttackMs}ms</span>
             </div>
             <Slider value={[settings.noiseFloorAttackMs]} onValueChange={([v]) => diag('noiseFloorAttackMs', v)} min={50} max={1000} step={25} />
-            <div className="flex justify-between text-sm text-muted-foreground font-mono"><span>Fast response</span><span>Smooth</span></div>
+            <div className="flex justify-between text-xs text-muted-foreground font-mono"><span className="flex-shrink-0">Fast response</span><span className="text-right">Smooth</span></div>
           </div>
           <div className="space-y-1">
             <div className="flex justify-between items-center">
@@ -143,7 +143,7 @@ export const AdvancedTab = memo(function AdvancedTab({
               <span className="text-sm font-mono tabular-nums">{settings.noiseFloorReleaseMs}ms</span>
             </div>
             <Slider value={[settings.noiseFloorReleaseMs]} onValueChange={([v]) => diag('noiseFloorReleaseMs', v)} min={200} max={5000} step={100} />
-            <div className="flex justify-between text-sm text-muted-foreground font-mono"><span>Quick drop</span><span>Gradual</span></div>
+            <div className="flex justify-between text-xs text-muted-foreground font-mono"><span className="flex-shrink-0">Quick drop</span><span className="text-right">Gradual</span></div>
           </div>
         </div>
       </Section>
@@ -158,7 +158,7 @@ export const AdvancedTab = memo(function AdvancedTab({
               <span className="text-sm font-mono tabular-nums">{settings.peakMergeCents}¢</span>
             </div>
             <Slider value={[settings.peakMergeCents]} onValueChange={([v]) => diag('peakMergeCents', v)} min={10} max={150} step={5} />
-            <div className="flex justify-between text-sm text-muted-foreground font-mono"><span>Narrow (precise)</span><span>Wide (merged)</span></div>
+            <div className="flex justify-between text-xs text-muted-foreground font-mono"><span className="flex-shrink-0">Narrow (precise)</span><span>Wide</span></div>
           </div>
           <Section title="Threshold Mode" showTooltip={settings.showTooltips}
             tooltip="Absolute: fixed dB threshold. Relative: above noise floor. Hybrid: uses both (recommended).">
@@ -167,7 +167,7 @@ export const AdvancedTab = memo(function AdvancedTab({
               <SelectContent>
                 <SelectItem value="absolute">Absolute - Fixed dB</SelectItem>
                 <SelectItem value="relative">Relative - Above Noise</SelectItem>
-                <SelectItem value="hybrid">Hybrid - Both (Recommended)</SelectItem>
+                <SelectItem value="hybrid">Hybrid (Recommended)</SelectItem>
               </SelectContent>
             </Select>
           </Section>
@@ -177,7 +177,7 @@ export const AdvancedTab = memo(function AdvancedTab({
               <span className="text-sm font-mono tabular-nums">{settings.prominenceDb}dB</span>
             </div>
             <Slider value={[settings.prominenceDb]} onValueChange={([v]) => diag('prominenceDbOverride', v)} min={4} max={30} step={1} />
-            <div className="flex justify-between text-sm text-muted-foreground font-mono"><span>Sensitive</span><span>Only strong peaks</span></div>
+            <div className="flex justify-between text-xs text-muted-foreground font-mono"><span className="flex-shrink-0">Sensitive</span><span>Strong peaks</span></div>
           </div>
         </div>
       </Section>

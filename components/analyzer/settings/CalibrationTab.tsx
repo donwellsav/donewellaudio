@@ -285,7 +285,7 @@ export const CalibrationTab = memo(function CalibrationTab({
 
       {/* ── Ambient Capture ───────────────────────────────────────── */}
       <SectionGroup title="Ambient Noise Capture">
-        <Section title="Noise Floor Measurement" tooltip="Records 5 seconds of ambient noise to establish the room's baseline noise floor spectrum.">
+        <Section title="Noise Floor" tooltip="Records 5 seconds of ambient noise to establish the room's baseline noise floor spectrum.">
           <Button
             variant="secondary"
             size="sm"
@@ -346,9 +346,9 @@ export const CalibrationTab = memo(function CalibrationTab({
 
       {/* ── Session Controls ──────────────────────────────────────── */}
       <SectionGroup title="Calibration Session">
-        <Section title="Record Detection Data" tooltip="When enabled, all detection events, spectrum snapshots, and noise floor readings are automatically recorded during analysis for later export.">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-mono">Enable Calibration Mode</Label>
+        <Section title="Detection Recording" tooltip="When enabled, all detection events, spectrum snapshots, and noise floor readings are automatically recorded during analysis for later export.">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-mono text-muted-foreground">Enable</span>
             <PillToggle
               checked={calibrationEnabled}
               onChange={setCalibrationEnabled}

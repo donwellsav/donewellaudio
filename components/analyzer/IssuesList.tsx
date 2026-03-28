@@ -185,7 +185,11 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               className="group relative flex flex-col items-center justify-center gap-3 w-full max-w-[220px] py-5 px-5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all duration-300 cursor-pointer animate-start-glow focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary"
               style={{ background: 'radial-gradient(circle at 50% 40%, rgba(75, 146, 255, 0.08) 0%, transparent 70%)' }}
             >
-              <DwaLogo className="w-20 h-20 text-foreground drop-shadow-[0_0_12px_rgba(37,99,235,0.3)] dark:drop-shadow-[0_0_14px_rgba(75,146,255,0.45)]" />
+              <div className="relative flex items-center justify-center" style={{ width: 80, height: 80 }}>
+                <div className="standby-glow-ring" />
+                <div className="standby-glow-ring" style={{ animationDelay: '1.75s' }} />
+                <DwaLogo className="w-20 h-20 text-foreground drop-shadow-[0_0_12px_rgba(37,99,235,0.3)] dark:drop-shadow-[0_0_14px_rgba(75,146,255,0.45)]" />
+              </div>
               <div className="flex flex-col items-center gap-0.5">
                 <span className="font-mono text-xs font-bold tracking-[0.15em] uppercase text-muted-foreground group-hover:text-foreground transition-colors">
                   Press to Start
@@ -539,9 +543,9 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
           {swipeDirection === 'right' && (
             <div
               className="absolute inset-0 flex items-center justify-start pl-4 rounded"
-              style={{ backgroundColor: `rgba(16, 185, 129, ${swipeProgress * 0.3})` }}
+              style={{ backgroundColor: `rgba(245, 158, 11, ${swipeProgress * 0.25})` }}
             >
-              <span className="text-xs font-mono font-bold text-emerald-300 uppercase tracking-wider"
+              <span className="text-xs font-mono font-bold text-[var(--console-amber)] uppercase tracking-wider"
                 style={{ opacity: swipeProgress }}>
                 CONFIRM
               </span>
@@ -697,7 +701,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                     onClick={() => onConfirmFeedback(advisory.id)}
                     aria-label={`${isConfirmed ? 'Unconfirm' : 'Confirm'} ${exactFreqStr} as real feedback`}
                     className={`rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1.5 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-8 min-w-[44px] ${
-                      isConfirmed ? 'text-emerald-400 bg-emerald-500/20 border border-emerald-500/40' : 'text-muted-foreground/50 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent'
+                      isConfirmed ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/15 border border-[var(--console-amber)]/35' : 'text-muted-foreground/50 hover:text-[var(--console-amber)] hover:bg-[var(--console-amber)]/10 border border-transparent'
                     }`}
                   >
                     CONFIRM
@@ -707,7 +711,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                   onClick={handleCopy}
                   aria-label={`Copy ${exactFreqStr} frequency info`}
                   className={`rounded btn-glow flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-8 w-8 ${
-                    copied ? 'text-emerald-400' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
+                    copied ? 'text-[var(--console-amber)]' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
                   }`}
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -745,7 +749,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
               onClick={handleCopy}
               aria-label={`Copy ${exactFreqStr} frequency info`}
               className={`rounded btn-glow flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-8 h-8 flex-shrink-0 self-center ${
-                copied ? 'text-emerald-400' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
+                copied ? 'text-[var(--console-amber)]' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
               }`}
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -826,7 +830,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                   onClick={() => onConfirmFeedback(advisory.id)}
                   aria-label={`${isConfirmed ? 'Unconfirm' : 'Confirm'} feedback`}
                   className={`rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-2 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-8 min-w-[44px] ${
-                    isConfirmed ? 'text-emerald-400 bg-emerald-500/20 border border-emerald-500/40' : 'text-muted-foreground/50 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent'
+                    isConfirmed ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/15 border border-[var(--console-amber)]/35' : 'text-muted-foreground/50 hover:text-[var(--console-amber)] hover:bg-[var(--console-amber)]/10 border border-transparent'
                   }`}
                 >
                   CONFIRM
@@ -836,7 +840,7 @@ const IssueCard = memo(function IssueCard({ advisory, occurrenceCount, touchFrie
                 onClick={handleCopy}
                 aria-label={`Copy ${exactFreqStr}`}
                 className={`rounded btn-glow flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-9 h-8 ${
-                  copied ? 'text-emerald-400' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
+                  copied ? 'text-[var(--console-amber)]' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
                 }`}
               >
                 {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
