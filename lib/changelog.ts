@@ -14,6 +14,25 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.28.0',
+    date: '2026-03-28',
+    changes: [
+      { type: 'feat', description: 'Advisory confidence now takes max(old, new) on re-detection' },
+      { type: 'feat', description: 'Severity escalates when new detection is more urgent' },
+      { type: 'feat', description: 'Previously: RESONANCE at 60% that worsened to GROWING at 90% stayed at original values' },
+      { type: 'feat', description: 'Q blend weight adapts to signal quality: alpha = SNR / (SNR + 20)' },
+      { type: 'feat', description: 'Clean signal (50dB SNR): 71% measured Q, 29% preset' },
+      { type: 'feat', description: 'Noisy signal (10dB SNR): 33% measured Q, 67% preset' },
+      { type: 'feat', description: 'Prevents noisy Q measurements from producing bad notch widths' },
+      { type: 'feat', description: 'Depth multiplier interpolation changed from linear Hz to log2 (octave-based)' },
+      { type: 'feat', description: 'Better psychoacoustic accuracy in 500-2000Hz vocal range' },
+      { type: 'feat', description: '1250Hz now scales to ~1.03x (was 0.95x with linear)' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` — zero errors' },
+      { type: 'feat', description: '[x] `pnpm test` — 981 pass, 4 skip' },
+      { type: 'feat', description: '[x] ERB test updated for log interpolation' },
+    ],
+  },
+  {
     version: '0.27.0',
     date: '2026-03-28',
     changes: [
