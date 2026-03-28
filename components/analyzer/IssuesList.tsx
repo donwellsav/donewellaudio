@@ -212,7 +212,7 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               <>
                 <div className="flex items-center gap-2 w-full max-w-[220px]">
                   <div className="flex-1 h-px panel-groove-subtle" />
-                  <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-widest">or</span>
+                  <span className="font-mono text-[9px] text-[var(--console-amber)]/40 uppercase tracking-widest">— OR —</span>
                   <div className="flex-1 h-px panel-groove-subtle" />
                 </div>
 

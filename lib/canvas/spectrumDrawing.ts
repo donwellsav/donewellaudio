@@ -34,11 +34,11 @@ export interface CanvasTheme {
 }
 
 export const DARK_CANVAS_THEME: CanvasTheme = {
-  background: '#080a0c',
-  vignette: 'rgba(0, 0, 0, 0.4)',
-  gridMinor: '#121416',
-  gridMajor: '#1e2024',
-  gridFreq: '#161820',
+  background: '#08101a',
+  vignette: 'rgba(0, 0, 0, 0.22)',
+  gridMinor: '#1a2030',
+  gridMajor: '#27303f',
+  gridFreq: '#1e2533',
   zoneLabel: 'rgba(160, 170, 190, 0.35)',
   axisLabel: '#8891a0',
   axisLabelShadow: 'rgba(0,0,0,0.7)',
@@ -138,6 +138,16 @@ export function drawGrid(
   ctx.fillStyle = vg
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
+  // Instrument backlight — diffuse blue-white glow centered where spectrum data lives
+  const backlight = ctx.createRadialGradient(
+    plotWidth * 0.5, plotHeight * 0.3, 0,
+    plotWidth * 0.5, plotHeight * 0.5, plotWidth * 0.52,
+  )
+  backlight.addColorStop(0, 'rgba(20, 45, 90, 0.28)')
+  backlight.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  ctx.fillStyle = backlight
+  ctx.fillRect(0, 0, plotWidth, plotHeight)
+
   // Minor dB grid (subtle, drawn first)
   ctx.strokeStyle = theme.gridMinor
   ctx.lineWidth = 0.5
@@ -182,7 +192,7 @@ const FREQ_ZONE_BANDS = [
 ] as const
 
 // Zone fill opacity per band — dark mode is stronger (dark bg absorbs color)
-const ZONE_ALPHA_DARK  = [0.12, 0.10, 0.10, 0.08, 0.08]
+const ZONE_ALPHA_DARK  = [0.20, 0.17, 0.15, 0.14, 0.14]
 const ZONE_ALPHA_LIGHT = [0.08, 0.07, 0.07, 0.06, 0.06]
 
 /**
@@ -976,62 +986,16 @@ export function drawPlaceholder(
   // Educational frequency zone bands — always shown at idle
   drawFreqZones(ctx, plotWidth, plotHeight, range, true, theme)
 
-  // Draw fake spectrum fill + stroke using PLACEHOLDER_CURVE
-  // Use freqRangeLine color (primary blue) for the placeholder spectrum
-  const pColor = theme.freqRangeLine
-  const gradient = ctx.createLinearGradient(0, 0, 0, plotHeight)
-  gradient.addColorStop(0, pColor + 'd9')  // ~85% opacity
-  gradient.addColorStop(0.5, pColor + '73') // ~45% opacity (was 35%)
-  gradient.addColorStop(1, pColor + '1a')   // ~10% opacity (was 5%)
-
-  const strokePath = new Path2D()
-  const fillPath = new Path2D()
-  let started = false
-  let lastX = 0
-
-  for (const [freq, db] of PLACEHOLDER_CURVE) {
-    if (freq < range.freqMin || freq > range.freqMax) continue
-    const x = freqToLogPosition(freq, range.freqMin, range.freqMax) * plotWidth
-    const y = ((range.dbMax - clamp(db, range.dbMin, range.dbMax)) / (range.dbMax - range.dbMin)) * plotHeight
-
-    if (!started) {
-      strokePath.moveTo(x, y)
-      fillPath.moveTo(x, plotHeight)
-      fillPath.lineTo(x, y)
-      started = true
-    } else {
-      strokePath.lineTo(x, y)
-      fillPath.lineTo(x, y)
-    }
-    lastX = x
-  }
-
-  fillPath.lineTo(lastX, plotHeight)
-  fillPath.closePath()
-
-  ctx.fillStyle = gradient
-  ctx.fill(fillPath)
-
+  // Zero-signal floor line — flat line at the bottom of the visible range
+  const floorY = plotHeight
   ctx.strokeStyle = VIZ_COLORS.SPECTRUM
-
-  // Deep halo
-  ctx.globalAlpha = 0.06
-  ctx.lineWidth = 9.5
-  ctx.stroke(strokePath)
-
-  // Mid glow
-  ctx.globalAlpha = 0.15
-  ctx.lineWidth = 4.5
-  ctx.stroke(strokePath)
-
-  // Sharp line with bloom
+  ctx.globalAlpha = 0.18
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(0, floorY)
+  ctx.lineTo(plotWidth, floorY)
+  ctx.stroke()
   ctx.globalAlpha = 1
-  ctx.lineWidth = 1.5
-  ctx.shadowColor = theme.placeholderShadow
-  ctx.shadowBlur = 6
-  ctx.stroke(strokePath)
-  ctx.shadowColor = 'transparent'
-  ctx.shadowBlur = 0
 
   ctx.restore()
 
