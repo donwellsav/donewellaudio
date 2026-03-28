@@ -14,6 +14,21 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.35.0',
+    date: '2026-03-28',
+    changes: [
+      { type: 'feat', description: '**SettingsPanel**: `truncate` on tab label span — prevents labels bleeding outside tab width at narrow panel sizes' },
+      { type: 'feat', description: '**SetupTab**: `overflow-hidden` + `<span className="truncate">` on mode chip buttons — stops "Broadcast" / "Worship" wrapping at narrow settings panel widths' },
+      { type: 'feat', description: '**DesktopLayout**: `whitespace-nowrap` on RTA panel header span — guards "Real-Time Analyzer" label from ever wrapping' },
+      { type: 'feat', description: '**dropdown-menu**: `min-w-0` added to `DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioItem`, `DropdownMenuSubTrigger` base classes — consumer-applied `truncate` classes (e.g. device name list) now actually take effect' },
+      { type: 'feat', description: '[ ] tsc --noEmit clean ✅' },
+      { type: 'feat', description: '[ ] 981 pass / 4 skip ✅' },
+      { type: 'feat', description: '[ ] Narrow the settings panel — mode chips show ellipsis instead of wrapping' },
+      { type: 'feat', description: '[ ] Device dropdown with long mic names — text truncates with ellipsis' },
+      { type: 'feat', description: '[ ] Tab labels at minimum panel width — show icon only, no text bleed' },
+    ],
+  },
+  {
     version: '0.34.0',
     date: '2026-03-28',
     changes: [
