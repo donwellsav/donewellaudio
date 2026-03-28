@@ -14,6 +14,28 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.36.0',
+    date: '2026-03-28',
+    changes: [
+      { type: 'feat', description: '**CSS overflow hardening** — truncation and `min-w-0` fixes across SettingsPanel, SetupTab, DesktopLayout, and dropdown-menu primitives' },
+      { type: 'feat', description: '**Canvas depth uplift** — brighter gridlines, visible zone bands, center backlight glow, reduced vignette crush (RTA + GEQ)' },
+      { type: 'feat', description: '**Border texture** — `instrument-window` redesigned with 6-layer beveled bezel + gradient background; `panel-header` stronger contrast' },
+      { type: 'feat', description: '**8 UI polish improvements** — page bg radial gradient, channel-strip catch-light, glass-card highlight, amber tab active state, icon-cluster borders, "Press To Begin" pulse glow, "— OR —" amber divider, header fullscreen separator' },
+      { type: 'feat', description: '**Placeholder curve removed** — idle RTA now shows flat floor line at -100 dB instead of fake spectrum data' },
+      { type: 'feat', description: '[ ] `npx tsc --noEmit` — clean (0 errors)' },
+      { type: 'feat', description: '[ ] `pnpm test` — 981 pass, 4 skip' },
+      { type: 'feat', description: '[ ] Visual: RTA gridlines visible at idle (dark mode)' },
+      { type: 'feat', description: '[ ] Visual: GEQ grid lines visible at idle' },
+      { type: 'feat', description: '[ ] Visual: Zone color bands perceptible in RTA' },
+      { type: 'feat', description: '[ ] Visual: `instrument-window` borders show beveled catch-light' },
+      { type: 'feat', description: '[ ] Visual: "Press To Begin" pill has border + slow blue pulse' },
+      { type: 'feat', description: '[ ] Visual: Tab bar active tab is amber, inactive tabs are dimmed' },
+      { type: 'feat', description: '[ ] Visual: "— OR —" divider has amber tint' },
+      { type: 'feat', description: '[ ] Visual: Idle RTA shows flat floor line, not fake curve' },
+      { type: 'feat', description: '[ ] No text overflow/truncation in settings panel, dropdown items, or panel headers' },
+    ],
+  },
+  {
     version: '0.35.0',
     date: '2026-03-28',
     changes: [
