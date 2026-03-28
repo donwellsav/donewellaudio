@@ -418,7 +418,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
           onClick={() => onFaderModeChange('gain')}
           className={`flex-1 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
             !isSensitivity
-              ? 'bg-white/15 text-foreground'
+              ? 'bg-[var(--console-amber)]/10 text-[var(--console-amber)]'
               : 'bg-transparent text-muted-foreground hover:text-foreground/70'
           }`}
           title="Input gain fader"
@@ -455,7 +455,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
         />
       ) : (
         <button
-          className={`font-mono text-center transition-colors cursor-text flex-shrink-0 tabular-nums text-sm leading-tight ${
+          className={`fader-readout font-mono text-center transition-colors cursor-text flex-shrink-0 tabular-nums text-sm leading-tight ${
             isSensitivity
               ? 'text-blue-400 hover:text-blue-300'
               : autoGainEnabled ? 'text-primary hover:text-primary/80' : 'text-foreground hover:text-primary'
