@@ -15,7 +15,7 @@ interface PillToggleProps {
   className?: string
 }
 
-const activeClass = 'bg-primary/20 text-primary border border-primary/40'
+const activeClass = 'bg-[var(--console-amber)]/15 text-[var(--console-amber)] border border-[var(--console-amber)]/35'
 const inactiveClass = 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
 const baseClass = 'px-2 py-0.5 rounded text-sm font-mono font-bold tracking-wide transition-colors'
 

@@ -98,7 +98,7 @@ export const AdvancedTab = memo(function AdvancedTab({
           <div className="space-y-1">
             <button onClick={() => diag('algorithmMode', settings.algorithmMode !== 'auto' ? 'auto' : 'custom')}
               className={`min-h-11 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full px-1.5 rounded text-xs font-mono font-bold tracking-wide transition-colors ${
-                settings.algorithmMode === 'auto' ? 'bg-primary/20 text-primary border border-primary/40' : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
+                settings.algorithmMode === 'auto' ? 'bg-[var(--console-amber)]/15 text-[var(--console-amber)] border border-[var(--console-amber)]/35' : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
               }`}>Auto</button>
             <div className={`grid grid-cols-3 gap-1 ${settings.algorithmMode === 'auto' ? 'pointer-events-none' : ''}`}>
               {([['msd', 'MSD'], ['phase', 'Phase'], ['spectral', 'Spectral'], ['comb', 'Comb'], ['ihr', 'IHR'], ['ptmr', 'PTMR'], ['ml', 'ML']] as const).map(([key, label]) => {
@@ -114,8 +114,8 @@ export const AdvancedTab = memo(function AdvancedTab({
                     diag('enabledAlgorithms', next)
                   }}
                     className={`min-h-11 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-1 rounded text-xs font-mono font-bold text-center transition-colors ${
-                      isAuto ? 'text-primary/60 border border-primary/20 bg-transparent'
-                        : enabled ? 'bg-primary/20 text-primary border border-primary/40'
+                      isAuto ? 'text-[var(--console-amber)]/50 border border-[var(--console-amber)]/20 bg-transparent'
+                        : enabled ? 'bg-[var(--console-amber)]/15 text-[var(--console-amber)] border border-[var(--console-amber)]/35'
                         : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
                     }`}>{label}</button>
                 )
