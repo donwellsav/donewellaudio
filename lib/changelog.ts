@@ -14,6 +14,27 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.25.0',
+    date: '2026-03-28',
+    changes: [
+      { type: 'feat', description: '**28 bug fixes** from dual code audit across the full PA2 detection-to-cut pipeline' },
+      { type: 'feat', description: '**Aggressive detection tuning** — catches more feedback, low-confidence gets shallow cuts instead of rejection' },
+      { type: 'feat', description: '**Settings UI descriptions** on all PA2 Bridge controls' },
+      { type: 'feat', description: '**Companion module v0.2.20260328** pre-packaged with download links on Help page' },
+      { type: 'feat', description: 'Fix `both` mode double-cut (was sending same advisory to GEQ AND PEQ)' },
+      { type: 'feat', description: 'Gate `/detect` on `stateLoaded`, serialized command queue, payload validation' },
+      { type: 'feat', description: 'Per-output PEQ slot allocation in `/approve` (was global)' },
+      { type: 'feat', description: '`_routeToOutput` checks `lpFreq` not `hpFreq` (0 is falsy in JS)' },
+      { type: 'feat', description: 'Notch filter type Bell to Notch, Q-scaling for depth, GEQ accumulation fix' },
+      { type: 'feat', description: 'Panic mute, auto-release, closedLoopEQ verify-deepen, slot prioritization' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` zero errors' },
+      { type: 'feat', description: '[x] `pnpm test` 981 pass, 4 skip' },
+      { type: 'feat', description: '[x] `node test/test-protocol.js` 91 pass' },
+      { type: 'feat', description: '[x] Visual verification in Chrome with live feedback' },
+      { type: 'feat', description: '[ ] Verify PA2 PEQ with updated Companion module' },
+    ],
+  },
+  {
     version: '0.24.0',
     date: '2026-03-28',
     changes: [
