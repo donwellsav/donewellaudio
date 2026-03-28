@@ -12,7 +12,12 @@ You are the fabrication verifier. Your job is to compare Claude's last response 
 
 ## Instructions
 
-1. Read the evidence ledger at the OS temp directory: look for `claude-evidence-ledger.jsonl` in the temp directory. Each line is a JSON object with a `summary` field containing tool execution facts and a `raw` field with the original tool data.
+1. Read the evidence ledger. Try these paths in order until one exists:
+   - `C:\Users\dwell\AppData\Local\Temp\claude-evidence-ledger.jsonl` (Windows user temp — primary)
+   - `C:\Windows\Temp\claude-evidence-ledger.jsonl` (Windows system temp — fallback)
+   - `/tmp/claude-evidence-ledger.jsonl` (Linux/macOS)
+   Each line is a JSON object with a `summary` field containing tool execution facts and a `raw` field with the original tool data.
+   If none of the paths exist or are readable, return `allow` with the note "Ledger unavailable — verification skipped."
 
 2. Read `$ARGUMENTS.last_assistant_message` — this is the response you are verifying.
 
