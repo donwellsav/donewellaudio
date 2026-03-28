@@ -18,6 +18,12 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node .claude/hooks/ship-guard.js",
+            "timeout": 5,
+            "statusMessage": "Checking ship permissions..."
+          },
+          {
+            "type": "command",
             "command": "node .claude/hooks/bash-protection.js",
             "timeout": 5,
             "statusMessage": "Checking command safety..."

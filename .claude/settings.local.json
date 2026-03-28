@@ -38,15 +38,29 @@
       "Bash(git commit:*)",
       "Bash(node -e \"require\\(''''docx''''\\)\")",
       "Bash(node tmp/gen-3ring-instructions.js)",
-      "Bash(git push:*)",
-      "Bash(gh pr:*)",
-      "Bash(git merge:*)",
+      "Bash(git push origin HEAD:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr checks:*)",
       "Bash(PYTHONIOENCODING=utf-8 python3 \"C:/Users/dwell/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"pro audio console dark dashboard real-time monitoring professional\" --design-system -p \"DoneWell Audio\" -f markdown)",
       "Bash(PYTHONIOENCODING=utf-8 python3 \"C:/Users/dwell/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"dark console instrument panel hardware analog\" --domain style -n 5)",
       "Bash(PYTHONIOENCODING=utf-8 python3 \"C:/Users/dwell/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"dashboard real-time data monitoring\" --domain ux -n 5)",
       "Bash(PYTHONIOENCODING=utf-8 python3 \"C:/Users/dwell/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"micro-interaction animation feedback\" --domain ux -n 6)",
       "Bash(\"C:\\\\Users\\\\dwell\\\\AppData\\\\Local\\\\Temp\\\\claude-cia-audit.md\")",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "Bash(grep -v \"^commit\\\\|^Author\\\\|^Date\\\\|^$\\\\|^    \")",
+      "Bash(grep -v \"^---\" echo \"---\" git diff 31dbf41 HEAD -- components/analyzer/settings/SettingsPanel.tsx)",
+      "Bash(cmd /c \"rmdir /s /q .next\")",
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(dir .next)",
+      "Bash(cmd /c \"rmdir /s /q .next 2>nul & echo done\")",
+      "Bash(cmd /c \"rmdir /s /q .next\\\\dev\\\\cache 2>nul & echo done\")",
+      "Bash(tasklist)",
+      "Bash(findstr /i \"node\")",
+      "Bash(node -e \":*)",
+      "Bash(node .claude/hooks/ship-guard.js)",
+      "Bash(node -e \"const fs=require\\(''fs''\\),os=require\\(''os''\\),path=require\\(''path''\\);fs.rmSync\\(path.join\\(os.tmpdir\\(\\),''claude-session-maintenance'',''maintenance-mode''\\),{force:true}\\);console.log\\(''cleared''\\)\")"
     ]
   }
 }
