@@ -14,6 +14,30 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.26.0',
+    date: '2026-03-28',
+    changes: [
+      { type: 'feat', description: '**Custom scrollbar** — 4px amber-tinted track matching console palette' },
+      { type: 'feat', description: '**LED status dots** — amber pulse (waiting) / green steady (active) in AlgorithmStatusBar' },
+      { type: 'feat', description: '**Console-thumb active glow** — `:active` scale + glow via CSS class (inline style removed so pseudo fires)' },
+      { type: 'feat', description: '**GAIN mode amber toggle** — active state uses `--console-amber` instead of white' },
+      { type: 'feat', description: '**Tab content fade** — fade-in animation on every settings tab switch' },
+      { type: 'feat', description: '**LiveTab section divider** — subtle gradient groove between sensitivity and freq range' },
+      { type: 'feat', description: '**CRT scanlines + film grain** — `body::before` 4px repeating gradient, grain lifted to 0.055 opacity' },
+      { type: 'feat', description: '**Radar-ping monitoring state** — sonar-ring animation replaces flat scan line; CLEAR / LOW SIGNAL labels' },
+      { type: 'feat', description: '**Status bar hierarchy** — unified `·` separators, FPS muted to `text-[10px] text-muted-foreground/50`' },
+      { type: 'feat', description: '**Sidebar panel depth** — `border-r-2 border-r-primary/10` separates controls from RTA' },
+      { type: 'feat', description: '**Fader readout face** — `.fader-readout` hardware LED display treatment on dB readout' },
+      { type: 'feat', description: '**Header icon clusters** — `.icon-cluster` groups primary actions and utility icons into hardware panel sections' },
+      { type: 'feat', description: '[ ] Dark mode: cards/panels have depth, radar ping renders, LED dots animate' },
+      { type: 'feat', description: '[ ] Light mode: no contrast regressions, scanlines barely visible (intended)' },
+      { type: 'feat', description: '[ ] `prefers-reduced-motion`: all CSS animations suppressed' },
+      { type: 'feat', description: '[ ] Mobile: no layout regressions on narrow screens' },
+      { type: 'feat', description: '[ ] `tsc --noEmit` clean ✅' },
+      { type: 'feat', description: '[ ] 940/944 tests pass (4 skipped) ✅' },
+    ],
+  },
+  {
     version: '0.25.0',
     date: '2026-03-28',
     changes: [
