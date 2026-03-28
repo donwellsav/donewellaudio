@@ -1,6 +1,6 @@
 {
 	"name": "companion-module-dbx-driverack-pa2",
-	"version": "0.2.20260328",
+	"version": "0.3.20260328",
 	"main": "src/main.js",
 	"scripts": {
 		"format": "prettier -w .",

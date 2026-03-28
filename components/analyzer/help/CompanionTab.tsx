@@ -50,7 +50,7 @@ export const CompanionTab = memo(function CompanionTab() {
               </ol>
             </div>
             <p className="mt-2 text-[10px] text-muted-foreground/50">
-              v0.2.20260328 &mdash; pre-packaged with node_modules.
+              v0.3.20260328 &mdash; pre-packaged with node_modules.
             </p>
           </HelpSection>
 
