@@ -11,8 +11,6 @@
       "Bash(gh repo:*)",
       "Bash(git add:*)",
       "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__list_deployments",
-      "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__deploy_to_vercel",
-      "Bash(npx vercel:*)",
       "Bash(git stash:*)",
       "Bash(git pull:*)",
       "Bash(grep -v \"^$\\\\|⎯\")",
@@ -22,7 +20,6 @@
       "Bash(CI=\"\" pnpm install)",
       "Bash(git checkout:*)",
       "Bash(git fetch:*)",
-      "Bash(git merge:*)",
       "Bash(pnpm install:*)",
       "Bash(pnpm audit:*)",
       "Bash(pnpm lint:*)",
@@ -30,7 +27,10 @@
       "Bash(git status:*)",
       "Bash(mkdir -p .claude/tmp)",
       "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__get_project",
-      "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__list_projects"
+      "mcp__0d4b5226-a85b-4a14-b837-9861889c489f__list_projects",
+      "Bash(where pnpm:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(node -e \"const os = require\\(''os''\\); const path = require\\(''path''\\); console.log\\(path.join\\(os.tmpdir\\(\\), ''claude-cia-audit.md''\\)\\)\")"
     ]
   }
 }
