@@ -98,15 +98,17 @@ export const DesktopLayout = memo(function DesktopLayout({
                 droppedPercent={droppedPercent}
               />
             </div>
-            {/* Sidebar tab bar */}
-            <div className="flex-shrink-0 flex border-b border-border">
+            {/* Sidebar tab bar — segmented control */}
+            <div className="flex-shrink-0 flex items-center gap-1.5 px-2 py-1.5 border-b border-border/50">
+              <div className="flex flex-1 tab-track">
               {!issuesPanelOpen && (
                 <button
                   onClick={() => setActiveSidebarTab('issues')}
-                  className={`flex-1 py-1 text-sm font-mono font-bold uppercase tracking-[0.2em] transition-all duration-200 border-b-2 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+                  data-active={activeSidebarTab === 'issues' ? 'true' : 'false'}
+                  className={`tab-track-item flex-1 py-0.5 text-[11px] font-mono font-bold uppercase tracking-[0.2em] cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                     activeSidebarTab === 'issues'
-                      ? 'text-foreground border-primary bg-primary/5'
-                      : 'text-muted-foreground border-transparent hover:text-foreground'
+                      ? 'text-[var(--console-amber)]'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   Issues
@@ -117,14 +119,16 @@ export const DesktopLayout = memo(function DesktopLayout({
               )}
               <button
                 onClick={() => setActiveSidebarTab('controls')}
-                className={`flex-1 py-1 text-sm font-mono font-bold uppercase tracking-[0.2em] transition-all duration-200 border-b-2 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+                data-active={activeSidebarTab === 'controls' ? 'true' : 'false'}
+                className={`tab-track-item flex-1 py-0.5 text-[11px] font-mono font-bold uppercase tracking-[0.2em] cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                   activeSidebarTab === 'controls'
-                    ? 'text-foreground border-primary bg-primary/5'
-                    : 'text-muted-foreground border-transparent hover:text-foreground'
+                    ? 'text-[var(--console-amber)]'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Controls
               </button>
+              </div>
               {/* Split-view toggle */}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -275,10 +279,11 @@ export const DesktopLayout = memo(function DesktopLayout({
             {/* Top graph */}
             <ResizablePanel defaultSize={60} minSize={20} collapsible>
               <div className="h-full p-1 pb-0.5">
-                <div ref={rtaContainerRef} className="h-full bg-card/40 rounded border border-border/40 overflow-hidden flex flex-col panel-recessed hover:border-border/60 transition-colors duration-300">
-                  <div className="flex-shrink-0 flex items-center justify-between px-2 py-0.5 border-b border-border bg-card/60 panel-groove">
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm font-mono font-bold tracking-[0.15em] text-primary"><span className="hidden lg:inline">Real-Time Analyzer</span><span className="lg:hidden">RTA</span></span>
+                <div ref={rtaContainerRef} className="h-full rounded overflow-hidden flex flex-col instrument-window noise-panel">
+                  <div className="flex-shrink-0 flex items-center justify-between panel-header">
+                    <div className="flex items-center gap-2">
+                      <div className={isRunning ? 'power-led' : 'power-led-off'} />
+                      <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-primary/90"><span className="hidden lg:inline">Real-Time Analyzer</span><span className="lg:hidden">RTA</span></span>
                       {isRunning && (
                         <button onClick={toggleFreeze} className={`px-1.5 py-0.5 rounded text-sm font-medium transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${isFrozen ? 'text-blue-400' : 'text-muted-foreground hover:text-foreground'}`}>
                           {isFrozen ? 'Live' : 'Freeze'}
@@ -317,10 +322,11 @@ export const DesktopLayout = memo(function DesktopLayout({
             {/* Bottom row */}
             <ResizablePanel defaultSize={40} minSize={15} collapsible>
               <div className="h-full p-1 pt-0.5">
-                <div className="h-full bg-card/40 rounded border border-border/40 overflow-hidden flex flex-col min-w-0 panel-recessed hover:border-border/60 transition-colors duration-300">
-                  <div className="flex-shrink-0 flex items-center px-2 py-0.5 border-b border-border bg-card/60 panel-groove">
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm font-mono font-bold tracking-[0.15em] text-primary"><span className="hidden lg:inline">Graphic Equalizer</span><span className="lg:hidden">GEQ</span></span>
+                <div className="h-full rounded overflow-hidden flex flex-col min-w-0 instrument-window noise-panel">
+                  <div className="flex-shrink-0 flex items-center panel-header">
+                    <div className="flex items-center gap-2">
+                      <div className={isRunning ? 'power-led' : 'power-led-off'} />
+                      <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-primary/90"><span className="hidden lg:inline">Graphic Equalizer</span><span className="lg:hidden">GEQ</span></span>
                       {hasActiveGEQBars && (
                         <button onClick={onClearGEQ} className="px-1.5 py-0.5 rounded text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                           Clear

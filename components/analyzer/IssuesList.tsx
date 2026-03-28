@@ -185,7 +185,11 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               className="group relative flex flex-col items-center justify-center gap-3 w-full max-w-[220px] py-5 px-5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all duration-300 cursor-pointer animate-start-glow focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary"
               style={{ background: 'radial-gradient(circle at 50% 40%, rgba(75, 146, 255, 0.08) 0%, transparent 70%)' }}
             >
-              <DwaLogo className="w-20 h-20 text-foreground drop-shadow-[0_0_12px_rgba(37,99,235,0.3)] dark:drop-shadow-[0_0_14px_rgba(75,146,255,0.45)]" />
+              <div className="relative flex items-center justify-center" style={{ width: 80, height: 80 }}>
+                <div className="standby-glow-ring" />
+                <div className="standby-glow-ring" style={{ animationDelay: '1.75s' }} />
+                <DwaLogo className="w-20 h-20 text-foreground drop-shadow-[0_0_12px_rgba(37,99,235,0.3)] dark:drop-shadow-[0_0_14px_rgba(75,146,255,0.45)]" />
+              </div>
               <div className="flex flex-col items-center gap-0.5">
                 <span className="font-mono text-xs font-bold tracking-[0.15em] uppercase text-muted-foreground group-hover:text-foreground transition-colors">
                   Press to Start
