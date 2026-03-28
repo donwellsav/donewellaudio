@@ -14,6 +14,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.34.0',
+    date: '2026-03-28',
+    changes: [
+      { type: 'feat', description: '**Advisory cards**: frequency readout `text-lg` → `text-2xl` — the Hz value now commands attention as the card\'s undisputed visual hero' },
+      { type: 'feat', description: '**Standby screen**: amber pulsing LED dot next to STANDBY label + oscilloscope-style sweep animation across the logo (4.5s loop) — idle state feels like a piece of studio gear powering up' },
+      { type: 'feat', description: '**Glass cards**: subtle `translateY(-1px)` + deeper shadow on hover — physical depth feedback on every card interaction' },
+      { type: 'feat', description: '**Accordion triggers** (Settings panel): `11px` semibold uppercase with `0.1em` tracking; open sections turn amber (text + left-border) for instant visual hierarchy — closed sections are neutral, open sections are lit up' },
+      { type: 'feat', description: '[ ] `npx tsc --noEmit` — clean ✓' },
+      { type: 'feat', description: '[ ] `pnpm test` — 981 pass / 4 skip ✓' },
+      { type: 'feat', description: '[ ] Dark mode: frequency on advisory cards is 24px and prominent' },
+      { type: 'feat', description: '[ ] Dark mode idle: amber dot pulses next to STANDBY, sweep line crosses logo' },
+      { type: 'feat', description: '[ ] Settings → Setup tab: open accordion section turns amber with left accent bar' },
+      { type: 'feat', description: '[ ] Card hover: subtle 1px lift visible' },
+      { type: 'feat', description: '[ ] `prefers-reduced-motion`: sweep, glow-ring, glass-card transition all suppressed' },
+    ],
+  },
+  {
     version: '0.33.0',
     date: '2026-03-28',
     changes: [
