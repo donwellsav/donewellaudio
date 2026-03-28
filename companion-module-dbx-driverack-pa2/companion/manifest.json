@@ -4,7 +4,7 @@
 	"name": "dbx DriveRack PA2",
 	"shortname": "PA2",
 	"description": "Control dbx DriveRack PA2 loudspeaker management system via Ethernet",
-	"version": "0.2.20260328",
+	"version": "0.3.20260328",
 	"license": "MIT",
 	"repository": "git+https://github.com/killthering/companion-module-dbx-driverack-pa2.git",
 	"bugs": "https://github.com/killthering/companion-module-dbx-driverack-pa2/issues",
