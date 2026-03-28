@@ -28,7 +28,7 @@ function drawGEQGrid(
   isDark: boolean,
 ) {
   // Background
-  ctx.fillStyle = isDark ? '#080a0c' : '#f0f1f4'
+  ctx.fillStyle = isDark ? '#08101a' : '#f0f1f4'
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
   // Radial vignette
@@ -37,12 +37,12 @@ function drawGEQGrid(
     plotWidth / 2, plotHeight / 2, plotWidth * 0.75,
   )
   vg.addColorStop(0, 'transparent')
-  vg.addColorStop(1, isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.06)')
+  vg.addColorStop(1, isDark ? 'rgba(0, 0, 0, 0.22)' : 'rgba(0, 0, 0, 0.06)')
   ctx.fillStyle = vg
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
   // Grid lines at ±6, ±12 dB (drawn first, underneath)
-  ctx.strokeStyle = isDark ? '#161820' : '#d0d4da'
+  ctx.strokeStyle = isDark ? '#1e2533' : '#d0d4da'
   ctx.lineWidth = 0.5
   ctx.setLineDash([2, 2])
   for (const db of [-12, -6, 6, 12]) {
@@ -55,7 +55,7 @@ function drawGEQGrid(
   ctx.setLineDash([])
 
   // Center line (0 dB) — major reference line, on top
-  ctx.strokeStyle = isDark ? '#1e2024' : '#c0c5cc'
+  ctx.strokeStyle = isDark ? '#27303f' : '#c0c5cc'
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(0, centerY)

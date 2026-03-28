@@ -216,6 +216,9 @@ export const HeaderBar = memo(function HeaderBar() {
           </Tooltip>
         </div>
 
+        {/* ── Separator before fullscreen ─────────────── */}
+        <div className="hidden tablet:block w-px h-6 bg-border/40 mx-1 flex-shrink-0" aria-hidden="true" />
+
         {/* ── Fullscreen (far right) ──────────────────── */}
         <Tooltip>
           <TooltipTrigger asChild>

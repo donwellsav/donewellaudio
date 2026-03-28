@@ -326,7 +326,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                   <div className="flex-shrink-0 flex items-center panel-header">
                     <div className="flex items-center gap-2">
                       <div className={isRunning ? 'power-led' : 'power-led-off'} />
-                      <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-primary/90"><span className="hidden lg:inline">Graphic Equalizer</span><span className="lg:hidden">GEQ</span></span>
+                      <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-primary/90 whitespace-nowrap"><span className="hidden lg:inline">Graphic Equalizer</span><span className="lg:hidden">GEQ</span></span>
                       {hasActiveGEQBars && (
                         <button onClick={onClearGEQ} className="px-1.5 py-0.5 rounded text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                           Clear
