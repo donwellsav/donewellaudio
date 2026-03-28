@@ -14,6 +14,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.32.0',
+    date: '2026-03-28',
+    changes: [
+      { type: 'feat', description: 'Removed `"Bash(git push:*)"` — was bypassing all push hooks' },
+      { type: 'feat', description: 'Removed `"Bash(git merge:*)"` — was bypassing merge hooks' },
+      { type: 'feat', description: 'Removed `"Bash(gh pr:*)"` — too broad, allowed `gh pr merge`' },
+      { type: 'feat', description: 'Replaced with: `git push origin HEAD:*`, `gh pr create/list/view/checks`' },
+      { type: 'feat', description: '[ ] `echo \'{"tool_input":{"command":"git push origin main"}}\' | node .claude/hooks/ship-guard.js` → BLOCKED' },
+      { type: 'feat', description: '[ ] `echo \'{"tool_input":{"command":"gh pr merge --squash 31"}}\' | node .claude/hooks/ship-guard.js` → BLOCKED' },
+      { type: 'feat', description: '[ ] `echo \'{"tool_input":{"command":"git push origin feature/test"}}\' | node .claude/hooks/ship-guard.js` → ALLOWED' },
+      { type: 'feat', description: '[ ] 981 tests pass' },
+    ],
+  },
+  {
     version: '0.31.2',
     date: '2026-03-28',
     changes: [
