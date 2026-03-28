@@ -35,6 +35,7 @@ const NOOP_BRIDGE: PA2ContextValue = {
   notchSlotsAvailable: 0,
   lastAutoSendResult: null,
   lastAutoSendError: null,
+  autoSendDiag: null,
   sendCorrections: NOOP_ASYNC,
   sendDetections: NOOP_ASYNC,
   flattenGEQ: NOOP_ASYNC,

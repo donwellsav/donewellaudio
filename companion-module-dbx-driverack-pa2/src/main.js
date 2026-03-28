@@ -140,7 +140,7 @@ class PA2Instance extends InstanceBase {
 				id: 'notchConfidenceThreshold',
 				label: 'Auto-notch confidence threshold (0.0-1.0)',
 				width: 4,
-				default: 0.80,
+				default: 0,
 				min: 0,
 				max: 1,
 				step: 0.05,
@@ -1389,7 +1389,7 @@ class PA2Instance extends InstanceBase {
 						actions.push({ type: 'skipped_not_feedback', freq: det.hz, clientId, detType: det.type })
 						continue
 					}
-					if (det.confidence < threshold) {
+					if (threshold > 0 && det.confidence < threshold) {
 						actions.push({ type: 'skipped_low_confidence', freq: det.hz, clientId, confidence: det.confidence })
 						continue
 					}

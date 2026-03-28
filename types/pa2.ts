@@ -201,6 +201,8 @@ export interface PA2BridgeState {
   readonly lastAutoSendResult: PA2AutoSendResult | null
   /** Last auto-send error message (cleared on success) */
   readonly lastAutoSendError: string | null
+  /** Diagnostic: how many advisories exist vs pass filters */
+  readonly autoSendDiag: { total: number; aboveThreshold: number; active: number } | null
 }
 
 // ═══ PA2 Settings ═══
@@ -248,7 +250,7 @@ export const DEFAULT_PA2_SETTINGS: PA2Settings = {
   instanceLabel: 'PA2',
   apiKey: '',
   autoSend: 'both',
-  autoSendMinConfidence: 0.4,
+  autoSendMinConfidence: 0.5,
   pollIntervalMs: 200,
   ringOutAutoSend: false,
   panicMuteEnabled: false,

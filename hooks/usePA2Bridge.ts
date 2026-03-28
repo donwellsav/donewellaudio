@@ -112,6 +112,7 @@ const INITIAL_STATE: PA2BridgeState = {
   notchSlotsAvailable: 8,
   lastAutoSendResult: null,
   lastAutoSendError: null,
+  autoSendDiag: null,
 }
 
 // ═══ Hook ═══
@@ -185,6 +186,7 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
           notchSlotsAvailable: s.notchSlotsAvailable,
           lastAutoSendResult: s.lastAutoSendResult,
           lastAutoSendError: s.lastAutoSendError,
+          autoSendDiag: s.autoSendDiag,
         }))
       } catch (err) {
         if (!mountedRef.current) return
@@ -242,7 +244,26 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
   useEffect(() => {
     if (autoSend === 'off' || !clientRef.current || state.status !== 'connected') return
     if (!state.pa2Connected) return // Don't send if PA2 hardware isn't connected
-    if (advisories.length === 0) return
+
+    // Compute diagnostics on every run so UI always shows filter status
+    const total = advisories.length
+    const active = advisories.filter(a => !a.resolved).length
+    const aboveThreshold = advisories.filter(a => !a.resolved && a.confidence >= autoSendMinConfidence).length
+    const diag = { total, aboveThreshold, active }
+
+    if (total === 0) {
+      setState(s => ({ ...s, autoSendDiag: null }))
+      return
+    }
+
+    // Always update diagnostics
+    setState(s => {
+      const prev = s.autoSendDiag
+      if (prev && prev.total === diag.total && prev.active === diag.active && prev.aboveThreshold === diag.aboveThreshold) return s
+      return { ...s, autoSendDiag: diag }
+    })
+
+    if (aboveThreshold === 0) return
 
     const now = Date.now()
     if (now - lastAutoSendRef.current < autoSendIntervalMs) return
@@ -323,14 +344,24 @@ export function usePA2Bridge(config: UsePA2BridgeConfig): UsePA2BridgeReturn {
       if (payload.length > 0) {
         client.detect({ frequencies: payload, source: 'donewellaudio' })
           .then((res) => {
-            if (mountedRef.current) {
+            if (!mountedRef.current) return
+            const placed = res.actions?.filter((a: { type: string }) => a.type === 'notch_placed').length ?? 0
+            const skipped = res.actions?.filter((a: { type: string }) => a.type.startsWith('skipped')).length ?? 0
+            if (placed > 0) {
               setState((s) => ({
                 ...s,
                 notchSlotsUsed: res.slots_used,
                 notchSlotsAvailable: res.slots_available,
-                lastAutoSendResult: { timestamp: Date.now(), type: 'both', count: geqCount + payload.length },
+                lastAutoSendResult: { timestamp: Date.now(), type: 'both', count: placed + geqCount },
                 lastAutoSendError: null,
               }))
+            } else if (skipped > 0) {
+              setState((s) => ({
+                ...s,
+                lastAutoSendError: `Companion skipped ${skipped} detection${skipped !== 1 ? 's' : ''} — lower confidence threshold in Companion module config`,
+              }))
+            } else {
+              recordAutoSendSuccess('both', geqCount + payload.length)
             }
           })
           .catch(recordAutoSendError)

@@ -316,7 +316,7 @@ export const SetupTab = memo(function SetupTab({
               )}
               {/* Auto-send activity */}
               {pa2.status === 'connected' && pa2.settings.autoSend !== 'off' && (
-                <div className="text-[10px]">
+                <div className="text-[10px] space-y-0.5">
                   {pa2.lastAutoSendError ? (
                     <span className="text-red-400">Auto-send failed: {pa2.lastAutoSendError}</span>
                   ) : pa2.lastAutoSendResult ? (
@@ -327,6 +327,11 @@ export const SetupTab = memo(function SetupTab({
                   ) : pa2.pa2Connected ? (
                     <span className="text-muted-foreground/50">Listening — no feedback detected yet</span>
                   ) : null}
+                  {pa2.autoSendDiag && pa2.autoSendDiag.aboveThreshold === 0 && pa2.autoSendDiag.active > 0 && (
+                    <span className="text-amber-500/70">
+                      {pa2.autoSendDiag.active} card{pa2.autoSendDiag.active !== 1 ? 's' : ''} active but 0 above {(pa2.settings.autoSendMinConfidence * 100).toFixed(0)}% confidence — lower the slider
+                    </span>
+                  )}
                 </div>
               )}
             </div>
