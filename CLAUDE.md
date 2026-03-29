@@ -1,7 +1,7 @@
 # CLAUDE.md — DoneWell Audio Project Intelligence
 
-> **Last updated March 2026. 169 TypeScript/TSX files, 944 tests (940 pass, 4 skip), 43 suites. Version 0.22.0.**
-> Ring-out room mode hints. Per-mode track timeouts. Deploy guard hook. Notch overlay opacity 15%.
+> **Last updated March 2026. 169 TypeScript/TSX files, 985 tests (981 pass, 4 skip), 46 suites. Version 0.22.0.**
+> Amber sidecar theme. Three-color operator vocabulary. Help accordion system. Fader UI overhaul.
 
 ## CRITICAL RULES
 
@@ -215,7 +215,7 @@ All previously tracked bugs (P1–P3) have been resolved as of v0.127.0. All Pha
 middleware.ts (53)              # Per-request nonce CSP (replaces static unsafe-inline)
 app/                          # Next.js App Router
   layout.tsx (54)             #   Root layout, Geist fonts, metadata
-  page.tsx (5)                #   Entry -> KillTheRingClient
+  page.tsx (5)                #   Entry -> AudioAnalyzerClient
   global-error.tsx (56)       #   Sentry error boundary
   sw.ts (38)                  #   Serwist service worker
   api/v1/ingest/route.ts (160)#   Spectral snapshot ingest (v1.0/1.1/1.2 schema, rate-limited, IP-stripped)
@@ -545,7 +545,7 @@ Then when user says "PR and merge":
 - **Snapshot enrichment:** Every `FeedbackMarker` includes `MarkerAlgorithmScores` with all 6 algorithm scores (MSD, phase, spectral, comb, IHR, PTMR) plus fused probability and confidence. Schema version `1.1` (backward-compatible with `1.0`).
 - **Ground truth labeling:** Always-on FALSE+ button on every advisory card (not just calibration mode). User feedback flows via `userFeedback` worker message to `snapshotCollector.applyUserFeedback()`, labeling pending batch events as `correct` or `false_positive`.
 - **Ingest API v1.1:** `app/api/v1/ingest/route.ts` accepts optional `algorithmScores` and `userFeedback` fields with validation. Backward-compatible — v1.0 payloads still accepted.
-- **Data flow:** Advisory card → `handleFalsePositive()` in `KillTheRing.tsx` → `dspWorker.sendUserFeedback()` → worker `applyUserFeedback()` → snapshot batch labeled for future ML training.
+- **Data flow:** Advisory card → `handleFalsePositive()` in `AudioAnalyzer.tsx` → `dspWorker.sendUserFeedback()` → worker `applyUserFeedback()` → snapshot batch labeled for future ML training.
 - **ML inference (v0.128.0):** ONNX Runtime Web as 7th fusion algorithm (weight 0.10). Bootstrap model (929 params, MLP 11→32→16→1) encodes existing gate logic. Lazy-loaded in worker via `import('onnxruntime-web')`. `predictCached()` pattern: async inference with synchronous cached reads. Previous-frame fused probability breaks circular dependency.
 - **CONFIRM button (v0.128.0):** Symmetric labeling alongside FALSE+ for balanced ML training data. Mutual exclusion: CONFIRM removes from fpIds, FALSE+ removes from confirmedIds. Label balance tracking in snapshotCollector.
 - **Cloud training pipeline (v0.128.0):** Supabase `spectral_snapshots` table with 12 ML columns. `scripts/ml/` with numpy-only trainer, export script, bootstrap model generator. GitHub Actions workflow (`ml-train.yml`) for weekly scheduled or manual training runs.
@@ -553,9 +553,28 @@ Then when user says "PR and merge":
 
 ## UI Features
 
+### Operator Color Vocabulary (3 colors)
+- **Amber** (`--console-amber`) — Detection: sensitivity, mode, thresholds, algorithms, panel chrome labels
+- **Blue** (`--console-blue`) — Scope/range: frequency range, FFT, timing, peak detection
+- **Green** (`--console-green`, `#4ADE80` dark / `#22c55e` light) — System/processing: auto-gain, noise floor, track management, room presets, calibration
+- Action buttons (Save, Export, Download, Next) stay `bg-primary` blue — they are interactive triggers, not panel chrome
+- Severity colors (RUNAWAY red, GROWING orange, etc.) are independent of the operator vocabulary
+
+### Amber Sidecar Theme
+- All panels use `amber-sidecar` class for cascade styling (accordion triggers, section labels)
+- `amber-panel-header` class for gradient header bars — requires compound selector when combined with `panel-header` or `channel-strip` (CSS specificity: later rules override equal-specificity earlier rules)
+- `instrument-window-amber` class for graph panel bezel borders
+- Pattern: `style={{ color: 'var(--console-X)' }}` inline overrides `.amber-sidecar .section-label` cascade
+- CSS multiple backgrounds for layering: `.channel-strip.amber-panel-header { background: amberGradient, darkGradient; }`
+
+### Help Menu Structure
+- `HelpShared.tsx`: `HelpSection` (card with `color` prop) + `HelpGroup` (collapsible accordion)
+- Every `HelpSection` must be inside a `HelpGroup` — no orphaned cards
+- Color mapping: amber = detection topics, blue = scope/analysis, green = system/environment
+
 ### Layout & Navigation
 - **Dual entry point:** Two start buttons — "Press to Start Analysis" (normal mode) and "Ring Out Room" (ring-out wizard). No settings menu required to switch modes.
-- **Desktop layout:** 3-panel — Controls sidebar | Issues panel | RTA + GEQ graphs. 4-tab settings (Live | Setup | Display | Advanced) with accordion sections per tab.
+- **Desktop layout:** 3-panel — Controls sidebar | Issues panel | RTA + GEQ graphs. 4-tab settings (Live | Setup | Display | Advanced) with accordion sections per tab. Fader strip (w-20, 80px) on far right.
 - **Mobile portrait (2-tab):** Tab 1 = Issues + inline resizable RTA/GEQ graph (drag handle to resize, swipe to switch RTA↔GEQ). Tab 2 = Settings. Graph tab removed — graphs are inline above cards.
 - **Mobile landscape:** 40/55/5 split (Issues/Graph/Controls). `LandscapeSettingsSheet.tsx` for bottom-sheet settings.
 - **Fullscreen:** Separate app fullscreen (Maximize2 icon) and RTA fullscreen (Expand icon). Distinct icons and behavior.
@@ -566,7 +585,7 @@ Then when user says "PR and merge":
 - **Algorithm scores debug:** Toggle in Display settings shows MSD/PH/SP/CM/IH/PT/ML scores on each card.
 
 ### Theme & Branding
-- **Dark/light theme (v0.146.0):** `next-themes` with CSS variables. Canvas colors via `canvasThemeRef` pattern (ref updated on theme change, read in RAF loop). Blue spectrum in light mode, amber/blue toggle in dark mode. RTA labels use frosted glass pills with theme-aware fills, shadows, and accent strips (v0.167.0).
+- **Dark/light theme (v0.146.0):** `next-themes` with CSS variables. Canvas colors via `canvasThemeRef` pattern (ref updated on theme change, read in RAF loop). Amber sidecar theme throughout — header, controls, issues, graphs, fader, help, history panels all use `channel-strip` + `amber-panel-header` + operator color vocabulary. RTA labels use frosted glass pills with theme-aware fills, shadows, and accent strips (v0.167.0).
 - **DWA brand logo:** PNG-based DW Audio logo with theme switching. `DwaLogo.tsx` component. Displays in header (64px) and start button (80px).
 - **Full names:** "Real-Time Analyzer" / "Graphic Equalizer" labels when space allows, abbreviated on narrow screens.
 

@@ -1,24 +1,26 @@
 'use client'
 
 import { memo } from 'react'
-import { HelpSection } from './HelpShared'
+import { HelpSection, HelpGroup } from './HelpShared'
 
 export const GuideTab = memo(function GuideTab() {
   return (
     <>
-      <HelpSection title="What is DoneWell Audio?">
-        <p>
-          A real-time acoustic feedback detection and analysis tool for professional live sound engineers.
-          Uses 7 detection algorithms and 6 multiplicative false-positive gates from peer-reviewed acoustic research to identify feedback frequencies,
-          resonant rings, and problematic tones — then delivers specific EQ recommendations with pitch translation.
-        </p>
-      </HelpSection>
+      {/* Group: Overview */}
+      <HelpGroup title="Overview">
+        <HelpSection title="What is DoneWell Audio?" color="amber">
+          <p>
+            A real-time acoustic feedback detection and analysis tool for professional live sound engineers.
+            Uses 7 detection algorithms and 6 multiplicative false-positive gates from peer-reviewed acoustic research to identify feedback frequencies,
+            resonant rings, and problematic tones — then delivers specific EQ recommendations with pitch translation.
+          </p>
+        </HelpSection>
+      </HelpGroup>
 
       {/* Group: Getting Started */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Getting Started</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-          <HelpSection title="Quick Start">
+      <HelpGroup title="Getting Started">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          <HelpSection title="Quick Start" color="amber">
             <ol className="list-decimal list-inside space-y-2">
               <li>Click <strong>Press to Start Analysis</strong> for live detection, or <strong>Ring Out Room</strong> for guided calibration wizard</li>
               <li>Detected issues appear in the <strong>Active Issues</strong> panel, sorted by frequency</li>
@@ -29,7 +31,7 @@ export const GuideTab = memo(function GuideTab() {
             </ol>
           </HelpSection>
 
-          <HelpSection title="Display Areas">
+          <HelpSection title="Display Areas" color="blue">
             <ul className="space-y-2">
               <li><strong>Desktop — Resizable Split:</strong> RTA spectrum (60%) and GEQ bar view (40%) side by side. Drag the divider to resize.</li>
               <li><strong>Mobile — Tabbed:</strong> Two tabs — Issues (with inline resizable graph) and Settings. Swipe the graph area to switch between RTA and GEQ. Drag the handle below the graph to resize.</li>
@@ -42,13 +44,12 @@ export const GuideTab = memo(function GuideTab() {
             </ul>
           </HelpSection>
         </div>
-      </div>
+      </HelpGroup>
 
       {/* Group: Controls */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Controls</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-          <HelpSection title="Header Controls">
+      <HelpGroup title="Controls">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          <HelpSection title="Header Controls" color="blue">
             <ul className="space-y-2">
               <li><strong>Start / Stop:</strong> Begin or pause audio analysis. LIVE indicator appears while running.</li>
               <li><strong>Input Gain Fader:</strong> Vertical fader strip with venue quick-cal pills (Quiet / Med / Loud). Default +6 dB.</li>
@@ -61,7 +62,7 @@ export const GuideTab = memo(function GuideTab() {
             </ul>
           </HelpSection>
 
-          <HelpSection title="Issue Card Actions">
+          <HelpSection title="Issue Card Actions" color="amber">
             <ul className="space-y-2">
               <li><strong>Copy:</strong> Tap the copy icon to copy frequency and EQ info to clipboard.</li>
               <li><strong>FALSE+:</strong> Flag a detection as a false positive. Feeds into ML training data for better future accuracy.</li>
@@ -71,7 +72,7 @@ export const GuideTab = memo(function GuideTab() {
             </ul>
           </HelpSection>
 
-          <HelpSection title="Detection Controls">
+          <HelpSection title="Detection Controls" color="amber">
             <ul className="space-y-2">
               <li><strong>Live Tab:</strong> Sensitivity slider and frequency range presets — the controls you use during a show.</li>
               <li><strong>Setup Tab:</strong> Mode selector, EQ style, auto-gain target, room/environment, calibration, and rig presets — for soundcheck and pre-show.</li>
@@ -81,13 +82,12 @@ export const GuideTab = memo(function GuideTab() {
             </ul>
           </HelpSection>
         </div>
-      </div>
+      </HelpGroup>
 
       {/* Group: Configuration */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Configuration</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-          <HelpSection title="Settings Panel (4 Tabs)">
+      <HelpGroup title="Configuration">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          <HelpSection title="Settings Panel (4 Tabs)" color="amber">
             <ul className="space-y-2">
               <li><strong>Live:</strong> Sensitivity and frequency range — the only controls you need during a show.</li>
               <li><strong>Setup:</strong> Mode selector, EQ style, auto-gain target, room environment (presets, dimensions, treatment), calibration (mic profile, ambient capture, venue metadata, session recording), and rig presets (save/load).</li>
@@ -96,7 +96,7 @@ export const GuideTab = memo(function GuideTab() {
             </ul>
           </HelpSection>
 
-          <HelpSection title="Troubleshooting">
+          <HelpSection title="Troubleshooting" color="amber">
             <div className="space-y-3">
               <div>
                 <p className="font-medium text-foreground text-sm mb-1">No Audio Input</p>
@@ -121,7 +121,7 @@ export const GuideTab = memo(function GuideTab() {
             </div>
           </HelpSection>
         </div>
-      </div>
+      </HelpGroup>
     </>
   )
 })

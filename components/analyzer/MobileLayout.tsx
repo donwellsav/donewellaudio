@@ -366,7 +366,7 @@ export const MobileLayout = memo(function MobileLayout({
             <h2 className="section-label mb-1 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 Issues
-                <span className="text-primary font-mono">{activeAdvisoryCount}</span>
+                <span className="text-[var(--console-amber)] font-mono">{activeAdvisoryCount}</span>
               </span>
               <LandscapeSettingsSheet
                 settings={settings}
@@ -511,7 +511,7 @@ export const MobileLayout = memo(function MobileLayout({
               tabIndex={mobileTab === tab.id ? 0 : -1}
               className={`cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[50px] transition-colors ${
                 mobileTab === tab.id
-                  ? 'text-primary'
+                  ? 'text-[var(--console-amber)]'
                   : 'text-muted-foreground active:text-foreground'
               }`}
               aria-label={tab.label}
@@ -519,7 +519,7 @@ export const MobileLayout = memo(function MobileLayout({
               <div className="relative">
                 <tab.Icon className="w-5 h-5" />
                 {tab.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 bg-primary text-primary-foreground text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-bold leading-none px-0.5">
+                  <span className="absolute -top-1.5 -right-2.5 bg-[var(--console-amber)] text-[#0a0d10] text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-bold leading-none px-0.5">
                     {tab.badge}
                   </span>
                 )}

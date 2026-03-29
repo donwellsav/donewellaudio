@@ -1,12 +1,12 @@
 'use client'
 
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { IssuesList } from './IssuesList'
 import { RingOutWizard } from './RingOutWizard'
 import { EarlyWarningPanel } from './EarlyWarningPanel'
 import { SpectrumCanvas } from './SpectrumCanvas'
 import { GEQBarView } from './GEQBarView'
-import { SettingsPanel, type DataCollectionTabProps } from './settings/SettingsPanel'
+import { SettingsPanel, SETTINGS_TABS, type DataCollectionTabProps, type SettingsTab } from './settings/SettingsPanel'
 import { AlgorithmStatusBar } from './AlgorithmStatusBar'
 import { VerticalGainFader } from './VerticalGainFader'
 import { useEngine } from '@/contexts/EngineContext'
@@ -31,6 +31,7 @@ interface DesktopLayoutProps {
   setActiveSidebarTab: (tab: 'issues' | 'controls') => void
   openIssuesPanel: () => void
   closeIssuesPanel: () => void
+  closeIssuesPanelToIssues: () => void
   setIssuesPanelOpen: (open: boolean) => void
   actualFps?: number
   droppedPercent?: number
@@ -45,13 +46,24 @@ interface DesktopLayoutProps {
 export const DesktopLayout = memo(function DesktopLayout({
   issuesPanelOpen, issuesPanelRef,
   activeSidebarTab, setActiveSidebarTab,
-  openIssuesPanel, closeIssuesPanel, setIssuesPanelOpen,
+  openIssuesPanel, closeIssuesPanel, closeIssuesPanelToIssues, setIssuesPanelOpen,
   actualFps, droppedPercent,
   calibration, dataCollection,
   isWizardActive, onStartWizard, onFinishWizard, onStartRingOut,
 }: DesktopLayoutProps) {
   const { isRunning, isStarting, error, start, stop } = useEngine()
   const { settings, handleModeChange, handleFreqRangeChange, resetSettings, setInputGain, setAutoGain, updateDisplay, setSensitivityOffset, session } = useSettings()
+
+  // Controls sub-tab state — owned here so the tab bar can be a flex-shrink-0 header
+  const [controlsTab, setControlsTab] = useState<SettingsTab>('live')
+  const hasCustomGates = !!(session?.diagnostics && (
+    session.diagnostics.formantGateOverride !== undefined ||
+    session.diagnostics.chromaticGateOverride !== undefined ||
+    session.diagnostics.combSweepOverride !== undefined ||
+    session.diagnostics.ihrGateOverride !== undefined ||
+    session.diagnostics.ptmrGateOverride !== undefined ||
+    session.diagnostics.mainsHumGateOverride !== undefined
+  ))
   const { spectrumRef, spectrumStatus, noiseFloorDb, inputLevel, isAutoGain, autoGainDb, autoGainLocked } = useMetering()
 
   const { isFrozen, toggleFreeze, layoutKey, rtaContainerRef, isRtaFullscreen, toggleRtaFullscreen } = useUI()
@@ -83,9 +95,9 @@ export const DesktopLayout = memo(function DesktopLayout({
       <ResizablePanelGroup key={layoutKey} direction="horizontal" autoSaveId="dwa-layout-main-v4">
         {/* Sidebar panel */}
         <ResizablePanel defaultSize={20} minSize={8} maxSize={30} collapsible>
-          <div className="flex flex-col h-full bg-card/40 channel-strip overflow-hidden border-r-2 border-r-primary/10">
+          <div className="flex flex-col h-full amber-sidecar overflow-hidden">
             {/* Algorithm status */}
-            <div className="flex-shrink-0 border-b border-border p-2">
+            <div className="flex-shrink-0 amber-panel-header p-2 panel-groove">
               <AlgorithmStatusBar
                 algorithmMode={spectrumStatus?.algorithmMode ?? settings.algorithmMode}
                 contentType={spectrumStatus?.contentType}
@@ -99,7 +111,7 @@ export const DesktopLayout = memo(function DesktopLayout({
               />
             </div>
             {/* Sidebar tab bar — segmented control */}
-            <div className="flex-shrink-0 flex items-center gap-1.5 px-2 py-1.5 border-b border-border/50">
+            <div className="flex-shrink-0 flex items-center gap-1.5 px-2 py-1.5 amber-panel-header">
               <div className="flex flex-1 tab-track">
               {!issuesPanelOpen && (
                 <button
@@ -113,7 +125,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                 >
                   Issues
                   {activeAdvisoryCount > 0 && (
-                    <span className="ml-1 font-mono text-primary">{activeAdvisoryCount}</span>
+                    <span className="ml-1 font-mono text-[var(--console-amber)]">{activeAdvisoryCount}</span>
                   )}
                 </button>
               )}
@@ -136,19 +148,44 @@ export const DesktopLayout = memo(function DesktopLayout({
                     onClick={issuesPanelOpen ? closeIssuesPanel : openIssuesPanel}
                     className={`flex-shrink-0 px-2 py-1 rounded transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                       issuesPanelOpen
-                        ? 'text-primary'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 ring-1 ring-primary/20'
+                        ? 'text-[var(--console-amber)]'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-[rgba(245,158,11,0.08)] ring-1 ring-[rgba(245,158,11,0.20)]'
                     }`}
-                    aria-label={issuesPanelOpen ? 'Close issues sidecar' : 'Open issues sidecar'}
+                    aria-label={issuesPanelOpen ? 'Show Controls only' : 'Open split view'}
                   >
                     <Columns2 className="w-4 h-4" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="text-sm">
-                  {issuesPanelOpen ? 'Close split view' : 'Split: Issues'}
+                  {issuesPanelOpen ? 'Show Controls only' : 'Split: Issues'}
                 </TooltipContent>
               </Tooltip>
             </div>
+            {/* Settings sub-tab bar — flex-shrink-0 sibling, zero gap, solid background */}
+            {activeSidebarTab === 'controls' && (
+              <div className="flex-shrink-0 flex gap-0 bg-[#070c12] border-b border-[rgba(245,158,11,0.14)]">
+                {SETTINGS_TABS.map(({ id, label, shortLabel, Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setControlsTab(id)}
+                    aria-label={label}
+                    data-active={controlsTab === id}
+                    className={`tab-track-item relative flex-1 min-h-[30px] flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+                      controlsTab === id
+                        ? 'bg-[rgba(245,158,11,0.08)] text-[var(--console-amber)]'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-[rgba(245,158,11,0.04)]'
+                    }`}
+                  >
+                    <Icon className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate">{shortLabel ?? label}</span>
+                    {id === 'advanced' && hasCustomGates && (
+                      <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-amber-500" title="Custom gate overrides active" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto p-3">
                 {activeSidebarTab === 'issues' && !issuesPanelOpen && (
@@ -184,7 +221,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                         {settings.mode === 'ringOut' && isRunning && onStartWizard && (
                           <button
                             onClick={onStartWizard}
-                            className="w-full mt-2 py-2 rounded font-mono text-xs font-bold tracking-[0.15em] uppercase bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+                            className="w-full mt-2 py-2 rounded font-mono text-xs font-bold tracking-[0.15em] uppercase bg-[rgba(245,158,11,0.10)] border border-[rgba(245,158,11,0.30)] text-[var(--console-amber)] hover:bg-[rgba(245,158,11,0.18)] transition-colors cursor-pointer"
                           >
                             Start Ring-Out Wizard
                           </button>
@@ -196,7 +233,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                 )}
                 {activeSidebarTab === 'controls' && (
                   <div className="animate-in fade-in-0 duration-150">
-                    <SettingsPanel settings={settings} onModeChange={handleModeChange} onReset={resetSettings} calibration={calibration} dataCollection={dataCollection} />
+                    <SettingsPanel settings={settings} onModeChange={handleModeChange} onReset={resetSettings} calibration={calibration} dataCollection={dataCollection} activeTab={controlsTab} onTabChange={setControlsTab} />
                   </div>
                 )}
               </div>
@@ -218,24 +255,31 @@ export const DesktopLayout = memo(function DesktopLayout({
           onCollapse={() => setIssuesPanelOpen(false)}
           onExpand={() => setIssuesPanelOpen(true)}
         >
-          <div className="flex flex-col h-full bg-card/40 channel-strip overflow-hidden border-l-2 border-l-primary/15">
-            <div className="flex-shrink-0 flex items-center justify-between px-3 py-1 border-b border-border bg-card/60 panel-groove">
-              <h2 className="section-label flex items-center gap-1.5">
-                <AlertTriangle className="w-3 h-3" />
+          <div className="flex flex-col h-full amber-sidecar overflow-hidden">
+            <div className="flex-shrink-0 flex items-center justify-between px-3 py-1 amber-panel-header">
+              <h2 className="section-label flex items-center gap-1.5 text-[var(--console-amber)]">
+                <AlertTriangle className="w-3 h-3 text-[var(--console-amber)]" />
                 Issues
                 {activeAdvisoryCount > 0 && (
-                  <span className="font-mono text-primary">{activeAdvisoryCount}</span>
+                  <span className="font-mono text-[var(--console-amber)]">{activeAdvisoryCount}</span>
                 )}
               </h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={closeIssuesPanel}
-                className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
-                aria-label="Close issues panel"
-              >
-                <PanelLeftClose className="w-3.5 h-3.5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={closeIssuesPanelToIssues}
+                    className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+                    aria-label="Show Issues in sidebar"
+                  >
+                    <PanelLeftClose className="w-3.5 h-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-sm">
+                  Show Issues only
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto p-3">
               {isWizardActive ? (
@@ -279,11 +323,11 @@ export const DesktopLayout = memo(function DesktopLayout({
             {/* Top graph */}
             <ResizablePanel defaultSize={60} minSize={20} collapsible>
               <div className="h-full p-1 pb-0.5">
-                <div ref={rtaContainerRef} className="h-full rounded overflow-hidden flex flex-col instrument-window noise-panel">
-                  <div className="flex-shrink-0 flex items-center justify-between panel-header">
+                <div ref={rtaContainerRef} className="h-full rounded overflow-hidden flex flex-col instrument-window instrument-window-amber noise-panel">
+                  <div className="flex-shrink-0 flex items-center justify-between amber-panel-header panel-header">
                     <div className="flex items-center gap-2">
                       <div className={isRunning ? 'power-led' : 'power-led-off'} />
-                      <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-primary/90 whitespace-nowrap"><span className="hidden lg:inline">Real-Time Analyzer</span><span className="lg:hidden">RTA</span></span>
+                      <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase whitespace-nowrap" style={{ color: 'var(--console-amber)', opacity: 0.9 }}><span className="hidden lg:inline">Real-Time Analyzer</span><span className="lg:hidden">RTA</span></span>
                       {isRunning && (
                         <button onClick={toggleFreeze} className={`px-1.5 py-0.5 rounded text-sm font-medium transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${isFrozen ? 'text-blue-400' : 'text-muted-foreground hover:text-foreground'}`}>
                           {isFrozen ? 'Live' : 'Freeze'}
@@ -296,7 +340,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                       )}
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="text-sm text-muted-foreground font-mono whitespace-nowrap">
+                      <span className="text-sm font-mono whitespace-nowrap" style={{ color: 'var(--console-amber)', opacity: 0.6 }}>
                         {isRunning && noiseFloorDb != null
                           ? `${noiseFloorDb.toFixed(0)}dB`
                           : 'Ready'}
@@ -322,11 +366,11 @@ export const DesktopLayout = memo(function DesktopLayout({
             {/* Bottom row */}
             <ResizablePanel defaultSize={40} minSize={15} collapsible>
               <div className="h-full p-1 pt-0.5">
-                <div className="h-full rounded overflow-hidden flex flex-col min-w-0 instrument-window noise-panel">
-                  <div className="flex-shrink-0 flex items-center panel-header">
+                <div className="h-full rounded overflow-hidden flex flex-col min-w-0 instrument-window instrument-window-amber noise-panel">
+                  <div className="flex-shrink-0 flex items-center amber-panel-header panel-header">
                     <div className="flex items-center gap-2">
                       <div className={isRunning ? 'power-led' : 'power-led-off'} />
-                      <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase text-primary/90 whitespace-nowrap"><span className="hidden lg:inline">Graphic Equalizer</span><span className="lg:hidden">GEQ</span></span>
+                      <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase whitespace-nowrap" style={{ color: 'var(--console-amber)', opacity: 0.9 }}><span className="hidden lg:inline">Graphic Equalizer</span><span className="lg:hidden">GEQ</span></span>
                       {hasActiveGEQBars && (
                         <button onClick={onClearGEQ} className="px-1.5 py-0.5 rounded text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                           Clear
@@ -345,7 +389,7 @@ export const DesktopLayout = memo(function DesktopLayout({
       </ResizablePanelGroup>
 
       {/* Gain fader strip */}
-      <div className="flex-shrink-0 w-16 border-l border-border/50 channel-strip">
+      <div className="flex-shrink-0 w-20 border-l border-[rgba(245,158,11,0.18)] channel-strip amber-sidecar">
         <VerticalGainFader
           value={settings.inputGainDb}
           onChange={(v) => setInputGain(v)}

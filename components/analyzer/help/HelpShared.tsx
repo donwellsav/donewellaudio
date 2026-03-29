@@ -1,21 +1,94 @@
 'use client'
 
 import { memo, type ReactNode } from 'react'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion'
 import type { ChangeType } from '@/lib/changelog'
 
-export const HelpSection = memo(function HelpSection({ title, children }: { title: string; children: ReactNode }) {
+// ── Color vocabulary (mirrors controls sidecar) ───────────────────────────────
+// amber = detection  |  blue = scope/range  |  green = system/processing
+
+type HelpColor = 'amber' | 'blue' | 'green'
+
+const COLOR_VAR: Record<HelpColor, string> = {
+  amber: 'var(--console-amber)',
+  blue:  'var(--console-blue)',
+  green: 'var(--console-green)',
+}
+
+const BORDER_ALPHA: Record<HelpColor, string> = {
+  amber: 'rgba(245,158,11,0.45)',
+  blue:  'rgba(75,146,255,0.45)',
+  green: 'rgba(74,222,128,0.45)',
+}
+
+// ── HelpSection ───────────────────────────────────────────────────────────────
+// Card with optional operator-color title + left-border accent.
+
+export const HelpSection = memo(function HelpSection({
+  title,
+  color,
+  children,
+}: {
+  title: string
+  color?: HelpColor
+  children: ReactNode
+}) {
+  const titleStyle = color ? { color: COLOR_VAR[color] } : undefined
+  const borderStyle = color
+    ? { borderLeftColor: BORDER_ALPHA[color], borderLeftWidth: '2px' }
+    : undefined
+
   return (
-    <div className="bg-card/80 rounded border p-3">
-      <h3 className="section-label mb-2 text-primary">{title}</h3>
+    <div className="bg-card/80 rounded border p-3" style={borderStyle}>
+      <h3 className="section-label mb-2" style={titleStyle ?? { color: 'var(--console-amber)' }}>
+        {title}
+      </h3>
       <div className="text-sm text-muted-foreground leading-relaxed">{children}</div>
     </div>
   )
 })
 
+// ── HelpGroup ─────────────────────────────────────────────────────────────────
+// Collapsible accordion group header — panel-groove style matching the controls
+// sidecar: amber glow on groove, left-bar accent when open.
+
+export const HelpGroup = memo(function HelpGroup({
+  title,
+  defaultOpen = true,
+  children,
+}: {
+  title: string
+  defaultOpen?: boolean
+  children: ReactNode
+}) {
+  return (
+    <Accordion
+      type="multiple"
+      defaultValue={defaultOpen ? [title] : []}
+    >
+      <AccordionItem value={title} className="border-b-0">
+        <AccordionTrigger className="py-1.5 px-2 panel-groove hover:no-underline hover:bg-[rgba(245,158,11,0.03)] data-[state=open]:border-l-2 data-[state=open]:border-[rgba(245,158,11,0.50)] data-[state=open]:pl-[calc(0.5rem-2px)] data-[state=open]:bg-[rgba(245,158,11,0.04)]">
+          <span className="section-label text-[var(--console-amber)]">{title}</span>
+        </AccordionTrigger>
+        <AccordionContent className="pb-0 pt-3">
+          {children}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
+})
+
+// ── Changelog type badge styles ────────────────────────────────────────────────
+
 export const TYPE_STYLES: Record<ChangeType, { label: string; className: string }> = {
-  feat: { label: 'Feature', className: 'bg-emerald-500/15 text-emerald-400' },
-  fix: { label: 'Fix', className: 'bg-orange-500/15 text-orange-400' },
-  perf: { label: 'Perf', className: 'bg-cyan-500/15 text-cyan-400' },
+  feat:     { label: 'Feature',  className: 'bg-emerald-500/15 text-emerald-400' },
+  fix:      { label: 'Fix',      className: 'bg-orange-500/15 text-orange-400' },
+  perf:     { label: 'Perf',     className: 'bg-cyan-500/15 text-cyan-400' },
   refactor: { label: 'Refactor', className: 'bg-violet-500/15 text-violet-400' },
-  ui: { label: 'UI', className: 'bg-pink-500/15 text-pink-400' },
+  ui:       { label: 'UI',       className: 'bg-pink-500/15 text-pink-400' },
 }

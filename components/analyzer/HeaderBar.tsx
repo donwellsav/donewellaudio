@@ -33,7 +33,7 @@ export const HeaderBar = memo(function HeaderBar() {
   const hasClearableContent = advisories.some(a => !dismissedIds.has(a.id)) || hasActiveGEQBars || hasActiveRTAMarkers
 
   return (
-    <header className="header-glow relative flex flex-row items-center justify-between gap-2 sm:gap-4 px-3 py-1 border-b-0 bg-card/90 backdrop-blur-sm shadow-[0_1px_16px_rgba(0,0,0,0.15),0_2px_4px_rgba(0,0,0,0.1),0_1px_0_rgba(37,99,235,0.06)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.55),0_2px_4px_rgba(0,0,0,0.3),0_1px_0_rgba(75,146,255,0.08)] sm:px-4 sm:py-1">
+    <header className="header-glow relative flex flex-row items-center justify-between gap-2 sm:gap-4 px-3 py-1 channel-strip amber-panel-header border-b border-b-[rgba(245,158,11,0.20)] shadow-[0_1px_16px_rgba(0,0,0,0.15),0_2px_4px_rgba(0,0,0,0.1),0_1px_0_rgba(217,119,6,0.06)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.55),0_2px_4px_rgba(0,0,0,0.3),0_1px_0_rgba(245,158,11,0.09)] sm:px-4 sm:py-1">
 
       {/* ── Logo + start button (responsive single block) ─────────── */}
       <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
@@ -44,16 +44,17 @@ export const HeaderBar = memo(function HeaderBar() {
             className="relative flex items-center justify-center flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary rounded"
           >
             <DwaLogo
-              className={`size-16 ${isRunning ? 'text-foreground drop-shadow-[0_0_8px_rgba(75,146,255,0.6)]' : 'text-foreground/70 hover:text-foreground'}`}
+              className={`size-16 ${isRunning ? 'text-foreground drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'text-foreground/70 hover:text-foreground'}`}
               audioLevel={isRunning ? Math.max(0, Math.min(1, (inputLevel + 60) / 60)) : undefined}
             />
           </button>
         </div>
 
-        <div className="flex flex-col justify-center min-w-0" style={{ gap: '2px' }}>
+        <div className="flex flex-col justify-center min-w-0" style={{ gap: '1px' }}>
           <span className="font-mono text-[12px] font-bold tracking-[0.25em] text-foreground/90 uppercase leading-none">Donewell</span>
-          <span className="font-mono text-[11px] font-normal tracking-[0.2em] text-muted-foreground/60 leading-none">
-            V{(process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0').toUpperCase()}
+          <span className="font-mono text-[10px] font-normal tracking-[0.15em] text-muted-foreground/55 leading-none">Audio Analyzer</span>
+          <span className="font-mono text-[9px] font-normal tracking-[0.1em] text-foreground/20 leading-none tabular-nums">
+            v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0'}
           </span>
         </div>
 
@@ -172,7 +173,7 @@ export const HeaderBar = memo(function HeaderBar() {
         </div>
 
         {/* ── Separator (desktop only) ────────────────── */}
-        <div className="hidden tablet:block w-px h-6 bg-border/40 mx-1 sm:mx-1.5 flex-shrink-0" aria-hidden="true" />
+        <div className="hidden tablet:block w-px h-6 bg-[rgba(245,158,11,0.20)] mx-1 sm:mx-1.5 flex-shrink-0" aria-hidden="true" />
 
         {/* ── Utility group (desktop: inline, mobile: overflow menu) ── */}
         <div className="hidden tablet:flex items-center gap-0 icon-cluster">

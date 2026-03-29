@@ -1,25 +1,26 @@
 'use client'
 
 import { memo } from 'react'
-import { HelpSection } from './HelpShared'
+import { HelpSection, HelpGroup } from './HelpShared'
 
 export const AlgorithmsTab = memo(function AlgorithmsTab() {
   return (
     <>
-      <HelpSection title="7-Algorithm Fusion System">
-        <p>
-          DoneWell Audio uses 7 detection algorithms from peer-reviewed acoustic research. Each exploits
-          a different physical property of feedback vs. musical content. They vote together with
-          content-aware weighting for maximum accuracy and minimal false positives.
-        </p>
-      </HelpSection>
+      {/* Group: Overview */}
+      <HelpGroup title="Overview">
+        <HelpSection title="7-Algorithm Fusion System" color="amber">
+          <p>
+            DoneWell Audio uses 7 detection algorithms from peer-reviewed acoustic research. Each exploits
+            a different physical property of feedback vs. musical content. They vote together with
+            content-aware weighting for maximum accuracy and minimal false positives.
+          </p>
+        </HelpSection>
+      </HelpGroup>
 
       {/* Group: Detection Algorithms */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Detection Algorithms</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1.5 pt-3">
-        <div className="bg-card/80 rounded border p-3">
-          <h3 className="section-label mb-2 text-primary">1. MSD — Magnitude Slope Deviation</h3>
+      <HelpGroup title="Detection Algorithms">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1.5">
+        <HelpSection title="1. MSD — Magnitude Slope Deviation" color="amber">
           <div className="space-y-2.5 pt-2">
             <p className="text-sm italic text-muted-foreground">DAFx-16 Paper — Growth pattern analysis</p>
             <p className="text-sm text-muted-foreground">
@@ -74,10 +75,9 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
               <p>Rock/compressed: 50 frames (~1.1 s) at 22% accuracy — use compression detection</p>
             </div>
           </div>
-        </div>
+        </HelpSection>
 
-        <div className="bg-card/80 rounded border p-3">
-          <h3 className="section-label mb-2 text-primary">2. Phase Coherence Analysis</h3>
+        <HelpSection title="2. Phase Coherence Analysis" color="amber">
           <div className="space-y-2.5 pt-2">
             <p className="text-sm italic text-muted-foreground">KU Leuven 2025 / Nyquist stability theory</p>
             <p className="text-sm text-muted-foreground">
@@ -123,10 +123,9 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
               <p>Min samples: 5 frames | Buffer: 10 frames per bin</p>
             </div>
           </div>
-        </div>
+        </HelpSection>
 
-        <div className="bg-card/80 rounded border p-3">
-          <h3 className="section-label mb-2 text-primary">3. Spectral Flatness / Compression</h3>
+        <HelpSection title="3. Spectral Flatness / Compression" color="amber">
           <div className="space-y-2.5 pt-2">
             <p className="text-sm italic text-muted-foreground">Wiener entropy — Tone vs. broadband discrimination</p>
             <p className="text-sm text-muted-foreground">
@@ -170,10 +169,9 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
               <p>When compressed: MSD weight drops, Phase weight increases automatically</p>
             </div>
           </div>
-        </div>
+        </HelpSection>
 
-        <div className="bg-card/80 rounded border p-3">
-          <h3 className="section-label mb-2 text-primary">4. Comb Filter Pattern Detection</h3>
+        <HelpSection title="4. Comb Filter Pattern Detection" color="amber">
           <div className="space-y-2.5 pt-2">
             <p className="text-sm italic text-muted-foreground">DBX Paper — Acoustic path geometry</p>
             <p className="text-sm text-muted-foreground">
@@ -213,10 +211,9 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
               <p className="text-muted-foreground">Allows preemptive EQ cuts before feedback becomes audible.</p>
             </div>
           </div>
-        </div>
+        </HelpSection>
 
-        <div className="bg-card/80 rounded border p-3">
-          <h3 className="section-label mb-2 text-primary">5. Inter-Harmonic Ratio (IHR)</h3>
+        <HelpSection title="5. Inter-Harmonic Ratio (IHR)" color="amber">
           <div className="space-y-2.5 pt-2">
             <p className="text-sm italic text-muted-foreground">Harmonic vs. inter-harmonic energy analysis</p>
             <p className="text-sm text-muted-foreground">
@@ -251,10 +248,9 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
               <p className="mt-1 text-muted-foreground">More harmonics → higher bar for feedback classification (instruments naturally have harmonics).</p>
             </div>
           </div>
-        </div>
+        </HelpSection>
 
-        <div className="bg-card/80 rounded border p-3">
-          <h3 className="section-label mb-2 text-primary">6. Peak-to-Median Ratio (PTMR)</h3>
+        <HelpSection title="6. Peak-to-Median Ratio (PTMR)" color="amber">
           <div className="space-y-2.5 pt-2">
             <p className="text-sm italic text-muted-foreground">Spectral prominence measurement</p>
             <p className="text-sm text-muted-foreground">
@@ -285,17 +281,15 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
               <p className="text-muted-foreground">Normalized to [0,1] over a 15 dB range (8–23 dB).</p>
             </div>
           </div>
-        </div>
+        </HelpSection>
 
         </div>
-      </div>
+      </HelpGroup>
 
       {/* Group: Fusion & Analysis */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Fusion & Analysis</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-        <div className="bg-card/80 rounded border p-3">
-          <h3 className="section-label mb-2 text-primary">Fusion Engine — Weighted Voting</h3>
+      <HelpGroup title="Fusion & Analysis">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+        <HelpSection title="Fusion Engine — Weighted Voting" color="amber">
           <div className="space-y-2.5 pt-2">
             <p className="text-sm text-muted-foreground">
               All 6 algorithms vote together with content-aware weighting. The system automatically
@@ -338,10 +332,9 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
               <p className="text-muted-foreground">Ensures P<sub>feedback</sub> stays in [0,1] while boosting comb&apos;s influence on the final vote.</p>
             </div>
           </div>
-        </div>
+        </HelpSection>
 
-        <div className="bg-card/80 rounded border p-3">
-          <h3 className="section-label mb-2 text-primary">Acoustic Physics & References</h3>
+        <HelpSection title="Acoustic Physics & References" color="blue">
           <div className="space-y-2.5 pt-2">
             <div className="bg-background/80 px-3 py-2 rounded font-mono text-sm border border-border/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3)] space-y-0.5">
               <p className="text-foreground font-semibold">FFT Resolution</p>
@@ -434,7 +427,7 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
             </div>
 
             <div className="mt-3 pt-2 panel-groove">
-              <p className="section-label mb-2">References</p>
+              <p className="section-label mb-2" style={{ color: 'var(--console-blue)' }}>References</p>
               <ul className="text-sm space-y-2 text-muted-foreground">
                 <li><strong>DAFx-16:</strong> Magnitude Slope Deviation algorithm for acoustic feedback detection. Demonstrates 100% accuracy for speech/classical with 7–13 frame windows. Introduces the &ldquo;Summing MSD&rdquo; method (140× speedup).</li>
                 <li><strong>DBX:</strong> Comb filter pattern analysis for feedback suppression. Equation 1: f<sub>n</sub> = n · c / d for open acoustic loop feedback frequencies.</li>
@@ -447,22 +440,20 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
               </ul>
             </div>
           </div>
+        </HelpSection>
+          <HelpSection title="Understanding Algorithm Scores" color="amber">
+            <ul className="space-y-2">
+              <li><strong>MSD HIGH:</strong> Second derivative near zero — strong feedback indicator (consistent growth)</li>
+              <li><strong>Phase LOCKED:</strong> Consistent phase relationship — strong feedback indicator (regenerative loop)</li>
+              <li><strong>Spectral PURE:</strong> Very low flatness — single tone present (near-zero entropy)</li>
+              <li><strong>Comb PATTERN:</strong> Regular frequency spacing — feedback loop geometry identified</li>
+              <li><strong>IHR LOW:</strong> Clean harmonics with no inter-harmonic energy — feedback</li>
+              <li><strong>PTMR HIGH:</strong> Peak stands far above spectral floor — narrow isolated tone</li>
+              <li><strong>COMPRESSED:</strong> Dynamic compression detected — phase coherence becomes primary</li>
+            </ul>
+          </HelpSection>
         </div>
-        </div>
-      </div>
-
-      {/* Full-width: Score Reference */}
-      <HelpSection title="Understanding Algorithm Scores">
-        <ul className="space-y-2">
-          <li><strong>MSD HIGH:</strong> Second derivative near zero — strong feedback indicator (consistent growth)</li>
-          <li><strong>Phase LOCKED:</strong> Consistent phase relationship — strong feedback indicator (regenerative loop)</li>
-          <li><strong>Spectral PURE:</strong> Very low flatness — single tone present (near-zero entropy)</li>
-          <li><strong>Comb PATTERN:</strong> Regular frequency spacing — feedback loop geometry identified</li>
-          <li><strong>IHR LOW:</strong> Clean harmonics with no inter-harmonic energy — feedback</li>
-          <li><strong>PTMR HIGH:</strong> Peak stands far above spectral floor — narrow isolated tone</li>
-          <li><strong>COMPRESSED:</strong> Dynamic compression detected — phase coherence becomes primary</li>
-        </ul>
-      </HelpSection>
+      </HelpGroup>
     </>
   )
 })

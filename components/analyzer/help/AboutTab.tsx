@@ -2,14 +2,14 @@
 
 import { memo } from 'react'
 import { CHANGELOG } from '@/lib/changelog'
-import { HelpSection, TYPE_STYLES } from './HelpShared'
+import { HelpSection, HelpGroup, TYPE_STYLES } from './HelpShared'
 
 export const AboutTab = memo(function AboutTab() {
   return (
     <>
       <div className="flex flex-col items-center text-center py-6 space-y-3">
         <div className="text-3xl font-black tracking-tighter font-mono">
-          DONEWELL <span className="text-primary drop-shadow-[0_0_10px_rgba(75,146,255,0.4)]">AUDIO</span>
+          DONEWELL <span className="text-[var(--console-amber)] drop-shadow-[0_0_10px_rgba(245,158,11,0.35)]">AUDIO</span>
         </div>
         <div className="text-sm text-muted-foreground/80 font-mono tracking-[0.2em] uppercase">Real-Time Acoustic Feedback Detection</div>
         <div className="font-mono text-sm bg-card/80 text-muted-foreground px-3 py-1.5 rounded border">
@@ -18,10 +18,9 @@ export const AboutTab = memo(function AboutTab() {
       </div>
 
       {/* Group: Project Info */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Project Info</div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 pt-3">
-          <HelpSection title="About">
+      <HelpGroup title="Project Info">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+          <HelpSection title="About" color="amber">
             <p>
               DoneWell Audio is a professional real-time acoustic feedback detection and analysis tool
               for live sound engineers. It uses 6 detection algorithms from peer-reviewed acoustic
@@ -33,7 +32,7 @@ export const AboutTab = memo(function AboutTab() {
             </p>
           </HelpSection>
 
-          <HelpSection title="Tech">
+          <HelpSection title="Tech" color="blue">
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
               <span className="text-muted-foreground">Platform</span><span className="font-mono">Progressive Web App</span>
               <span className="text-muted-foreground">Framework</span><span className="font-mono">Next.js + React 19</span>
@@ -43,26 +42,25 @@ export const AboutTab = memo(function AboutTab() {
             </div>
           </HelpSection>
 
-          <HelpSection title="Credits">
+          <HelpSection title="Credits" color="amber">
             <p>Built by <strong>Don Wells AV</strong></p>
             <p className="mt-1 text-sm">
               Algorithm research: DAFx-16, KU Leuven (2025), DBX, Hopkins (2007), IEC 61672-1
             </p>
           </HelpSection>
         </div>
-      </div>
+      </HelpGroup>
 
       {/* Changelog — compact entries */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Changelog</div>
-        <div className="space-y-1.5 pt-3">
+      <HelpGroup title="Changelog">
+        <div className="space-y-1.5">
           {CHANGELOG.map((entry, i) => (
             <div key={`${entry.version}-${i}`} className="bg-card/80 rounded border p-2.5">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="font-mono text-sm font-bold text-foreground">v{entry.version}</span>
                 <span className="text-xs text-muted-foreground font-mono">{entry.date}</span>
                 {entry.highlights && (
-                  <span className="text-xs text-primary font-mono">· {entry.highlights}</span>
+                  <span className="text-xs font-mono" style={{ color: 'var(--console-amber)' }}>· {entry.highlights}</span>
                 )}
               </div>
               <div className="space-y-1">
@@ -81,7 +79,7 @@ export const AboutTab = memo(function AboutTab() {
             </div>
           ))}
         </div>
-      </div>
+      </HelpGroup>
     </>
   )
 })

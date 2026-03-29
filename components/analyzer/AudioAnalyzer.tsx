@@ -310,6 +310,12 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
     issuesPanelRef.current?.collapse()
   }, [])
 
+  /** Close split view and focus the Issues list in the left sidebar */
+  const closeIssuesPanelToIssues = useCallback(() => {
+    setActiveSidebarTab('issues')
+    issuesPanelRef.current?.collapse()
+  }, [])
+
   // ── Calibration + data collection tab props ─────────────────────────────
 
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0'
@@ -426,6 +432,7 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
             setActiveSidebarTab={setActiveSidebarTab}
             openIssuesPanel={openIssuesPanel}
             closeIssuesPanel={closeIssuesPanel}
+            closeIssuesPanelToIssues={closeIssuesPanelToIssues}
             setIssuesPanelOpen={setIssuesPanelOpen}
             actualFps={actualFps}
             droppedPercent={droppedPercent}

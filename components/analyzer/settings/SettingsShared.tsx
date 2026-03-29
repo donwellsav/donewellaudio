@@ -33,22 +33,32 @@ export const SettingsGrid = memo(function SettingsGrid({ children, className }: 
 
 // ── Section (flat, uniform) ──────────────────────────────────────────────────
 
-export const Section = memo(function Section({ title, tooltip, showTooltip = true, fullWidth, children }: {
+type SectionColor = 'amber' | 'blue' | 'green'
+const COLOR_VAR: Record<SectionColor, string> = {
+  amber: 'var(--console-amber)',
+  blue: 'var(--console-blue)',
+  green: 'var(--console-green)',
+}
+
+export const Section = memo(function Section({ title, tooltip, showTooltip = true, fullWidth, color, children }: {
   title: string
   tooltip?: string
   showTooltip?: boolean
   fullWidth?: boolean
+  /** Operator color group — overrides amber cascade for this section header */
+  color?: SectionColor
   children: React.ReactNode
 }) {
+  const labelStyle = color ? { color: COLOR_VAR[color] } : undefined
   return (
     <TooltipProvider delayDuration={300}>
       <div className={cn('space-y-2', fullWidth && 'sm:col-span-full')}>
         <div className="flex items-center gap-1.5">
-          <h3 className="section-label">{title}</h3>
+          <h3 className="section-label" style={labelStyle}>{title}</h3>
           {tooltip && showTooltip && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <HelpCircle className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                <HelpCircle className="w-3.5 h-3.5 text-[rgba(245,158,11,0.45)] hover:text-[var(--console-amber)] cursor-help" />
               </TooltipTrigger>
               <TooltipContent side="right" className="max-w-[280px] text-sm">
                 {tooltip}

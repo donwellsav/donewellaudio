@@ -22,7 +22,7 @@ Built by [Don Wells AV](https://donwellsav.com).
 - `lib/calibration/calibrationSession.ts` - Session data collector
 - `hooks/useCalibrationSession.ts` - React hook for calibration state
 
-**Current default values (as of v0.95):**
+**Current default values (as of v0.22.0):**
 - Input Gain: **0 dB**
 - Confidence Threshold: **35%**
 - Algorithm Mode: **Auto** (content-adaptive)
@@ -135,7 +135,7 @@ Open [http://localhost:3000](http://localhost:3000), grant microphone permission
 analyzer/
 ├── app/
 │   ├── layout.tsx                    # Root layout with metadata + Sentry
-│   ├── page.tsx                      # Entry point — renders KillTheRing
+│   ├── page.tsx                      # Entry point — renders AudioAnalyzer
 │   ├── global-error.tsx              # Global error boundary (Sentry)
 │   ├── sw.ts                         # Serwist service worker
 │   ├── ~offline/page.tsx             # Offline fallback page
@@ -143,8 +143,8 @@ analyzer/
 │
 ├── components/
 │   ├── analyzer/
-│   │   ├── KillTheRing.tsx           # Main orchestration component
-│   │   ├── KillTheRingClient.tsx     # Client-side wrapper
+│   │   ├── AudioAnalyzer.tsx          # Main orchestration component
+│   │   ├── AudioAnalyzerClient.tsx   # Client-side wrapper
 │   │   ├── SpectrumCanvas.tsx        # RTA Spectrum visualization
 │   │   ├── GEQBarView.tsx            # 31-Band GEQ bar visualization
 │   │   ├── IssuesList.tsx            # Active issues with Apply buttons

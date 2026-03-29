@@ -183,7 +183,7 @@ export const CalibrationTab = memo(function CalibrationTab({
                   onClick={() => handleUnit(u)}
                   className={`px-2 py-1 text-xs font-mono rounded border transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                     room.dimensions.unit === u
-                      ? 'bg-primary/20 text-primary border-primary/40'
+                      ? 'bg-[rgba(74,222,128,0.12)] text-[var(--console-green)] border-[rgba(74,222,128,0.40)]'
                       : 'bg-muted/40 text-muted-foreground border-border hover:text-foreground'
                   }`}
                 >
@@ -235,7 +235,7 @@ export const CalibrationTab = memo(function CalibrationTab({
                 title={mic.fullName}
                 className={`px-2.5 py-1 text-xs font-mono font-bold tracking-wider rounded border transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                   room.micTypes.includes(mic.value)
-                    ? 'bg-primary/20 text-primary border-primary/40'
+                    ? 'bg-[rgba(74,222,128,0.12)] text-[var(--console-green)] border-[rgba(74,222,128,0.40)]'
                     : 'bg-muted/40 text-muted-foreground border-border hover:text-foreground'
                 }`}
               >
@@ -363,7 +363,7 @@ export const CalibrationTab = memo(function CalibrationTab({
             }`}>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Status</span>
-                <span className={isRecording ? 'text-primary font-medium' : 'text-muted-foreground'}>
+                <span className={isRecording ? 'text-[var(--console-green)] font-medium' : 'text-muted-foreground'}>
                   {isRecording ? 'Recording' : 'Waiting for analysis...'}
                 </span>
               </div>
