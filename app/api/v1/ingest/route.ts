@@ -69,8 +69,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
     }
 
-    // IP-based rate limit (primary gate — client cannot forge on Vercel)
-    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+    // IP-based rate limit (primary gate).
+    // Prefer request.ip (set by Vercel, not forgeable) over the header.
+    const clientIp = (request as NextRequest & { ip?: string }).ip
+      ?? request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      ?? 'unknown'
     if (isRateLimitedByKey(ipRateLimitMap, clientIp, IP_RATE_LIMIT_MAX_REQUESTS)) {
       return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
     }

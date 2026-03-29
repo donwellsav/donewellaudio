@@ -23,6 +23,10 @@ const securityHeaders = [
     key: 'Permissions-Policy',
     value: 'microphone=(self), camera=(), geolocation=()',
   },
+  {
+    key: 'Strict-Transport-Security',
+    value: 'max-age=31536000; includeSubDomains',
+  },
 ]
 
 /** @type {import('next').NextConfig} */
