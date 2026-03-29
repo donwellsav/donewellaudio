@@ -149,7 +149,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                     className={`flex-shrink-0 px-2 py-1 rounded transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                       issuesPanelOpen
                         ? 'text-[var(--console-amber)]'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-[rgba(245,158,11,0.08)] ring-1 ring-[rgba(245,158,11,0.20)]'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.08)] ring-1 ring-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.20)]'
                     }`}
                     aria-label={issuesPanelOpen ? 'Show Controls only' : 'Open split view'}
                   >
@@ -163,7 +163,7 @@ export const DesktopLayout = memo(function DesktopLayout({
             </div>
             {/* Settings sub-tab bar — flex-shrink-0 sibling, zero gap, solid background */}
             {activeSidebarTab === 'controls' && (
-              <div className="flex-shrink-0 flex gap-0 bg-[#070c12] border-b border-[rgba(245,158,11,0.14)]">
+              <div className="flex-shrink-0 flex gap-0 bg-[#070c12] border-b border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.14)]">
                 {SETTINGS_TABS.map(({ id, label, shortLabel, Icon }) => (
                   <button
                     key={id}
@@ -172,8 +172,8 @@ export const DesktopLayout = memo(function DesktopLayout({
                     data-active={controlsTab === id}
                     className={`tab-track-item relative flex-1 min-h-[30px] flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                       controlsTab === id
-                        ? 'bg-[rgba(245,158,11,0.08)] text-[var(--console-amber)]'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-[rgba(245,158,11,0.04)]'
+                        ? 'bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.08)] text-[var(--console-amber)]'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.04)]'
                     }`}
                   >
                     <Icon className="w-3 h-3 flex-shrink-0" />
@@ -221,7 +221,7 @@ export const DesktopLayout = memo(function DesktopLayout({
                         {settings.mode === 'ringOut' && isRunning && onStartWizard && (
                           <button
                             onClick={onStartWizard}
-                            className="w-full mt-2 py-2 rounded font-mono text-xs font-bold tracking-[0.15em] uppercase bg-[rgba(245,158,11,0.10)] border border-[rgba(245,158,11,0.30)] text-[var(--console-amber)] hover:bg-[rgba(245,158,11,0.18)] transition-colors cursor-pointer"
+                            className="w-full mt-2 py-2 rounded font-mono text-xs font-bold tracking-[0.15em] uppercase bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.10)] border border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.30)] text-[var(--console-amber)] hover:bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.18)] transition-colors cursor-pointer"
                           >
                             Start Ring-Out Wizard
                           </button>
@@ -389,7 +389,7 @@ export const DesktopLayout = memo(function DesktopLayout({
       </ResizablePanelGroup>
 
       {/* Gain fader strip */}
-      <div className="flex-shrink-0 w-20 border-l border-[rgba(245,158,11,0.18)] channel-strip amber-sidecar">
+      <div className="flex-shrink-0 w-20 border-l border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.18)] channel-strip amber-sidecar">
         <VerticalGainFader
           value={settings.inputGainDb}
           onChange={(v) => setInputGain(v)}

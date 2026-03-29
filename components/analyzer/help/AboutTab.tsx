@@ -9,7 +9,7 @@ export const AboutTab = memo(function AboutTab() {
     <>
       <div className="flex flex-col items-center text-center py-6 space-y-3">
         <div className="text-3xl font-black tracking-tighter font-mono">
-          DONEWELL <span className="text-[var(--console-amber)] drop-shadow-[0_0_10px_rgba(245,158,11,0.35)]">AUDIO</span>
+          DONEWELL <span className="text-[var(--console-amber)] drop-shadow-[0_0_10px_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.35)]">AUDIO</span>
         </div>
         <div className="text-sm text-muted-foreground/80 font-mono tracking-[0.2em] uppercase">Real-Time Acoustic Feedback Detection</div>
         <div className="font-mono text-sm bg-card/80 text-muted-foreground px-3 py-1.5 rounded border">

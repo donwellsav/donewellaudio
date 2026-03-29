@@ -118,7 +118,7 @@ export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
         </TooltipContent>
       </Tooltip>
       <SheetContent side="right" className={cn("overflow-y-auto channel-strip amber-sidecar", maxW)}>
-        <SheetHeader className="pb-3 panel-groove bg-card/60 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-4 max-sm:pt-2 shadow-[0_1px_8px_rgba(0,0,0,0.3),0_1px_0_rgba(245,158,11,0.09)]">
+        <SheetHeader className="pb-3 panel-groove bg-card/60 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-4 max-sm:pt-2 shadow-[0_1px_8px_rgba(0,0,0,0.3),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.09)]">
           <SheetTitle className="text-lg flex items-center gap-2">
             <History className="h-5 w-5" style={{ color: 'var(--console-amber)' }} />
             <span style={{ color: 'var(--console-amber)' }}>Feedback History</span>
@@ -237,7 +237,7 @@ export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
             <div className={hotspots.length === 0 ? 'space-y-1.5' : gridCls}>
               {hotspots.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-1 bg-card/80 rounded border">
-                  <BarChart3 className="w-5 h-5 text-[rgba(245,158,11,0.30)] mb-1" />
+                  <BarChart3 className="w-5 h-5 text-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.30)] mb-1" />
                   <span className="text-sm font-mono font-medium">No feedback events recorded yet</span>
                   <span className="text-sm text-muted-foreground font-mono">Events will appear here as they are detected</span>
                 </div>
@@ -300,7 +300,7 @@ export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
             </div>
             {archivedSessions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-muted-foreground gap-1 bg-card/80 rounded border">
-                <Clock className="w-5 h-5 text-[rgba(245,158,11,0.30)] mb-1" />
+                <Clock className="w-5 h-5 text-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.30)] mb-1" />
                 <span className="text-sm font-mono">No past sessions</span>
                 <span className="text-xs text-muted-foreground/70 font-mono">Sessions are archived when you stop analysis</span>
               </div>
@@ -316,7 +316,7 @@ export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
                           {new Date(session.startTime).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </span>
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(245,158,11,0.12)] font-mono" style={{ color: 'var(--console-amber)' }}>
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.12)] font-mono" style={{ color: 'var(--console-amber)' }}>
                         {session.mode}
                       </span>
                     </div>

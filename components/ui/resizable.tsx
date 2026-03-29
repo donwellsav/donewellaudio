@@ -39,14 +39,14 @@ function ResizableHandle({
     <ResizablePrimitive.PanelResizeHandle
       data-slot="resizable-handle"
       className={cn(
-        'bg-[rgba(245,158,11,0.12)] focus-visible:ring-ring relative flex w-px items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-2 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-2 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:translate-x-0 data-[panel-group-direction=vertical]:after:-translate-y-1/2 [&[data-panel-group-direction=vertical]>div]:rotate-90',
+        'bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.12)] focus-visible:ring-ring relative flex w-px items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-2 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-2 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:translate-x-0 data-[panel-group-direction=vertical]:after:-translate-y-1/2 [&[data-panel-group-direction=vertical]>div]:rotate-90',
         className,
       )}
       {...props}
     >
       {withHandle && (
-        <div className="bg-border z-10 flex h-5 w-4 items-center justify-center rounded-xs border border-[rgba(245,158,11,0.15)]">
-          <GripVerticalIcon className="size-3 text-[rgba(245,158,11,0.45)]" />
+        <div className="bg-border z-10 flex h-5 w-4 items-center justify-center rounded-xs border border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.15)]">
+          <GripVerticalIcon className="size-3 text-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.45)]" />
         </div>
       )}
     </ResizablePrimitive.PanelResizeHandle>

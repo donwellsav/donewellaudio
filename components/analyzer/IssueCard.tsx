@@ -139,7 +139,7 @@ export const IssueCard = memo(function IssueCard({
             : isRunaway
                 ? 'border-red-500/70 animate-emergency-glow'
                 : isWarning
-                  ? 'border-amber-500/60 shadow-[0_0_8px_rgba(245,158,11,0.3)] ring-1 ring-amber-500/15'
+                  ? 'border-amber-500/60 shadow-[0_0_8px_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.3)] ring-1 ring-amber-500/15'
                   : 'border-border/40 hover:border-primary/30'
       }`}
       onTouchStart={handlers.onTouchStart}

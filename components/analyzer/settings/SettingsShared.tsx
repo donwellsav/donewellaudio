@@ -58,7 +58,7 @@ export const Section = memo(function Section({ title, tooltip, showTooltip = tru
           {tooltip && showTooltip && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <HelpCircle className="w-3.5 h-3.5 text-[rgba(245,158,11,0.45)] hover:text-[var(--console-amber)] cursor-help" />
+                <HelpCircle className="w-3.5 h-3.5 text-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.45)] hover:text-[var(--console-amber)] cursor-help" />
               </TooltipTrigger>
               <TooltipContent side="right" className="max-w-[280px] text-sm">
                 {tooltip}

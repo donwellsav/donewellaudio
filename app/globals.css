@@ -56,17 +56,21 @@
   --sidebar-accent-foreground: #4B92FF;
   --sidebar-border: #1e2530;
   --sidebar-ring: #4B92FF;
+  /* Signal tint — driven by useSignalTint hook based on detection severity */
+  --tint-r: 245;
+  --tint-g: 158;
+  --tint-b: 11;
   /* Console accent colors — pro-audio instrument aesthetic */
-  --console-amber: #f59e0b;
-  --console-amber-glow: rgba(245, 158, 11, 0.35);
+  --console-amber: rgb(var(--tint-r), var(--tint-g), var(--tint-b));
+  --console-amber-glow: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35);
   --console-blue: #4B92FF;
   --console-blue-glow: rgba(75, 146, 255, 0.28);
   --console-cyan: #06b6d4;
   --console-cyan-glow: rgba(6, 182, 212, 0.25);
   --console-green: #4ade80;
   --console-green-glow: rgba(74, 222, 128, 0.30);
-  --console-readout-text: #f59e0b;
-  --console-readout-glow: rgba(245, 158, 11, 0.35);
+  --console-readout-text: rgb(var(--tint-r), var(--tint-g), var(--tint-b));
+  --console-readout-glow: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35);
 }
 
 /* ── Global touch & scroll behavior ──────────────────────────────────────────── */
@@ -121,16 +125,16 @@ html {
   --sidebar-border: #d0d5dd;
   --sidebar-ring: #2563eb;
   /* Console accent colors — muted for light theme (no glow) */
-  --console-amber: #d97706;
-  --console-amber-glow: rgba(217, 119, 6, 0.15);
+  --console-amber: rgb(var(--tint-r), var(--tint-g), var(--tint-b));
+  --console-amber-glow: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.15);
   --console-blue: #2563eb;
   --console-blue-glow: rgba(37, 99, 235, 0.18);
   --console-cyan: #0891b2;
   --console-cyan-glow: rgba(8, 145, 178, 0.12);
   --console-green: #22c55e;
   --console-green-glow: rgba(34, 197, 94, 0.18);
-  --console-readout-text: #d97706;
-  --console-readout-glow: rgba(217, 119, 6, 0.08);
+  --console-readout-text: rgb(var(--tint-r), var(--tint-g), var(--tint-b));
+  --console-readout-glow: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.08);
 }
 
 @theme inline {
@@ -290,16 +294,16 @@ html {
   .amber-sidecar {
     background: linear-gradient(180deg, #0d1520 0%, #080e16 40%, #070c12 100%);
     box-shadow:
-      inset 0 0 0 1px rgba(245, 158, 11, 0.22),   /* amber ring — no layout shift */
-      inset 0 1px 0 rgba(245, 158, 11, 0.32),       /* top catch-light */
-      0 0 24px rgba(245, 158, 11, 0.09);             /* outer ambient glow */
+      inset 0 0 0 1px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.22),   /* amber ring — no layout shift */
+      inset 0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.32),       /* top catch-light */
+      0 0 24px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.09);             /* outer ambient glow */
     position: relative;
   }
   .light .amber-sidecar {
     background: linear-gradient(180deg, #f8f5ef 0%, #f2eeea 100%);
     box-shadow:
-      inset 0 0 0 1px rgba(217, 119, 6, 0.18),
-      inset 0 1px 0 rgba(217, 119, 6, 0.20);
+      inset 0 0 0 1px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18),
+      inset 0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.20);
   }
   /* Bottom amber fade accent bar */
   .amber-sidecar::after {
@@ -308,9 +312,9 @@ html {
     bottom: 0; left: 0; right: 0;
     height: 2px;
     background: linear-gradient(90deg,
-      rgba(245, 158, 11, 0) 0%,
-      rgba(245, 158, 11, 0.35) 50%,
-      rgba(245, 158, 11, 0) 100%
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0) 0%,
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35) 50%,
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0) 100%
     );
     pointer-events: none;
     z-index: 1;
@@ -319,31 +323,31 @@ html {
   /* ── Amber panel header bar ──────────────────────────────────────────────── */
   .amber-panel-header {
     background: linear-gradient(180deg,
-      rgba(245, 158, 11, 0.09) 0%,
-      rgba(245, 158, 11, 0.03) 100%
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.09) 0%,
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.03) 100%
     );
-    border-bottom: 1px solid rgba(245, 158, 11, 0.18);
-    box-shadow: 0 1px 0 rgba(245, 158, 11, 0.06);
+    border-bottom: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18);
+    box-shadow: 0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06);
   }
   .light .amber-panel-header {
     background: linear-gradient(180deg,
-      rgba(217, 119, 6, 0.07) 0%,
-      rgba(217, 119, 6, 0.02) 100%
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.07) 0%,
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.02) 100%
     );
-    border-bottom: 1px solid rgba(217, 119, 6, 0.14);
+    border-bottom: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.14);
   }
 
   /* ── Cascade overrides inside amber sidecars ─────────────────────────────── */
-  .amber-sidecar .section-label      { color: rgba(245, 158, 11, 0.55); }
-  .light .amber-sidecar .section-label { color: rgba(217, 119, 6, 0.60); }
+  .amber-sidecar .section-label      { color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.55); }
+  .light .amber-sidecar .section-label { color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.60); }
   .amber-sidecar .panel-groove-subtle {
     background: linear-gradient(90deg,
-      transparent 0%, rgba(245, 158, 11, 0.14) 50%, transparent 100%
+      transparent 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.14) 50%, transparent 100%
     );
   }
   .light .amber-sidecar .panel-groove-subtle {
     background: linear-gradient(90deg,
-      transparent 0%, rgba(217, 119, 6, 0.12) 50%, transparent 100%
+      transparent 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.12) 50%, transparent 100%
     );
   }
 
@@ -352,44 +356,44 @@ html {
   .amber-sidecar .panel-groove {
     box-shadow:
       inset 0 1px 0 rgba(0, 0, 0, 0.45),
-      0 1px 0 rgba(245, 158, 11, 0.09);
+      0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.09);
   }
   .light .amber-sidecar .panel-groove {
     box-shadow:
       inset 0 1px 0 rgba(0, 0, 0, 0.08),
-      0 1px 0 rgba(217, 119, 6, 0.12);
+      0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.12);
   }
   /* Trigger: hover state — subtle amber tint */
   .amber-sidecar [data-radix-accordion-trigger]:hover {
-    background: rgba(245, 158, 11, 0.035);
+    background: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.035);
   }
   /* Trigger: open/active state — amber left accent bar */
   .amber-sidecar [data-radix-accordion-trigger][data-state="open"] {
-    border-left: 2px solid rgba(245, 158, 11, 0.50);
+    border-left: 2px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.50);
     padding-left: calc(0.5rem - 2px);
-    background: rgba(245, 158, 11, 0.05);
+    background: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.05);
   }
   .amber-sidecar [data-radix-accordion-trigger][data-state="open"] .section-label {
-    color: rgba(245, 158, 11, 0.80);
+    color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.80);
   }
   /* Content area: left amber line when expanded */
   .amber-sidecar [data-radix-accordion-content] {
-    border-left: 2px solid rgba(245, 158, 11, 0.18);
+    border-left: 2px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18);
     padding-left: calc(0.5rem - 2px);
     margin-left: 0;
   }
   .light .amber-sidecar [data-radix-accordion-trigger]:hover {
-    background: rgba(217, 119, 6, 0.04);
+    background: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.04);
   }
   .light .amber-sidecar [data-radix-accordion-trigger][data-state="open"] {
-    border-left-color: rgba(217, 119, 6, 0.45);
-    background: rgba(217, 119, 6, 0.06);
+    border-left-color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.45);
+    background: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06);
   }
   .light .amber-sidecar [data-radix-accordion-trigger][data-state="open"] .section-label {
-    color: rgba(217, 119, 6, 0.85);
+    color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.85);
   }
   .light .amber-sidecar [data-radix-accordion-content] {
-    border-left-color: rgba(217, 119, 6, 0.20);
+    border-left-color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.20);
   }
 
   /* Channel strip vertical gradient — recessed rack-unit feel */
@@ -406,28 +410,28 @@ html {
   /* Amber tint on channel-strip — layers amber gradient over dark base */
   .channel-strip.amber-panel-header {
     background:
-      linear-gradient(180deg, rgba(245, 158, 11, 0.07) 0%, rgba(245, 158, 11, 0.02) 100%),
+      linear-gradient(180deg, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.07) 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.02) 100%),
       linear-gradient(180deg, #141a22 0%, #0f1318 50%, #0a0d10 100%);
-    border-top: 1px solid rgba(245, 158, 11, 0.06);
+    border-top: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06);
   }
   .light .channel-strip.amber-panel-header {
     background:
-      linear-gradient(180deg, rgba(217, 119, 6, 0.06) 0%, rgba(217, 119, 6, 0.02) 100%),
+      linear-gradient(180deg, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06) 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.02) 100%),
       linear-gradient(180deg, #f0f3f7 0%, #eaecf1 50%, #e2e5ea 100%);
-    border-top: 1px solid rgba(217, 119, 6, 0.08);
+    border-top: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.08);
   }
   /* Subtle amber tint on channel-strip sidecar (fader, etc.) */
   .channel-strip.amber-sidecar {
     background:
-      linear-gradient(180deg, rgba(245, 158, 11, 0.04) 0%, rgba(245, 158, 11, 0.01) 100%),
+      linear-gradient(180deg, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.04) 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.01) 100%),
       linear-gradient(180deg, #141a22 0%, #0f1318 50%, #0a0d10 100%);
-    border-top: 1px solid rgba(245, 158, 11, 0.05);
+    border-top: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.05);
   }
   .light .channel-strip.amber-sidecar {
     background:
-      linear-gradient(180deg, rgba(217, 119, 6, 0.03) 0%, rgba(217, 119, 6, 0.01) 100%),
+      linear-gradient(180deg, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.03) 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.01) 100%),
       linear-gradient(180deg, #f0f3f7 0%, #eaecf1 50%, #e2e5ea 100%);
-    border-top: 1px solid rgba(217, 119, 6, 0.06);
+    border-top: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06);
   }
 
   /* LED blink for active-running state */
@@ -519,7 +523,7 @@ html {
     transition: box-shadow 120ms ease, transform 80ms ease, color 120ms ease, background-color 120ms ease;
   }
   .btn-glow-amber:hover {
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.25), 0 0 4px rgba(245, 158, 11, 0.12);
+    box-shadow: 0 0 10px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.25), 0 0 4px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.12);
   }
   .btn-glow-amber:active { transform: scale(0.95); }
   .btn-glow-green {
@@ -559,11 +563,11 @@ html {
 
   /* ── Console slider — pro-audio recessed track + amber fill ─────────── */
   .console-range {
-    background: linear-gradient(90deg, rgba(var(--console-amber-rgb, 245, 158, 11), 0.3), rgba(var(--console-amber-rgb, 245, 158, 11), 0.7));
+    background: linear-gradient(90deg, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.3), rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.7));
     box-shadow: 0 0 6px var(--console-amber-glow);
   }
   .light .console-range {
-    background: linear-gradient(90deg, rgba(217, 119, 6, 0.2), rgba(217, 119, 6, 0.5));
+    background: linear-gradient(90deg, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.2), rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.5));
     box-shadow: none;
   }
   .console-thumb {
@@ -598,8 +602,8 @@ html {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--console-amber);
-    background: rgba(var(--console-amber-rgb, 245, 158, 11), 0.1);
-    border: 1px solid rgba(var(--console-amber-rgb, 245, 158, 11), 0.25);
+    background: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.1);
+    border: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.25);
     padding: 2px 7px;
     border-radius: 10px;
   }
@@ -650,12 +654,12 @@ html {
     background: rgba(255, 255, 255, 0.04);
   }
   .tab-track-item[data-active="true"] {
-    background: rgba(245, 158, 11, 0.13);
+    background: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.13);
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.25),
-      0 0 0 1px rgba(245, 158, 11, 0.28),
+      0 0 0 1px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.28),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    color: rgba(245, 158, 11, 1);
+    color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 1);
   }
   .light .tab-track-item {
     color: rgba(0, 0, 0, 0.40);
@@ -681,11 +685,11 @@ html {
   }
   .console-input:focus,
   .console-input:focus-visible {
-    border-color: rgba(245, 158, 11, 0.3);
+    border-color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.3);
     box-shadow:
       inset 0 1px 2px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(245, 158, 11, 0.15),
-      0 0 6px rgba(245, 158, 11, 0.12);
+      0 0 0 1px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.15),
+      0 0 6px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.12);
   }
   .light .console-input {
     background: #f5f6f8;
@@ -720,11 +724,11 @@ html {
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.30) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.30) 50%, transparent 100%);
     pointer-events: none;
   }
   .light .header-glow::after {
-    background: linear-gradient(90deg, transparent 0%, rgba(217, 119, 6, 0.20) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.20) 50%, transparent 100%);
   }
 
   /* ── Severity severity-accent-strip — glowing left edge for issue cards ── */
@@ -820,17 +824,17 @@ html {
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: rgba(245, 158, 11, 0.18);
+    background: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18);
     border-radius: 2px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(245, 158, 11, 0.38); }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.38); }
   .light ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); }
   .light ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
 
   /* ── LED status dot — hardware panel indicator ───────────────────────────── */
   @keyframes led-pulse-amber {
-    0%, 100% { opacity: 0.55; box-shadow: 0 0 3px rgba(245, 158, 11, 0.35); }
-    50%       { opacity: 1;    box-shadow: 0 0 7px rgba(245, 158, 11, 0.65); }
+    0%, 100% { opacity: 0.55; box-shadow: 0 0 3px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35); }
+    50%       { opacity: 1;    box-shadow: 0 0 7px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.65); }
   }
   @keyframes led-pulse-green {
     0%, 100% { opacity: 0.8; box-shadow: 0 0 3px rgba(34, 197, 94, 0.3); }
@@ -883,12 +887,12 @@ html {
     inset 0 3px 14px rgba(0, 0, 0, 0.55);
 }
 .instrument-window-amber {
-  border-color: rgba(245, 158, 11, 0.12);
-  border-top-color: rgba(245, 158, 11, 0.18);
+  border-color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.12);
+  border-top-color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18);
 }
 .light .instrument-window-amber {
-  border-color: rgba(217, 119, 6, 0.10);
-  border-top-color: rgba(217, 119, 6, 0.14);
+  border-color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.10);
+  border-top-color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.14);
 }
 .light .instrument-window {
   background: rgba(238, 241, 247, 0.95);
@@ -914,21 +918,21 @@ html {
 /* Compound selector — when amber-panel-header is used ON a panel-header, amber wins */
 .panel-header.amber-panel-header {
   background: linear-gradient(180deg,
-    rgba(245, 158, 11, 0.09) 0%,
-    rgba(245, 158, 11, 0.03) 100%
+    rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.09) 0%,
+    rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.03) 100%
   );
-  border-bottom: 1px solid rgba(245, 158, 11, 0.18);
+  border-bottom: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18);
   box-shadow:
-    0 1px 0 rgba(245, 158, 11, 0.06),
+    0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06),
     inset 0 -1px 0 rgba(0, 0, 0, 0.20);
 }
 .light .panel-header.amber-panel-header {
   background: linear-gradient(180deg,
-    rgba(217, 119, 6, 0.07) 0%,
-    rgba(217, 119, 6, 0.02) 100%
+    rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.07) 0%,
+    rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.02) 100%
   );
-  border-bottom: 1px solid rgba(217, 119, 6, 0.12);
-  box-shadow: 0 1px 0 rgba(217, 119, 6, 0.06);
+  border-bottom: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.12);
+  box-shadow: 0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06);
 }
 .light .panel-header {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(230, 234, 241, 0.6) 100%);
@@ -951,7 +955,7 @@ html {
 .power-led-amber {
   width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
   background: var(--console-amber);
-  box-shadow: 0 0 5px rgba(245, 158, 11, 0.9), 0 0 10px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 5px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.9), 0 0 10px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35);
   animation: led-pulse-amber 2s ease-in-out infinite;
 }
 

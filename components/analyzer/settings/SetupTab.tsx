@@ -119,7 +119,7 @@ export const SetupTab = memo(function SetupTab({
             className={`min-h-11 flex items-center justify-center overflow-hidden cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-1 rounded text-xs font-mono font-bold tracking-wide transition-all ${
               settings.mode === mode
                 ? 'bg-[var(--console-amber)]/10 text-[var(--console-amber)] border border-[var(--console-amber)]/40 btn-glow'
-                : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-[rgba(245,158,11,0.18)]'
+                : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.18)]'
             }`}
           >
             <span className="truncate">{label}</span>
@@ -133,7 +133,7 @@ export const SetupTab = memo(function SetupTab({
           <span className="section-label text-muted-foreground">EQ Style</span>
           {settings.showTooltips && (
             <Tooltip>
-              <TooltipTrigger asChild><HelpCircle className="w-3 h-3 text-[rgba(245,158,11,0.45)] hover:text-[var(--console-amber)] cursor-help" /></TooltipTrigger>
+              <TooltipTrigger asChild><HelpCircle className="w-3 h-3 text-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.45)] hover:text-[var(--console-amber)] cursor-help" /></TooltipTrigger>
               <TooltipContent side="right" className="max-w-[260px] text-sm">Surgical: narrow Q cuts for precision. Heavy: wider, deeper cuts for aggressive feedback.</TooltipContent>
             </Tooltip>
           )}
@@ -142,7 +142,7 @@ export const SetupTab = memo(function SetupTab({
           {([['surgical', 'Surgical'], ['heavy', 'Heavy']] as const).map(([style, label]) => (
             <button key={style} onClick={() => ctx.setEqStyle(style)}
               className={`min-h-11 flex-1 px-2 rounded text-xs font-mono font-bold tracking-wide transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-                settings.eqPreset === style ? 'bg-[rgba(245,158,11,0.12)] text-[var(--console-amber)] border border-[rgba(245,158,11,0.38)]' : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-[rgba(245,158,11,0.18)]'
+                settings.eqPreset === style ? 'bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.12)] text-[var(--console-amber)] border border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.38)]' : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.18)]'
               }`}
             >{label}</button>
           ))}

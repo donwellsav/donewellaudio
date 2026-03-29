@@ -598,10 +598,10 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
                 <span className="text-sm text-neutral-400 font-mono">Tap to retry</span>
               </span>
             ) : (
-              <span className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(245,158,11,0.20)] bg-card/70 text-sm text-foreground/80 font-mono font-bold tracking-wide backdrop-blur-sm pointer-events-none animate-start-glow">
+              <span className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.20)] bg-card/70 text-sm text-foreground/80 font-mono font-bold tracking-wide backdrop-blur-sm pointer-events-none animate-start-glow">
                 Press
                 {/* mini speaker button replica */}
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-[rgba(245,158,11,0.45)] bg-[rgba(245,158,11,0.10)] flex-shrink-0">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.45)] bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.10)] flex-shrink-0">
                   <svg className="w-3.5 h-3.5 text-[var(--console-amber)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.31-2.5-4.06v8.12c1.48-.75 2.5-2.29 2.5-4.06zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                   </svg>

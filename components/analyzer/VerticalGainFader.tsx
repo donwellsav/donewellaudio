@@ -222,41 +222,48 @@ export const VerticalGainFader = memo(function VerticalGainFader({
       ctx.textBaseline = 'middle'
       ctx.fillText('25', w * 0.48, defY)
     } else {
-      // Gain mode: standard dB scale — amber-tinted ticks
+      // Read tint color from CSS custom properties for canvas drawing
+      const rootStyle = getComputedStyle(document.documentElement)
+      const tr = rootStyle.getPropertyValue('--tint-r').trim() || '245'
+      const tg = rootStyle.getPropertyValue('--tint-g').trim() || '158'
+      const tb = rootStyle.getPropertyValue('--tint-b').trim() || '11'
+      const tint = (a: number) => `rgba(${tr},${tg},${tb},${a})`
+
+      // Gain mode: standard dB scale — tinted ticks
       for (const db of [-30, -20, -10, 10, 20, 30]) {
         const ratio = (db - min) / (max - min)
         const y = h * (1 - ratio)
 
-        ctx.strokeStyle = 'rgba(245,158,11,0.18)'
+        ctx.strokeStyle = tint(0.18)
         ctx.lineWidth = 0.75
         ctx.beginPath()
         ctx.moveTo(w * 0.55, y)
         ctx.lineTo(w, y)
         ctx.stroke()
 
-        ctx.fillStyle = 'rgba(245,158,11,0.28)'
+        ctx.fillStyle = tint(0.28)
         ctx.font = `${labelSize}px monospace`
         ctx.textAlign = 'right'
         ctx.textBaseline = 'middle'
         ctx.fillText(`${db}`, w * 0.48, y)
       }
 
-      // Zero-dB (unity) reference — prominent amber double-line with label
+      // Zero-dB (unity) reference — prominent double-line with label
       const zeroRatio = (0 - min) / (max - min)
       const zeroY = h * (1 - zeroRatio)
-      ctx.strokeStyle = 'rgba(245,158,11,0.45)'
+      ctx.strokeStyle = tint(0.45)
       ctx.lineWidth = 1.5
       ctx.beginPath()
       ctx.moveTo(0, zeroY)
       ctx.lineTo(w, zeroY)
       ctx.stroke()
-      ctx.strokeStyle = 'rgba(245,158,11,0.08)'
+      ctx.strokeStyle = tint(0.08)
       ctx.lineWidth = 0.5
       ctx.beginPath()
       ctx.moveTo(0, zeroY + 1.5)
       ctx.lineTo(w, zeroY + 1.5)
       ctx.stroke()
-      ctx.fillStyle = 'rgba(245,158,11,0.55)'
+      ctx.fillStyle = tint(0.55)
       ctx.font = `bold ${labelSize + 1}px monospace`
       ctx.textAlign = 'right'
       ctx.textBaseline = 'middle'
@@ -413,20 +420,20 @@ export const VerticalGainFader = memo(function VerticalGainFader({
     <div className="flex flex-col h-full items-center py-2 gap-1.5 select-none">
 
       {/* Mode toggle — rocker switch with LED indicators */}
-      <div className="flex-shrink-0 flex flex-col w-full rounded-md overflow-hidden border border-[rgba(245,158,11,0.22)] bg-[rgba(0,0,0,0.15)]">
+      <div className="flex-shrink-0 flex flex-col w-full rounded-md overflow-hidden border border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.22)] bg-[rgba(0,0,0,0.15)]">
         <button
           onClick={() => onFaderModeChange('gain')}
           className={`flex-1 py-1.5 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
             !isSensitivity
-              ? 'bg-[rgba(245,158,11,0.10)] text-[var(--console-amber)]'
+              ? 'bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.10)] text-[var(--console-amber)]'
               : 'bg-transparent text-muted-foreground hover:text-foreground/70'
           }`}
           title="Input gain fader"
         >
-          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${!isSensitivity ? 'bg-[var(--console-amber)] shadow-[0_0_4px_rgba(245,158,11,0.6)]' : 'bg-muted-foreground/25'}`} />
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${!isSensitivity ? 'bg-[var(--console-amber)] shadow-[0_0_4px_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.6)]' : 'bg-muted-foreground/25'}`} />
           Gain
         </button>
-        <div className="h-px bg-[rgba(245,158,11,0.10)]" />
+        <div className="h-px bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.10)]" />
         <button
           onClick={() => onFaderModeChange('sensitivity')}
           className={`flex-1 py-1.5 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
@@ -442,7 +449,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
       </div>
 
       {/* Panel groove */}
-      <div className="w-full flex-shrink-0 h-px bg-gradient-to-r from-transparent via-[rgba(245,158,11,0.12)] to-transparent" />
+      <div className="w-full flex-shrink-0 h-px bg-gradient-to-r from-transparent via-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.12)] to-transparent" />
 
       {/* dB readout — click to edit */}
       {editing ? (
@@ -491,7 +498,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
 
       {/* Panel groove */}
       {!isSensitivity && onAutoGainToggle && (
-        <div className="w-full flex-shrink-0 h-px bg-gradient-to-r from-transparent via-[rgba(245,158,11,0.12)] to-transparent" />
+        <div className="w-full flex-shrink-0 h-px bg-gradient-to-r from-transparent via-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.12)] to-transparent" />
       )}
 
       {/* Auto/Manual toggle — gain mode only */}
@@ -503,7 +510,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
               ? autoGainLocked
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                 : 'bg-amber-500/20 text-amber-400 border border-amber-500/40 motion-safe:animate-pulse'
-              : 'bg-[rgba(245,158,11,0.08)] text-[var(--console-amber)] border border-[rgba(245,158,11,0.30)] hover:bg-[rgba(245,158,11,0.12)]'
+              : 'bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.08)] text-[var(--console-amber)] border border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.30)] hover:bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.12)]'
           }`}
           title={
             autoGainEnabled
@@ -525,7 +532,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
               ? autoGainLocked
                 ? 'bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.6)]'
                 : 'bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.6)]'
-              : 'bg-[var(--console-amber)] shadow-[0_0_4px_rgba(245,158,11,0.4)]'
+              : 'bg-[var(--console-amber)] shadow-[0_0_4px_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.4)]'
           }`} />
           {autoGainEnabled ? (autoGainLocked ? 'Lock' : 'Cal') : 'Man'}
         </button>
@@ -584,9 +591,9 @@ export const VerticalGainFader = memo(function VerticalGainFader({
               isSensitivity ? 'bg-cyan-200/15' : autoGainEnabled ? 'bg-white/20' : 'bg-white/50'
             }`} />
             {/* Groove ridges — amber accent for gain mode, blue for sensitivity */}
-            <div className={`absolute inset-x-2.5 top-[6px] h-[1.5px] rounded-full ${isSensitivity ? 'bg-blue-400/30' : autoGainEnabled ? 'bg-white/25' : 'bg-[rgba(245,158,11,0.35)]'}`} />
-            <div className={`absolute inset-x-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full ${isSensitivity ? 'bg-cyan-300/50' : autoGainEnabled ? 'bg-white/40' : 'bg-[rgba(245,158,11,0.50)]'}`} />
-            <div className={`absolute inset-x-2.5 bottom-[6px] h-[1.5px] rounded-full ${isSensitivity ? 'bg-blue-400/30' : autoGainEnabled ? 'bg-white/25' : 'bg-[rgba(245,158,11,0.35)]'}`} />
+            <div className={`absolute inset-x-2.5 top-[6px] h-[1.5px] rounded-full ${isSensitivity ? 'bg-blue-400/30' : autoGainEnabled ? 'bg-white/25' : 'bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.35)]'}`} />
+            <div className={`absolute inset-x-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full ${isSensitivity ? 'bg-cyan-300/50' : autoGainEnabled ? 'bg-white/40' : 'bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.50)]'}`} />
+            <div className={`absolute inset-x-2.5 bottom-[6px] h-[1.5px] rounded-full ${isSensitivity ? 'bg-blue-400/30' : autoGainEnabled ? 'bg-white/25' : 'bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.35)]'}`} />
           </div>
           {/* Guidance arrows — coach engineer toward sensitivity sweet spot */}
           {guidance.direction === 'up' && (

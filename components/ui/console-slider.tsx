@@ -26,7 +26,7 @@ const COLOR_CONFIG: Record<SliderColor, {
   text: string
 }> = {
   amber: {
-    rangeGradient: 'linear-gradient(90deg, rgba(245,158,11,0.30), rgba(245,158,11,0.70))',
+    rangeGradient: 'linear-gradient(90deg, rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.30), rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.70))',
     rangeGlow: '0 0 6px var(--console-amber-glow)',
     thumbBorder: 'var(--console-amber)',
     thumbGlow: '0 0 8px var(--console-amber-glow), 0 0 2px var(--console-amber-glow)',

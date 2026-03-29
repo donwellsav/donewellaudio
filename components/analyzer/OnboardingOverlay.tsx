@@ -89,7 +89,7 @@ export const OnboardingOverlay = memo(function OnboardingOverlay() {
     >
       <div className="bg-card/90 border border-border/40 rounded max-w-md w-full p-6 shadow-xl backdrop-blur-sm animate-in fade-in zoom-in-95 duration-200">
         {/* Icon */}
-        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[rgba(245,158,11,0.10)] border border-[rgba(245,158,11,0.20)] mb-4 mx-auto">
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.10)] border border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.20)] mb-4 mx-auto">
           <Icon className="w-6 h-6" style={{ color: 'var(--console-amber)' }} />
         </div>
 
