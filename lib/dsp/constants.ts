@@ -672,6 +672,7 @@ export const DEFAULT_SETTINGS: DetectorSettings = {
   algorithmMode: 'auto' as const, // Content-adaptive algorithm selection
   enabledAlgorithms: ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr', 'ml'] as ('msd' | 'phase' | 'spectral' | 'comb' | 'ihr' | 'ptmr' | 'ml')[], // All on for custom mode
   mlEnabled: true, // ML algorithm enabled by default; when false, excluded from all mode branches
+  adaptivePhaseSkip: true, // Adaptive phase skip — saves CPU in speech/monitors where MSD leads
   showAlgorithmScores: false, // Hide advanced scores by default
   showPeqDetails: false, // Hide PEQ recommendation on cards by default
   showFreqZones: false, // Frequency zone overlay on RTA (Sub/Voice/Presence/Air)

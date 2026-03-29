@@ -140,6 +140,7 @@ function makeSettings(overrides: Partial<DetectorSettings> = {}): DetectorSettin
     algorithmMode: 'auto',
     enabledAlgorithms: ['msd', 'phase', 'spectral', 'comb', 'ihr', 'ptmr', 'ml'],
     mlEnabled: true,
+    adaptivePhaseSkip: true,
     showAlgorithmScores: false,
     showPeqDetails: true,
     showFreqZones: false,

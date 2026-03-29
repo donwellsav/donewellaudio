@@ -404,9 +404,14 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       const track = trackManager.processPeak(peak)
 
       // Feed frame-level buffers (MSD, amplitude, phase — once per frame)
+      const skipPhase = algorithmEngine.shouldSkipPhase(
+        settings?.adaptivePhaseSkip ?? true,
+        settings?.mode ?? 'speech',
+      )
       const isNewFrame = algorithmEngine.feedFrame(
         peak.timestamp, spectrum, timeDomain,
-        minFreq, maxFreq, sampleRate, fftSize
+        minFreq, maxFreq, sampleRate, fftSize,
+        skipPhase,
       )
 
       if (isNewFrame) {

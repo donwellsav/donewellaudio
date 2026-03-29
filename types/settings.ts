@@ -169,6 +169,7 @@ export interface DisplayPrefs {
  */
 export interface DiagnosticsProfile {
   mlEnabled: boolean
+  adaptivePhaseSkip?: boolean
   algorithmMode: 'auto' | 'custom'
   enabledAlgorithms: Algorithm[]
   thresholdMode: 'absolute' | 'relative' | 'hybrid'
