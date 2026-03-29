@@ -477,9 +477,9 @@ When the user says "update the usuals" or "update the usual stuff", do all of th
 3. **Version** (`package.json`) — bump to `0.{next_PR_number}.0`
 4. **CLAUDE.md** — update header (version, test count, file count, summary line)
 
-Then when user says "PR and merge":
-5. Commit locally, create feature branch, push, `gh pr create`, `gh pr merge --squash --delete-branch --admin`
-6. Sync local: `git checkout main && git pull origin main`
+Then when user says "PR":
+5. Commit locally, create feature branch, push, `gh pr create`
+6. **Stop.** Don merges on GitHub — Claude never merges.
 
 **NEVER push unless the user explicitly says "push", "PR", or "send to GitHub".**
 
