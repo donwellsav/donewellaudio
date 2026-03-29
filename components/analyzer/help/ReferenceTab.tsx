@@ -1,16 +1,15 @@
 'use client'
 
 import { memo } from 'react'
-import { HelpSection } from './HelpShared'
+import { HelpSection, HelpGroup } from './HelpShared'
 
 export const ReferenceTab = memo(function ReferenceTab() {
   return (
     <>
       {/* Group: Quick Reference */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Quick Reference</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-          <HelpSection title="Keyboard Shortcuts">
+      <HelpGroup title="Quick Reference">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          <HelpSection title="Keyboard Shortcuts" color="blue">
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
               <kbd className="font-mono bg-muted px-1.5 py-0.5 rounded text-sm">Space</kbd><span>Start / stop analysis</span>
               <kbd className="font-mono bg-muted px-1.5 py-0.5 rounded text-sm">P</kbd><span>Freeze / unfreeze spectrum display</span>
@@ -18,7 +17,7 @@ export const ReferenceTab = memo(function ReferenceTab() {
             </div>
           </HelpSection>
 
-          <HelpSection title="Severity Levels">
+          <HelpSection title="Severity Levels" color="amber">
             <ul className="space-y-2">
               <li><strong className="text-red-500">RUNAWAY:</strong> Active feedback rapidly increasing — address immediately</li>
               <li><strong className="text-orange-500">GROWING:</strong> Feedback building but not yet critical</li>
@@ -29,10 +28,10 @@ export const ReferenceTab = memo(function ReferenceTab() {
             </ul>
           </HelpSection>
         </div>
-      </div>
+      </HelpGroup>
 
       {/* Full-width: Default Configuration */}
-      <HelpSection title="Default Configuration (Speech Mode)">
+      <HelpSection title="Default Configuration (Speech Mode)" color="amber">
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
           <span className="text-muted-foreground">Mode</span><span className="font-mono">Speech — Corporate &amp; Conference</span>
           <span className="text-muted-foreground">Frequency range</span><span className="font-mono">150 Hz – 10 kHz</span>
@@ -57,10 +56,9 @@ export const ReferenceTab = memo(function ReferenceTab() {
       </HelpSection>
 
       {/* Group: Technical Reference */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Technical Reference</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-3">
-          <HelpSection title="Frequency Bands">
+      <HelpGroup title="Technical Reference">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          <HelpSection title="Frequency Bands" color="blue">
             <div className="space-y-2 text-sm">
               <div>
                 <strong>LOW (20–300 Hz):</strong> Room modes, sub-bass. Prominence ×1.15, Sustain ×1.2, Q threshold ×0.6.
@@ -76,14 +74,14 @@ export const ReferenceTab = memo(function ReferenceTab() {
             </div>
           </HelpSection>
 
-          <HelpSection title="GEQ Band Mapping">
+          <HelpSection title="GEQ Band Mapping" color="blue">
             <p className="mb-2 text-sm">Detected frequencies map to nearest ISO 31-band (1/3 octave) center:</p>
             <p className="text-sm font-mono bg-background/80 p-2 rounded leading-relaxed border border-border/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3)]">
               20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1k, 1.25k, 1.6k, 2k, 2.5k, 3.15k, 4k, 5k, 6.3k, 8k, 10k, 12.5k, 16k, 20k Hz
             </p>
           </HelpSection>
 
-          <HelpSection title="EQ Presets">
+          <HelpSection title="EQ Presets" color="amber">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="font-medium text-foreground mb-1">Surgical</p>
@@ -98,7 +96,7 @@ export const ReferenceTab = memo(function ReferenceTab() {
             </div>
           </HelpSection>
 
-          <HelpSection title="Room Presets">
+          <HelpSection title="Room Presets" color="green">
             <div className="space-y-2 text-sm">
               <div>
                 <strong>Small Room:</strong> RT60 0.4s, Volume 80m³, Schroeder 141 Hz.
@@ -123,10 +121,10 @@ export const ReferenceTab = memo(function ReferenceTab() {
             </div>
           </HelpSection>
         </div>
-      </div>
+      </HelpGroup>
 
       {/* Full-width: Browser Requirements */}
-      <HelpSection title="Browser Requirements">
+      <HelpSection title="Browser Requirements" color="blue">
         <ul className="space-y-2 text-sm">
           <li><strong>Web Audio API + getUserMedia:</strong> Required for real-time audio processing</li>
           <li><strong>Supported:</strong> Chrome 74+, Firefox 76+, Safari 14.1+, Edge 79+</li>
