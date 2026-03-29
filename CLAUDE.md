@@ -1,6 +1,6 @@
 # CLAUDE.md — DoneWell Audio Project Intelligence
 
-> **Last updated March 2026. 165 TypeScript/TSX files, 994 tests (990 pass, 4 skip), 47 suites. Version 0.37.0.**
+> **Last updated March 2026. 165 TypeScript/TSX files, 1024 tests (1020 pass, 4 skip), 49 suites. Version 0.37.0.**
 > Amber sidecar theme. Three-color operator vocabulary. Help accordion system. Fader UI overhaul. Adaptive phase skip. Performance-optimized fusion loop + canvas rendering.
 
 ## CRITICAL RULES
