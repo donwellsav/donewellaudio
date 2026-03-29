@@ -389,7 +389,7 @@ export const DesktopLayout = memo(function DesktopLayout({
       </ResizablePanelGroup>
 
       {/* Gain fader strip */}
-      <div className="flex-shrink-0 w-16 border-l border-border/50 channel-strip">
+      <div className="flex-shrink-0 w-16 border-l border-[rgba(245,158,11,0.18)] channel-strip amber-sidecar">
         <VerticalGainFader
           value={settings.inputGainDb}
           onChange={(v) => setInputGain(v)}

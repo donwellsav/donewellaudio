@@ -458,7 +458,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
           className={`fader-readout font-mono text-center transition-colors cursor-text flex-shrink-0 tabular-nums text-sm leading-tight ${
             isSensitivity
               ? 'text-blue-400 hover:text-blue-300'
-              : autoGainEnabled ? 'text-primary hover:text-primary/80' : 'text-foreground hover:text-primary'
+              : autoGainEnabled ? 'text-[var(--console-amber)] hover:text-[var(--console-amber)]/80' : 'text-[var(--console-amber)] hover:text-[var(--console-amber)]/80'
           }`}
           onClick={() => setEditing(true)}
           onWheel={(e) => {
@@ -477,7 +477,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
           }
         >
           {valueLabel}
-          <span className={`block text-sm ${isSensitivity ? 'text-blue-400/60' : 'text-muted-foreground'}`}>
+          <span className={`block text-sm ${isSensitivity ? 'text-blue-400/60' : 'text-[var(--console-amber)]/60'}`}>
             {isSensitivity ? 'Sens' : 'dB'}
           </span>
         </button>
@@ -492,7 +492,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
               ? autoGainLocked
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                 : 'bg-amber-500/20 text-amber-400 border border-amber-500/40 motion-safe:animate-pulse'
-              : 'bg-muted/40 text-muted-foreground border border-border hover:text-foreground'
+              : 'bg-[rgba(245,158,11,0.08)] text-[var(--console-amber)] border border-[rgba(245,158,11,0.30)] hover:bg-[rgba(245,158,11,0.12)]'
           }`}
           title={
             autoGainEnabled
