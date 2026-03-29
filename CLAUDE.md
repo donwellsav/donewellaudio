@@ -269,7 +269,7 @@ lib/
   export/ (3 files)           # PDF/TXT/CSV/JSON export
   calibration/ (3 files)      # Room profile, session recording, JSON export
   storage/dwaStorage.ts (183) # Typed localStorage abstraction
-  data/ (4 files)             # Anonymous spectral collection (opt-out, v1.1 with algo scores)
+  data/ (4 files)             # Anonymous spectral collection (opt-in, v1.1 with algo scores)
     snapshotCollector.ts (343)#   Batch collection, algorithm score enrichment, user feedback, label balance tracking
   utils/ (2 files)            # Math helpers, pitch utilities
 types/
@@ -388,7 +388,7 @@ Always. If you changed code, you audit it. Specifically:
 | Accessibility | ARIA roles, focus management, touch targets, screen readers, color contrast |
 | Performance | Hot path (50fps analyze), Canvas (30fps), bundle size, memory, LUT |
 | ML Pipeline | ONNX model, inference, training data, snapshot collection |
-| Data / Privacy | Consent, snapshot collection, PII, opt-out, GDPR |
+| Data / Privacy | Consent, snapshot collection, PII, opt-in, GDPR |
 
 ### Audit format
 
@@ -536,8 +536,8 @@ Then when user says "PR and merge":
 ## Data Privacy
 
 - **Analysis:** All audio processing runs locally in the browser. No audio is transmitted.
-- **Data collection:** Anonymous spectral snapshots (opt-out). No PII. Random session UUIDs. IP stripped server-side.
-- **Consent:** Opt-out model (US). Needs opt-in for GDPR jurisdictions before EU launch.
+- **Data collection:** Anonymous spectral snapshots (opt-in). No PII. Random session UUIDs. IP stripped server-side.
+- **Consent:** Opt-in model — user must tap "Share Data" before collection begins. EU launch ready for data collection; full GDPR disclosures (legal basis, retention period, data subject rights) not yet implemented.
 - **Storage:** Settings and history in localStorage only. Never transmitted unless user explicitly exports.
 
 ## ML Data Pipeline (v0.106.0+)
