@@ -694,11 +694,11 @@ html {
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(75, 146, 255, 0.3) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(245, 158, 11, 0.30) 50%, transparent 100%);
     pointer-events: none;
   }
   .light .header-glow::after {
-    background: linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.2) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(217, 119, 6, 0.20) 50%, transparent 100%);
   }
 
   /* ── Severity severity-accent-strip — glowing left edge for issue cards ── */
