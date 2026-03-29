@@ -155,7 +155,7 @@ export const SetupTab = memo(function SetupTab({
           tooltip={settings.showTooltips ? 'Post-gain peak target. -12 hot (ring out), -18 balanced, -24 conservative (broadcast).' : undefined}
           min={-30} max={-6} step={1} sliderValue={settings.autoGainTargetDb}
           onChange={(v) => ctx.setAutoGain(settings.autoGainEnabled, v)}
-          color="cyan" />
+          color="green" />
       )}
 
       {/* Room */}

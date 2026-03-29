@@ -33,11 +33,11 @@ export const SettingsGrid = memo(function SettingsGrid({ children, className }: 
 
 // ── Section (flat, uniform) ──────────────────────────────────────────────────
 
-type SectionColor = 'amber' | 'blue' | 'cyan'
+type SectionColor = 'amber' | 'blue' | 'green'
 const COLOR_VAR: Record<SectionColor, string> = {
   amber: 'var(--console-amber)',
   blue: 'var(--console-blue)',
-  cyan: 'var(--console-cyan)',
+  green: 'var(--console-green)',
 }
 
 export const Section = memo(function Section({ title, tooltip, showTooltip = true, fullWidth, color, children }: {

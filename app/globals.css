@@ -63,8 +63,8 @@
   --console-blue-glow: rgba(75, 146, 255, 0.28);
   --console-cyan: #06b6d4;
   --console-cyan-glow: rgba(6, 182, 212, 0.25);
-  --console-green: #22c55e;
-  --console-green-glow: rgba(34, 197, 94, 0.3);
+  --console-green: #4ade80;
+  --console-green-glow: rgba(74, 222, 128, 0.30);
   --console-readout-text: #f59e0b;
   --console-readout-glow: rgba(245, 158, 11, 0.35);
 }
@@ -127,8 +127,8 @@ html {
   --console-blue-glow: rgba(37, 99, 235, 0.18);
   --console-cyan: #0891b2;
   --console-cyan-glow: rgba(8, 145, 178, 0.12);
-  --console-green: #16a34a;
-  --console-green-glow: rgba(22, 163, 74, 0.15);
+  --console-green: #22c55e;
+  --console-green-glow: rgba(34, 197, 94, 0.18);
   --console-readout-text: #d97706;
   --console-readout-glow: rgba(217, 119, 6, 0.08);
 }

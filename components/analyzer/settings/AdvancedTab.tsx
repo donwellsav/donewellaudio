@@ -126,21 +126,21 @@ export const AdvancedTab = memo(function AdvancedTab({
       </Section>
 
       {/* Noise Floor */}
-      <Section title="Noise Floor" color="cyan" showTooltip={settings.showTooltips}
+      <Section title="Noise Floor" color="green" showTooltip={settings.showTooltips}
         tooltip="Controls how the adaptive noise floor estimates and tracks ambient noise levels.">
         <div className="space-y-3">
           <div className="space-y-1">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-mono tracking-wide" style={{ color: 'var(--console-cyan)' }}>Attack Time</span>
-              <span className="text-sm font-mono tabular-nums" style={{ color: 'var(--console-cyan)' }}>{settings.noiseFloorAttackMs}ms</span>
+              <span className="text-sm font-mono tracking-wide" style={{ color: 'var(--console-green)' }}>Attack Time</span>
+              <span className="text-sm font-mono tabular-nums" style={{ color: 'var(--console-green)' }}>{settings.noiseFloorAttackMs}ms</span>
             </div>
             <Slider value={[settings.noiseFloorAttackMs]} onValueChange={([v]) => diag('noiseFloorAttackMs', v)} min={50} max={1000} step={25} />
             <div className="flex justify-between text-xs text-muted-foreground font-mono"><span className="flex-shrink-0">Fast response</span><span className="text-right">Smooth</span></div>
           </div>
           <div className="space-y-1">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-mono tracking-wide" style={{ color: 'var(--console-cyan)' }}>Release Time</span>
-              <span className="text-sm font-mono tabular-nums" style={{ color: 'var(--console-cyan)' }}>{settings.noiseFloorReleaseMs}ms</span>
+              <span className="text-sm font-mono tracking-wide" style={{ color: 'var(--console-green)' }}>Release Time</span>
+              <span className="text-sm font-mono tabular-nums" style={{ color: 'var(--console-green)' }}>{settings.noiseFloorReleaseMs}ms</span>
             </div>
             <Slider value={[settings.noiseFloorReleaseMs]} onValueChange={([v]) => diag('noiseFloorReleaseMs', v)} min={200} max={5000} step={100} />
             <div className="flex justify-between text-xs text-muted-foreground font-mono"><span className="flex-shrink-0">Quick drop</span><span className="text-right">Gradual</span></div>
@@ -183,20 +183,20 @@ export const AdvancedTab = memo(function AdvancedTab({
       </Section>
 
       {/* Track Management */}
-      <Section title="Track Management" color="cyan" showTooltip={settings.showTooltips}
+      <Section title="Track Management" color="green" showTooltip={settings.showTooltips}
         tooltip="Controls for frequency tracker limits, timeout, and harmonic association tolerance.">
         <div className="space-y-3">
           <div className="space-y-1">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-mono tracking-wide" style={{ color: 'var(--console-cyan)' }}>Max Tracks</span>
-              <span className="text-sm font-mono tabular-nums" style={{ color: 'var(--console-cyan)' }}>{settings.maxTracks}</span>
+              <span className="text-sm font-mono tracking-wide" style={{ color: 'var(--console-green)' }}>Max Tracks</span>
+              <span className="text-sm font-mono tabular-nums" style={{ color: 'var(--console-green)' }}>{settings.maxTracks}</span>
             </div>
             <Slider value={[settings.maxTracks]} onValueChange={([v]) => diag('maxTracks', v)} min={8} max={128} step={8} />
           </div>
           <div className="space-y-1">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-mono tracking-wide" style={{ color: 'var(--console-cyan)' }}>Track Timeout</span>
-              <span className="text-sm font-mono tabular-nums" style={{ color: 'var(--console-cyan)' }}>{settings.trackTimeoutMs}ms</span>
+              <span className="text-sm font-mono tracking-wide" style={{ color: 'var(--console-green)' }}>Track Timeout</span>
+              <span className="text-sm font-mono tabular-nums" style={{ color: 'var(--console-green)' }}>{settings.trackTimeoutMs}ms</span>
             </div>
             <Slider value={[settings.trackTimeoutMs]} onValueChange={([v]) => diag('trackTimeoutMs', v)} min={200} max={5000} step={100} />
           </div>

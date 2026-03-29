@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils'
 // Inline styles are necessary here because Radix SliderPrimitive.Range ignores
 // Tailwind class-based fills — the component applies its own style attribute.
 
-type SliderColor = 'amber' | 'blue' | 'cyan'
+type SliderColor = 'amber' | 'blue' | 'green'
 
 const COLOR_CONFIG: Record<SliderColor, {
   rangeGradient: string
@@ -39,12 +39,12 @@ const COLOR_CONFIG: Record<SliderColor, {
     thumbGlow: '0 0 8px var(--console-blue-glow), 0 0 2px var(--console-blue-glow)',
     text: 'var(--console-blue)',
   },
-  cyan: {
-    rangeGradient: 'linear-gradient(90deg, rgba(6,182,212,0.28), rgba(6,182,212,0.65))',
-    rangeGlow: '0 0 6px var(--console-cyan-glow)',
-    thumbBorder: 'var(--console-cyan)',
-    thumbGlow: '0 0 8px var(--console-cyan-glow), 0 0 2px var(--console-cyan-glow)',
-    text: 'var(--console-cyan)',
+  green: {
+    rangeGradient: 'linear-gradient(90deg, rgba(74,222,128,0.22), rgba(74,222,128,0.55))',
+    rangeGlow: '0 0 6px var(--console-green-glow)',
+    thumbBorder: 'var(--console-green)',
+    thumbGlow: '0 0 8px var(--console-green-glow), 0 0 2px var(--console-green-glow)',
+    text: 'var(--console-green)',
   },
 }
 

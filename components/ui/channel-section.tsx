@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/accordion'
 import { cn } from '@/lib/utils'
 
-type SectionColor = 'amber' | 'blue' | 'cyan'
+type SectionColor = 'amber' | 'blue' | 'green'
 
 interface ChannelSectionProps {
   title: string
@@ -36,7 +36,7 @@ interface ChannelSectionProps {
 const COLOR_VAR: Record<NonNullable<ChannelSectionProps['color']>, string> = {
   amber: 'var(--console-amber)',
   blue: 'var(--console-blue)',
-  cyan: 'var(--console-cyan)',
+  green: 'var(--console-green)',
 }
 
 export const ChannelSection = memo(function ChannelSection({
