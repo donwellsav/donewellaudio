@@ -222,41 +222,41 @@ export const VerticalGainFader = memo(function VerticalGainFader({
       ctx.textBaseline = 'middle'
       ctx.fillText('25', w * 0.48, defY)
     } else {
-      // Gain mode: standard dB scale
+      // Gain mode: standard dB scale — amber-tinted ticks
       for (const db of [-30, -20, -10, 10, 20, 30]) {
         const ratio = (db - min) / (max - min)
         const y = h * (1 - ratio)
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.20)'
+        ctx.strokeStyle = 'rgba(245,158,11,0.18)'
         ctx.lineWidth = 0.75
         ctx.beginPath()
         ctx.moveTo(w * 0.55, y)
         ctx.lineTo(w, y)
         ctx.stroke()
 
-        ctx.fillStyle = 'rgba(255,255,255,0.30)'
+        ctx.fillStyle = 'rgba(245,158,11,0.28)'
         ctx.font = `${labelSize}px monospace`
         ctx.textAlign = 'right'
         ctx.textBaseline = 'middle'
         ctx.fillText(`${db}`, w * 0.48, y)
       }
 
-      // Zero-dB (unity) reference — prominent double-line with label
+      // Zero-dB (unity) reference — prominent amber double-line with label
       const zeroRatio = (0 - min) / (max - min)
       const zeroY = h * (1 - zeroRatio)
-      ctx.strokeStyle = 'rgba(255,255,255,0.45)'
+      ctx.strokeStyle = 'rgba(245,158,11,0.45)'
       ctx.lineWidth = 1.5
       ctx.beginPath()
       ctx.moveTo(0, zeroY)
       ctx.lineTo(w, zeroY)
       ctx.stroke()
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)'
+      ctx.strokeStyle = 'rgba(245,158,11,0.08)'
       ctx.lineWidth = 0.5
       ctx.beginPath()
       ctx.moveTo(0, zeroY + 1.5)
       ctx.lineTo(w, zeroY + 1.5)
       ctx.stroke()
-      ctx.fillStyle = 'rgba(255,255,255,0.55)'
+      ctx.fillStyle = 'rgba(245,158,11,0.55)'
       ctx.font = `bold ${labelSize + 1}px monospace`
       ctx.textAlign = 'right'
       ctx.textBaseline = 'middle'
@@ -412,31 +412,37 @@ export const VerticalGainFader = memo(function VerticalGainFader({
   return (
     <div className="flex flex-col h-full items-center py-2 gap-1.5 select-none">
 
-      {/* Mode toggle — segmented pill */}
-      <div className="flex-shrink-0 flex flex-col w-full rounded-md overflow-hidden border border-[rgba(245,158,11,0.20)]">
+      {/* Mode toggle — rocker switch with LED indicators */}
+      <div className="flex-shrink-0 flex flex-col w-full rounded-md overflow-hidden border border-[rgba(245,158,11,0.22)] bg-[rgba(0,0,0,0.15)]">
         <button
           onClick={() => onFaderModeChange('gain')}
-          className={`flex-1 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+          className={`flex-1 py-1.5 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
             !isSensitivity
-              ? 'bg-[var(--console-amber)]/10 text-[var(--console-amber)]'
+              ? 'bg-[rgba(245,158,11,0.10)] text-[var(--console-amber)]'
               : 'bg-transparent text-muted-foreground hover:text-foreground/70'
           }`}
           title="Input gain fader"
         >
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${!isSensitivity ? 'bg-[var(--console-amber)] shadow-[0_0_4px_rgba(245,158,11,0.6)]' : 'bg-muted-foreground/25'}`} />
           Gain
         </button>
+        <div className="h-px bg-[rgba(245,158,11,0.10)]" />
         <button
           onClick={() => onFaderModeChange('sensitivity')}
-          className={`flex-1 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+          className={`flex-1 py-1.5 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
             isSensitivity
-              ? 'bg-blue-500/20 text-blue-400'
+              ? 'bg-blue-500/15 text-blue-400'
               : 'bg-transparent text-muted-foreground hover:text-foreground/70'
           }`}
           title="Detection sensitivity fader"
         >
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isSensitivity ? 'bg-blue-400 shadow-[0_0_4px_rgba(96,165,250,0.6)]' : 'bg-muted-foreground/25'}`} />
           Sens
         </button>
       </div>
+
+      {/* Panel groove */}
+      <div className="w-full flex-shrink-0 h-px bg-gradient-to-r from-transparent via-[rgba(245,158,11,0.12)] to-transparent" />
 
       {/* dB readout — click to edit */}
       {editing ? (
@@ -455,7 +461,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
         />
       ) : (
         <button
-          className={`fader-readout font-mono text-center transition-colors cursor-text flex-shrink-0 tabular-nums text-sm leading-tight ${
+          className={`fader-readout font-mono text-center transition-colors cursor-text flex-shrink-0 tabular-nums text-base font-bold leading-tight ${
             isSensitivity
               ? 'text-blue-400 hover:text-blue-300'
               : autoGainEnabled ? 'text-[var(--console-amber)] hover:text-[var(--console-amber)]/80' : 'text-[var(--console-amber)] hover:text-[var(--console-amber)]/80'
@@ -483,11 +489,16 @@ export const VerticalGainFader = memo(function VerticalGainFader({
         </button>
       )}
 
+      {/* Panel groove */}
+      {!isSensitivity && onAutoGainToggle && (
+        <div className="w-full flex-shrink-0 h-px bg-gradient-to-r from-transparent via-[rgba(245,158,11,0.12)] to-transparent" />
+      )}
+
       {/* Auto/Manual toggle — gain mode only */}
       {!isSensitivity && onAutoGainToggle && (
         <button
           onClick={() => onAutoGainToggle(!autoGainEnabled)}
-          className={`flex-shrink-0 px-1 py-0.5 rounded text-sm font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+          className={`flex-shrink-0 px-1 py-1 rounded flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
             autoGainEnabled
               ? autoGainLocked
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
@@ -509,6 +520,13 @@ export const VerticalGainFader = memo(function VerticalGainFader({
               : 'Switch to auto gain'
           }
         >
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+            autoGainEnabled
+              ? autoGainLocked
+                ? 'bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.6)]'
+                : 'bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.6)]'
+              : 'bg-[var(--console-amber)] shadow-[0_0_4px_rgba(245,158,11,0.4)]'
+          }`} />
           {autoGainEnabled ? (autoGainLocked ? 'Lock' : 'Cal') : 'Man'}
         </button>
       )}
@@ -544,7 +562,7 @@ export const VerticalGainFader = memo(function VerticalGainFader({
           />
           {/* Fader thumb — console-style wide capsule knob with ridges + bevel */}
           <div
-            className={`absolute left-1/2 -translate-x-1/2 translate-y-1/2 w-[52px] h-7 rounded-[6px] border-2 pointer-events-none transition-all duration-150 ${
+            className={`absolute left-1/2 -translate-x-1/2 translate-y-1/2 w-[68px] h-7 rounded-[6px] border-2 pointer-events-none transition-all duration-150 ${
               isSensitivity
                 ? 'border-cyan-300/60 bg-gradient-to-b from-blue-700 via-blue-800 to-blue-950'
                 : autoGainEnabled
@@ -565,10 +583,10 @@ export const VerticalGainFader = memo(function VerticalGainFader({
             <div className={`absolute inset-x-0 top-0 h-[2px] rounded-t-[4px] ${
               isSensitivity ? 'bg-cyan-200/15' : autoGainEnabled ? 'bg-white/20' : 'bg-white/50'
             }`} />
-            {/* Groove ridges — console fader tactile lines */}
-            <div className={`absolute inset-x-2.5 top-[6px] h-[1.5px] rounded-full ${isSensitivity ? 'bg-blue-400/30' : autoGainEnabled ? 'bg-white/25' : 'bg-gray-500/40'}`} />
-            <div className={`absolute inset-x-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full ${isSensitivity ? 'bg-cyan-300/50' : autoGainEnabled ? 'bg-white/40' : 'bg-gray-600/60'}`} />
-            <div className={`absolute inset-x-2.5 bottom-[6px] h-[1.5px] rounded-full ${isSensitivity ? 'bg-blue-400/30' : autoGainEnabled ? 'bg-white/25' : 'bg-gray-500/40'}`} />
+            {/* Groove ridges — amber accent for gain mode, blue for sensitivity */}
+            <div className={`absolute inset-x-2.5 top-[6px] h-[1.5px] rounded-full ${isSensitivity ? 'bg-blue-400/30' : autoGainEnabled ? 'bg-white/25' : 'bg-[rgba(245,158,11,0.35)]'}`} />
+            <div className={`absolute inset-x-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full ${isSensitivity ? 'bg-cyan-300/50' : autoGainEnabled ? 'bg-white/40' : 'bg-[rgba(245,158,11,0.50)]'}`} />
+            <div className={`absolute inset-x-2.5 bottom-[6px] h-[1.5px] rounded-full ${isSensitivity ? 'bg-blue-400/30' : autoGainEnabled ? 'bg-white/25' : 'bg-[rgba(245,158,11,0.35)]'}`} />
           </div>
           {/* Guidance arrows — coach engineer toward sensitivity sweet spot */}
           {guidance.direction === 'up' && (
@@ -606,10 +624,10 @@ export const VerticalGainFader = memo(function VerticalGainFader({
           {/* Noise floor overlay — gain mode only */}
           {!isSensitivity && noiseFloorDb != null && (
             <div className="absolute bottom-0 inset-x-0 flex flex-col items-center pb-1.5 pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-              <span className="text-sm font-mono font-semibold text-white/70 leading-none">
+              <span className="text-sm font-mono font-semibold leading-none" style={{ color: 'var(--console-green)', opacity: 0.6 }}>
                 Floor
               </span>
-              <span className="text-sm font-mono font-bold text-white leading-none">
+              <span className="text-sm font-mono font-bold leading-none" style={{ color: 'var(--console-green)', opacity: 0.85 }}>
                 {noiseFloorDb.toFixed(0)}dB
               </span>
             </div>
