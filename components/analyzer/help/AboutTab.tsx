@@ -2,7 +2,7 @@
 
 import { memo } from 'react'
 import { CHANGELOG } from '@/lib/changelog'
-import { HelpSection, TYPE_STYLES } from './HelpShared'
+import { HelpSection, HelpGroup, TYPE_STYLES } from './HelpShared'
 
 export const AboutTab = memo(function AboutTab() {
   return (
@@ -18,10 +18,9 @@ export const AboutTab = memo(function AboutTab() {
       </div>
 
       {/* Group: Project Info */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Project Info</div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 pt-3">
-          <HelpSection title="About">
+      <HelpGroup title="Project Info">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+          <HelpSection title="About" color="amber">
             <p>
               DoneWell Audio is a professional real-time acoustic feedback detection and analysis tool
               for live sound engineers. It uses 6 detection algorithms from peer-reviewed acoustic
@@ -33,7 +32,7 @@ export const AboutTab = memo(function AboutTab() {
             </p>
           </HelpSection>
 
-          <HelpSection title="Tech">
+          <HelpSection title="Tech" color="blue">
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
               <span className="text-muted-foreground">Platform</span><span className="font-mono">Progressive Web App</span>
               <span className="text-muted-foreground">Framework</span><span className="font-mono">Next.js + React 19</span>
@@ -43,19 +42,18 @@ export const AboutTab = memo(function AboutTab() {
             </div>
           </HelpSection>
 
-          <HelpSection title="Credits">
+          <HelpSection title="Credits" color="amber">
             <p>Built by <strong>Don Wells AV</strong></p>
             <p className="mt-1 text-sm">
               Algorithm research: DAFx-16, KU Leuven (2025), DBX, Hopkins (2007), IEC 61672-1
             </p>
           </HelpSection>
         </div>
-      </div>
+      </HelpGroup>
 
       {/* Changelog — compact entries */}
-      <div>
-        <div className="py-1.5 px-2 section-label panel-groove bg-card/60">Changelog</div>
-        <div className="space-y-1.5 pt-3">
+      <HelpGroup title="Changelog">
+        <div className="space-y-1.5">
           {CHANGELOG.map((entry, i) => (
             <div key={`${entry.version}-${i}`} className="bg-card/80 rounded border p-2.5">
               <div className="flex items-center gap-2 mb-1.5">
@@ -81,7 +79,7 @@ export const AboutTab = memo(function AboutTab() {
             </div>
           ))}
         </div>
-      </div>
+      </HelpGroup>
     </>
   )
 })
