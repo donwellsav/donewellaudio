@@ -290,6 +290,13 @@ html {
     color: var(--foreground);
   }
 
+  /* ── Sheet overlays stay amber — reference UI, not live status ─────────── */
+  [data-slot="sheet-content"] {
+    --tint-r: 245;
+    --tint-g: 158;
+    --tint-b: 11;
+  }
+
   /* ── Amber sidecar — rack-unit instrument bay, matches LIVE tab language ─── */
   .amber-sidecar {
     background: linear-gradient(180deg, #0d1520 0%, #080e16 40%, #070c12 100%);
@@ -298,6 +305,7 @@ html {
       inset 0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.32),       /* top catch-light */
       0 0 24px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.09);             /* outer ambient glow */
     position: relative;
+    transition: box-shadow 500ms ease-out;
   }
   .light .amber-sidecar {
     background: linear-gradient(180deg, #f8f5ef 0%, #f2eeea 100%);
@@ -316,6 +324,7 @@ html {
       rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35) 50%,
       rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0) 100%
     );
+    transition: background 500ms ease-out;
     pointer-events: none;
     z-index: 1;
   }
@@ -328,6 +337,7 @@ html {
     );
     border-bottom: 1px solid rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18);
     box-shadow: 0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06);
+    transition: background 500ms ease-out, border-color 500ms ease-out, box-shadow 500ms ease-out;
   }
   .light .amber-panel-header {
     background: linear-gradient(180deg,
@@ -338,7 +348,7 @@ html {
   }
 
   /* ── Cascade overrides inside amber sidecars ─────────────────────────────── */
-  .amber-sidecar .section-label      { color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.55); }
+  .amber-sidecar .section-label      { color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.55); transition: color 500ms ease-out; }
   .light .amber-sidecar .section-label { color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.60); }
   .amber-sidecar .panel-groove-subtle {
     background: linear-gradient(90deg,
@@ -725,12 +735,30 @@ html {
     right: 10%;
     height: 1px;
     background: linear-gradient(90deg, transparent 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.30) 50%, transparent 100%);
+    transition: background 500ms ease-out;
     pointer-events: none;
   }
   .light .header-glow::after {
     background: linear-gradient(90deg, transparent 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.20) 50%, transparent 100%);
   }
 
+  /* ── RUNAWAY boost — 2x alpha on key tint surfaces for emergency visibility ── */
+  .tint-runaway .amber-panel-header {
+    background: linear-gradient(180deg,
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18) 0%,
+      rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.06) 100%
+    );
+    border-bottom-color: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35);
+  }
+  .tint-runaway .amber-sidecar {
+    box-shadow:
+      inset 0 0 0 1px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.40),
+      inset 0 1px 0 rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.55),
+      0 0 24px rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.18);
+  }
+  .tint-runaway .header-glow::after {
+    background: linear-gradient(90deg, transparent 0%, rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.55) 50%, transparent 100%);
+  }
   /* ── Severity severity-accent-strip — glowing left edge for issue cards ── */
   .severity-accent-strip {
     width: 3px;
@@ -1027,6 +1055,13 @@ html {
 
 /* ── Reduced motion: respect user preference (WCAG 2.3.3) ───────────────────── */
 @media (prefers-reduced-motion: reduce) {
+  .amber-panel-header,
+  .amber-sidecar,
+  .amber-sidecar::after,
+  .header-glow::after,
+  .amber-sidecar .section-label {
+    transition: none;
+  }
   .animate-emergency-glow {
     animation: none;
     box-shadow: 0 0 12px rgba(255, 60, 60, 0.45), 0 0 4px rgba(255, 60, 60, 0.15);

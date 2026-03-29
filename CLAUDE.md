@@ -1,7 +1,7 @@
 # CLAUDE.md — DoneWell Audio Project Intelligence
 
-> **Last updated March 2026. 165 TypeScript/TSX files, 1024 tests (1020 pass, 4 skip), 49 suites. Version 0.37.0.**
-> Amber sidecar theme. Three-color operator vocabulary. Help accordion system. Fader UI overhaul. Adaptive phase skip. Performance-optimized fusion loop + canvas rendering.
+> **Last updated March 2026. 170+ TypeScript/TSX files, 1033 tests (1029 pass, 4 skip), 49 suites. Version 0.37.0.**
+> Signal-responsive console tint. GDPR disclosures. Amber sidecar theme. Three-color operator vocabulary. Help accordion system. Fader UI overhaul. Adaptive phase skip. Performance-optimized fusion loop + canvas rendering.
 
 ## CRITICAL RULES
 
@@ -108,7 +108,7 @@ When the user asks to cut a release or "update the usuals":
 
 ## Project Overview
 
-**DoneWell Audio** (donewellaudio.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.13.0. Repository: github.com/donwellsav/donewellaudio.
+**DoneWell Audio** (donewellaudio.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using seven fused detection algorithms (six classical + ML), and delivers EQ recommendations with pitch translation. Version 0.37.0. Repository: github.com/donwellsav/donewellaudio.
 
 ## Tech Stack
 
@@ -121,7 +121,7 @@ When the user asks to cut a release or "update the usuals":
 | DSP Offload | Web Worker (dspWorker.ts, ~458 lines) |
 | Visualization | HTML5 Canvas at 30fps |
 | State | React 19 hooks + 4 context providers (no external state library) |
-| Testing | Vitest (799 tests, 39 suites, under 10s) |
+| Testing | Vitest (1033 tests, 49 suites, under 10s) |
 | Error Reporting | Sentry (browser + server + worker runtimes) |
 | PWA | Serwist (service worker, offline caching, installable) |
 | Package Manager | pnpm |
@@ -133,7 +133,7 @@ pnpm dev              # Dev server on :3000 (Turbopack, no SW)
 pnpm build            # Production build (webpack, generates SW)
 pnpm start            # Production server
 pnpm lint             # ESLint (flat config)
-pnpm test             # Vitest (799 tests: 795 pass + 4 skip)
+pnpm test             # Vitest (1033 tests: 1029 pass + 4 skip)
 pnpm test:watch       # Vitest watch mode
 pnpm test:coverage    # Vitest with V8 coverage
 npx tsc --noEmit      # Type-check (run BEFORE pnpm build)
@@ -219,41 +219,44 @@ app/                          # Next.js App Router
   global-error.tsx (56)       #   Sentry error boundary
   sw.ts (38)                  #   Serwist service worker
   api/v1/ingest/route.ts (160)#   Spectral snapshot ingest (v1.0/1.1/1.2 schema, rate-limited, IP-stripped)
+  api/geo/route.ts (24)       #   Returns { isEU: boolean } from Vercel geo header for GDPR consent flow
 components/
   analyzer/ (28 files)        # Domain components + barrel index.ts
     help/ (6 files)           # Help tab components (mirrors settings/ pattern)
     AudioAnalyzer.tsx         #   Root orchestrator, settings debounce, FP handling
-    HeaderBar.tsx (191)       #   Header bar (zero props, permanent Clear All)
-    IssuesList.tsx (440)      #   Advisory cards with swipe gestures, 3s stability
+    HeaderBar.tsx (289)       #   Header bar (zero props, permanent Clear All, useSignalTint)
+    IssuesList.tsx (330)      #   Advisory card list (orchestrator)
+    IssueCard.tsx (383)       #   Individual advisory card with swipe gestures, 3s stability
+    IssueCardActions.tsx (194)#   FALSE+, CONFIRM, Copy, dismiss action buttons
     DesktopLayout.tsx         #   Desktop 3-panel layout with room mode computation
     MobileLayout.tsx          #   Mobile portrait/landscape layouts (3 SpectrumCanvas instances)
     SpectrumCanvas.tsx        #   RTA canvas with room mode lines, notch overlays, markers
-    KtrLogo.tsx               #   Brand SVG logo (frequency analyzer crosshair + EQ bars)
     RingOutWizard.tsx         #   Guided ring-out workflow with step tracking
     LandscapeSettingsSheet.tsx (58) # Bottom Sheet wrapper for mobile landscape settings
     settings/ (8 files)       # 4-tab settings: LiveTab, SetupTab, DisplayTab, AdvancedTab, CalibrationTab, RoomTab, SettingsPanel, SettingsShared
-  ui/ (21 files)              # shadcn/ui primitives (includes accordion)
-contexts/ (8 files)           # React context providers
-  AudioAnalyzerContext (195)  #   Compound provider: nests Engine/Settings/Metering/Detection
+  ui/ (24 files)              # shadcn/ui primitives (includes accordion)
+contexts/ (9 files)           # React context providers
+  AudioAnalyzerContext (261)  #   Compound provider: nests Engine/Settings/Metering/Detection
   EngineContext (42)          #   Engine lifecycle, devices, dspWorker (11 fields)
   SettingsContext (30)        #   Settings, updateSettings, mode/freq (5 fields)
   MeteringContext (38)        #   Spectrum, inputLevel, autoGain, noiseFloor (10 fields)
   DetectionContext (25)       #   Advisories, earlyWarning (3 fields)
-  AdvisoryContext (190)       #   Advisory state, dismiss/clear/FP, derived booleans
+  AdvisoryContext (205)       #   Advisory state, dismiss/clear/FP, derived booleans
   UIContext (162)             #   Mobile tab, freeze, fullscreen, RTA fullscreen, layout reset
   PortalContainerContext (23) #   Portal mount for mobile overlays
-hooks/ (11 files)             # Custom hooks
+hooks/ (18 files)             # Custom hooks
+  useSignalTint.ts (85)       #   Signal-responsive tint: severity → CSS vars on <html>
   useDSPWorker.ts (363)       #   Worker lifecycle, crash recovery, userFeedback
 lib/
-  dsp/ (18 modules)           # DSP engine + ML inference:
-    feedbackDetector.ts (1721)#   Core: peak detection, MSD pool, auto-gain, persistence
-    constants.ts (961)        #   All tuning constants, 8 mode presets, ECM8000 cal curve, mobile constants
+  dsp/ (20 modules)           # DSP engine + ML inference:
+    feedbackDetector.ts (1757)#   Core: peak detection, MSD pool, auto-gain, persistence
+    constants.ts (1097)       #   All tuning constants, 8 mode presets, ECM8000 cal curve, mobile constants
     acousticUtils.ts (861)    #   Room modes, Schroeder, RT60, vibrato, cumulative growth
     classifier.ts (850)       #   11-feature Bayesian classification + formant/chromatic gates
-    algorithmFusion.ts (823)  #   6-algo fusion, comb, IHR, PTMR, MINDS, CombStabilityTracker
+    algorithmFusion.ts (1155) #   6-algo fusion, comb, IHR, PTMR, MINDS, CombStabilityTracker
     feedbackHistory.ts (467)  #   Session history, repeat offenders, hotspot tracking
     trackManager.ts (466)     #   Track lifecycle, cents-based association (100-cent tolerance)
-    dspWorker.ts (458)        #   Worker orchestrator, temporal smoothing, ML score extraction
+    dspWorker.ts (745)        #   Worker orchestrator, temporal smoothing, ML score extraction
     eqAdvisor.ts (402)        #   GEQ/PEQ/shelf recs, ERB scaling, MINDS depth
     workerFft.ts (389)        #   Radix-2 FFT, AlgorithmEngine, phase extraction
     advisoryManager.ts (292)  #   3-layer dedup, band cooldown, memory bounds (max 200)
@@ -265,7 +268,7 @@ lib/
     severityUtils.ts (18)     #   Severity urgency mapping
     mlInference.ts (~180)     #   ONNX Runtime Web ML inference, predictCached(), lazy model loading
     advancedDetection.ts (16) #   Barrel re-export
-  canvas/spectrumDrawing.ts(949)# Pure canvas drawing (no React), RTA label overlap suppression, theme-aware notch overlays (70% opacity), frequency zone bands, label range merging
+  canvas/spectrumDrawing.ts(1193)# Pure canvas drawing (no React), RTA label overlap suppression, theme-aware notch overlays (70% opacity), frequency zone bands, label range merging
   export/ (3 files)           # PDF/TXT/CSV/JSON export
   calibration/ (3 files)      # Room profile, session recording, JSON export
   storage/dwaStorage.ts (183) # Typed localStorage abstraction
@@ -280,11 +283,11 @@ tests/
   dsp/ (7 files)              # Integration/scenario tests (~135 tests)
   vitest.config.ts            # Legacy test configuration (root vitest.config.ts is primary)
   helpers/                    # Mock algorithm score builders
-hooks/__tests__/ (4 files)    # Hook unit tests (useAdvisoryMap, useFpsMonitor, useAdvisoryLogging, useIsMobile)
+hooks/__tests__/ (7 files)    # Hook unit tests (useAdvisoryMap, useFpsMonitor, useAdvisoryLogging, useIsMobile, useLayeredSettings, useRigPresets, useDSPWorker)
 contexts/__tests__/ (2 files) # Context unit tests (AdvisoryContext, UIContext)
 lib/storage/__tests__/ (1 file)  # dwaStorage unit tests
 lib/export/__tests__/ (3 files)  # Export module unit tests (txt, pdf, downloadFile)
-lib/dsp/__tests__/ (1 file)     # mlInference unit tests (12 tests)
+lib/dsp/__tests__/ (19 files)   # DSP unit tests (feedbackDetector, algorithmFusion, classifier, msdPool, eqAdvisor, etc.)
 public/models/                  # ML model assets
   manifest.json                 #   Model registry (version, metrics, architecture)
   dwa-fp-filter-v1.onnx         #   Bootstrap ONNX model (929 params, 4KB)
@@ -451,9 +454,7 @@ For trivial changes (typo fix, comment update, import reorder), a one-line audit
 
 **CHANGE:** Fixed typo in HeaderBar tooltip | **CLASSIFICATION:** ⚪ NEUTRAL | **Verdict:** Text-only change, no logic/state/render impact.
 
-### Examples
-
-**Example 1 — DSP change (from calibration clamp removal):**
+### Example
 
 **CHANGE:** Removed pre-calibration clamp `db = clamp(db, -100, 0)` in `_buildPowerSpectrum()`
 **CLASSIFICATION:** ⚪ NEUTRAL (feedback detection) + 🟢 POSITIVE (room analysis)
@@ -462,41 +463,10 @@ For trivial changes (typo fix, comment update, import reorder), a one-line audit
 | System | Impact | Evidence |
 |--------|--------|----------|
 | Peak detection | ⚪ None | Affected bins < -100 dB, never cross any threshold (min 2 dB prominence) |
-| Prominence calc | ⚪ Negligible | Sub-noise-floor bins contribute ≈0 power to prefix sum |
 | MSD / algorithms | ⚪ None | Only peak bins written to MSD history |
 | Room analysis | 🟢 Improved | Quiet low-freq signals no longer artificially raised before calibration offset |
-| Performance | ⚪ None | One fewer clamp() call per bin — nanoseconds |
 
 **Verdict:** Strict improvement — removes artificial floor that lost precision for room analysis, while being mathematically invariant for all feedback detection paths.
-
-**Example 2 — UI change (hypothetical context refactor):**
-
-**CHANGE:** Split EngineContext into EngineLifecycleContext + DeviceContext
-**CLASSIFICATION:** 🟢 POSITIVE (re-renders) + 🔴 NEGATIVE (complexity)
-**SCOPE:** React State, UI Components
-
-| System | Impact | Evidence |
-|--------|--------|----------|
-| Re-renders | 🟢 Improved | Components using only devices no longer re-render on start/stop |
-| Bundle size | ⚪ None | Same total code, just restructured |
-| Complexity | 🔴 Increased | 2 providers instead of 1, more import paths for consumers |
-| Accessibility | ⚪ None | No DOM or interaction changes |
-
-**Verdict:** Trade-off — reduces unnecessary re-renders but adds architectural complexity. Recommend only if profiling shows the re-renders cause visible jank.
-
-**Example 3 — Storage change (hypothetical key rename):**
-
-**CHANGE:** Renamed localStorage key `dwa-settings` → `dwa-settings-v2`
-**CLASSIFICATION:** 🔴 NEGATIVE (data loss risk)
-**SCOPE:** Settings / Storage
-
-| System | Impact | Evidence |
-|--------|--------|----------|
-| New users | ⚪ None | Get DEFAULT_SETTINGS as always |
-| Existing users | 🔴 Settings lost | Old key not read, 47 settings reset to defaults |
-| PWA | ⚪ None | Service worker cache unrelated to localStorage |
-
-**Verdict:** Regression — existing users lose all saved settings on upgrade. Must add migration: read old key → write new key → delete old key.
 
 ## "Update the Usuals" Workflow
 
@@ -507,9 +477,9 @@ When the user says "update the usuals" or "update the usual stuff", do all of th
 3. **Version** (`package.json`) — bump to `0.{next_PR_number}.0`
 4. **CLAUDE.md** — update header (version, test count, file count, summary line)
 
-Then when user says "PR and merge":
-5. Commit locally, create feature branch, push, `gh pr create`, `gh pr merge --squash --delete-branch --admin`
-6. Sync local: `git checkout main && git pull origin main`
+Then when user says "PR":
+5. Commit locally, create feature branch, push, `gh pr create`
+6. **Stop.** Don merges on GitHub — Claude never merges.
 
 **NEVER push unless the user explicitly says "push", "PR", or "send to GitHub".**
 
@@ -521,6 +491,9 @@ Then when user says "PR and merge":
 - **API:** Ingest endpoint validates v1.0/v1.1/v1.2 schema, dual rate-limiting (IP-based 30/60s primary + session-based 6/60s secondary), actual body size enforcement (512KB), strips IP, error messages not leaked
 - **Worker:** Inbound messages type-validated via `WorkerOutboundMessage` switch; outbound postMessage lacks compile-time Set validation (minor gap)
 - **localStorage:** 37 touchpoints, all via dwaStorage.ts abstraction with try/catch
+- **Companion proxy:** SSRF protection via `isBlockedHost()` — blocks RFC 1918, localhost, link-local, cloud metadata IPs before fetch (`app/api/companion/proxy/route.ts`)
+- **Companion relay:** Rate-limited (30 req/min per IP, amortized Map pruning), payload shape validated before storage (`app/api/companion/relay/[code]/route.ts`)
+- **Pairing codes:** `crypto.getRandomValues()` (not Math.random()), 6-char alphanumeric (`lib/companion/companionBridge.ts`)
 
 ## Accessibility Notes
 
@@ -537,7 +510,7 @@ Then when user says "PR and merge":
 
 - **Analysis:** All audio processing runs locally in the browser. No audio is transmitted.
 - **Data collection:** Anonymous spectral snapshots (opt-in). No PII. Random session UUIDs. IP stripped server-side.
-- **Consent:** Opt-in model — user must tap "Share Data" before collection begins. EU launch ready for data collection; full GDPR disclosures (legal basis, retention period, data subject rights) not yet implemented.
+- **Consent:** Opt-in model — user must tap "Share Data" before collection begins. EU/EEA/UK users see full GDPR disclosures (Article 6(1)(a) legal basis, 24-month retention, data subject rights, Supabase storage location). `ConsentJurisdiction` tracked in localStorage. Geo detection via `/api/geo` (Vercel `x-vercel-ip-country` header, fail-open). `CONSENT_VERSION=2`; v1→v2 migration preserves existing consent status.
 - **Storage:** Settings and history in localStorage only. Never transmitted unless user explicitly exports.
 
 ## ML Data Pipeline (v0.106.0+)
@@ -561,6 +534,10 @@ Then when user says "PR and merge":
 - Severity colors (RUNAWAY red, GROWING orange, etc.) are independent of the operator vocabulary
 
 ### Amber Sidecar Theme
+- **Signal-responsive tint:** `--tint-r/g/b` CSS vars on `:root` drive all amber-tinted surfaces. `useSignalTint` hook (in HeaderBar) maps worst detection severity → color: idle=slate, listening=blue, detection=amber, warning=orange, RUNAWAY=red. 500ms CSS transitions, 1s downgrade hysteresis, `prefers-reduced-motion` respected.
+- **Overlay scoping:** `[data-slot="sheet-content"]` pins `--tint-*` to amber — Help, History, Settings sheets stay branded regardless of detection state.
+- **RUNAWAY boost:** `.tint-runaway` class on `<html>` doubles alpha on headers/sidebars/glow lines for emergency visibility.
+- **Canvas code:** Cannot use CSS `var()` directly — use `getComputedStyle(document.documentElement).getPropertyValue('--tint-r')` to read tint values for `ctx.fillStyle`/`ctx.strokeStyle`.
 - All panels use `amber-sidecar` class for cascade styling (accordion triggers, section labels)
 - `amber-panel-header` class for gradient header bars — requires compound selector when combined with `panel-header` or `channel-strip` (CSS specificity: later rules override equal-specificity earlier rules)
 - `instrument-window-amber` class for graph panel bezel borders
