@@ -6,13 +6,16 @@ import { HelpSection, HelpGroup } from './HelpShared'
 export const AlgorithmsTab = memo(function AlgorithmsTab() {
   return (
     <>
-      <HelpSection title="7-Algorithm Fusion System" color="amber">
-        <p>
-          DoneWell Audio uses 7 detection algorithms from peer-reviewed acoustic research. Each exploits
-          a different physical property of feedback vs. musical content. They vote together with
-          content-aware weighting for maximum accuracy and minimal false positives.
-        </p>
-      </HelpSection>
+      {/* Group: Overview */}
+      <HelpGroup title="Overview">
+        <HelpSection title="7-Algorithm Fusion System" color="amber">
+          <p>
+            DoneWell Audio uses 7 detection algorithms from peer-reviewed acoustic research. Each exploits
+            a different physical property of feedback vs. musical content. They vote together with
+            content-aware weighting for maximum accuracy and minimal false positives.
+          </p>
+        </HelpSection>
+      </HelpGroup>
 
       {/* Group: Detection Algorithms */}
       <HelpGroup title="Detection Algorithms">
@@ -438,21 +441,19 @@ export const AlgorithmsTab = memo(function AlgorithmsTab() {
             </div>
           </div>
         </HelpSection>
+          <HelpSection title="Understanding Algorithm Scores" color="amber">
+            <ul className="space-y-2">
+              <li><strong>MSD HIGH:</strong> Second derivative near zero — strong feedback indicator (consistent growth)</li>
+              <li><strong>Phase LOCKED:</strong> Consistent phase relationship — strong feedback indicator (regenerative loop)</li>
+              <li><strong>Spectral PURE:</strong> Very low flatness — single tone present (near-zero entropy)</li>
+              <li><strong>Comb PATTERN:</strong> Regular frequency spacing — feedback loop geometry identified</li>
+              <li><strong>IHR LOW:</strong> Clean harmonics with no inter-harmonic energy — feedback</li>
+              <li><strong>PTMR HIGH:</strong> Peak stands far above spectral floor — narrow isolated tone</li>
+              <li><strong>COMPRESSED:</strong> Dynamic compression detected — phase coherence becomes primary</li>
+            </ul>
+          </HelpSection>
         </div>
       </HelpGroup>
-
-      {/* Full-width: Score Reference */}
-      <HelpSection title="Understanding Algorithm Scores" color="amber">
-        <ul className="space-y-2">
-          <li><strong>MSD HIGH:</strong> Second derivative near zero — strong feedback indicator (consistent growth)</li>
-          <li><strong>Phase LOCKED:</strong> Consistent phase relationship — strong feedback indicator (regenerative loop)</li>
-          <li><strong>Spectral PURE:</strong> Very low flatness — single tone present (near-zero entropy)</li>
-          <li><strong>Comb PATTERN:</strong> Regular frequency spacing — feedback loop geometry identified</li>
-          <li><strong>IHR LOW:</strong> Clean harmonics with no inter-harmonic energy — feedback</li>
-          <li><strong>PTMR HIGH:</strong> Peak stands far above spectral floor — narrow isolated tone</li>
-          <li><strong>COMPRESSED:</strong> Dynamic compression detected — phase coherence becomes primary</li>
-        </ul>
-      </HelpSection>
     </>
   )
 })

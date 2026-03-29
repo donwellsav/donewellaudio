@@ -6,13 +6,16 @@ import { HelpSection, HelpGroup } from './HelpShared'
 export const GuideTab = memo(function GuideTab() {
   return (
     <>
-      <HelpSection title="What is DoneWell Audio?" color="amber">
-        <p>
-          A real-time acoustic feedback detection and analysis tool for professional live sound engineers.
-          Uses 7 detection algorithms and 6 multiplicative false-positive gates from peer-reviewed acoustic research to identify feedback frequencies,
-          resonant rings, and problematic tones — then delivers specific EQ recommendations with pitch translation.
-        </p>
-      </HelpSection>
+      {/* Group: Overview */}
+      <HelpGroup title="Overview">
+        <HelpSection title="What is DoneWell Audio?" color="amber">
+          <p>
+            A real-time acoustic feedback detection and analysis tool for professional live sound engineers.
+            Uses 7 detection algorithms and 6 multiplicative false-positive gates from peer-reviewed acoustic research to identify feedback frequencies,
+            resonant rings, and problematic tones — then delivers specific EQ recommendations with pitch translation.
+          </p>
+        </HelpSection>
+      </HelpGroup>
 
       {/* Group: Getting Started */}
       <HelpGroup title="Getting Started">

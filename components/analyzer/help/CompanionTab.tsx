@@ -6,17 +6,16 @@ import { HelpSection, HelpGroup } from './HelpShared'
 export const CompanionTab = memo(function CompanionTab() {
   return (
     <>
-      <HelpSection title="What is Companion Integration?" color="green">
-        <p>
-          DoneWell Audio can send its EQ recommendations to <strong>Bitfocus Companion</strong>, which routes them to your hardware mixer or DSP processor.
-          DoneWell detects feedback and calculates the cut — Companion talks to the mixer and applies it.
-          Works with any mixer that Companion supports: Behringer X32, Yamaha CL/QL/TF, Allen &amp; Heath, dbx, Midas, and hundreds more.
-        </p>
-      </HelpSection>
-
       {/* Group: Download & Setup */}
       <HelpGroup title="Download & Setup">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          <HelpSection title="What is Companion Integration?" color="green">
+            <p>
+              DoneWell Audio can send its EQ recommendations to <strong>Bitfocus Companion</strong>, which routes them to your hardware mixer or DSP processor.
+              DoneWell detects feedback and calculates the cut — Companion talks to the mixer and applies it.
+              Works with any mixer that Companion supports: Behringer X32, Yamaha CL/QL/TF, Allen &amp; Heath, dbx, Midas, and hundreds more.
+            </p>
+          </HelpSection>
           <HelpSection title="Get the Module" color="green">
             <p className="mb-2">Pre-built, ready to use. Unzip into Companion&apos;s dev modules folder — no build step needed.</p>
             <div className="space-y-2">
