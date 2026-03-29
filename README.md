@@ -135,7 +135,7 @@ Open [http://localhost:3000](http://localhost:3000), grant microphone permission
 analyzer/
 ├── app/
 │   ├── layout.tsx                    # Root layout with metadata + Sentry
-│   ├── page.tsx                      # Entry point — renders KillTheRing
+│   ├── page.tsx                      # Entry point — renders AudioAnalyzer
 │   ├── global-error.tsx              # Global error boundary (Sentry)
 │   ├── sw.ts                         # Serwist service worker
 │   ├── ~offline/page.tsx             # Offline fallback page
@@ -143,8 +143,8 @@ analyzer/
 │
 ├── components/
 │   ├── analyzer/
-│   │   ├── KillTheRing.tsx           # Main orchestration component
-│   │   ├── KillTheRingClient.tsx     # Client-side wrapper
+│   │   ├── AudioAnalyzer.tsx          # Main orchestration component
+│   │   ├── AudioAnalyzerClient.tsx   # Client-side wrapper
 │   │   ├── SpectrumCanvas.tsx        # RTA Spectrum visualization
 │   │   ├── GEQBarView.tsx            # 31-Band GEQ bar visualization
 │   │   ├── IssuesList.tsx            # Active issues with Apply buttons
