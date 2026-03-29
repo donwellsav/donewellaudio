@@ -14,6 +14,25 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.39.0',
+    date: '2026-03-29',
+    changes: [
+      { type: 'feat', description: '**Signal-responsive console tint** — entire amber UI shifts color with detection severity (gray→blue→amber→orange→red) via CSS custom properties driven by `useSignalTint` hook. 17 files, ~90 hardcoded amber values replaced.' },
+      { type: 'feat', description: '**GDPR full disclosures** — EU/EEA/UK users see Article 6(1)(a) legal basis, retention, rights before consenting. Geo detection via Vercel header, jurisdiction stored in consent state, v1→v2 migration preserves existing consent.' },
+      { type: 'feat', description: '**Security hardening** — SSRF protection on companion proxy, crypto pairing codes, relay rate limiting + payload validation, HSTS header, improved IP detection.' },
+      { type: 'feat', description: '**Performance** — zero-alloc fusion loop, cached FusionConfig, O(1) MSD eviction, canvas grid/spectrum caching, ERB/GEQ log2 caching, adaptive phase FFT skip.' },
+      { type: 'feat', description: '**Refactoring** — IssuesList.tsx split from 876L into 4 focused modules (IssueCard, IssueCardActions, useSwipeGesture).' },
+      { type: 'feat', description: '**Docs** — audit documents, plan files, opt-in consent model corrections.' },
+      { type: 'feat', description: '[ ] `npx tsc --noEmit` passes' },
+      { type: 'feat', description: '[ ] `pnpm test` — 1029 pass, 4 skip, 49 suites' },
+      { type: 'feat', description: '[ ] Visual: idle → gray tint, listening → blue, detection → amber, RUNAWAY → red' },
+      { type: 'feat', description: '[ ] Visual: light/dark theme both shift correctly' },
+      { type: 'feat', description: '[ ] Visual: sidebars, accordions, glow lines all shift together' },
+      { type: 'feat', description: '[ ] GDPR: local dev shows standard dialog (no EU section)' },
+      { type: 'feat', description: '[ ] Security: companion proxy blocks private IPs' },
+    ],
+  },
+  {
     version: '0.38.0',
     date: '2026-03-29',
     changes: [
