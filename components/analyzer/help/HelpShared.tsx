@@ -21,7 +21,7 @@ const COLOR_VAR: Record<HelpColor, string> = {
 }
 
 const BORDER_ALPHA: Record<HelpColor, string> = {
-  amber: 'rgba(245,158,11,0.45)',
+  amber: 'rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.45)',
   blue:  'rgba(75,146,255,0.45)',
   green: 'rgba(74,222,128,0.45)',
 }
@@ -72,7 +72,7 @@ export const HelpGroup = memo(function HelpGroup({
       defaultValue={defaultOpen ? [title] : []}
     >
       <AccordionItem value={title} className="border-b-0">
-        <AccordionTrigger className="py-1.5 px-2 panel-groove hover:no-underline hover:bg-[rgba(245,158,11,0.03)] data-[state=open]:border-l-2 data-[state=open]:border-[rgba(245,158,11,0.50)] data-[state=open]:pl-[calc(0.5rem-2px)] data-[state=open]:bg-[rgba(245,158,11,0.04)]">
+        <AccordionTrigger className="py-1.5 px-2 panel-groove hover:no-underline hover:bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.03)] data-[state=open]:border-l-2 data-[state=open]:border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.50)] data-[state=open]:pl-[calc(0.5rem-2px)] data-[state=open]:bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.04)]">
           <span className="section-label text-[var(--console-amber)]">{title}</span>
         </AccordionTrigger>
         <AccordionContent className="pb-0 pt-3">

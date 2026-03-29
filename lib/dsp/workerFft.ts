@@ -29,8 +29,8 @@ import type { ContentType, DetectedPeak, Track } from '@/types/advisory'
 // ── dB-to-linear LUT (replaces Math.pow(10, db/10) in hot loops) ────────────
 // 1001-entry table: index = (db + 100) * 10, range [-100, 0] dB
 const EXP_LUT = /* @__PURE__ */ (() => {
-  const table = new Float32Array(1001)
-  for (let i = 0; i <= 1000; i++) {
+  const table = new Float32Array(1301)
+  for (let i = 0; i <= 1300; i++) {
     table[i] = Math.pow(10, (i / 10 - 100) / 10)
   }
   return table
@@ -39,7 +39,7 @@ const EXP_LUT = /* @__PURE__ */ (() => {
 /** Convert dB to linear power via LUT. ~3x faster than Math.pow(10, db/10). */
 function dbToLinear(db: number): number {
   const idx = ((db + 100) * 10 + 0.5) | 0
-  return EXP_LUT[idx < 0 ? 0 : idx > 1000 ? 1000 : idx]
+  return EXP_LUT[idx < 0 ? 0 : idx > 1300 ? 1300 : idx]
 }
 
 // ── Extracted magic numbers ─────────────────────────────────────────────────
@@ -240,6 +240,8 @@ export class AlgorithmEngine {
   private _lastFusedProb = 0.5
   /** Previous frame's fused confidence — fed into ML feature vector (1-frame lag) */
   private _lastFusedConf = 0.5
+  /** Frame counter for phase skip cadence (0, 1, 2, 0, 1, 2, ...) */
+  private _phaseFrameCounter = 0
 
   // ── Content-type authority (moved from main-thread feedbackDetector.ts) ─────
   private _ctEnergyBuffer = new Float32Array(TEMPORAL_ENVELOPE.BUFFER_SIZE)
@@ -363,6 +365,7 @@ export class AlgorithmEngine {
     maxFreq: number,
     sampleRate: number,
     fftSize: number,
+    skipPhase: boolean = false,
   ): boolean {
     const isNewFrame = timestamp !== this.lastFrameTimestamp
     if (!isNewFrame) return false
@@ -384,12 +387,17 @@ export class AlgorithmEngine {
     this.rmsDb = validBins > 0 ? 10 * Math.log10(sumLinearPower / validBins) : -100
     this.ampBuffer.addSample(this.specMax, this.rmsDb)
 
-    // Phase coherence: extract phase angles on EVERY frame unconditionally
+    // Phase coherence: adaptive skip when MSD is decisive in MSD-led modes
     if (timeDomain && this.phaseBuffer) {
-      const phases = computePhaseAngles(timeDomain)
-      if (phases) {
-        this.phaseBuffer.addFrame(phases)
+      this._phaseFrameCounter++
+      if (!skipPhase) {
+        const phases = computePhaseAngles(timeDomain)
+        if (phases) {
+          this.phaseBuffer.addFrame(phases)
+        }
       }
+      // On skip frames, phaseBuffer retains last-written frame — coherence score
+      // uses existing history, which is at most 40ms stale (2 skipped × 20ms).
     }
 
     this.lastFrameTimestamp = timestamp
@@ -499,11 +507,25 @@ export class AlgorithmEngine {
     this._lastFusedConf = confidence
   }
 
+  /**
+   * Determine if phase FFT should be skipped this frame.
+   * Skip when: adaptive skip enabled AND mode is MSD-led AND MSD is decisive.
+   * Never skip in liveMusic or worship (phase is the lead algorithm there).
+   */
+  shouldSkipPhase(adaptivePhaseSkip: boolean, mode: string): boolean {
+    if (!adaptivePhaseSkip) return false
+    if (mode === 'liveMusic' || mode === 'worship') return false
+    const msdDecisive = this._lastFusedProb > 0.8 || this._lastFusedProb < 0.1
+    if (!msdDecisive) return false
+    return (this._phaseFrameCounter % 3) !== 0
+  }
+
   reset(): void {
     this.msdPool?.reset()
     this.phaseBuffer?.reset()
     this.ampBuffer.reset()
     this.lastFrameTimestamp = -1
+    this._phaseFrameCounter = 0
     this.specMax = -Infinity
     this.rmsDb = -100
     this._lastFusedProb = 0.5

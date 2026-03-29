@@ -91,6 +91,10 @@ export class FeedbackDetector {
   // MSD (Magnitude Slope Deviation) — delegated to MSDPool (lib/dsp/msdPool.ts)
   // Pooled sparse allocation: 256 slots × 64 frames = 64KB. LRU eviction when full.
   private _msdPool: MSDPool | null = null
+  // Per-frame MSD result cache — avoids duplicate calculateMsd() calls when
+  // early detection (line ~1139) and registration (line ~1366) both need the same bin's MSD.
+  // Cleared at the start of each _scanAndProcessPeaks() call.
+  private _msdResultCache: Map<number, { msd: number; growthRate: number; isHowl: boolean; fastConfirm: boolean }> = new Map()
   private _fastConfirmCounts: Map<number, number> = new Map() // binIndex → consecutive low-MSD frames
   private msdMinFrames: number = MSD_SETTINGS.DEFAULT_MIN_FRAMES // Content-adaptive (synced with worker)
 
@@ -954,23 +958,20 @@ export class FeedbackDetector {
       analyser.getFloatTimeDomainData(this.timeDomain)
     }
 
-    // ── Auto-gain: measure raw peak BEFORE applying gain ──────────────────
+    // ── Shared raw peak scan — used by both auto-gain and manual modes ───
+    // Single O(n) pass instead of duplicate scans in each branch.
+    let rawPeak = -100
+    const scanStart = this.startBin > 0 ? this.startBin : 1
+    const scanEnd = this.endBin > 0 ? this.endBin : n - 1
+    for (let i = scanStart; i <= scanEnd; i++) {
+      const v = freqDb[i]
+      if (Number.isFinite(v) && v > rawPeak) rawPeak = v
+    }
+    this._rawPeakDb = rawPeak
+    this._isSignalPresent = rawPeak >= this._silenceThresholdDb
+
+    // ── Auto-gain: EMA calibration using the shared rawPeak ──────────────
     if (this._autoGainEnabled) {
-      let rawPeak = -100
-      const agStart = this.startBin > 0 ? this.startBin : 1
-      const agEnd = this.endBin > 0 ? this.endBin : n - 1
-      for (let i = agStart; i <= agEnd; i++) {
-        const v = freqDb[i]
-        if (Number.isFinite(v) && v > rawPeak) rawPeak = v
-      }
-      this._rawPeakDb = rawPeak
-
-      // ── Signal presence gate ──────────────────────────────────────────
-      // If the raw (pre-gain) signal is below silence threshold, there is
-      // no meaningful audio. Skip all peak detection to prevent auto-gain
-      // from amplifying noise floor artifacts into phantom feedback peaks.
-      this._isSignalPresent = rawPeak >= this._silenceThresholdDb
-
       // ── Measure-then-lock calibration ─────────────────────────────────
       // Once locked, skip all EMA updates — gain stays frozen at calibrated value
       if (!this._autoGainLocked) {
@@ -1009,27 +1010,12 @@ export class FeedbackDetector {
           }
         }
       }
+    }
 
-      // When no signal present, skip peak detection. Noise floor continues tracking.
-      if (!this._isSignalPresent) {
-        this._clearStalePeaksOnSilence(dt, now)
-        return false
-      }
-    } else {
-      // Manual gain mode — still check signal presence via raw peak scan
-      let rawPeak = -100
-      const mgStart = this.startBin > 0 ? this.startBin : 1
-      const mgEnd = this.endBin > 0 ? this.endBin : n - 1
-      for (let i = mgStart; i <= mgEnd; i++) {
-        const v = freqDb[i]
-        if (Number.isFinite(v) && v > rawPeak) rawPeak = v
-      }
-      this._rawPeakDb = rawPeak
-      this._isSignalPresent = rawPeak >= this._silenceThresholdDb
-      if (!this._isSignalPresent) {
-        this._clearStalePeaksOnSilence(dt, now)
-        return false
-      }
+    // When no signal present, skip peak detection. Noise floor continues tracking.
+    if (!this._isSignalPresent) {
+      this._clearStalePeaksOnSilence(dt, now)
+      return false
     }
     return true
   }
@@ -1092,7 +1078,7 @@ export class FeedbackDetector {
 
       // LUT replaces Math.exp(db * ln10/10) — 0.1dB quantization, ~3x faster
       const lutIdx = ((db + 100) * 10 + 0.5) | 0
-      const p = EXP_LUT[lutIdx < 0 ? 0 : lutIdx > 1000 ? 1000 : lutIdx]
+      const p = EXP_LUT[lutIdx < 0 ? 0 : lutIdx > 1300 ? 1300 : lutIdx]
       power[i] = p
       prefix[i + 1] = prefix[i] + p
     }
@@ -1114,6 +1100,9 @@ export class FeedbackDetector {
     const nb = this.effectiveNb
     const start = this.startBin
     const end = this.endBin
+
+    // Clear per-frame MSD cache (avoids duplicate calculateMsd calls within this scan)
+    this._msdResultCache.clear()
 
     for (let i = start; i <= end; i++) {
       const peakDb = freqDb[i]
@@ -1137,6 +1126,7 @@ export class FeedbackDetector {
       // This lets quiet feedback through before it becomes obvious.
       if (!valid && isLocalMax && peakDb >= effectiveThresholdDb - MSD_SETTINGS.THRESHOLD_REDUCTION_DB) {
         const msdResult = this.calculateMsd(i)
+        this._msdResultCache.set(i, msdResult)
         if (msdResult.isHowl || msdResult.fastConfirm) {
           valid = true
         }
@@ -1362,8 +1352,8 @@ export class FeedbackDetector {
     // PHPR (Peak-to-Harmonic Power Ratio) — feedback vs music discrimination
     peak.phpr = this.calculatePHPR(i)
 
-    // MSD analysis for howl detection
-    const msdResult = this.calculateMsd(i)
+    // MSD analysis for howl detection (reuse cached result from early detection if available)
+    const msdResult = this._msdResultCache.get(i) ?? this.calculateMsd(i)
     peak.msd = msdResult.msd
     peak.msdGrowthRate = msdResult.growthRate
     peak.msdIsHowl = msdResult.isHowl
@@ -1486,7 +1476,7 @@ export class FeedbackDetector {
 
       // Convert dB → linear power via EXP_LUT (clamped to [-100, 0] dB range)
       const lutIdx = ((maxHarmonicDb + 100) * 10 + 0.5) | 0
-      linearSum += EXP_LUT[lutIdx < 0 ? 0 : lutIdx > 1000 ? 1000 : lutIdx]
+      linearSum += EXP_LUT[lutIdx < 0 ? 0 : lutIdx > 1300 ? 1300 : lutIdx]
       harmonicCount++
     }
 

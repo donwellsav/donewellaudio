@@ -212,6 +212,20 @@ export function freqToLogPosition(freq: number, freqMin: number, freqMax: number
 }
 
 /**
+ * Fast variant for hot loops — caller pre-computes logMin and invLogRange once,
+ * reducing Math.log10 calls from 3 per bin to 1 per bin.
+ *
+ * Usage:
+ *   const logMin = Math.log10(freqMin)
+ *   const invLogRange = 1 / (Math.log10(freqMax) - logMin)
+ *   // in loop:
+ *   const x = freqToLogPositionFast(freq, logMin, invLogRange)
+ */
+export function freqToLogPositionFast(freq: number, logMin: number, invLogRange: number): number {
+  return (Math.log10(freq) - logMin) * invLogRange
+}
+
+/**
  * Convert log scale position to frequency
  */
 export function logPositionToFreq(position: number, freqMin: number, freqMax: number): number {

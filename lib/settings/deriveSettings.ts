@@ -146,6 +146,7 @@ export function deriveDetectorSettings(
     algorithmMode: diagnostics.algorithmMode,
     enabledAlgorithms: diagnostics.enabledAlgorithms,
     mlEnabled: diagnostics.mlEnabled,
+    adaptivePhaseSkip: diagnostics.adaptivePhaseSkip ?? true,
 
     // Threshold mode
     thresholdMode: diagnostics.thresholdMode,

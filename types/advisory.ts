@@ -352,6 +352,7 @@ export interface DetectorSettings {
   algorithmMode: AlgorithmMode // 'auto' (content-adaptive) or 'custom' (user-selected algorithms)
   enabledAlgorithms: Algorithm[] // Which algorithms are active when algorithmMode === 'custom'
   mlEnabled: boolean // When false, ML algorithm is excluded from all mode branches including Auto
+  adaptivePhaseSkip: boolean // Skip phase FFT when MSD is decisive in MSD-led modes (default true)
   showAlgorithmScores: boolean // Show the algorithm status bar with live scoring metrics
   showPeqDetails: boolean // Show PEQ recommendation (type, Q, gain) on each issue card
   showFreqZones: boolean // Show frequency zone overlay (Sub/Voice/Presence/Air) on RTA

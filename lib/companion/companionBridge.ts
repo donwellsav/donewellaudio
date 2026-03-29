@@ -43,12 +43,15 @@ function toPayload(advisory: Advisory) {
   }
 }
 
-/** Generate a random pairing code like "DWA-A1B2" */
+/** Generate a crypto-secure pairing code like "DWA-A1B2C3" (6 chars, ~1B combos) */
 export function generatePairingCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no 0/O/1/I confusion
+  // chars.length = 32 = 2^5, so % 32 has zero modulo bias with Uint32
+  const randomValues = new Uint32Array(6)
+  crypto.getRandomValues(randomValues)
   let code = ''
-  for (let i = 0; i < 4; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)]
+  for (let i = 0; i < 6; i++) {
+    code += chars[randomValues[i] % chars.length]
   }
   return `DWA-${code}`
 }

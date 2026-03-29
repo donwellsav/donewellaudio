@@ -1,7 +1,7 @@
 # CLAUDE.md — DoneWell Audio Project Intelligence
 
-> **Last updated March 2026. 169 TypeScript/TSX files, 985 tests (981 pass, 4 skip), 46 suites. Version 0.22.0.**
-> Amber sidecar theme. Three-color operator vocabulary. Help accordion system. Fader UI overhaul.
+> **Last updated March 2026. 165 TypeScript/TSX files, 1024 tests (1020 pass, 4 skip), 49 suites. Version 0.37.0.**
+> Amber sidecar theme. Three-color operator vocabulary. Help accordion system. Fader UI overhaul. Adaptive phase skip. Performance-optimized fusion loop + canvas rendering.
 
 ## CRITICAL RULES
 
@@ -269,7 +269,7 @@ lib/
   export/ (3 files)           # PDF/TXT/CSV/JSON export
   calibration/ (3 files)      # Room profile, session recording, JSON export
   storage/dwaStorage.ts (183) # Typed localStorage abstraction
-  data/ (4 files)             # Anonymous spectral collection (opt-out, v1.1 with algo scores)
+  data/ (4 files)             # Anonymous spectral collection (opt-in, v1.1 with algo scores)
     snapshotCollector.ts (343)#   Batch collection, algorithm score enrichment, user feedback, label balance tracking
   utils/ (2 files)            # Math helpers, pitch utilities
 types/
@@ -300,9 +300,9 @@ scripts/ml/                     # ML training pipeline
 - **FeedbackDetector.analyze() is the hot path.** Runs every 20ms (50fps). Every optimization matters.
 - **MSD uses pooled sparse allocation:** 256 slots x 64 frames = 64KB (vs 1MB dense). O(1) slot allocation, O(256) LRU eviction.
 - **Prefix sum for O(1) prominence:** Float64Array prefix sum enables neighborhood averaging without per-bin loops.
-- **EXP_LUT:** 1001-entry precomputed dB-to-linear table. Use instead of Math.pow() in hot loops.
+- **EXP_LUT:** 1301-entry precomputed dB-to-linear table [-100, +30] dB. Use instead of Math.pow() in hot loops.
 - **Skip-threshold:** Bins 12dB below threshold skip the LUT entirely.
-- **Canvas at 30fps, not 60fps.** Sufficient for spectrum visualization. Saves 50% GPU.
+- **Canvas at 30fps (default), not 60fps.** Sufficient for spectrum visualization. Grid cached as Path2D, log-scale math hoisted outside loops.
 - **Worker backpressure:** If worker is still processing, next peak is DROPPED (not queued). Real-time > completeness.
 - **Transferable buffers:** spectrum and timeDomain Float32Arrays are transferred (zero-copy) to worker, then returned via `returnBuffers` message. No allocation after init.
 
@@ -388,7 +388,7 @@ Always. If you changed code, you audit it. Specifically:
 | Accessibility | ARIA roles, focus management, touch targets, screen readers, color contrast |
 | Performance | Hot path (50fps analyze), Canvas (30fps), bundle size, memory, LUT |
 | ML Pipeline | ONNX model, inference, training data, snapshot collection |
-| Data / Privacy | Consent, snapshot collection, PII, opt-out, GDPR |
+| Data / Privacy | Consent, snapshot collection, PII, opt-in, GDPR |
 
 ### Audit format
 
@@ -536,8 +536,8 @@ Then when user says "PR and merge":
 ## Data Privacy
 
 - **Analysis:** All audio processing runs locally in the browser. No audio is transmitted.
-- **Data collection:** Anonymous spectral snapshots (opt-out). No PII. Random session UUIDs. IP stripped server-side.
-- **Consent:** Opt-out model (US). Needs opt-in for GDPR jurisdictions before EU launch.
+- **Data collection:** Anonymous spectral snapshots (opt-in). No PII. Random session UUIDs. IP stripped server-side.
+- **Consent:** Opt-in model — user must tap "Share Data" before collection begins. EU launch ready for data collection; full GDPR disclosures (legal basis, retention period, data subject rights) not yet implemented.
 - **Storage:** Settings and history in localStorage only. Never transmitted unless user explicitly exports.
 
 ## ML Data Pipeline (v0.106.0+)

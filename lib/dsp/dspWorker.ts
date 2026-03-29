@@ -113,6 +113,9 @@ function getMsdMinFramesForMode(mode?: string): number {
   return MSD_SETTINGS.DEFAULT_MIN_FRAMES
 }
 
+// ─── Cached FusionConfig (rebuilt only on settings change, not per-peak) ─────
+let _cachedFusionConfig: FusionConfig | null = null
+
 // ─── Per-cycle shelf cache (cross-advisory dedup) ────────────────────────────
 // Shelves are broadband (global spectrum), not peak-specific. Computing once
 // per analysis frame and sharing across all peaks avoids duplicate shelf arrays.
@@ -178,6 +181,8 @@ interface LabelRingBuffer {
 
 const LABEL_HISTORY_CAPACITY = CLASSIFICATION_SMOOTHING_FRAMES * 3
 const classificationLabelHistory = new Map<string, LabelRingBuffer>()
+/** Reusable Map for majority-vote label smoothing — avoids per-call allocation */
+const _labelVoteMap = new Map<string, number>()
 
 /**
  * Smooth classification label via ring-buffer majority vote.
@@ -208,17 +213,18 @@ function smoothClassificationLabel(
   }
 
   // Majority vote over the most recent window
+  // Reuse module-level Map to avoid per-call allocation (~60 calls/sec)
   const cap = LABEL_HISTORY_CAPACITY
   const windowSize = CLASSIFICATION_SMOOTHING_FRAMES
-  const counts = new Map<string, number>()
+  _labelVoteMap.clear()
   for (let k = 0; k < windowSize; k++) {
     const label = ring.labels[(ring.idx - 1 - k + cap) % cap]
-    counts.set(label, (counts.get(label) ?? 0) + 1)
+    _labelVoteMap.set(label, (_labelVoteMap.get(label) ?? 0) + 1)
   }
 
   let maxLabel = newLabel
   let maxCount = 0
-  for (const [label, count] of counts) {
+  for (const [label, count] of _labelVoteMap) {
     if (count > maxCount) {
       maxCount = count
       maxLabel = label
@@ -255,6 +261,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
 
     case 'updateSettings': {
       settings = { ...settings, ...msg.settings }
+      _cachedFusionConfig = null  // Invalidate — rebuilt on next processPeak
       if (msg.settings.maxTracks !== undefined || msg.settings.trackTimeoutMs !== undefined) {
         trackManager.updateOptions({
           maxTracks: msg.settings.maxTracks,
@@ -273,6 +280,7 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       peakProcessCount = 0
       cachedShelves = null
       cachedShelvesFrameId = -1
+      _cachedFusionConfig = null
       snapshotCollector?.reset()
       break
     }
@@ -399,9 +407,14 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       const track = trackManager.processPeak(peak)
 
       // Feed frame-level buffers (MSD, amplitude, phase — once per frame)
+      const skipPhase = algorithmEngine.shouldSkipPhase(
+        settings?.adaptivePhaseSkip ?? true,
+        settings?.mode ?? 'speech',
+      )
       const isNewFrame = algorithmEngine.feedFrame(
         peak.timestamp, spectrum, timeDomain,
-        minFreq, maxFreq, sampleRate, fftSize
+        minFreq, maxFreq, sampleRate, fftSize,
+        skipPhase,
       )
 
       if (isNewFrame) {
@@ -514,30 +527,31 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
       lastIsCompressed = algorithmScores.compression?.isCompressed ?? false
       lastCompressionRatio = algorithmScores.compression?.estimatedRatio ?? 1
 
-      // Fuse algorithm results with user-selected mode
-      const fusionConfig: FusionConfig = {
-        ...DEFAULT_FUSION_CONFIG,
-        mode: settings?.algorithmMode ?? 'auto',
-        enabledAlgorithms: settings?.enabledAlgorithms,
-        msdMinFrames: getMsdMinFramesForMode(settings?.mode),
-        mlEnabled: settings?.mlEnabled ?? true,
+      // Fuse algorithm results with user-selected mode (cached — rebuilt only on settings change)
+      if (!_cachedFusionConfig) {
+        _cachedFusionConfig = {
+          ...DEFAULT_FUSION_CONFIG,
+          mode: settings?.algorithmMode ?? 'auto',
+          enabledAlgorithms: settings?.enabledAlgorithms,
+          msdMinFrames: getMsdMinFramesForMode(settings?.mode),
+          mlEnabled: settings?.mlEnabled ?? true,
+        }
       }
       // Get or create per-track comb stability tracker
       // Fix 13 (AI Fight Club): Cap at 256 entries to prevent unbounded growth during broadband transients
       let trackCst = combTrackers.get(track.id)
       if (!trackCst) {
         if (combTrackers.size >= 256) {
-          // Emergency prune — remove entries not in active tracks
-          const activeIds = new Set(trackManager.getActiveTracks().map(t => t.id))
+          // Emergency prune — remove entries not in active tracks (O(1) per check via Map lookup)
           for (const tid of combTrackers.keys()) {
-            if (!activeIds.has(tid)) combTrackers.delete(tid)
+            if (!trackManager.isActiveTrack(tid)) combTrackers.delete(tid)
           }
         }
         trackCst = new CombStabilityTracker()
         combTrackers.set(track.id, trackCst)
       }
       const fusionResult = fuseAlgorithmResults(
-        algorithmScores, contentType, fusionConfig, track.trueFrequencyHz, trackCst,
+        algorithmScores, contentType, _cachedFusionConfig, track.trueFrequencyHz, trackCst,
         undefined, undefined, // agreementTracker, calibrationTable
         { combSweepOverride: settings.combSweepOverride, ihrGateOverride: settings.ihrGateOverride, ptmrGateOverride: settings.ptmrGateOverride }
       )

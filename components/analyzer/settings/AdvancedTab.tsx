@@ -95,6 +95,8 @@ export const AdvancedTab = memo(function AdvancedTab({
         <div className="space-y-2">
           <LEDToggle color="amber" checked={settings.mlEnabled} onChange={(checked) => diag('mlEnabled', checked)} label="ML Scoring"
             tooltip={settings.showTooltips ? 'Enable machine learning false-positive filter (7th algorithm). Disable for deterministic 6-algorithm detection.' : undefined} />
+          <LEDToggle color="amber" checked={settings.adaptivePhaseSkip} onChange={(checked) => diag('adaptivePhaseSkip', checked)} label="Adaptive Phase Skip"
+            tooltip={settings.showTooltips ? 'Skip phase FFT when MSD is decisive. Saves CPU in speech/monitor modes. Always runs full phase in music/worship.' : undefined} />
           <div className="space-y-1">
             <button onClick={() => diag('algorithmMode', settings.algorithmMode !== 'auto' ? 'auto' : 'custom')}
               className={`min-h-11 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-full px-1.5 rounded text-xs font-mono font-bold tracking-wide transition-colors ${

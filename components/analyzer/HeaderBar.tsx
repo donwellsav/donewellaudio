@@ -23,7 +23,9 @@ import { useEngine } from '@/contexts/EngineContext'
 import { usePA2 } from '@/contexts/PA2Context'
 import { useMetering } from '@/contexts/MeteringContext'
 import { useUI } from '@/contexts/UIContext'
+import { useSignalTint } from '@/hooks/useSignalTint'
 export const HeaderBar = memo(function HeaderBar() {
+  useSignalTint()
   const { isRunning, start, stop, devices, selectedDeviceId, handleDeviceChange } = useEngine()
   const { inputLevel } = useMetering()
   const { resetLayout, isFullscreen, toggleFullscreen, isFrozen, toggleFreeze, isRtaFullscreen, toggleRtaFullscreen } = useUI()
@@ -33,7 +35,7 @@ export const HeaderBar = memo(function HeaderBar() {
   const hasClearableContent = advisories.some(a => !dismissedIds.has(a.id)) || hasActiveGEQBars || hasActiveRTAMarkers
 
   return (
-    <header className="header-glow relative flex flex-row items-center justify-between gap-2 sm:gap-4 px-3 py-1 channel-strip amber-panel-header border-b border-b-[rgba(245,158,11,0.20)] shadow-[0_1px_16px_rgba(0,0,0,0.15),0_2px_4px_rgba(0,0,0,0.1),0_1px_0_rgba(217,119,6,0.06)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.55),0_2px_4px_rgba(0,0,0,0.3),0_1px_0_rgba(245,158,11,0.09)] sm:px-4 sm:py-1">
+    <header className="header-glow relative flex flex-row items-center justify-between gap-2 sm:gap-4 px-3 py-1 channel-strip amber-panel-header border-b border-b-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.20)] shadow-[0_1px_16px_rgba(0,0,0,0.15),0_2px_4px_rgba(0,0,0,0.1),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.06)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.55),0_2px_4px_rgba(0,0,0,0.3),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.09)] sm:px-4 sm:py-1">
 
       {/* ── Logo + start button (responsive single block) ─────────── */}
       <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
@@ -44,7 +46,7 @@ export const HeaderBar = memo(function HeaderBar() {
             className="relative flex items-center justify-center flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary rounded"
           >
             <DwaLogo
-              className={`size-16 ${isRunning ? 'text-foreground drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'text-foreground/70 hover:text-foreground'}`}
+              className={`size-16 ${isRunning ? 'text-foreground drop-shadow-[0_0_8px_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.5)]' : 'text-foreground/70 hover:text-foreground'}`}
               audioLevel={isRunning ? Math.max(0, Math.min(1, (inputLevel + 60) / 60)) : undefined}
             />
           </button>
@@ -173,7 +175,7 @@ export const HeaderBar = memo(function HeaderBar() {
         </div>
 
         {/* ── Separator (desktop only) ────────────────── */}
-        <div className="hidden tablet:block w-px h-6 bg-[rgba(245,158,11,0.20)] mx-1 sm:mx-1.5 flex-shrink-0" aria-hidden="true" />
+        <div className="hidden tablet:block w-px h-6 bg-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.20)] mx-1 sm:mx-1.5 flex-shrink-0" aria-hidden="true" />
 
         {/* ── Utility group (desktop: inline, mobile: overflow menu) ── */}
         <div className="hidden tablet:flex items-center gap-0 icon-cluster">
