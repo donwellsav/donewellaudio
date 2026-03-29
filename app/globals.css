@@ -856,6 +856,14 @@ html {
     inset 0 -1px 0 rgba(0, 0, 0, 0.50),
     inset 0 3px 14px rgba(0, 0, 0, 0.55);
 }
+.instrument-window-amber {
+  border-color: rgba(245, 158, 11, 0.12);
+  border-top-color: rgba(245, 158, 11, 0.18);
+}
+.light .instrument-window-amber {
+  border-color: rgba(217, 119, 6, 0.10);
+  border-top-color: rgba(217, 119, 6, 0.14);
+}
 .light .instrument-window {
   background: rgba(238, 241, 247, 0.95);
   border: 1px solid rgba(0, 0, 0, 0.10);
