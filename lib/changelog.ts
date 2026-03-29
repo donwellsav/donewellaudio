@@ -14,6 +14,22 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.40.0',
+    date: '2026-03-29',
+    changes: [
+      { type: 'feat', description: '**Signal tint polish** — 500ms CSS transitions, 1s downgrade hysteresis, sheet overlay scoping (Help/History/Settings stay amber), RUNAWAY 2x alpha boost, prefers-reduced-motion respected' },
+      { type: 'feat', description: '**CLAUDE.md deep audit** — fixed 16 stale file/line counts, added IssueCard/IssueCardActions split, removed ghost KtrLogo, updated test counts (799→1033), version (0.13.0→0.37.0), added companion security docs' },
+      { type: 'feat', description: '**CLAUDE.md cosmetic** — "six algorithms" → "seven (six classical + ML)", trimmed CIA examples from 3 to 1' },
+      { type: 'feat', description: '**Merge contradiction fix** — removed `gh pr merge` from Update the Usuals workflow (contradicted "Never merge on GitHub" rule)' },
+      { type: 'feat', description: '[ ] `npx tsc --noEmit` passes' },
+      { type: 'feat', description: '[ ] `pnpm test` — 1029 pass, 4 skip' },
+      { type: 'feat', description: '[ ] Visual: tint transitions are smooth (500ms), not instant snaps' },
+      { type: 'feat', description: '[ ] Visual: RUNAWAY state shows boosted red opacity' },
+      { type: 'feat', description: '[ ] Visual: Help/History sheets stay amber regardless of detection state' },
+      { type: 'feat', description: '[ ] Visual: prefers-reduced-motion disables tint transitions' },
+    ],
+  },
+  {
     version: '0.39.0',
     date: '2026-03-29',
     changes: [
