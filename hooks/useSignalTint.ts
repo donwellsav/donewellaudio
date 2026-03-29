@@ -15,7 +15,7 @@
  *   RUNAWAY → red
  */
 
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useState, useRef } from 'react'
 import { useAdvisories } from '@/contexts/AdvisoryContext'
 import { useEngine } from '@/contexts/EngineContext'
 import { getSeverityUrgency } from '@/lib/dsp/severityUtils'
@@ -28,6 +28,9 @@ const TINT_AMBER: RGB  = [245, 158, 11]   // console amber (default)
 const TINT_ORANGE: RGB = [249, 115, 22]   // warning
 const TINT_RED: RGB    = [239, 68, 68]    // RUNAWAY
 
+/** Hold severity for 1s before allowing downgrade — prevents flicker */
+const HOLD_MS = 1000
+
 function tintForUrgency(urgency: number, running: boolean): RGB {
   if (!running) return TINT_IDLE
   if (urgency === 0) return TINT_LISTEN
@@ -39,12 +42,15 @@ function tintForUrgency(urgency: number, running: boolean): RGB {
 /**
  * Must be called inside AdvisoryProvider + EngineContext.
  * Reads advisories and engine state from context directly.
+ *
+ * Hysteresis: upgrades are instant, downgrades are held for HOLD_MS
+ * to prevent flicker when advisories briefly disappear and return.
  */
 export function useSignalTint(): void {
   const { advisories, dismissedIds } = useAdvisories()
   const { isRunning } = useEngine()
 
-  const worstUrgency = useMemo(() => {
+  const rawUrgency = useMemo(() => {
     if (!isRunning) return 0
     let worst = 0
     for (const a of advisories) {
@@ -55,18 +61,48 @@ export function useSignalTint(): void {
     return worst
   }, [isRunning, advisories, dismissedIds])
 
-  const [r, g, b] = tintForUrgency(worstUrgency, isRunning)
+  // Hysteresis: upgrades instant, downgrades delayed
+  const [displayedUrgency, setDisplayedUrgency] = useState(0)
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    const root = document.documentElement.style
-    root.setProperty('--tint-r', String(r))
-    root.setProperty('--tint-g', String(g))
-    root.setProperty('--tint-b', String(b))
-    return () => {
-      // Reset to amber on unmount
-      root.setProperty('--tint-r', '245')
-      root.setProperty('--tint-g', '158')
-      root.setProperty('--tint-b', '11')
+    if (rawUrgency >= displayedUrgency) {
+      // Upgrade or same — apply immediately
+      if (holdTimerRef.current) { clearTimeout(holdTimerRef.current); holdTimerRef.current = null }
+      setDisplayedUrgency(rawUrgency)
+    } else {
+      // Downgrade — hold for HOLD_MS before applying
+      if (!holdTimerRef.current) {
+        holdTimerRef.current = setTimeout(() => {
+          holdTimerRef.current = null
+          setDisplayedUrgency(rawUrgency)
+        }, HOLD_MS)
+      }
     }
-  }, [r, g, b])
+    return () => {
+      if (holdTimerRef.current) { clearTimeout(holdTimerRef.current); holdTimerRef.current = null }
+    }
+  }, [rawUrgency, displayedUrgency])
+
+  const [r, g, b] = tintForUrgency(displayedUrgency, isRunning)
+  const isRunaway = displayedUrgency >= 5
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.setProperty('--tint-r', String(r))
+    root.style.setProperty('--tint-g', String(g))
+    root.style.setProperty('--tint-b', String(b))
+    // Boost alpha for RUNAWAY — makes red actually visible at low tint alphas
+    if (isRunaway) {
+      root.classList.add('tint-runaway')
+    } else {
+      root.classList.remove('tint-runaway')
+    }
+    return () => {
+      root.style.setProperty('--tint-r', '245')
+      root.style.setProperty('--tint-g', '158')
+      root.style.setProperty('--tint-b', '11')
+      root.classList.remove('tint-runaway')
+    }
+  }, [r, g, b, isRunaway])
 }
