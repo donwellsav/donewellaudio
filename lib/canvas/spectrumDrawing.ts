@@ -5,7 +5,7 @@
  * Stateless: all data received as parameters, no React dependency.
  */
 
-import { freqToLogPosition, clamp } from '@/lib/utils/mathHelpers'
+import { freqToLogPosition, freqToLogPositionFast, clamp } from '@/lib/utils/mathHelpers'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { getSeverityUrgency } from '@/lib/dsp/severityUtils'
 import { formatFrequency } from '@/lib/utils/pitchUtils'
@@ -117,6 +117,32 @@ export function calcPadding(width: number, height: number) {
   }
 }
 
+// ── measureText cache — avoids expensive text rendering engine queries (14+ calls/frame → ~0) ──
+// Keyed by "font|text" since measurement depends on both. Max ~100 entries (bounded by unique labels).
+const _measureCache = new Map<string, TextMetrics>()
+let _measureCacheFont = ''
+
+function cachedMeasureText(ctx: CanvasRenderingContext2D, text: string): TextMetrics {
+  // Clear cache when font changes (theme switch, font size change)
+  const font = ctx.font
+  if (font !== _measureCacheFont) {
+    _measureCache.clear()
+    _measureCacheFont = font
+  }
+  let m = _measureCache.get(text)
+  if (!m) {
+    m = ctx.measureText(text)
+    _measureCache.set(text, m)
+  }
+  return m
+}
+
+// ── Grid Path2D cache — geometry rebuilt only when range or dimensions change ──
+let _gridMinorPath: Path2D | null = null
+let _gridMajorPath: Path2D | null = null
+let _gridFreqPath: Path2D | null = null
+let _gridCacheKey = ''
+
 export function drawGrid(
   ctx: CanvasRenderingContext2D,
   plotWidth: number,
@@ -148,38 +174,47 @@ export function drawGrid(
   ctx.fillStyle = backlight
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
-  // Minor dB grid (subtle, drawn first)
+  // Rebuild cached grid paths only when geometry inputs change
+  const key = `${plotWidth}|${plotHeight}|${range.dbMin}|${range.dbMax}|${range.freqMin}|${range.freqMax}`
+  if (key !== _gridCacheKey) {
+    const dbSpan = range.dbMax - range.dbMin
+
+    _gridMinorPath = new Path2D()
+    for (const db of DB_MINOR) {
+      const y = ((range.dbMax - db) / dbSpan) * plotHeight
+      _gridMinorPath.moveTo(0, y)
+      _gridMinorPath.lineTo(plotWidth, y)
+    }
+
+    _gridMajorPath = new Path2D()
+    for (const db of DB_MAJOR) {
+      const y = ((range.dbMax - db) / dbSpan) * plotHeight
+      _gridMajorPath.moveTo(0, y)
+      _gridMajorPath.lineTo(plotWidth, y)
+    }
+
+    _gridFreqPath = new Path2D()
+    for (const freq of FREQ_LABELS) {
+      const x = freqToLogPosition(freq, range.freqMin, range.freqMax) * plotWidth
+      _gridFreqPath.moveTo(x, 0)
+      _gridFreqPath.lineTo(x, plotHeight)
+    }
+
+    _gridCacheKey = key
+  }
+
+  // Stroke cached paths with current theme colors
   ctx.strokeStyle = theme.gridMinor
   ctx.lineWidth = 0.5
-  ctx.beginPath()
-  for (const db of DB_MINOR) {
-    const y = ((range.dbMax - db) / (range.dbMax - range.dbMin)) * plotHeight
-    ctx.moveTo(0, y)
-    ctx.lineTo(plotWidth, y)
-  }
-  ctx.stroke()
+  ctx.stroke(_gridMinorPath!)
 
-  // Major dB grid (brighter, on top)
   ctx.strokeStyle = theme.gridMajor
   ctx.lineWidth = 1
-  ctx.beginPath()
-  for (const db of DB_MAJOR) {
-    const y = ((range.dbMax - db) / (range.dbMax - range.dbMin)) * plotHeight
-    ctx.moveTo(0, y)
-    ctx.lineTo(plotWidth, y)
-  }
-  ctx.stroke()
+  ctx.stroke(_gridMajorPath!)
 
-  // Frequency grid
   ctx.strokeStyle = theme.gridFreq
   ctx.lineWidth = 0.5
-  ctx.beginPath()
-  for (const freq of FREQ_LABELS) {
-    const x = freqToLogPosition(freq, range.freqMin, range.freqMax) * plotWidth
-    ctx.moveTo(x, 0)
-    ctx.lineTo(x, plotHeight)
-  }
-  ctx.stroke()
+  ctx.stroke(_gridFreqPath!)
 }
 
 /** Frequency zone band boundaries — colors are theme-dependent */
@@ -461,11 +496,16 @@ export function drawSpectrum(
   let holdStarted = false
   const dbSpan = range.dbMax - range.dbMin
 
+  // Pre-compute log-scale constants — hoisted outside loop to eliminate
+  // 2 of 3 Math.log10 calls per bin (~8,000 fewer transcendental ops/frame)
+  const logMin = Math.log10(range.freqMin)
+  const invLogRange = 1 / (Math.log10(range.freqMax) - logMin)
+
   for (let i = 1; i < n; i++) {
     const freq = i * hzPerBin
     if (freq < range.freqMin || freq > range.freqMax) continue
 
-    const x = freqToLogPosition(freq, range.freqMin, range.freqMax) * plotWidth
+    const x = freqToLogPositionFast(freq, logMin, invLogRange) * plotWidth
 
     // Spectrum path
     const db = clamp(freqDb[i], range.dbMin, range.dbMax)
@@ -741,7 +781,7 @@ export function drawMarkers(
 
   // Compute label x-ranges (center ± half-width + padding)
   const labelXRanges: Array<{ left: number; right: number }> = visibleAdvisories.map((advisory, i) => {
-    const halfWidth = ctx.measureText(formatFrequency(advisory.trueFrequencyHz)).width / 2 + labelPadding
+    const halfWidth = cachedMeasureText(ctx, formatFrequency(advisory.trueFrequencyHz)).width / 2 + labelPadding
     return { left: labelXCenters[i] - halfWidth, right: labelXCenters[i] + halfWidth }
   })
 
@@ -841,7 +881,7 @@ export function drawMarkers(
 
       // Pro audio callout badge — frosted glass with severity accent
       // Uses measureText bounding box to perfectly center text inside pill
-      const metrics = ctx.measureText(labelText)
+      const metrics = cachedMeasureText(ctx, labelText)
       const ascent = metrics.actualBoundingBoxAscent
       const descent = metrics.actualBoundingBoxDescent
       const pillPadX = 7
