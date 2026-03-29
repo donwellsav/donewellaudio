@@ -119,7 +119,7 @@ export const SetupTab = memo(function SetupTab({
             className={`min-h-11 flex items-center justify-center overflow-hidden cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-1 rounded text-xs font-mono font-bold tracking-wide transition-all ${
               settings.mode === mode
                 ? 'bg-[var(--console-amber)]/10 text-[var(--console-amber)] border border-[var(--console-amber)]/40 btn-glow'
-                : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
+                : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-[rgba(245,158,11,0.18)]'
             }`}
           >
             <span className="truncate">{label}</span>
@@ -133,7 +133,7 @@ export const SetupTab = memo(function SetupTab({
           <span className="section-label text-muted-foreground">EQ Style</span>
           {settings.showTooltips && (
             <Tooltip>
-              <TooltipTrigger asChild><HelpCircle className="w-3 h-3 text-muted-foreground/70 hover:text-muted-foreground cursor-help" /></TooltipTrigger>
+              <TooltipTrigger asChild><HelpCircle className="w-3 h-3 text-[rgba(245,158,11,0.45)] hover:text-[var(--console-amber)] cursor-help" /></TooltipTrigger>
               <TooltipContent side="right" className="max-w-[260px] text-sm">Surgical: narrow Q cuts for precision. Heavy: wider, deeper cuts for aggressive feedback.</TooltipContent>
             </Tooltip>
           )}

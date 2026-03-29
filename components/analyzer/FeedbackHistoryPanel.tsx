@@ -237,7 +237,7 @@ export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
             <div className={hotspots.length === 0 ? 'space-y-1.5' : gridCls}>
               {hotspots.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-1 bg-card/80 rounded border">
-                  <BarChart3 className="w-5 h-5 text-muted-foreground/50 mb-1" />
+                  <BarChart3 className="w-5 h-5 text-[rgba(245,158,11,0.30)] mb-1" />
                   <span className="text-sm font-mono font-medium">No feedback events recorded yet</span>
                   <span className="text-sm text-muted-foreground font-mono">Events will appear here as they are detected</span>
                 </div>
@@ -300,7 +300,7 @@ export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
             </div>
             {archivedSessions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-muted-foreground gap-1 bg-card/80 rounded border">
-                <Clock className="w-5 h-5 text-muted-foreground/50 mb-1" />
+                <Clock className="w-5 h-5 text-[rgba(245,158,11,0.30)] mb-1" />
                 <span className="text-sm font-mono">No past sessions</span>
                 <span className="text-xs text-muted-foreground/70 font-mono">Sessions are archived when you stop analysis</span>
               </div>

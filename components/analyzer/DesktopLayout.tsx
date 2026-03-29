@@ -97,7 +97,7 @@ export const DesktopLayout = memo(function DesktopLayout({
         <ResizablePanel defaultSize={20} minSize={8} maxSize={30} collapsible>
           <div className="flex flex-col h-full amber-sidecar overflow-hidden">
             {/* Algorithm status */}
-            <div className="flex-shrink-0 amber-panel-header p-2">
+            <div className="flex-shrink-0 amber-panel-header p-2 panel-groove">
               <AlgorithmStatusBar
                 algorithmMode={spectrumStatus?.algorithmMode ?? settings.algorithmMode}
                 contentType={spectrumStatus?.contentType}

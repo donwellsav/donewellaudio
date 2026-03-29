@@ -161,7 +161,7 @@ export const SettingsPanel = memo(function SettingsPanel({
         </div>
 
         {/* ── Footer: Reset ─────────────────────────── */}
-        <div className="border-t border-border/40 pt-2 mt-2">
+        <div className="panel-groove pt-2 mt-2">
           <ResetConfirmDialog
             onConfirm={onReset}
             trigger={

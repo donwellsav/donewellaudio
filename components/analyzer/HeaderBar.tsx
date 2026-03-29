@@ -173,7 +173,7 @@ export const HeaderBar = memo(function HeaderBar() {
         </div>
 
         {/* ── Separator (desktop only) ────────────────── */}
-        <div className="hidden tablet:block w-px h-6 bg-border/40 mx-1 sm:mx-1.5 flex-shrink-0" aria-hidden="true" />
+        <div className="hidden tablet:block w-px h-6 bg-[rgba(245,158,11,0.20)] mx-1 sm:mx-1.5 flex-shrink-0" aria-hidden="true" />
 
         {/* ── Utility group (desktop: inline, mobile: overflow menu) ── */}
         <div className="hidden tablet:flex items-center gap-0 icon-cluster">
