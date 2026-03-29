@@ -84,9 +84,9 @@ export const DesktopLayout = memo(function DesktopLayout({
       <ResizablePanelGroup key={layoutKey} direction="horizontal" autoSaveId="dwa-layout-main-v4">
         {/* Sidebar panel */}
         <ResizablePanel defaultSize={20} minSize={8} maxSize={30} collapsible>
-          <div className="flex flex-col h-full bg-card/40 channel-strip overflow-hidden border-r-2 border-r-primary/10">
+          <div className="flex flex-col h-full amber-sidecar overflow-hidden">
             {/* Algorithm status */}
-            <div className="flex-shrink-0 border-b border-border p-2">
+            <div className="flex-shrink-0 amber-panel-header p-2">
               <AlgorithmStatusBar
                 algorithmMode={spectrumStatus?.algorithmMode ?? settings.algorithmMode}
                 contentType={spectrumStatus?.contentType}
@@ -100,7 +100,7 @@ export const DesktopLayout = memo(function DesktopLayout({
               />
             </div>
             {/* Sidebar tab bar — segmented control */}
-            <div className="flex-shrink-0 flex items-center gap-1.5 px-2 py-1.5 border-b border-border/50">
+            <div className="flex-shrink-0 flex items-center gap-1.5 px-2 py-1.5 amber-panel-header">
               <div className="flex flex-1 tab-track">
               {!issuesPanelOpen && (
                 <button
@@ -219,13 +219,13 @@ export const DesktopLayout = memo(function DesktopLayout({
           onCollapse={() => setIssuesPanelOpen(false)}
           onExpand={() => setIssuesPanelOpen(true)}
         >
-          <div className="flex flex-col h-full bg-card/40 channel-strip overflow-hidden border-l-2 border-l-primary/15">
-            <div className="flex-shrink-0 flex items-center justify-between px-3 py-1 border-b border-border bg-card/60 panel-groove">
-              <h2 className="section-label flex items-center gap-1.5">
-                <AlertTriangle className="w-3 h-3" />
+          <div className="flex flex-col h-full amber-sidecar overflow-hidden">
+            <div className="flex-shrink-0 flex items-center justify-between px-3 py-1 amber-panel-header">
+              <h2 className="section-label flex items-center gap-1.5 text-[var(--console-amber)]">
+                <AlertTriangle className="w-3 h-3 text-[var(--console-amber)]" />
                 Issues
                 {activeAdvisoryCount > 0 && (
-                  <span className="font-mono text-primary">{activeAdvisoryCount}</span>
+                  <span className="font-mono text-[var(--console-amber)]">{activeAdvisoryCount}</span>
                 )}
               </h2>
               <Tooltip>

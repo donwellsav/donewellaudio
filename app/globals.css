@@ -282,6 +282,67 @@ html {
     color: var(--foreground);
   }
 
+  /* ── Amber sidecar — rack-unit instrument bay, matches LIVE tab language ─── */
+  .amber-sidecar {
+    background: linear-gradient(180deg, #0d1520 0%, #080e16 40%, #070c12 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(245, 158, 11, 0.22),   /* amber ring — no layout shift */
+      inset 0 1px 0 rgba(245, 158, 11, 0.32),       /* top catch-light */
+      0 0 24px rgba(245, 158, 11, 0.09);             /* outer ambient glow */
+    position: relative;
+  }
+  .light .amber-sidecar {
+    background: linear-gradient(180deg, #f8f5ef 0%, #f2eeea 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(217, 119, 6, 0.18),
+      inset 0 1px 0 rgba(217, 119, 6, 0.20);
+  }
+  /* Bottom amber fade accent bar */
+  .amber-sidecar::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+      rgba(245, 158, 11, 0) 0%,
+      rgba(245, 158, 11, 0.35) 50%,
+      rgba(245, 158, 11, 0) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── Amber panel header bar ──────────────────────────────────────────────── */
+  .amber-panel-header {
+    background: linear-gradient(180deg,
+      rgba(245, 158, 11, 0.09) 0%,
+      rgba(245, 158, 11, 0.03) 100%
+    );
+    border-bottom: 1px solid rgba(245, 158, 11, 0.18);
+    box-shadow: 0 1px 0 rgba(245, 158, 11, 0.06);
+  }
+  .light .amber-panel-header {
+    background: linear-gradient(180deg,
+      rgba(217, 119, 6, 0.07) 0%,
+      rgba(217, 119, 6, 0.02) 100%
+    );
+    border-bottom: 1px solid rgba(217, 119, 6, 0.14);
+  }
+
+  /* ── Cascade overrides inside amber sidecars ─────────────────────────────── */
+  .amber-sidecar .section-label      { color: rgba(245, 158, 11, 0.55); }
+  .light .amber-sidecar .section-label { color: rgba(217, 119, 6, 0.60); }
+  .amber-sidecar .panel-groove-subtle {
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(245, 158, 11, 0.14) 50%, transparent 100%
+    );
+  }
+  .light .amber-sidecar .panel-groove-subtle {
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(217, 119, 6, 0.12) 50%, transparent 100%
+    );
+  }
+
   /* Channel strip vertical gradient — recessed rack-unit feel */
   .channel-strip {
     background: linear-gradient(180deg, #141a22 0%, #0f1318 50%, #0a0d10 100%);
