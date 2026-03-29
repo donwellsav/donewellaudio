@@ -31,6 +31,7 @@ interface DesktopLayoutProps {
   setActiveSidebarTab: (tab: 'issues' | 'controls') => void
   openIssuesPanel: () => void
   closeIssuesPanel: () => void
+  closeIssuesPanelToIssues: () => void
   setIssuesPanelOpen: (open: boolean) => void
   actualFps?: number
   droppedPercent?: number
@@ -45,7 +46,7 @@ interface DesktopLayoutProps {
 export const DesktopLayout = memo(function DesktopLayout({
   issuesPanelOpen, issuesPanelRef,
   activeSidebarTab, setActiveSidebarTab,
-  openIssuesPanel, closeIssuesPanel, setIssuesPanelOpen,
+  openIssuesPanel, closeIssuesPanel, closeIssuesPanelToIssues, setIssuesPanelOpen,
   actualFps, droppedPercent,
   calibration, dataCollection,
   isWizardActive, onStartWizard, onFinishWizard, onStartRingOut,
@@ -139,13 +140,13 @@ export const DesktopLayout = memo(function DesktopLayout({
                         ? 'text-primary'
                         : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 ring-1 ring-primary/20'
                     }`}
-                    aria-label={issuesPanelOpen ? 'Close issues sidecar' : 'Open issues sidecar'}
+                    aria-label={issuesPanelOpen ? 'Show Controls only' : 'Open split view'}
                   >
                     <Columns2 className="w-4 h-4" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="text-sm">
-                  {issuesPanelOpen ? 'Close split view' : 'Split: Issues'}
+                  {issuesPanelOpen ? 'Show Controls only' : 'Split: Issues'}
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -227,15 +228,22 @@ export const DesktopLayout = memo(function DesktopLayout({
                   <span className="font-mono text-primary">{activeAdvisoryCount}</span>
                 )}
               </h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={closeIssuesPanel}
-                className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
-                aria-label="Close issues panel"
-              >
-                <PanelLeftClose className="w-3.5 h-3.5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={closeIssuesPanelToIssues}
+                    className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+                    aria-label="Show Issues in sidebar"
+                  >
+                    <PanelLeftClose className="w-3.5 h-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-sm">
+                  Show Issues only
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto p-3">
               {isWizardActive ? (
