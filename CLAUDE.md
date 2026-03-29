@@ -108,7 +108,7 @@ When the user asks to cut a release or "update the usuals":
 
 ## Project Overview
 
-**DoneWell Audio** (donewellaudio.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using six fused detection algorithms, and delivers EQ recommendations with pitch translation. Version 0.37.0. Repository: github.com/donwellsav/donewellaudio.
+**DoneWell Audio** (donewellaudio.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using seven fused detection algorithms (six classical + ML), and delivers EQ recommendations with pitch translation. Version 0.37.0. Repository: github.com/donwellsav/donewellaudio.
 
 ## Tech Stack
 
@@ -454,9 +454,7 @@ For trivial changes (typo fix, comment update, import reorder), a one-line audit
 
 **CHANGE:** Fixed typo in HeaderBar tooltip | **CLASSIFICATION:** ⚪ NEUTRAL | **Verdict:** Text-only change, no logic/state/render impact.
 
-### Examples
-
-**Example 1 — DSP change (from calibration clamp removal):**
+### Example
 
 **CHANGE:** Removed pre-calibration clamp `db = clamp(db, -100, 0)` in `_buildPowerSpectrum()`
 **CLASSIFICATION:** ⚪ NEUTRAL (feedback detection) + 🟢 POSITIVE (room analysis)
@@ -465,41 +463,10 @@ For trivial changes (typo fix, comment update, import reorder), a one-line audit
 | System | Impact | Evidence |
 |--------|--------|----------|
 | Peak detection | ⚪ None | Affected bins < -100 dB, never cross any threshold (min 2 dB prominence) |
-| Prominence calc | ⚪ Negligible | Sub-noise-floor bins contribute ≈0 power to prefix sum |
 | MSD / algorithms | ⚪ None | Only peak bins written to MSD history |
 | Room analysis | 🟢 Improved | Quiet low-freq signals no longer artificially raised before calibration offset |
-| Performance | ⚪ None | One fewer clamp() call per bin — nanoseconds |
 
 **Verdict:** Strict improvement — removes artificial floor that lost precision for room analysis, while being mathematically invariant for all feedback detection paths.
-
-**Example 2 — UI change (hypothetical context refactor):**
-
-**CHANGE:** Split EngineContext into EngineLifecycleContext + DeviceContext
-**CLASSIFICATION:** 🟢 POSITIVE (re-renders) + 🔴 NEGATIVE (complexity)
-**SCOPE:** React State, UI Components
-
-| System | Impact | Evidence |
-|--------|--------|----------|
-| Re-renders | 🟢 Improved | Components using only devices no longer re-render on start/stop |
-| Bundle size | ⚪ None | Same total code, just restructured |
-| Complexity | 🔴 Increased | 2 providers instead of 1, more import paths for consumers |
-| Accessibility | ⚪ None | No DOM or interaction changes |
-
-**Verdict:** Trade-off — reduces unnecessary re-renders but adds architectural complexity. Recommend only if profiling shows the re-renders cause visible jank.
-
-**Example 3 — Storage change (hypothetical key rename):**
-
-**CHANGE:** Renamed localStorage key `dwa-settings` → `dwa-settings-v2`
-**CLASSIFICATION:** 🔴 NEGATIVE (data loss risk)
-**SCOPE:** Settings / Storage
-
-| System | Impact | Evidence |
-|--------|--------|----------|
-| New users | ⚪ None | Get DEFAULT_SETTINGS as always |
-| Existing users | 🔴 Settings lost | Old key not read, 47 settings reset to defaults |
-| PWA | ⚪ None | Service worker cache unrelated to localStorage |
-
-**Verdict:** Regression — existing users lose all saved settings on upgrade. Must add migration: read old key → write new key → delete old key.
 
 ## "Update the Usuals" Workflow
 
