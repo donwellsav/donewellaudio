@@ -14,6 +14,27 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.37.0',
+    date: '2026-03-29',
+    changes: [
+      { type: 'feat', description: '**Three-color operator vocabulary** — amber (detection), blue (scope/range), green (system/processing) applied across every control, label, and panel in the app' },
+      { type: 'feat', description: '**Amber sidecar theme** — unified visual language: header, controls, issues, graphs, fader, history, and help panels all share `channel-strip` + `amber-panel-header` + `instrument-window-amber` treatment' },
+      { type: 'feat', description: '**Help menu accordions** — all 6 tabs (Guide, Reference, Algorithms, Modes, Companion, About) converted to collapsible `HelpGroup` accordions with color-coded `HelpSection` cards' },
+      { type: 'feat', description: '**Fader UI overhaul** — wider strip (64→80px), LED dot indicators, amber scale ticks, amber thumb ridges, panel grooves, green floor label' },
+      { type: 'feat', description: '**Console green** (#4ADE80) replaces teal/cyan for system controls' },
+      { type: 'feat', description: '**CSS specificity fixes** — compound selectors for `amber-panel-header` + `panel-header`/`channel-strip` layering' },
+      { type: 'feat', description: '**Full UI audit** — every `text-primary` on panel chrome converted to operator colors (14 amber, 3 green)' },
+      { type: 'feat', description: '**Docs cleanup** — CLAUDE.md, AGENTS.md, README.md, tests/README.md updated; 20 obsolete KTR-branded binary files removed' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` — zero type errors' },
+      { type: 'feat', description: '[x] `pnpm test` — 981/985 pass (4 skip), 46 suites' },
+      { type: 'feat', description: '[x] Fast Refresh — no console errors throughout session' },
+      { type: 'feat', description: '[ ] Visual check: dark mode amber theme across all panels' },
+      { type: 'feat', description: '[ ] Visual check: light mode CSS variable fallbacks' },
+      { type: 'feat', description: '[ ] Visual check: mobile portrait + landscape layouts' },
+      { type: 'feat', description: '[ ] Visual check: help menu accordion expand/collapse + color coding' },
+    ],
+  },
+  {
     version: '0.36.0',
     date: '2026-03-28',
     changes: [
