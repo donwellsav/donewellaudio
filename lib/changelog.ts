@@ -14,6 +14,29 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.44.0',
+    date: '2026-03-30',
+    changes: [
+      { type: 'feat', description: 'Set `sendDefaultPii: false` in all 3 Sentry configs — aligns with GDPR consent flow' },
+      { type: 'feat', description: 'Added IPv6 SSRF checks to companion proxy (`::1`, `::ffff:*`, `fe80::`, `fc00::/7`, multicast)' },
+      { type: 'feat', description: 'Validated relay codes match `DWA-[A-Z0-9]{6}` format on all handlers' },
+      { type: 'feat', description: 'Added `Content-Type` check (415 if not JSON) + `isNaN` guard on `Content-Length` to ingest API' },
+      { type: 'feat', description: 'ML inference failures now logged with consecutive failure counter (capped at 3 warns)' },
+      { type: 'feat', description: 'Relay payload validation: whitelisted control types, `Number.isFinite` on confidence, field length caps' },
+      { type: 'feat', description: '`Retry-After: 60` header on all four 429 responses (ingest + relay)' },
+      { type: 'feat', description: 'localStorage retry failure in feedbackHistory now logged instead of silently swallowed' },
+      { type: 'feat', description: 'Deleted duplicate `tests/vitest.config.ts` (root config is authoritative; nested one had broken `@` alias)' },
+      { type: 'feat', description: 'Reduced SW static asset cache TTL from 30 days to 7 days' },
+      { type: 'feat', description: 'Added `console.warn` if dev CSP (`unsafe-eval`) runs on `VERCEL_ENV=production`' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` — clean' },
+      { type: 'feat', description: '[x] `pnpm test` — 1076 pass, 4 skip (same baseline)' },
+      { type: 'feat', description: '[ ] Verify Sentry events no longer contain IP/cookies after deploy' },
+      { type: 'feat', description: '[ ] Verify `isBlockedHost(\'http://[::1]:8000/\')` returns `true` (IPv6 SSRF fix)' },
+      { type: 'feat', description: '[ ] Verify relay rejects codes not matching `DWA-XXXXXX` with 400' },
+      { type: 'feat', description: '[ ] Verify ingest returns 415 for non-JSON Content-Type' },
+    ],
+  },
+  {
     version: '0.43.0',
     date: '2026-03-30',
     highlights: 'Architecture + color vocabulary',
