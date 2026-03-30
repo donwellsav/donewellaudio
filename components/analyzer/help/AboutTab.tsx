@@ -9,7 +9,7 @@ export const AboutTab = memo(function AboutTab() {
     <>
       <div className="flex flex-col items-center text-center py-6 space-y-3">
         <div className="text-3xl font-black tracking-tighter font-mono">
-          DONEWELL <span className="text-[var(--console-amber)] drop-shadow-[0_0_10px_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.35)]">AUDIO</span>
+          DONEWELL <span className="text-[var(--console-blue)] drop-shadow-[0_0_10px_rgba(75,146,255,0.35)]">AUDIO</span>
         </div>
         <div className="text-sm text-muted-foreground/80 font-mono tracking-[0.2em] uppercase">Real-Time Acoustic Feedback Detection</div>
         <div className="font-mono text-sm bg-card/80 text-muted-foreground px-3 py-1.5 rounded border">
@@ -23,7 +23,7 @@ export const AboutTab = memo(function AboutTab() {
           <HelpSection title="About" color="amber">
             <p>
               DoneWell Audio is a professional real-time acoustic feedback detection and analysis tool
-              for live sound engineers. It uses 6 detection algorithms from peer-reviewed acoustic
+              for live sound engineers. It uses 7 detection algorithms (6 classical + ML) from peer-reviewed acoustic
               research to identify feedback frequencies and deliver EQ recommendations with pitch translation.
             </p>
             <p className="mt-2">
@@ -37,7 +37,7 @@ export const AboutTab = memo(function AboutTab() {
               <span className="text-muted-foreground">Platform</span><span className="font-mono">Progressive Web App</span>
               <span className="text-muted-foreground">Framework</span><span className="font-mono">Next.js + React 19</span>
               <span className="text-muted-foreground">Audio</span><span className="font-mono">Web Audio API + Web Workers</span>
-              <span className="text-muted-foreground">Algorithms</span><span className="font-mono">6 (MSD, Phase, Spectral/Compression, Comb, IHR, PTMR)</span>
+              <span className="text-muted-foreground">Algorithms</span><span className="font-mono">7 (MSD, Phase, Spectral, Comb, IHR, PTMR, ML)</span>
               <span className="text-muted-foreground">Offline</span><span className="font-mono">Service worker cached</span>
             </div>
           </HelpSection>
@@ -60,7 +60,7 @@ export const AboutTab = memo(function AboutTab() {
                 <span className="font-mono text-sm font-bold text-foreground">v{entry.version}</span>
                 <span className="text-xs text-muted-foreground font-mono">{entry.date}</span>
                 {entry.highlights && (
-                  <span className="text-xs font-mono" style={{ color: 'var(--console-amber)' }}>· {entry.highlights}</span>
+                  <span className="text-xs font-mono" style={{ color: 'var(--console-blue)' }}>· {entry.highlights}</span>
                 )}
               </div>
               <div className="space-y-1">

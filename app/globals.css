@@ -61,16 +61,16 @@
   --tint-g: 158;
   --tint-b: 11;
   /* Console accent colors — pro-audio instrument aesthetic */
-  --console-amber: rgb(var(--tint-r), var(--tint-g), var(--tint-b));
-  --console-amber-glow: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35);
+  --console-amber: #f59e0b;
+  --console-amber-glow: rgba(245, 158, 11, 0.35);
   --console-blue: #4B92FF;
   --console-blue-glow: rgba(75, 146, 255, 0.28);
   --console-cyan: #06b6d4;
   --console-cyan-glow: rgba(6, 182, 212, 0.25);
   --console-green: #4ade80;
   --console-green-glow: rgba(74, 222, 128, 0.30);
-  --console-readout-text: rgb(var(--tint-r), var(--tint-g), var(--tint-b));
-  --console-readout-glow: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.35);
+  --console-readout-text: #f59e0b;
+  --console-readout-glow: rgba(245, 158, 11, 0.35);
 }
 
 /* ── Global touch & scroll behavior ──────────────────────────────────────────── */
@@ -125,16 +125,16 @@ html {
   --sidebar-border: #d0d5dd;
   --sidebar-ring: #2563eb;
   /* Console accent colors — muted for light theme (no glow) */
-  --console-amber: rgb(var(--tint-r), var(--tint-g), var(--tint-b));
-  --console-amber-glow: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.15);
+  --console-amber: #d97706;
+  --console-amber-glow: rgba(217, 119, 6, 0.15);
   --console-blue: #2563eb;
   --console-blue-glow: rgba(37, 99, 235, 0.18);
   --console-cyan: #0891b2;
   --console-cyan-glow: rgba(8, 145, 178, 0.12);
   --console-green: #22c55e;
   --console-green-glow: rgba(34, 197, 94, 0.18);
-  --console-readout-text: rgb(var(--tint-r), var(--tint-g), var(--tint-b));
-  --console-readout-glow: rgba(var(--tint-r), var(--tint-g), var(--tint-b), 0.08);
+  --console-readout-text: #d97706;
+  --console-readout-glow: rgba(217, 119, 6, 0.08);
 }
 
 @theme inline {

@@ -1,4 +1,5 @@
 import { createRequire } from 'module'
+import importPlugin from 'eslint-plugin-import-x'
 
 const require = createRequire(import.meta.url)
 
@@ -15,12 +16,16 @@ const eslintConfig = [
   {
     plugins: {
       'react-hooks': reactHooks,
+      'import-x': importPlugin,
     },
     rules: {
       'no-console': 'warn',
       'prefer-const': 'error',
       '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports' }],
       '@typescript-eslint/no-explicit-any': 'error',
+      // Circular dependency detection — catches import cycles before they ship.
+      // maxDepth: 3 limits traversal depth to keep lint fast (~2s overhead).
+      'import-x/no-cycle': ['error', { maxDepth: 3 }],
       // React 19 experimental rules — downgrade from error (eslint-config-next default)
       // to warn. These flag legitimate patterns: setState in effects for browser-API
       // synchronization, "latest ref" pattern, and Date.now() in render paths.
