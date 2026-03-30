@@ -14,6 +14,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.42.0',
+    date: '2026-03-30',
+    changes: [
+      { type: 'feat', description: 'Split `constants.ts` (1097 lines) into 6 focused domain files under `lib/dsp/constants/`' },
+      { type: 'feat', description: 'Barrel `index.ts` re-exports everything — **zero consumer changes** across all 49 importing files' },
+      { type: 'feat', description: 'musicConstants, acousticConstants, calibrationConstants, detectionConstants, presetConstants, uiConstants' },
+      { type: 'feat', description: '[ ] `npx tsc --noEmit` passes' },
+      { type: 'feat', description: '[ ] `pnpm test` — 1076 pass, 4 skip, 52 suites' },
+      { type: 'feat', description: '[ ] All 49 consumer files unchanged — imports resolve via barrel' },
+    ],
+  },
+  {
     version: '0.41.0',
     date: '2026-03-30',
     changes: [
