@@ -14,6 +14,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.41.0',
+    date: '2026-03-30',
+    changes: [
+      { type: 'feat', description: '**47 new tests** for previously untested DSP modules: acousticUtils (37 tests), decayAnalyzer (8), severityUtils (2). Total: 1080 tests, 52 suites.' },
+      { type: 'feat', description: '**Split algorithmFusion.ts** (1155L) into 3 focused modules: combPattern.ts, spectralAlgorithms.ts, fusionEngine.ts. Barrel re-export preserves all existing imports.' },
+      { type: 'feat', description: '**Split feedbackDetector.ts** (1757→1527L) by extracting: calibrationTables.ts (pure A-weighting + mic cal), frequencyAnalysis.ts (Q estimation + PHPR), persistenceScoring.ts (per-bin amplitude tracking). Hot path unchanged.' },
+      { type: 'feat', description: '**CLAUDE.md** updated with current file/line counts, new module docs.' },
+      { type: 'feat', description: '[ ] `npx tsc --noEmit` passes' },
+      { type: 'feat', description: '[ ] `pnpm test` — 1076 pass, 4 skip, 52 suites' },
+      { type: 'feat', description: '[ ] No public API changes — all consumers import via barrel or class methods' },
+      { type: 'feat', description: '[ ] Hot path: feedbackDetector.hotpath.test.ts passes (persistence delegation verified)' },
+    ],
+  },
+  {
     version: '0.40.0',
     date: '2026-03-29',
     changes: [
