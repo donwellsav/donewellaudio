@@ -14,6 +14,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.45.1',
+    date: '2026-03-30',
+    changes: [
+      { type: 'fix', description: 'Convert panel size props to percentage strings for react-resizable-panels v4' },
+    ],
+  },
+  {
     version: '0.45.0',
     date: '2026-03-30',
     changes: [
