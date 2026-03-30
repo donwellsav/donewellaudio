@@ -94,7 +94,7 @@ export const DesktopLayout = memo(function DesktopLayout({
     <div className="hidden lg:flex lg:landscape:hidden md:landscape:flex flex-1 overflow-hidden">
       <ResizablePanelGroup key={layoutKey} orientation="horizontal">
         {/* Sidebar panel */}
-        <ResizablePanel defaultSize={20} minSize={8} maxSize={30} collapsible>
+        <ResizablePanel defaultSize="20%" minSize="8%" maxSize="30%" collapsible>
           <div className="flex flex-col h-full amber-sidecar overflow-hidden">
             {/* Algorithm status */}
             <div className="flex-shrink-0 amber-panel-header p-2 panel-groove">
@@ -247,10 +247,10 @@ export const DesktopLayout = memo(function DesktopLayout({
         {/* Issues side-panel (collapsible) */}
         <ResizablePanel
           panelRef={issuesPanelRef}
-          defaultSize={25}
-          collapsedSize={0}
-          minSize={10}
-          maxSize={35}
+          defaultSize="25%"
+          collapsedSize="0%"
+          minSize="10%"
+          maxSize="35%"
           collapsible
           onResize={(size) => {
             const pct = typeof size === 'object' && 'asPercentage' in size ? size.asPercentage : size as number
@@ -320,10 +320,10 @@ export const DesktopLayout = memo(function DesktopLayout({
         <ResizableHandle withHandle />
 
         {/* Graph area panel */}
-        <ResizablePanel defaultSize={50}>
+        <ResizablePanel defaultSize="50%">
           <ResizablePanelGroup orientation="vertical">
             {/* Top graph */}
-            <ResizablePanel defaultSize={60} minSize={20} collapsible>
+            <ResizablePanel defaultSize="60%" minSize="20%" collapsible>
               <div className="h-full p-1 pb-0.5">
                 <div ref={rtaContainerRef} className="h-full rounded overflow-hidden flex flex-col instrument-window instrument-window-amber noise-panel">
                   <div className="flex-shrink-0 flex items-center justify-between amber-panel-header panel-header">
@@ -366,7 +366,7 @@ export const DesktopLayout = memo(function DesktopLayout({
             <ResizableHandle withHandle />
 
             {/* Bottom row */}
-            <ResizablePanel defaultSize={40} minSize={15} collapsible>
+            <ResizablePanel defaultSize="40%" minSize="15%" collapsible>
               <div className="h-full p-1 pt-0.5">
                 <div className="h-full rounded overflow-hidden flex flex-col min-w-0 instrument-window instrument-window-amber noise-panel">
                   <div className="flex-shrink-0 flex items-center amber-panel-header panel-header">
