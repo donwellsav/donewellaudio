@@ -14,6 +14,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.51.0',
+    date: '2026-03-31',
+    changes: [
+      { type: 'feat', description: '**Hardened `/api/companion/proxy`** with 11-layer defense-in-depth SSRF protection, verified through 9 rounds of Codex adversarial review' },
+      { type: 'feat', description: '**Added API route tests** for companion relay, geo, and sentry endpoints + extended vitest config for `app/` test discovery' },
+      { type: 'feat', description: '**Gitignore cleanup** — coverage, generated docs, worktrees, repomix exports, tsbuildinfo' },
+      { type: 'feat', description: 'Codex plugin Windows `spawn` fix (`shell: process.platform === "win32"`)' },
+      { type: 'feat', description: 'Codex review budget cap (768KB) to handle large working trees' },
+      { type: 'feat', description: 'Both are local plugin cache patches, not in this PR' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` passes' },
+      { type: 'feat', description: '[x] `pnpm test` — 1136 tests pass (57 suites), 4 skipped' },
+      { type: 'feat', description: '[x] 32 proxy route tests covering all defense layers' },
+      { type: 'feat', description: '[x] 9 API route tests (relay, geo, sentry)' },
+      { type: 'feat', description: '[x] 9 rounds of Codex adversarial review — no remaining security bypasses' },
+    ],
+  },
+  {
     version: '0.50.0',
     date: '2026-03-31',
     changes: [
