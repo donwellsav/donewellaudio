@@ -14,6 +14,22 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.54.0',
+    date: '2026-03-31',
+    changes: [
+      { type: 'feat', description: 'Updated CLAUDE.md to v0.52.0 (264 files, 1142 tests, 57 suites) with corrected security notes' },
+      { type: 'feat', description: 'Added 5 new Claude Code skills: `/gen-test`, `/cia`, `/update-usuals`, `/companion-build`, `/dsp-bench`' },
+      { type: 'feat', description: 'Added PostToolUse hook: `auto-gitignore-docx.js` (auto-adds .docx to .gitignore on Write)' },
+      { type: 'feat', description: 'Fixed 4 automation defects found by Codex adversarial review:' },
+      { type: 'feat', description: '`auto-gitignore-docx.js`: rewrote as CommonJS, reads from stdin instead of argv' },
+      { type: 'feat', description: '`cia.md`: output format now matches `pre-commit-gate.js` (bold keywords + `## <system>` sections)' },
+      { type: 'feat', description: '`update-usuals.md`: version derivation adds 1 to last PR number for correct next version' },
+      { type: 'feat', description: '`companion-build.md`: zip filenames corrected to match `CompanionTab.tsx` download links' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` — clean' },
+      { type: 'feat', description: '[x] `pnpm test` — 1138 pass, 4 skip, 0 fail' },
+    ],
+  },
+  {
     version: '0.53.0',
     date: '2026-03-31',
     changes: [
