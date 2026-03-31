@@ -1,7 +1,7 @@
 # CLAUDE.md — DoneWell Audio Project Intelligence
 
 > **Last updated March 2026. 264 TypeScript/TSX files, 1142 tests (1138 pass, 4 skip), 57 suites. Version 0.52.0.**
-> Signal-responsive console tint. GDPR disclosures. Amber sidecar theme. Three-color operator vocabulary. Help accordion system. Fader UI overhaul. Adaptive phase skip. Performance-optimized fusion loop + canvas rendering. 13-layer SSRF-hardened companion proxy.
+> Signal-responsive console tint. GDPR disclosures. Amber sidecar theme. Three-color operator vocabulary. Help accordion system. Fader UI overhaul. Adaptive phase skip. Performance-optimized fusion loop + canvas rendering. SSRF-hardened companion proxy.
 
 ## CRITICAL RULES
 
@@ -499,7 +499,7 @@ Then when user says "PR":
 - **API:** Ingest endpoint validates v1.0/v1.1/v1.2 schema, dual rate-limiting (IP-based 30/60s primary + session-based 6/60s secondary), actual body size enforcement (512KB), strips IP, error messages not leaked
 - **Worker:** Inbound messages type-validated via `WorkerOutboundMessage` switch; outbound postMessage lacks compile-time Set validation (minor gap)
 - **localStorage:** 37 touchpoints, all via dwaStorage.ts abstraction with try/catch
-- **Companion proxy:** 13-layer SSRF defense (`app/api/companion/proxy/route.ts`): Origin check (browser-only), HTTP-only, RFC 6890 complete IPv4 blocklist, all-IPv6 blocked, DNS resolution via OS resolver with 2s timeout, IP pinning (TOCTOU-safe), dual-stack IPv4 filtering, manual redirect re-validation per hop, 307/308 method preservation, 1MB response cap, rate limiting (30 req/60s per IP), redirect exhaustion → 502, distinct error codes (403/429/504/502). Public HTTP endpoints only — LAN Companion uses relay.
+- **Companion proxy:** SSRF-hardened public HTTP proxy (`app/api/companion/proxy/route.ts`): Origin header check (defense-in-depth, spoofable by non-browser clients — not a true auth boundary), HTTP-only (HTTPS blocked), 13 IPv4 special-use ranges blocked (RFC 1918, loopback, link-local, CGNAT, TEST-NETs, benchmarking, reserved; does NOT cover multicast 224/4 or 6to4 relay 192.88.99/24), all-IPv6 blocked, DNS resolution via OS resolver with 2s timeout, IP pinning (TOCTOU-safe for HTTP), dual-stack IPv4 filtering, manual redirect re-validation per hop, 307/308 method preservation, 1MB response cap, rate limiting (30 req/60s per IP via `x-forwarded-for` — trusted on Vercel, spoofable elsewhere), redirect exhaustion → 502, distinct error codes (403/429/504/502). **Known gaps:** no unforgeable auth (Origin is spoofable), IP-based rate limiting depends on platform-sanitized headers. Public HTTP endpoints only — LAN Companion uses relay.
 - **Companion relay:** Rate-limited (30 req/min per IP, amortized Map pruning), payload shape validated before storage (`app/api/companion/relay/[code]/route.ts`)
 - **Pairing codes:** `crypto.getRandomValues()` (not Math.random()), 6-char alphanumeric (`lib/companion/companionBridge.ts`)
 
