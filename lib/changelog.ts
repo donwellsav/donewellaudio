@@ -14,6 +14,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.57.0',
+    date: '2026-03-31',
+    changes: [
+      { type: 'feat', description: '**System status readout**: Standby state shows `SPEECH · 8192 FFT · 200-8.0k` below start buttons — fills empty space with useful context' },
+      { type: 'feat', description: '**Mode selector grouping**: Split into Venue row (Speech/Worship/Live/Theater) + Special row (Monitors/Ring Out/Bcast/Outdoor) with groove separator' },
+      { type: 'feat', description: '**GEQ cut count badge**: "{N} cuts" badge next to Graphic Equalizer label when EQ recommendations are active' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` — clean' },
+      { type: 'feat', description: '[x] `pnpm test` — 59 suites, 1143 pass, 4 skip' },
+      { type: 'feat', description: '[x] Chrome verification: standby state status readout visible' },
+      { type: 'feat', description: '[x] Chrome verification: mode selector groove separator renders' },
+      { type: 'feat', description: '[ ] Visual verification: GEQ badge with active detections' },
+    ],
+  },
+  {
     version: '0.56.0',
     date: '2026-03-31',
     changes: [
