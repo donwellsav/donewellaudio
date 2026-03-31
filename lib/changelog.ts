@@ -14,6 +14,26 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.61.0',
+    date: '2026-03-31',
+    changes: [
+      { type: 'feat', description: 'Replace single toggle-mode fader with two simultaneous side-by-side faders (Gain + Sensitivity, 64px each = 136px strip)' },
+      { type: 'feat', description: 'Three link modes: Unlinked, Linked (same direction), Linked Reversed (opposite). Centers snap to current positions on mode switch to prevent jumps' },
+      { type: 'feat', description: 'Home button, configurable link ratio (0.5–2.0) in Advanced settings, mobile keeps single fader with local toggle' },
+      { type: 'feat', description: '`SingleFader.tsx` — extracted rendering core from VerticalGainFader (canvas, thumb, drag, ticks)' },
+      { type: 'feat', description: '`DualFaderStrip.tsx` — orchestrator: link buttons, home, auto-gain, two SingleFader instances' },
+      { type: 'feat', description: '`useFaderLink.ts` — coupling math in visual-position space (handles sensitivity inversion + ratio)' },
+      { type: 'feat', description: '4 new persisted settings: `faderLinkMode`, `faderLinkRatio`, `faderLinkCenterGainDb`, `faderLinkCenterSensDb`' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` passes' },
+      { type: 'feat', description: '[x] `pnpm test` — 1161 pass, 4 skip (17 new useFaderLink tests)' },
+      { type: 'feat', description: '[x] Visual verification: both faders render on desktop, link buttons work' },
+      { type: 'feat', description: '[ ] Manual: drag gain in linked mode, verify sensitivity follows' },
+      { type: 'feat', description: '[ ] Manual: switch to linked-reversed, verify opposite movement' },
+      { type: 'feat', description: '[ ] Manual: test home button resets both faders' },
+      { type: 'feat', description: '[ ] Manual: verify mobile shows single fader with toggle' },
+    ],
+  },
+  {
     version: '0.60.0',
     date: '2026-03-31',
     changes: [
