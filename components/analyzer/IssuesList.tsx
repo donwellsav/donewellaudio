@@ -10,7 +10,14 @@ import { swipeHintStorage } from '@/lib/storage/dwaStorage'
 import type { Advisory } from '@/types/advisory'
 import { useCompanion } from '@/hooks/useCompanion'
 import { usePA2 } from '@/contexts/PA2Context'
+import { useSettings } from '@/contexts/SettingsContext'
 import { IssueCard } from './IssueCard'
+
+function formatFreqLabel(hz: number): string {
+  if (hz >= 10000) return `${(hz / 1000).toFixed(0)}k`
+  if (hz >= 1000) return `${(hz / 1000).toFixed(1)}k`
+  return `${hz}`
+}
 
 /** Minimum time (ms) issue cards stay in place before the list re-sorts */
 const MIN_DISPLAY_MS = 3000
@@ -39,6 +46,7 @@ interface IssuesListProps {
 export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10, dismissedIds, onClearAll, onClearResolved, touchFriendly, isRunning, onStart, onFalsePositive, falsePositiveIds, onConfirmFeedback, confirmedIds, isLowSignal, swipeLabeling, showAlgorithmScores, showPeqDetails, onStartRingOut, onDismiss }: IssuesListProps) {
   const companion = useCompanion()
   const pa2 = usePA2()
+  const { settings } = useSettings()
 
   // Auto-send new advisories to Companion when enabled
   const sentIdsRef = useRef(new Set<string>())
@@ -224,9 +232,19 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
                 </button>
               </>
             )}
-            <p className="text-[10px] font-mono text-muted-foreground/40 text-center mt-3 max-w-[220px]">
-              Adjust sensitivity with the fader or drag the threshold line on the spectrum
-            </p>
+            {/* System status readout — gives the panel substance while idle */}
+            <div className="flex flex-col items-center gap-1 mt-3 max-w-[220px]">
+              <div className="flex items-center gap-2 font-mono text-[9px] tracking-[0.12em] uppercase text-muted-foreground/45">
+                <span>{settings.mode}</span>
+                <span className="text-muted-foreground/25">·</span>
+                <span>{settings.fftSize} FFT</span>
+                <span className="text-muted-foreground/25">·</span>
+                <span>{formatFreqLabel(settings.minFrequency)}–{formatFreqLabel(settings.maxFrequency)}</span>
+              </div>
+              <p className="text-[10px] font-mono text-muted-foreground/40 text-center">
+                Adjust sensitivity with the fader or drag the threshold line on the spectrum
+              </p>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center flex-1 min-h-[80px] py-6 gap-2">

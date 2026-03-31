@@ -110,21 +110,39 @@ export const SetupTab = memo(function SetupTab({
   return (
     <div className="space-y-1">
 
-      {/* Mode chips */}
-      <div className="grid grid-cols-4 gap-1 py-1">
-        {MODES.map(([mode, label]) => (
-          <button
-            key={mode}
-            onClick={() => onModeChange(mode)}
-            className={`min-h-11 flex items-center justify-center overflow-hidden cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-1 rounded text-xs font-mono font-bold tracking-wide transition-all ${
-              settings.mode === mode
-                ? 'bg-[var(--console-amber)]/10 text-[var(--console-amber)] border border-[var(--console-amber)]/40 btn-glow'
-                : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.18)]'
-            }`}
-          >
-            <span className="truncate">{label}</span>
-          </button>
-        ))}
+      {/* Mode chips — grouped: Venue (row 1) + Special (row 2) */}
+      <div className="space-y-1 py-1">
+        <div className="grid grid-cols-4 gap-1">
+          {MODES.slice(0, 4).map(([mode, label]) => (
+            <button
+              key={mode}
+              onClick={() => onModeChange(mode)}
+              className={`min-h-11 flex items-center justify-center overflow-hidden cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-1 rounded text-xs font-mono font-bold tracking-wide transition-all ${
+                settings.mode === mode
+                  ? 'bg-[var(--console-amber)]/10 text-[var(--console-amber)] border border-[var(--console-amber)]/40 btn-glow'
+                  : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.18)]'
+              }`}
+            >
+              <span className="truncate">{label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="panel-groove-subtle" />
+        <div className="grid grid-cols-4 gap-1">
+          {MODES.slice(4).map(([mode, label]) => (
+            <button
+              key={mode}
+              onClick={() => onModeChange(mode)}
+              className={`min-h-11 flex items-center justify-center overflow-hidden cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 px-1 rounded text-xs font-mono font-bold tracking-wide transition-all ${
+                settings.mode === mode
+                  ? 'bg-[var(--console-amber)]/10 text-[var(--console-amber)] border border-[var(--console-amber)]/40 btn-glow'
+                  : 'text-muted-foreground hover:text-foreground border border-transparent hover:border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.18)]'
+              }`}
+            >
+              <span className="truncate">{label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* EQ Style */}

@@ -40,6 +40,12 @@ vi.mock('@/lib/storage/dwaStorage', () => ({
   swipeHintStorage: { get: () => false, set: vi.fn() },
 }))
 
+vi.mock('@/contexts/SettingsContext', () => ({
+  useSettings: () => ({
+    settings: { mode: 'speech', fftSize: 8192, minFrequency: 200, maxFrequency: 8000 },
+  }),
+}))
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeAdvisory(id: string, severity: SeverityLevel = 'POSSIBLE_RING', overrides: Partial<Advisory> = {}): Advisory {
