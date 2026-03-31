@@ -14,6 +14,29 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.50.0',
+    date: '2026-03-31',
+    changes: [
+      { type: 'feat', description: 'Moves ~31MB of companion module zip files from `public/downloads/` to GitHub Releases (`companion-modules-v0.3.0`)' },
+      { type: 'feat', description: 'Updates 3 download links in `CompanionTab.tsx` to point to GitHub Release asset URLs' },
+      { type: 'feat', description: 'Reduces repo working tree size significantly; future clones no longer fetch binary blobs in the tree' },
+      { type: 'feat', description: '`components/analyzer/help/CompanionTab.tsx` — 3 href updates (local paths → GitHub Release URLs)' },
+      { type: 'feat', description: '`public/downloads/*.zip` — 3 files deleted (31MB total)' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` passes' },
+      { type: 'feat', description: '[x] `pnpm test` — 1076/1076 pass, 4 skip' },
+      { type: 'feat', description: '[x] GitHub Release assets verified downloadable at https://github.com/donwellsav/donewellaudio/releases/tag/companion-modules-v0.3.0' },
+      { type: 'feat', description: '[x] Dev server: Companion tab renders all 3 download buttons with correct GitHub URLs' },
+      { type: 'feat', description: '[ ] Post-deploy: verify download buttons work on live site' },
+    ],
+  },
+  {
+    version: '0.49.0',
+    date: '2026-03-30',
+    changes: [
+      { type: 'feat', description: '⚡ Bolt: Optimize onThresholdChange handler with useCallback' },
+    ],
+  },
+  {
     version: '0.48.0',
     date: '2026-03-30',
     changes: [
