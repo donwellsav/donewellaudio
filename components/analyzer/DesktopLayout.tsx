@@ -384,9 +384,14 @@ export const DesktopLayout = memo(function DesktopLayout({
                       <div className={isRunning ? 'power-led' : 'power-led-off'} />
                       <span className="text-[11px] font-mono font-bold tracking-[0.2em] uppercase whitespace-nowrap" style={{ color: 'var(--console-amber)', opacity: 0.9 }}><span className="hidden lg:inline">Graphic Equalizer</span><span className="lg:hidden">GEQ</span></span>
                       {hasActiveGEQBars && (
-                        <button onClick={onClearGEQ} className="px-1.5 py-0.5 rounded text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                          Clear
-                        </button>
+                        <>
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-bold leading-none bg-[var(--console-amber)]/15 text-[var(--console-amber)] border border-[var(--console-amber)]/30">
+                            {advisories.filter(a => !a.resolved && !geqClearedIds.has(a.id) && a.advisory?.geq).length} cuts
+                          </span>
+                          <button onClick={onClearGEQ} className="px-1.5 py-0.5 rounded text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+                            Clear
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
