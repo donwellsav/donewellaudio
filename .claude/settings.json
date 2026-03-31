@@ -102,6 +102,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/auto-gitignore-docx.js",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "Stop": [
