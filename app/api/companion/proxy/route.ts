@@ -34,7 +34,9 @@ import dns from 'node:dns/promises'
  *   8. 307/308 method preservation — correct HTTP redirect semantics
  *   9. DNS timeout — 2s deadline prevents resolver-based DoS
  *  10. Response size cap — 1MB streaming reader with early abort
- *  11. Distinct error codes — 403 policy, 504 DNS, 502 upstream
+ *  11. Rate limiting — 30 req/60s per IP (server-enforced, not spoofable)
+ *  12. Redirect exhaustion — returns 502 if max hops exceeded
+ *  13. Distinct error codes — 403 policy, 504 DNS, 429 rate limit, 502 upstream
  */
 
 /** Max redirect hops to follow manually. */
@@ -45,6 +47,50 @@ const DNS_TIMEOUT_MS = 2000
 
 /** Max upstream response body size in bytes (1 MB). */
 const MAX_RESPONSE_BYTES = 1024 * 1024
+
+// ─── Rate limiting (matches relay pattern) ───────────────────────────────────
+
+const RATE_WINDOW_MS = 60_000
+const RATE_MAX_REQUESTS = 30
+const MAX_RATE_LIMIT_ENTRIES = 10_000
+const proxyRateMap = new Map<string, { count: number; windowStart: number }>()
+let _rateLimitCallCount = 0
+
+function getClientIp(request: NextRequest): string {
+  return (request as NextRequest & { ip?: string }).ip
+    ?? request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    ?? 'unknown'
+}
+
+/** Server-enforced rate limiting — 30 req/60s per IP. Not spoofable like Origin. */
+function isRateLimited(request: NextRequest): boolean {
+  const ip = getClientIp(request)
+  const now = Date.now()
+  const entry = proxyRateMap.get(ip)
+
+  _rateLimitCallCount++
+  if (_rateLimitCallCount % 100 === 0 || proxyRateMap.size > MAX_RATE_LIMIT_ENTRIES) {
+    for (const [k, v] of proxyRateMap) {
+      if (now - v.windowStart > RATE_WINDOW_MS) proxyRateMap.delete(k)
+    }
+    if (proxyRateMap.size > MAX_RATE_LIMIT_ENTRIES) {
+      const excess = proxyRateMap.size - MAX_RATE_LIMIT_ENTRIES
+      const iter = proxyRateMap.keys()
+      for (let i = 0; i < excess; i++) {
+        const k = iter.next().value
+        if (k !== undefined) proxyRateMap.delete(k)
+      }
+    }
+  }
+
+  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
+    proxyRateMap.set(ip, { count: 1, windowStart: now })
+    return false
+  }
+
+  entry.count++
+  return entry.count > RATE_MAX_REQUESTS
+}
 
 /**
  * Returns true if an IPv4 address is non-globally-reachable (RFC 6890).
@@ -270,6 +316,11 @@ function isValidOrigin(request: NextRequest): boolean {
 export async function POST(request: NextRequest) {
   let requestedUrl: string | undefined
   try {
+    // Layer 0: Rate limiting (server-enforced, not spoofable)
+    if (isRateLimited(request)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': '60' } })
+    }
+
     // Layer 1: Origin/CSRF check
     if (!isValidOrigin(request)) {
       return NextResponse.json({ error: 'Cross-origin request blocked' }, { status: 403 })
@@ -371,6 +422,12 @@ export async function POST(request: NextRequest) {
       currentMethod = redirectMethod
       currentBody = redirectBody
       redirectCount++
+    }
+
+    // Redirect exhaustion — don't pass raw 3xx through as a "success"
+    if (redirectCount >= MAX_REDIRECTS && response.status >= 300 && response.status < 400) {
+      console.error('[companion-proxy] Redirect limit exceeded:', redirectCount, 'hops. URL:', requestedUrl)
+      return NextResponse.json({ error: 'Too many redirects' }, { status: 502 })
     }
 
     // Layer 8: Size-capped response reading

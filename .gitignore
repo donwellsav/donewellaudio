@@ -31,11 +31,10 @@ nul
 # Test coverage
 /coverage/
 
-# Generated docs
+# Generated doc exports
 docs/*.docx
-docs/*.md
-docs/generate-*.js
 docs/~$*
+docs/generate-*-docx.js
 
 # Claude agent worktrees
 .claude/worktrees/

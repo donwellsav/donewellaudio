@@ -7,12 +7,15 @@ vi.mock('node:dns/promises', () => ({
   },
 }))
 
+let _testRequestId = 0
 function makeRequest(body: unknown, headers?: Record<string, string>): NextRequest {
+  _testRequestId++
   return new NextRequest('http://localhost:3000/api/companion/proxy', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'origin': 'http://localhost:3000', // Same-origin by default
+      'x-forwarded-for': `10.0.${Math.floor(_testRequestId / 256)}.${_testRequestId % 256}`, // Unique IP per request — avoids rate limit crosstalk
       ...headers,
     },
     body: JSON.stringify(body),
@@ -508,5 +511,56 @@ describe('POST /api/companion/proxy', () => {
     const res = await POST(makeRequest({ url: 'http://example.com/fail', method: 'GET' }))
     expect(res.status).toBe(502)
     expect(await res.json()).toEqual({ error: 'socket hang up' })
+  })
+
+  // === Rate limiting ===
+
+  it('rate limits after 30 requests per IP', async () => {
+    const fetchMock = vi.fn().mockImplementation(
+      () => Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 })),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { POST } = await getRoute()
+
+    // Use a unique IP for this test so it doesn't pollute other tests
+    const rateTestHeaders = {
+      origin: 'http://localhost:3000',
+      'x-forwarded-for': '198.51.100.99', // TEST-NET-2 IP (blocked as target, fine as client IP)
+    }
+
+    // Fire 30 requests — all should succeed
+    for (let i = 0; i < 30; i++) {
+      const res = await POST(makeRequest({ url: 'http://example.com/api', method: 'GET' }, rateTestHeaders))
+      expect(res.status).toBe(200)
+    }
+
+    // 31st request should be rate limited
+    const res = await POST(makeRequest({ url: 'http://example.com/api', method: 'GET' }, rateTestHeaders))
+    expect(res.status).toBe(429)
+    const body = await res.json()
+    expect(body.error).toBe('Too many requests')
+  })
+
+  // === Redirect exhaustion ===
+
+  it('returns 502 when redirect hops are exhausted', async () => {
+    // Every fetch returns another redirect — infinite loop
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(null, {
+        status: 302,
+        headers: { location: 'http://example.com/loop' },
+      }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const { POST } = await getRoute()
+    const res = await POST(makeRequest({ url: 'http://example.com/start', method: 'GET' }))
+
+    expect(res.status).toBe(502)
+    const body = await res.json()
+    expect(body.error).toBe('Too many redirects')
+    // Should have fetched initial + MAX_REDIRECTS (5) hops = 6 total
+    expect(fetchMock).toHaveBeenCalledTimes(6)
   })
 })
