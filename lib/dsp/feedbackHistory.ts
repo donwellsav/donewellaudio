@@ -141,7 +141,7 @@ export class FeedbackHistory {
    * Record a new feedback event
    */
   recordEvent(event: Omit<FeedbackEvent, 'id'>): FeedbackEvent {
-    const id = `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const id = `evt_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
     const fullEvent: FeedbackEvent = { id, ...event }
     
     // Add to events array
@@ -313,7 +313,7 @@ export class FeedbackHistory {
   // ==================== PRIVATE METHODS ====================
 
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `session_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
   }
 
   private findHotspotForFrequency(frequencyHz: number): FrequencyHotspot | undefined {

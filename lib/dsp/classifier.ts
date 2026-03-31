@@ -2,7 +2,7 @@
 // Enhanced with acoustic research from "Sound Insulation" (Carl Hopkins, 2007)
 // Now integrates MSD, Phase Coherence, and Spectral Flatness from advancedDetection.ts
 
-import { CLASSIFIER_WEIGHTS, SEVERITY_THRESHOLDS, SCHROEDER_CONSTANTS, PHPR_SETTINGS, MAINS_HUM_GATE } from './constants'
+import { CLASSIFIER_WEIGHTS, SEVERITY_THRESHOLDS, PHPR_SETTINGS, MAINS_HUM_GATE } from './constants'
 import type { 
   Track, 
   ClassificationResult, 

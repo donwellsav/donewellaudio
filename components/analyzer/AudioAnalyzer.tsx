@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef, useMemo, memo, lazy, Suspense } from 'react'
+import { useEffect, useLayoutEffect, useState, useCallback, useRef, useMemo, memo, lazy, Suspense } from 'react'
+import type { SnapshotBatch } from '@/types/data'
+import type { DataCollectionHandle } from '@/hooks/useDataCollection'
 import { useAdvisoryLogging } from '@/hooks/useAdvisoryLogging'
 import { useFpsMonitor } from '@/hooks/useFpsMonitor'
 import { useCalibrationSession } from '@/hooks/useCalibrationSession'
@@ -53,8 +55,8 @@ export const AudioAnalyzer = memo(function AudioAnalyzerComponent() {
   const dataCollection = useDataCollection()
 
   // Ref that bridges data collection ↔ AudioAnalyzerProvider (breaks circular dep)
-  const snapshotBatchRef = useRef<((batch: import('@/types/data').SnapshotBatch) => void) | null>(null)
-  snapshotBatchRef.current = dataCollection.handleSnapshotBatch
+  const snapshotBatchRef = useRef<((batch: SnapshotBatch) => void) | null>(null)
+  useLayoutEffect(() => { snapshotBatchRef.current = dataCollection.handleSnapshotBatch })
 
   // Shared frozen ref — synced by UIProvider, read by useAdvisoryMap to buffer cards
   const frozenRef = useRef(false)
@@ -91,14 +93,14 @@ export const AudioAnalyzer = memo(function AudioAnalyzerComponent() {
 // ── FrozenSync: bridges UIContext.isFrozen → shared frozenRef for advisory buffering
 function FrozenSync({ frozenRef }: { frozenRef: React.RefObject<boolean> }) {
   const { isFrozen } = useUI()
-  frozenRef.current = isFrozen
+  useLayoutEffect(() => { frozenRef.current = isFrozen })
   return null
 }
 
 // ── Inner: consumes AudioAnalyzerContext, renders remaining providers + UI ───
 
 interface AudioAnalyzerInnerProps {
-  dataCollection: import('@/hooks/useDataCollection').DataCollectionHandle
+  dataCollection: DataCollectionHandle
   rootRef: React.RefObject<HTMLDivElement | null>
   rootEl: HTMLDivElement | null
   frozenRef: React.RefObject<boolean>
@@ -110,9 +112,9 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
   rootEl,
   frozenRef,
 }: AudioAnalyzerInnerProps) {
-  const { isRunning, error, workerError, start, stop, dspWorker } = useEngine()
-  const { settings, resetSettings, handleModeChange, setMicProfile } = useSettings()
-  const { spectrumRef, spectrumStatus, noiseFloorDb, sampleRate, fftSize } = useMetering()
+  const { isRunning, error, workerError, start, dspWorker } = useEngine()
+  const { settings, handleModeChange, setMicProfile } = useSettings()
+  const { spectrumRef, sampleRate, fftSize } = useMetering()
   const { advisories } = useDetection()
 
   // Wire the DSP worker handle into data collection (breaks circular dep)

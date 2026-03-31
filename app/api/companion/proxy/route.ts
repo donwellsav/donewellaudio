@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import dns from 'node:dns/promises'
 
 /**
@@ -128,11 +129,6 @@ function isBlockedIPv6(ip: string): boolean {
   if (lc.startsWith('::ffff:')) return isBlockedIPv4(lc.slice(7))
   if (lc.includes(':')) return true // All IPv6
   return false
-}
-
-/** Returns true if a resolved address is dangerous. */
-function isBlockedAddress(addr: string): boolean {
-  return isBlockedIPv4(addr) || isBlockedIPv6(addr)
 }
 
 /**
@@ -274,8 +270,7 @@ async function readResponseCapped(response: Response): Promise<string> {
   const chunks: Uint8Array[] = []
   let totalBytes = 0
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+  while (true) { // eslint-disable-line no-constant-condition -- streaming reader loop
     const { done, value } = await reader.read()
     if (done) break
     totalBytes += value.byteLength
@@ -348,6 +343,7 @@ export async function POST(request: NextRequest) {
       resolved = await resolveAndPin(url)
     } catch (err) {
       if (err instanceof DnsError) {
+        // eslint-disable-next-line no-console -- server-side diagnostic log (Vercel function logs)
         console.error('[companion-proxy] DNS error:', err.message, 'URL:', url)
         return NextResponse.json({ error: `DNS resolution failed: ${err.message}` }, { status: 504 })
       }
@@ -392,6 +388,7 @@ export async function POST(request: NextRequest) {
         redirectResolved = await resolveAndPin(redirectUrl)
       } catch (err) {
         if (err instanceof DnsError) {
+          // eslint-disable-next-line no-console -- server-side diagnostic log (Vercel function logs)
           console.error('[companion-proxy] DNS error on redirect:', err.message, 'URL:', redirectUrl)
           return NextResponse.json({ error: `DNS resolution failed: ${err.message}` }, { status: 504 })
         }
@@ -426,6 +423,7 @@ export async function POST(request: NextRequest) {
 
     // Redirect exhaustion — don't pass raw 3xx through as a "success"
     if (redirectCount >= MAX_REDIRECTS && response.status >= 300 && response.status < 400) {
+      // eslint-disable-next-line no-console -- server-side diagnostic log (Vercel function logs)
       console.error('[companion-proxy] Redirect limit exceeded:', redirectCount, 'hops. URL:', requestedUrl)
       return NextResponse.json({ error: 'Too many redirects' }, { status: 502 })
     }
@@ -443,6 +441,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: response.status })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Proxy request failed'
+    // eslint-disable-next-line no-console -- server-side diagnostic log (Vercel function logs)
     console.error('[companion-proxy] Error:', message, 'URL:', requestedUrl)
     return NextResponse.json({ error: message }, { status: 502 })
   }
