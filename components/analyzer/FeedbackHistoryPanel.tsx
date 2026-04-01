@@ -26,10 +26,17 @@ import { getArchivedSessions, clearSessionHistory } from '@/lib/storage/sessionH
 import { cn } from '@/lib/utils'
 import type { ArchivedSession } from '@/types/export'
 
-export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
+interface FeedbackHistoryPanelProps {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel({ open: controlledOpen, onOpenChange }: FeedbackHistoryPanelProps) {
   const [hotspots, setHotspots] = useState<FrequencyHotspot[]>([])
   const [archivedSessions, setArchivedSessions] = useState<ArchivedSession[]>([])
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isOpen = controlledOpen ?? internalOpen
+  const setIsOpen = onOpenChange ?? setInternalOpen
   const [isExporting, setIsExporting] = useState(false)
 
   // Refresh data when panel opens
@@ -103,20 +110,24 @@ export const FeedbackHistoryPanel = memo(function FeedbackHistoryPanel() {
       ? 'grid grid-cols-1 sm:grid-cols-2 gap-1.5'
       : 'space-y-2'
 
+  const isControlled = controlledOpen !== undefined
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-foreground" aria-label="Feedback History">
-              <History className="size-5 sm:size-6" />
-            </Button>
-          </SheetTrigger>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="text-sm">
-          History
-        </TooltipContent>
-      </Tooltip>
+      {!isControlled && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-foreground" aria-label="Feedback History">
+                <History className="size-5 sm:size-6" />
+              </Button>
+            </SheetTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-sm">
+            History
+          </TooltipContent>
+        </Tooltip>
+      )}
       <SheetContent side="right" className={cn("overflow-y-auto channel-strip amber-sidecar", maxW)}>
         <SheetHeader className="pb-3 panel-groove bg-card/60 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-4 max-sm:pt-2 shadow-[0_1px_8px_rgba(0,0,0,0.3),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.09)]">
           <SheetTitle className="text-lg flex items-center gap-2">

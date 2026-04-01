@@ -22,16 +22,27 @@ import { ReferenceTab } from './help/ReferenceTab'
 import { AboutTab } from './help/AboutTab'
 import { CompanionTab } from './help/CompanionTab'
 
-export const HelpMenu = memo(function HelpMenu() {
-  const [open, setOpen] = useState(false)
+interface HelpMenuProps {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export const HelpMenu = memo(function HelpMenu({ open: controlledOpen, onOpenChange }: HelpMenuProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isOpen = controlledOpen ?? internalOpen
+  const setIsOpen = onOpenChange ?? setInternalOpen
+
+  const isControlled = controlledOpen !== undefined
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-foreground" aria-label="Help">
-          <HelpCircle className="size-5 sm:size-6" />
-        </Button>
-      </SheetTrigger>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      {!isControlled && (
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-foreground" aria-label="Help">
+            <HelpCircle className="size-5 sm:size-6" />
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent side="right" className="sm:max-w-7xl overflow-y-auto channel-strip amber-sidecar">
         <SheetHeader className="pb-3 panel-groove bg-card/60 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-4 max-sm:pt-2 shadow-[0_1px_8px_rgba(0,0,0,0.3),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.09)]">
           <SheetTitle className="text-lg flex items-center gap-2">
@@ -41,7 +52,7 @@ export const HelpMenu = memo(function HelpMenu() {
           <SheetDescription className="text-sm flex items-center justify-between">
             <span>Guides, modes, algorithms & changelog.</span>
             <button
-              onClick={() => { onboardingStorage.clear(); setOpen(false) }}
+              onClick={() => { onboardingStorage.clear(); setIsOpen(false) }}
               className="inline-flex items-center gap-1 text-xs transition-colors cursor-pointer"
               style={{ color: 'var(--console-blue)' }}
             >

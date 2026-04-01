@@ -122,7 +122,7 @@ export const MobileLayout = memo(function MobileLayout({
 
   // Inline graph — mode and resizable height
   const [inlineGraphMode, setInlineGraphMode] = useState<'rta' | 'geq'>('rta')
-  const [graphHeightVh, setGraphHeightVh] = useState(18)
+  const [graphHeightVh, setGraphHeightVh] = useState(28)
   const resizeDragRef = useRef<{ startY: number; startH: number } | null>(null)
   const graphTouchStart = useRef<{ x: number; y: number } | null>(null)
 
@@ -256,10 +256,26 @@ export const MobileLayout = memo(function MobileLayout({
               onTouchStart={onGraphTouchStart}
               onTouchEnd={onGraphTouchEnd}
             >
-              {/* Graph mode indicator dots */}
-              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 z-20 flex gap-1" aria-hidden>
-                <div className={`h-1 rounded-full transition-all ${inlineGraphMode === 'rta' ? 'w-2 bg-primary' : 'w-1 bg-muted-foreground/30'}`} />
-                <div className={`h-1 rounded-full transition-all ${inlineGraphMode === 'geq' ? 'w-2 bg-primary' : 'w-1 bg-muted-foreground/30'}`} />
+              {/* Graph mode toggle — tappable segmented pill (swipe gesture preserved) */}
+              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 z-20 flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden">
+                <button
+                  onClick={() => setInlineGraphMode('rta')}
+                  className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                    inlineGraphMode === 'rta' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
+                  }`}
+                  aria-label="Show Real-Time Analyzer"
+                >
+                  RTA
+                </button>
+                <button
+                  onClick={() => setInlineGraphMode('geq')}
+                  className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                    inlineGraphMode === 'geq' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
+                  }`}
+                  aria-label="Show Graphic Equalizer"
+                >
+                  GEQ
+                </button>
               </div>
 
               {/* Fullscreen icon */}
@@ -270,11 +286,6 @@ export const MobileLayout = memo(function MobileLayout({
               >
                 <Expand className="w-3.5 h-3.5" />
               </button>
-
-              {/* Label */}
-              <span className="absolute top-0.5 left-1 z-20 text-[10px] text-muted-foreground/60 font-mono font-bold uppercase tracking-[0.2em] pointer-events-none">
-                {inlineGraphMode === 'rta' ? 'RTA' : 'GEQ'}
-              </span>
 
               {inlineGraphMode === 'rta' ? (
                 <div ref={rtaContainerRef} className="w-full h-full">
@@ -342,7 +353,7 @@ export const MobileLayout = memo(function MobileLayout({
             aria-hidden={mobileTab !== 'settings'}
             inert={mobileTab !== 'settings' || undefined}
           >
-            <section>
+            <section className="rounded-lg border border-border/40 bg-card/30 p-3">
               <h3 className="section-label mb-2">Input Gain</h3>
               <InputMeterSlider
                 value={settings.inputGainDb}
@@ -355,7 +366,7 @@ export const MobileLayout = memo(function MobileLayout({
                 onAutoGainToggle={(enabled) => setAutoGain(enabled)}
               />
             </section>
-            <div className="border-t border-border" />
+            <h3 className="section-label mt-1">Configuration</h3>
             <SettingsPanel
               settings={settings}
               onModeChange={handleModeChange}
@@ -372,7 +383,7 @@ export const MobileLayout = memo(function MobileLayout({
           {/* Mode toggle button */}
           <button
             onClick={() => setMobileFaderMode(m => m === 'gain' ? 'sensitivity' : 'gain')}
-            className={`flex-shrink-0 py-1 text-[9px] font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
+            className={`flex-shrink-0 py-1 text-[11px] font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
               mobileFaderMode === 'sensitivity' ? 'text-blue-400' : 'text-[var(--console-amber)]'
             }`}
             title={`Switch to ${mobileFaderMode === 'gain' ? 'sensitivity' : 'gain'} fader`}
@@ -475,8 +486,8 @@ export const MobileLayout = memo(function MobileLayout({
             <EarlyWarningPanel earlyWarning={earlyWarning} />
           </div>
         </div>
-        {/* Graphs — 55% */}
-        <div className="w-[55%] flex flex-col gap-0.5 overflow-hidden p-0.5">
+        {/* Graphs — 54% */}
+        <div className="w-[54%] flex flex-col gap-0.5 overflow-hidden p-0.5">
           {/* RTA — top half */}
           <div ref={rtaContainerRef} className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
             <div className="absolute top-1 left-1.5 z-20 flex items-center gap-1">
@@ -526,15 +537,15 @@ export const MobileLayout = memo(function MobileLayout({
             <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} />
           </div>
         </div>
-        {/* Right fader sidecar — 5% */}
-        <div className="w-[5%] min-w-[3rem] flex-shrink-0 border-l border-border/50 channel-strip flex flex-col">
+        {/* Right fader sidecar — 6% */}
+        <div className="w-[6%] min-w-[3.5rem] flex-shrink-0 border-l border-border/50 channel-strip flex flex-col">
           <button
             onClick={() => setMobileFaderMode(m => m === 'gain' ? 'sensitivity' : 'gain')}
-            className={`flex-shrink-0 py-0.5 text-[8px] font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
+            className={`flex-shrink-0 py-0.5 text-[10px] font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
               mobileFaderMode === 'sensitivity' ? 'text-blue-400' : 'text-[var(--console-amber)]'
             }`}
           >
-            {mobileFaderMode === 'sensitivity' ? 'S' : 'G'}
+            {mobileFaderMode === 'sensitivity' ? 'Sens' : 'Gain'}
           </button>
           <div className="flex-1 min-h-0">
             <SingleFader
@@ -570,7 +581,7 @@ export const MobileLayout = memo(function MobileLayout({
       </div>
 
       {/* ── Mobile bottom tab bar (portrait only) ──────────────── */}
-      <nav className="landscape:hidden lg:hidden flex-shrink-0 border-t border-border/60 bg-card/90 backdrop-blur-sm" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <nav className="landscape:hidden lg:hidden flex-shrink-0 border-t border-border/60 bg-card/90 backdrop-blur-sm">
         <div className="flex items-stretch" role="tablist" onKeyDown={handleTabKeyDown}>
           {([
             { id: 'issues' as const, label: 'Issues', Icon: AlertTriangle, badge: activeAdvisoryCount },
@@ -585,15 +596,18 @@ export const MobileLayout = memo(function MobileLayout({
               aria-selected={mobileTab === tab.id}
               aria-controls={`mobile-tabpanel-${tab.id}`}
               tabIndex={mobileTab === tab.id ? 0 : -1}
-              className={`cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[50px] transition-colors ${
+              className={`cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[50px] transition-colors relative ${
                 mobileTab === tab.id
-                  ? 'text-[var(--console-amber)]'
+                  ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/5'
                   : 'text-muted-foreground active:text-foreground'
               }`}
               aria-label={tab.label}
             >
+              {mobileTab === tab.id && (
+                <div className="absolute top-0 left-[20%] right-[20%] h-[2px] bg-[var(--console-amber)] rounded-full" aria-hidden />
+              )}
               <div className="relative">
-                <tab.Icon className="w-5 h-5" />
+                <tab.Icon className={mobileTab === tab.id ? 'w-[22px] h-[22px]' : 'w-5 h-5'} />
                 {tab.badge > 0 && (
                   <span className="absolute -top-1.5 -right-2.5 bg-[var(--console-amber)] text-[#0a0d10] text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-bold leading-none px-0.5">
                     {tab.badge}
