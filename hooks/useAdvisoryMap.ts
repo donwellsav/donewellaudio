@@ -65,6 +65,8 @@ export function useAdvisoryMap(
     dirtyRef.current = false
     return sorted
   }, [maxDisplayedIssues])
+  const buildSortedRef = useRef(buildSorted)
+  buildSortedRef.current = buildSorted
 
   // ── Ref indirection for onAdvisory ──────────────────────────────────────
   // Reassigned every render so the stable callback below always has fresh closures.
@@ -153,7 +155,7 @@ export function useAdvisoryMap(
         return // Don't update React — cards stay frozen
       }
 
-      const sorted = buildSorted()
+      const sorted = buildSortedRef.current()
       setAdvisories(sorted)
     },
   }).current
@@ -173,8 +175,9 @@ export function useAdvisoryMap(
   useEffect(() => {
     if (mapRef.current.size === 0) return
     dirtyRef.current = true
+    if (frozenRef?.current ?? false) return
     setAdvisories(buildSorted())
-  }, [buildSorted])
+  }, [buildSorted, frozenRef])
 
   // ── clearMap — reset everything for fresh analysis ─────────────────────
 
