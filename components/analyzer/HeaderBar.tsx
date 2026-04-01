@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, lazy, Suspense } from 'react'
+import { memo, lazy, Suspense, useState } from 'react'
 import { FeedbackHistoryPanel } from './FeedbackHistoryPanel'
 
 const LazyHelpMenu = lazy(() => import('./HelpMenu').then(m => ({ default: m.HelpMenu })))
@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { LayoutGrid, Maximize2, Mic, Minimize2, Moon, MoreVertical, Pause, Play, Sun, Trash2 } from 'lucide-react'
+import { HelpCircle, History, LayoutGrid, Maximize2, Mic, Minimize2, Moon, MoreVertical, Pause, Play, Sun, Trash2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { DwaLogo } from './DwaLogo'
 import { useAdvisories } from '@/contexts/AdvisoryContext'
@@ -32,6 +32,8 @@ export const HeaderBar = memo(function HeaderBar() {
   const { advisories, dismissedIds, onClearAll, onClearGEQ, onClearRTA, hasActiveGEQBars, hasActiveRTAMarkers } = useAdvisories()
   const { resolvedTheme, setTheme } = useTheme()
   const pa2 = usePA2()
+  const [mobileHelpOpen, setMobileHelpOpen] = useState(false)
+  const [mobileHistoryOpen, setMobileHistoryOpen] = useState(false)
   const hasClearableContent = advisories.some(a => !dismissedIds.has(a.id)) || hasActiveGEQBars || hasActiveRTAMarkers
 
   return (
@@ -52,13 +54,7 @@ export const HeaderBar = memo(function HeaderBar() {
           </button>
         </div>
 
-        <div className="flex flex-col justify-center min-w-0" style={{ gap: '1px' }}>
-          <span className="font-mono text-[12px] font-bold tracking-[0.25em] text-foreground/90 uppercase leading-none">Donewell</span>
-          <span className="font-mono text-[10px] font-normal tracking-[0.15em] text-muted-foreground/55 leading-none">Audio Analyzer</span>
-          <span className="font-mono text-[9px] font-normal tracking-[0.1em] text-foreground/20 leading-none tabular-nums">
-            v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0'}
-          </span>
-        </div>
+        {/* Branding text moved to bottom info bar — removed from header */}
 
         {/* Audio source selector */}
         {devices.length > 0 && (
@@ -96,8 +92,8 @@ export const HeaderBar = memo(function HeaderBar() {
         )}
       </div>
 
-      {/* ── Center: Transport strip (ENGAGE/STOP + PAUSE) ──── */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      {/* ── Center: Transport strip (ENGAGE/STOP + PAUSE) — hidden on mobile (logo tap + overflow menu cover these) ──── */}
+      <div className="hidden tablet:flex items-center gap-2 flex-shrink-0">
         <button
           onClick={isRunning ? stop : start}
           aria-label={isRunning ? 'Stop analysis' : 'Engage analysis'}
@@ -289,10 +285,25 @@ export const HeaderBar = memo(function HeaderBar() {
                 <LayoutGrid className="w-4 h-4" />
                 Reset Layout
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setMobileHistoryOpen(true)} className="text-sm gap-2 cursor-pointer">
+                <History className="w-4 h-4" />
+                History
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setMobileHelpOpen(true)} className="text-sm gap-2 cursor-pointer">
+                <HelpCircle className="w-4 h-4" />
+                Help
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
+
+      {/* Mobile-triggered Help & History sheets (controlled via overflow menu — no trigger buttons rendered) */}
+      <FeedbackHistoryPanel open={mobileHistoryOpen} onOpenChange={setMobileHistoryOpen} />
+      <Suspense fallback={null}>
+        <LazyHelpMenu open={mobileHelpOpen} onOpenChange={setMobileHelpOpen} />
+      </Suspense>
     </header>
   )
 })
