@@ -92,7 +92,8 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
   // engineers can read them before they shuffle. Advisory data (severity, age,
   // velocity) still updates in-place via IssueCard's own memos.
   const stableRef = useRef(latestSorted)
-  const lastUpdateRef = useRef(Date.now())
+  const [initialSortTimestamp] = useState(() => Date.now())
+  const lastUpdateRef = useRef(initialSortTimestamp)
   const [sorted, setSorted] = useState(latestSorted)
   const pendingRef = useRef(false)
 
@@ -107,6 +108,7 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
     if (!orderChanged) {
       // Same cards in same order — update advisory data in-place (no visual jump)
       stableRef.current = latestSorted
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- this effect intentionally stages stable card order
       setSorted(latestSorted)
       return
     }
@@ -167,6 +169,7 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
         const freq = a.trueFrequencyHz != null ? formatFrequency(a.trueFrequencyHz) : 'unknown'
         const sev = getSeverityText(a.severity)
         const cut = a.advisory?.peq ? `cut ${Math.abs(a.advisory.peq.gainDb).toFixed(0)} dB at Q ${a.advisory.peq.q.toFixed(0)}` : ''
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- aria-live announcements must be emitted after commit
         setLiveAnnouncement(`Feedback detected at ${freq}, severity ${sev}${cut ? `, ${cut}` : ''}`)
         break // One announcement at a time
       }

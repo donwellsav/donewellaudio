@@ -50,12 +50,10 @@ export const SingleFader = memo(function SingleFader({
   onAutoGainToggle,
   noiseFloorDb,
   guidance,
-  isRunning,
   width = 64,
 }: SingleFaderProps) {
   const { resolvedTheme } = useTheme()
-  const isDarkRef = useRef(true)
-  isDarkRef.current = resolvedTheme !== 'light'
+  const isDark = resolvedTheme !== 'light'
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
@@ -135,7 +133,7 @@ export const SingleFader = memo(function SingleFader({
     ctx.clearRect(0, 0, w, h)
 
     // Background
-    ctx.fillStyle = isDarkRef.current ? '#0e1012' : '#e8eaee'
+    ctx.fillStyle = isDark ? '#0e1012' : '#e8eaee'
     ctx.fillRect(0, 0, w, h)
 
     // Cached vertical gradient — bottom-to-top
@@ -246,7 +244,7 @@ export const SingleFader = memo(function SingleFader({
       ctx.textBaseline = 'middle'
       ctx.fillText('0', w * 0.48, zeroY)
     }
-  }, [min, max, isSensitivity])
+  }, [isDark, isSensitivity, max, min])
 
   // Ballistic animation loop
   useEffect(() => {
@@ -276,7 +274,7 @@ export const SingleFader = memo(function SingleFader({
   // Force redraw on theme change
   useEffect(() => {
     prevDrawnRef.current = -1
-  }, [resolvedTheme])
+  }, [isDark])
 
   // Vertical drag: top = max, bottom = min (gain) OR top = 2, bottom = 50 (sensitivity, inverted)
   const updateValueFromY = (clientY: number) => {
