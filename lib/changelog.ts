@@ -14,6 +14,26 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.68.0',
+    date: '2026-04-01',
+    changes: [
+      { type: 'feat', description: 'Power LED + overflow pulse for running-state awareness on mobile' },
+      { type: 'feat', description: 'Zone bands fade in over 300ms, dB labels thin out on short plots, frequency axis tick marks' },
+      { type: 'feat', description: 'Confidence badge replaced with SVG arc gauge, freshness bar has tooltip' },
+      { type: 'feat', description: 'Fader center detent, reference zone labels (MON/SPK/MUS), double-tap reset' },
+      { type: 'feat', description: 'Settings slider shows floating tooltip during drag' },
+      { type: 'feat', description: 'Tab bar: sliding amber indicator + icon bounce animation' },
+      { type: 'feat', description: 'Light mode: stronger console accent colors, wider severity strips' },
+      { type: 'feat', description: '"Manual"/"Auto"/"Locked" labels (was "Man"/"Cal"/"Lock")' },
+      { type: 'feat', description: '[x] `npx tsc --noEmit` clean' },
+      { type: 'feat', description: '[x] `pnpm test` — 1184 pass, 4 skip' },
+      { type: 'feat', description: '[ ] Mobile: power LED visible, overflow dot pulses when running' },
+      { type: 'feat', description: '[ ] Settings: drag sensitivity slider and verify floating tooltip' },
+      { type: 'feat', description: '[ ] Toggle frequency zones on/off — should fade in smoothly' },
+      { type: 'feat', description: '[ ] Light mode: verify stronger accent colors' },
+    ],
+  },
+  {
     version: '0.67.0',
     date: '2026-04-01',
     changes: [
