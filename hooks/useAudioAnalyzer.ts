@@ -123,7 +123,7 @@ export function useAudioAnalyzer(
   }, [settings])
 
   // ── Advisory state (Map, sorting, dedup) — extracted hook ──────────────────
-  const { advisories, onAdvisory, onAdvisoryCleared, clearMap } = useAdvisoryMap(settingsRef, frozenRef)
+  const { advisories, onAdvisory, onAdvisoryCleared, clearMap } = useAdvisoryMap(settings.maxDisplayedIssues, frozenRef)
 
   // ── Internal state (everything except advisories) ─────────────────────────
   const [state, setState] = useState<InternalAnalyzerState>({

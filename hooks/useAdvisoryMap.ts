@@ -15,9 +15,9 @@
  *     re-detected with a new track ID at the same frequency (100 cents = 1 semitone)
  */
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { getSeverityUrgency } from '@/lib/dsp/classifier'
-import type { Advisory, DetectorSettings } from '@/types/advisory'
+import type { Advisory } from '@/types/advisory'
 
 // ── Public interface ─────────────────────────────────────────────────────────
 
@@ -35,7 +35,7 @@ export interface UseAdvisoryMapReturn {
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useAdvisoryMap(
-  settingsRef: React.RefObject<DetectorSettings>,
+  maxDisplayedIssues: number,
   frozenRef?: React.RefObject<boolean>
 ): UseAdvisoryMapReturn {
   const [advisories, setAdvisories] = useState<Advisory[]>([])
@@ -47,11 +47,10 @@ export function useAdvisoryMap(
 
   // Freeze buffering: queue advisory updates while UI is frozen
   const frozenBufferRef = useRef<{ updates: Advisory[]; clears: string[] }>({ updates: [], clears: [] })
-  const wasFrozenRef = useRef(false)
+  const wasFrozenRef = useRef(frozenRef?.current ?? false)
 
   // Sort: active above resolved → severity urgency → amplitude (descending)
   const buildSorted = useCallback(() => {
-    const maxIssues = settingsRef.current?.maxDisplayedIssues ?? 50
     const sorted = Array.from(mapRef.current.values())
       .sort((a, b) => {
         // Active cards always above resolved
@@ -61,11 +60,11 @@ export function useAdvisoryMap(
         if (urgencyA !== urgencyB) return urgencyB - urgencyA
         return b.trueAmplitudeDb - a.trueAmplitudeDb
       })
-      .slice(0, maxIssues)
+      .slice(0, maxDisplayedIssues)
     sortedCacheRef.current = sorted
     dirtyRef.current = false
     return sorted
-  }, [settingsRef])
+  }, [maxDisplayedIssues])
 
   // ── Ref indirection for onAdvisory ──────────────────────────────────────
   // Reassigned every render so the stable callback below always has fresh closures.
@@ -93,9 +92,17 @@ export function useAdvisoryMap(
   /** Apply an advisory to the backing map (no React update) */
   function applyToMap(advisory: Advisory) {
     const map = mapRef.current
+    const existing = map.get(advisory.id)
 
-    if (map.has(advisory.id)) {
+    if (existing) {
       map.set(advisory.id, advisory)
+      if (
+        existing.resolved !== advisory.resolved ||
+        getSeverityUrgency(existing.severity) !== getSeverityUrgency(advisory.severity) ||
+        existing.trueAmplitudeDb !== advisory.trueAmplitudeDb
+      ) {
+        dirtyRef.current = true
+      }
     } else {
       // Frequency-proximity dedup (100 cents = 1 semitone, matches worker)
       let replacedKey: string | null = null
@@ -153,16 +160,21 @@ export function useAdvisoryMap(
 
   // ── Flush buffered updates when unfreeze is detected ─────────────────
   // Check on every render: if we were frozen and now aren't, flush.
-  const currentlyFrozen = frozenRef?.current ?? false
-  if (wasFrozenRef.current && !currentlyFrozen) {
-    // Transition from frozen → unfrozen: map already has all updates applied,
-    // just need to push current state to React
-    frozenBufferRef.current = { updates: [], clears: [] }
+  useEffect(() => {
+    const currentlyFrozen = frozenRef?.current ?? false
+    if (wasFrozenRef.current && !currentlyFrozen) {
+      frozenBufferRef.current = { updates: [], clears: [] }
+      dirtyRef.current = true
+      setAdvisories(buildSorted())
+    }
+    wasFrozenRef.current = currentlyFrozen
+  })
+
+  useEffect(() => {
+    if (mapRef.current.size === 0) return
     dirtyRef.current = true
-    const sorted = buildSorted()
-    setAdvisories(sorted)
-  }
-  wasFrozenRef.current = currentlyFrozen
+    setAdvisories(buildSorted())
+  }, [buildSorted])
 
   // ── clearMap — reset everything for fresh analysis ─────────────────────
 
@@ -170,6 +182,7 @@ export function useAdvisoryMap(
     mapRef.current.clear()
     sortedCacheRef.current = []
     dirtyRef.current = false
+    frozenBufferRef.current = { updates: [], clears: [] }
     setAdvisories([])
   }, [])
 

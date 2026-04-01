@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useAdvisoryMap } from '../useAdvisoryMap'
-import type { Advisory, DetectorSettings } from '@/types/advisory'
+import type { Advisory } from '@/types/advisory'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -40,27 +40,23 @@ function makeAdvisory(overrides: Partial<Advisory> = {}): Advisory {
   } as Advisory
 }
 
-function makeSettingsRef(): React.RefObject<DetectorSettings> {
-  return { current: { maxDisplayedIssues: 50 } as DetectorSettings }
-}
-
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('useAdvisoryMap', () => {
   it('starts with empty advisories', () => {
-    const { result } = renderHook(() => useAdvisoryMap(makeSettingsRef()))
+    const { result } = renderHook(() => useAdvisoryMap(50))
     expect(result.current.advisories).toEqual([])
   })
 
   it('adds new advisory via onAdvisory', () => {
-    const { result } = renderHook(() => useAdvisoryMap(makeSettingsRef()))
+    const { result } = renderHook(() => useAdvisoryMap(50))
     act(() => result.current.onAdvisory(makeAdvisory()))
     expect(result.current.advisories).toHaveLength(1)
     expect(result.current.advisories[0].id).toBe('adv-1')
   })
 
   it('deduplicates advisories within 100 cents (1 semitone)', () => {
-    const { result } = renderHook(() => useAdvisoryMap(makeSettingsRef()))
+    const { result } = renderHook(() => useAdvisoryMap(50))
     // 1000 Hz
     act(() => result.current.onAdvisory(makeAdvisory({ id: 'adv-1', trueFrequencyHz: 1000 })))
     // ~1058 Hz = 1000 * 2^(100/1200) — exactly 100 cents above, should replace
@@ -70,7 +66,7 @@ describe('useAdvisoryMap', () => {
   })
 
   it('keeps advisories >100 cents apart', () => {
-    const { result } = renderHook(() => useAdvisoryMap(makeSettingsRef()))
+    const { result } = renderHook(() => useAdvisoryMap(50))
     act(() => result.current.onAdvisory(makeAdvisory({ id: 'adv-1', trueFrequencyHz: 1000 })))
     // ~1060 Hz ≈ 101 cents — just outside dedup range
     act(() => result.current.onAdvisory(makeAdvisory({ id: 'adv-2', trueFrequencyHz: 1000 * Math.pow(2, 101 / 1200) })))
@@ -78,7 +74,7 @@ describe('useAdvisoryMap', () => {
   })
 
   it('sorts active before resolved, higher severity first', () => {
-    const { result } = renderHook(() => useAdvisoryMap(makeSettingsRef()))
+    const { result } = renderHook(() => useAdvisoryMap(50))
 
     act(() => {
       result.current.onAdvisory(makeAdvisory({
@@ -93,8 +89,51 @@ describe('useAdvisoryMap', () => {
     expect(result.current.advisories[1].id).toBe('adv-low')
   })
 
+  it('re-sorts existing advisories when severity changes', () => {
+    const { result } = renderHook(() => useAdvisoryMap(50))
+
+    act(() => {
+      result.current.onAdvisory(makeAdvisory({
+        id: 'adv-a', severity: 'RESONANCE', trueFrequencyHz: 500, trueAmplitudeDb: -12,
+      }))
+      result.current.onAdvisory(makeAdvisory({
+        id: 'adv-b', severity: 'POSSIBLE_RING', trueFrequencyHz: 2000, trueAmplitudeDb: -6,
+      }))
+    })
+
+    expect(result.current.advisories.map(a => a.id)).toEqual(['adv-a', 'adv-b'])
+
+    act(() => {
+      result.current.onAdvisory(makeAdvisory({
+        id: 'adv-b', severity: 'RUNAWAY', trueFrequencyHz: 2000, trueAmplitudeDb: -6,
+      }))
+    })
+
+    expect(result.current.advisories.map(a => a.id)).toEqual(['adv-b', 'adv-a'])
+  })
+
+  it('applies a new maxDisplayedIssues cap on rerender', () => {
+    const { result, rerender } = renderHook(
+      ({ maxDisplayedIssues }) => useAdvisoryMap(maxDisplayedIssues),
+      { initialProps: { maxDisplayedIssues: 3 } }
+    )
+
+    act(() => {
+      result.current.onAdvisory(makeAdvisory({ id: 'adv-1', severity: 'RUNAWAY', trueFrequencyHz: 500 }))
+      result.current.onAdvisory(makeAdvisory({ id: 'adv-2', severity: 'GROWING', trueFrequencyHz: 1000 }))
+      result.current.onAdvisory(makeAdvisory({ id: 'adv-3', severity: 'RESONANCE', trueFrequencyHz: 2000 }))
+    })
+
+    expect(result.current.advisories).toHaveLength(3)
+
+    rerender({ maxDisplayedIssues: 1 })
+
+    expect(result.current.advisories).toHaveLength(1)
+    expect(result.current.advisories[0].id).toBe('adv-1')
+  })
+
   it('onAdvisoryCleared marks advisory as resolved', () => {
-    const { result } = renderHook(() => useAdvisoryMap(makeSettingsRef()))
+    const { result } = renderHook(() => useAdvisoryMap(50))
     act(() => result.current.onAdvisory(makeAdvisory({ id: 'adv-1' })))
     act(() => result.current.onAdvisoryCleared('adv-1'))
     expect(result.current.advisories[0].resolved).toBe(true)
@@ -102,7 +141,7 @@ describe('useAdvisoryMap', () => {
   })
 
   it('clearMap resets everything', () => {
-    const { result } = renderHook(() => useAdvisoryMap(makeSettingsRef()))
+    const { result } = renderHook(() => useAdvisoryMap(50))
     act(() => result.current.onAdvisory(makeAdvisory()))
     act(() => result.current.clearMap())
     expect(result.current.advisories).toEqual([])
