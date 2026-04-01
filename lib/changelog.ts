@@ -14,6 +14,22 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.62.0',
+    date: '2026-04-01',
+    changes: [
+      { type: 'feat', description: 'moved `useCompanion()` from per-component local state to a shared client-side store so all consumers see the same settings and relay status' },
+      { type: 'feat', description: 'reset Companion connection state when the pairing code changes and deduped concurrent relay checks' },
+      { type: 'feat', description: 'updated `usePA2Bridge()` effect dependencies so live threshold and panic settings do not run on stale closures' },
+      { type: 'feat', description: 'added hook regression tests for shared Companion state and PA2 effective-confidence updates' },
+      { type: 'feat', description: 'changing Companion settings in one component did not reliably update other `useCompanion()` callers' },
+      { type: 'feat', description: 'PA2 bridge state could continue using an old `autoSendMinConfidence` value after settings changed' },
+      { type: 'feat', description: 'Companion auto-send and settings UI now stay in sync across the analyzer, ring-out flow, and settings panel' },
+      { type: 'feat', description: 'PA2 effective confidence and auto-send logic now reflect current settings without recreating the client unnecessarily' },
+      { type: 'feat', description: '`npx tsc --noEmit`' },
+      { type: 'feat', description: '`pnpm test`' },
+    ],
+  },
+  {
     version: '0.61.0',
     date: '2026-03-31',
     changes: [
