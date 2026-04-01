@@ -14,6 +14,28 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.66.0',
+    date: '2026-04-01',
+    changes: [
+      { type: 'feat', description: '**Fix Help & History inaccessible on mobile** — added to overflow menu via controlled `open`/`onOpenChange` props on HelpMenu and FeedbackHistoryPanel' },
+      { type: 'feat', description: '**Fix header overflow on small phones** — transport strip hidden below 600px (logo tap + overflow menu already cover ENGAGE/STOP, PAUSE, CLEAR)' },
+      { type: 'feat', description: '**Move branding text to bottom info bar** — header is just the DW Audio logo now, "DONEWELL AUDIO ANALYZER v0.xx.0" in a thin bar at the bottom on all screen sizes' },
+      { type: 'feat', description: '**Increase default graph height** — 18vh → 28vh (~55% more spectrum space on mobile)' },
+      { type: 'feat', description: '**Tappable RTA/GEQ toggle** — replaces invisible swipe-only dots with a frosted segmented pill' },
+      { type: 'feat', description: '**Readable fader labels** — 9px → 11px portrait, 8px → 10px landscape, full "Sens"/"Gain" text' },
+      { type: 'feat', description: '**Tab bar polish** — amber active indicator bar, subtle background tint, larger active icon' },
+      { type: 'feat', description: '**Settings tab grouping** — Input Gain wrapped in card, "Configuration" section header' },
+      { type: 'feat', description: '**Landscape fader width** — 48px → 56px minimum' },
+      { type: 'feat', description: '[ ] `npx tsc --noEmit` passes clean' },
+      { type: 'feat', description: '[ ] `pnpm test` — all suites pass, no regressions' },
+      { type: 'feat', description: '[ ] Mobile (375px): header doesn\'t overflow, overflow menu shows Help + History' },
+      { type: 'feat', description: '[ ] Mobile: RTA/GEQ pill is tappable, graph is taller by default' },
+      { type: 'feat', description: '[ ] Mobile: fader labels readable, tab bar has active indicator' },
+      { type: 'feat', description: '[ ] Desktop: info bar visible at bottom, header clean' },
+      { type: 'feat', description: '[ ] Landscape: fader strip usable, labels readable' },
+    ],
+  },
+  {
     version: '0.65.0',
     date: '2026-04-01',
     changes: [
