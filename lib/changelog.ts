@@ -14,6 +14,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.63.0',
+    date: '2026-04-01',
+    changes: [
+      { type: 'feat', description: 're-sort advisories when an existing issue changes severity or amplitude' },
+      { type: 'feat', description: 'apply max displayed issues changes immediately instead of waiting for another advisory event' },
+      { type: 'feat', description: 'add regression coverage for severity reordering and live cap updates' },
+      { type: 'feat', description: 'npx tsc --noEmit' },
+      { type: 'feat', description: 'pnpm test' },
+    ],
+  },
+  {
     version: '0.62.0',
     date: '2026-04-01',
     changes: [
