@@ -14,6 +14,26 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.74.0',
+    date: '2026-04-02',
+    changes: [
+      { type: 'feat', description: '**PA2 hybrid/both GEQ dedup** — hybrid and both auto-send modes now dedup via `appliedGEQRef`, preventing additive cut accumulation every poll cycle' },
+      { type: 'feat', description: '**localStorage validation** — nested branches (environment, liveOverrides, diagnostics) validated before spreading; malformed/null values fall back to defaults' },
+      { type: 'feat', description: '**Consent version re-prompt** — version bump now resets status to `not_asked` instead of preserving `accepted`; forces re-consent under new terms' },
+      { type: 'feat', description: '**PA2 control boundary** — documented safety interlock for auto-send paths that write to external hardware' },
+      { type: 'feat', description: '**Notch verification threshold** — uses advisory confidence instead of hardcoded 1.0; prevents false "notch failed" on normal program material' },
+      { type: 'feat', description: '**Predictive pre-notching** — requires confirmed advisory (no speculative cuts on RTA slope alone); tracks pre-cut values for auto-rollback after 15s' },
+      { type: 'feat', description: '**Cluster lifecycle tracking** — consolidated payloads carry all source advisory IDs via new `sourceIds` field on `PA2DetectFrequency`' },
+      { type: 'feat', description: '**Legacy algorithm migration** — msd/phase/combined map to `custom` (preserves enabledAlgorithms); `all` maps to `auto`' },
+      { type: 'feat', description: '**Content type consistency** — `computeScores()` uses worker\'s smoothed content type instead of calling `detectContentType()` per-peak' },
+      { type: 'feat', description: '[ ] Tests pass — 66 suites, 1249 pass, 4 skip' },
+      { type: 'feat', description: '[ ] Consent migration: v1 accepted → loads as not_asked (re-prompt triggered)' },
+      { type: 'feat', description: '[ ] PA2 hybrid mode: GEQ bands don\'t accumulate on repeated polls' },
+      { type: 'feat', description: '[ ] Pre-notch auto-releases after band calms (15s rollback)' },
+      { type: 'feat', description: '[ ] Legacy `msd`/`phase` algorithm modes load as `custom` not `auto`' },
+    ],
+  },
+  {
     version: '0.73.0',
     date: '2026-04-02',
     changes: [
