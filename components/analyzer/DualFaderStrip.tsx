@@ -72,14 +72,14 @@ export const DualFaderStrip = memo(function DualFaderStrip({
     const id = setInterval(() => {
       if (activeAdvisoryCount > 0 || level < -45) {
         noDetectionSecsRef.current = 0
-        if (prolongedSilence) setProlongedSilence(false)
+        setProlongedSilence(prev => prev ? false : prev)
       } else {
         noDetectionSecsRef.current++
-        if (noDetectionSecsRef.current >= 2 && !prolongedSilence) setProlongedSilence(true)
+        setProlongedSilence(prev => noDetectionSecsRef.current >= 2 && !prev ? true : prev)
       }
     }, 1000)
     return () => clearInterval(id)
-  }, [isRunning, activeAdvisoryCount, level, prolongedSilence])
+  }, [isRunning, activeAdvisoryCount, level])
 
   const guidance: FaderGuidance = useMemo(() => {
     if (!isRunning) return { direction: 'none', urgency: 'none' }
@@ -195,7 +195,6 @@ export const DualFaderStrip = memo(function DualFaderStrip({
           autoGainLocked={autoGainLocked}
           onAutoGainToggle={onAutoGainToggle}
           noiseFloorDb={noiseFloorDb}
-          isRunning={isRunning}
           width={64}
         />
         <SingleFader
@@ -206,7 +205,6 @@ export const DualFaderStrip = memo(function DualFaderStrip({
           max={50}
           label="SENS"
           guidance={guidance}
-          isRunning={isRunning}
           width={64}
         />
       </div>

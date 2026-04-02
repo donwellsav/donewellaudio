@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, lazy, Suspense, useState } from 'react'
+import { memo, lazy, Suspense, useState, useMemo } from 'react'
 import { FeedbackHistoryPanel } from './FeedbackHistoryPanel'
 
 const LazyHelpMenu = lazy(() => import('./HelpMenu').then(m => ({ default: m.HelpMenu })))
@@ -34,7 +34,10 @@ export const HeaderBar = memo(function HeaderBar() {
   const pa2 = usePA2()
   const [mobileHelpOpen, setMobileHelpOpen] = useState(false)
   const [mobileHistoryOpen, setMobileHistoryOpen] = useState(false)
-  const hasClearableContent = advisories.some(a => !dismissedIds.has(a.id)) || hasActiveGEQBars || hasActiveRTAMarkers
+  const hasClearableContent = useMemo(
+    () => advisories.some(a => !dismissedIds.has(a.id)) || hasActiveGEQBars || hasActiveRTAMarkers,
+    [advisories, dismissedIds, hasActiveGEQBars, hasActiveRTAMarkers],
+  )
 
   return (
     <header className="header-glow relative flex flex-row items-center gap-2 sm:gap-4 px-3 py-1 channel-strip amber-panel-header border-b border-b-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.20)] shadow-[0_1px_16px_rgba(0,0,0,0.15),0_2px_4px_rgba(0,0,0,0.1),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.06)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.55),0_2px_4px_rgba(0,0,0,0.3),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.09)] sm:px-4 sm:py-1">

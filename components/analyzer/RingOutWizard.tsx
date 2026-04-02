@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState, useEffect, useRef, useCallback } from 'react'
+import { memo, useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { formatFrequency } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { AlertTriangle, Check, ChevronRight, Download, SkipForward, X } from 'lucide-react'
@@ -50,14 +50,15 @@ export const RingOutWizard = memo(function RingOutWizard({
   const prevAdvisoryCountRef = useRef(0)
   const companion = useCompanion()
 
+  // Memoize filtered advisories — reused by both effects below
+  const activeAdvisories = useMemo(
+    () => advisories.filter(a => a.severity !== 'INSTRUMENT' && a.severity !== 'WHISTLE'),
+    [advisories],
+  )
+
   // Watch for new advisories during listening phase
   useEffect(() => {
     if (phase !== 'listening' || !isRunning) return
-
-    // Detect new advisory appearing (count increased)
-    const activeAdvisories = advisories.filter(a =>
-      a.severity !== 'INSTRUMENT' && a.severity !== 'WHISTLE'
-    )
 
     if (activeAdvisories.length > prevAdvisoryCountRef.current && activeAdvisories.length > 0) {
       // New feedback detected — pick the highest severity one
@@ -69,17 +70,14 @@ export const RingOutWizard = memo(function RingOutWizard({
       setPhase('detected')
     }
     prevAdvisoryCountRef.current = activeAdvisories.length
-  }, [advisories, phase, isRunning])
+  }, [activeAdvisories, phase, isRunning])
 
   // Reset advisory count when entering listening phase
   useEffect(() => {
     if (phase === 'listening') {
-      const activeCount = advisories.filter(a =>
-        a.severity !== 'INSTRUMENT' && a.severity !== 'WHISTLE'
-      ).length
-      prevAdvisoryCountRef.current = activeCount
+      prevAdvisoryCountRef.current = activeAdvisories.length
     }
-  }, [phase, advisories])
+  }, [phase, activeAdvisories])
 
   const handleNext = useCallback(() => {
     if (!currentAdvisory) return

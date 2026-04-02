@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { IssuesList } from './IssuesList'
 import { RingOutWizard } from './RingOutWizard'
 import { EarlyWarningPanel } from './EarlyWarningPanel'
@@ -23,7 +23,7 @@ import type { usePanelRef } from '@/components/ui/resizable'
 import type { DetectorSettings } from '@/types/advisory'
 import type { CalibrationTabProps } from './settings/CalibrationTab'
 import { useThresholdChange } from '@/hooks/useThresholdChange'
-import { calculateRoomModes, calculateSchroederFrequency } from '@/lib/dsp/acousticUtils'
+import { useRoomModes } from '@/hooks/useRoomModes'
 
 interface DesktopLayoutProps {
   // Panel state
@@ -76,18 +76,7 @@ export const DesktopLayout = memo(function DesktopLayout({
 
 
   const handleThresholdChange = useThresholdChange(session, setSensitivityOffset)
-
-  // Compute axial room modes for RTA overlay (memoized — only recomputes when dimensions/unit change)
-  const roomModes = useMemo(() => {
-    if (settings.roomPreset === 'none' || !settings.roomLengthM || !settings.roomWidthM || !settings.roomHeightM) return null
-    const toM = settings.roomDimensionsUnit === 'feet' ? 0.3048 : 1
-    const lM = settings.roomLengthM * toM
-    const wM = settings.roomWidthM * toM
-    const hM = settings.roomHeightM * toM
-    const schroeder = calculateSchroederFrequency(settings.roomRT60, lM * wM * hM)
-    const maxHz = Math.min(schroeder, 300)
-    return calculateRoomModes(lM, wM, hM, maxHz).axial
-  }, [settings.roomPreset, settings.roomLengthM, settings.roomWidthM, settings.roomHeightM, settings.roomDimensionsUnit, settings.roomRT60])
+  const roomModes = useRoomModes(settings)
 
   const {
     advisories, activeAdvisoryCount, earlyWarning,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState, useCallback, useRef, useEffect, memo } from 'react'
-import { formatFrequency } from '@/lib/utils/pitchUtils'
+import { formatFrequency, formatFreqLabel } from '@/lib/utils/pitchUtils'
 import { getSeverityText } from '@/lib/dsp/classifier'
 import { getFeedbackHistory } from '@/lib/dsp/feedbackHistory'
 import { ArrowLeft, ArrowRight, Timer } from 'lucide-react'
@@ -12,12 +12,6 @@ import { useCompanion } from '@/hooks/useCompanion'
 import { usePA2 } from '@/contexts/PA2Context'
 import { useSettings } from '@/contexts/SettingsContext'
 import { IssueCard } from './IssueCard'
-
-function formatFreqLabel(hz: number): string {
-  if (hz >= 10000) return `${(hz / 1000).toFixed(0)}k`
-  if (hz >= 1000) return `${(hz / 1000).toFixed(1)}k`
-  return `${hz}`
-}
 
 /** Minimum time (ms) issue cards stay in place before the list re-sorts */
 const MIN_DISPLAY_MS = 3000

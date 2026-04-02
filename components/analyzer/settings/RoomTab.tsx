@@ -46,8 +46,8 @@ function RoomModesDisplay({ lengthM, widthM, heightM }: { lengthM: number; width
             <span className="text-sm font-mono font-medium text-foreground">Axial (strongest)</span>
           </div>
           <div className="flex flex-wrap gap-1 pl-3.5">
-            {formatted.axial.slice(0, 8).map((mode, i) => (
-              <span key={i} className="px-1.5 py-0.5 text-sm font-mono bg-destructive/10 text-destructive rounded" title={`Mode ${mode.label}`}>
+            {formatted.axial.slice(0, 8).map((mode) => (
+              <span key={`${mode.label}-${mode.hz}`} className="px-1.5 py-0.5 text-sm font-mono bg-destructive/10 text-destructive rounded" title={`Mode ${mode.label}`}>
                 {mode.hz}Hz
               </span>
             ))}
@@ -62,8 +62,8 @@ function RoomModesDisplay({ lengthM, widthM, heightM }: { lengthM: number; width
             <span className="text-sm font-mono font-medium text-foreground">Tangential (medium)</span>
           </div>
           <div className="flex flex-wrap gap-1 pl-3.5">
-            {formatted.tangential.slice(0, 6).map((mode, i) => (
-              <span key={i} className="px-1.5 py-0.5 text-sm font-mono bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded" title={`Mode ${mode.label}`}>
+            {formatted.tangential.slice(0, 6).map((mode) => (
+              <span key={`${mode.label}-${mode.hz}`} className="px-1.5 py-0.5 text-sm font-mono bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded" title={`Mode ${mode.label}`}>
                 {mode.hz}Hz
               </span>
             ))}
@@ -78,8 +78,8 @@ function RoomModesDisplay({ lengthM, widthM, heightM }: { lengthM: number; width
             <span className="text-sm font-mono font-medium text-foreground">Oblique (weakest)</span>
           </div>
           <div className="flex flex-wrap gap-1 pl-3.5">
-            {formatted.oblique.slice(0, 4).map((mode, i) => (
-              <span key={i} className="px-1.5 py-0.5 text-sm font-mono bg-card/40 text-muted-foreground rounded" title={`Mode ${mode.label}`}>
+            {formatted.oblique.slice(0, 4).map((mode) => (
+              <span key={`${mode.label}-${mode.hz}`} className="px-1.5 py-0.5 text-sm font-mono bg-card/40 text-muted-foreground rounded" title={`Mode ${mode.label}`}>
                 {mode.hz}Hz
               </span>
             ))}

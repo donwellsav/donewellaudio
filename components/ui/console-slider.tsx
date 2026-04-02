@@ -107,7 +107,7 @@ export const ConsoleSlider = memo(function ConsoleSlider({
   // Click-to-edit state for the value readout
   const [editing, setEditing] = useState(false)
   const commitEdit = useCallback((raw: string) => {
-    const parsed = parseFloat(raw)
+    const parsed = parseFloat(raw.replace(',', '.'))
     if (!isNaN(parsed)) {
       // Round to step precision and clamp
       const rounded = Math.round(parsed / step) * step

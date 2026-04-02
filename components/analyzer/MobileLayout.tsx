@@ -22,7 +22,7 @@ import type { DetectorSettings } from '@/types/advisory'
 import type { CalibrationTabProps } from './settings/CalibrationTab'
 import { MOBILE_MAX_DISPLAYED_ISSUES } from '@/lib/dsp/constants'
 import { useThresholdChange } from '@/hooks/useThresholdChange'
-import { calculateRoomModes, calculateSchroederFrequency } from '@/lib/dsp/acousticUtils'
+import { useRoomModes } from '@/hooks/useRoomModes'
 
 const TAB_ORDER = ['issues', 'settings'] as const
 
@@ -66,17 +66,7 @@ export const MobileLayout = memo(function MobileLayout({
     }
   }, [mobileFaderMode, handleThresholdChange, isAutoGain, setAutoGain, setInputGain])
 
-  // Compute axial room modes for RTA overlay (memoized)
-  const roomModes = useMemo(() => {
-    if (settings.roomPreset === 'none' || !settings.roomLengthM || !settings.roomWidthM || !settings.roomHeightM) return null
-    const toM = settings.roomDimensionsUnit === 'feet' ? 0.3048 : 1
-    const lM = settings.roomLengthM * toM
-    const wM = settings.roomWidthM * toM
-    const hM = settings.roomHeightM * toM
-    const schroeder = calculateSchroederFrequency(settings.roomRT60, lM * wM * hM)
-    const maxHz = Math.min(schroeder, 300)
-    return calculateRoomModes(lM, wM, hM, maxHz).axial
-  }, [settings.roomPreset, settings.roomLengthM, settings.roomWidthM, settings.roomHeightM, settings.roomDimensionsUnit, settings.roomRT60])
+  const roomModes = useRoomModes(settings)
 
   const {
     advisories, activeAdvisoryCount, earlyWarning,
@@ -412,7 +402,6 @@ export const MobileLayout = memo(function MobileLayout({
               onAutoGainToggle={mobileFaderMode === 'gain' ? (enabled) => setAutoGain(enabled) : undefined}
               noiseFloorDb={mobileFaderMode === 'gain' ? noiseFloorDb : null}
               guidance={mobileFaderMode === 'sensitivity' ? mobileGuidance : undefined}
-              isRunning={isRunning}
             />
           </div>
         </div>
@@ -569,7 +558,6 @@ export const MobileLayout = memo(function MobileLayout({
               onAutoGainToggle={mobileFaderMode === 'gain' ? (enabled) => setAutoGain(enabled) : undefined}
               noiseFloorDb={mobileFaderMode === 'gain' ? noiseFloorDb : null}
               guidance={mobileFaderMode === 'sensitivity' ? mobileGuidance : undefined}
-              isRunning={isRunning}
             />
           </div>
         </div>

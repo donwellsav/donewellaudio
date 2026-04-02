@@ -58,7 +58,7 @@ export const FullscreenOverlay = memo(function FullscreenOverlay({
         variant="ghost"
         size="sm"
         onClick={onExitFullscreen}
-        className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-accent/20"
+        className="h-7 w-7 p-0 text-foreground/70 hover:text-foreground hover:bg-accent/20"
         aria-label="Exit fullscreen"
       >
         <Minimize2 className="w-3.5 h-3.5" />

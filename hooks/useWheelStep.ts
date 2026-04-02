@@ -69,6 +69,7 @@ export function useWheelStep(
     el.addEventListener('focusout', onBlur)
 
     return () => {
+      focusedRef.current = false
       el.removeEventListener('wheel', onWheel)
       el.removeEventListener('focusin', onFocus)
       el.removeEventListener('focusout', onBlur)

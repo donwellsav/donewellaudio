@@ -27,7 +27,6 @@ export interface SingleFaderProps {
   onAutoGainToggle?: (enabled: boolean) => void
   noiseFloorDb?: number | null
   guidance?: FaderGuidance
-  isRunning: boolean
   width?: number              // default 64
 }
 

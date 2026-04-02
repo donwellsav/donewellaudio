@@ -185,7 +185,7 @@ const AudioAnalyzerInner = memo(function AudioAnalyzerInner({
         calibration.onDetection(advisory, spectrumRef.current)
       }
     }
-    prevAdvisoryIdsRef.current = new Set(advisories.map(a => a.id))
+    const s = prevAdvisoryIdsRef.current; s.clear(); advisories.forEach(a => s.add(a.id))
   }, [advisories, calibration, spectrumRef])
 
   // ── False positive feedback (always available, not just during calibration) ──

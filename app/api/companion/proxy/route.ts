@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import dns from 'node:dns/promises'
+import { createRateLimiter } from '@/lib/api/rateLimit'
 
 /**
  * Server-side HTTP proxy for public Companion endpoints.
@@ -49,49 +50,9 @@ const DNS_TIMEOUT_MS = 2000
 /** Max upstream response body size in bytes (1 MB). */
 const MAX_RESPONSE_BYTES = 1024 * 1024
 
-// ─── Rate limiting (matches relay pattern) ───────────────────────────────────
+// ─── Rate limiting ───────────────────────────────────────────────────────────
 
-const RATE_WINDOW_MS = 60_000
-const RATE_MAX_REQUESTS = 30
-const MAX_RATE_LIMIT_ENTRIES = 10_000
-const proxyRateMap = new Map<string, { count: number; windowStart: number }>()
-let _rateLimitCallCount = 0
-
-function getClientIp(request: NextRequest): string {
-  return (request as NextRequest & { ip?: string }).ip
-    ?? request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    ?? 'unknown'
-}
-
-/** Server-enforced rate limiting — 30 req/60s per IP. Not spoofable like Origin. */
-function isRateLimited(request: NextRequest): boolean {
-  const ip = getClientIp(request)
-  const now = Date.now()
-  const entry = proxyRateMap.get(ip)
-
-  _rateLimitCallCount++
-  if (_rateLimitCallCount % 100 === 0 || proxyRateMap.size > MAX_RATE_LIMIT_ENTRIES) {
-    for (const [k, v] of proxyRateMap) {
-      if (now - v.windowStart > RATE_WINDOW_MS) proxyRateMap.delete(k)
-    }
-    if (proxyRateMap.size > MAX_RATE_LIMIT_ENTRIES) {
-      const excess = proxyRateMap.size - MAX_RATE_LIMIT_ENTRIES
-      const iter = proxyRateMap.keys()
-      for (let i = 0; i < excess; i++) {
-        const k = iter.next().value
-        if (k !== undefined) proxyRateMap.delete(k)
-      }
-    }
-  }
-
-  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
-    proxyRateMap.set(ip, { count: 1, windowStart: now })
-    return false
-  }
-
-  entry.count++
-  return entry.count > RATE_MAX_REQUESTS
-}
+const isRateLimited = createRateLimiter({ windowMs: 60_000, maxRequests: 30, maxEntries: 10_000 })
 
 /**
  * Returns true if an IPv4 address is non-globally-reachable (RFC 6890).
