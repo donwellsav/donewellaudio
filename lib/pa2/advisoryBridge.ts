@@ -188,6 +188,7 @@ export function advisoriesToDetectPayload(
   const payload: PA2DetectFrequency[] = []
 
   for (const adv of advisories) {
+    if (adv.confidence < minConfidence) continue
     if (adv.confidence < softFloor) continue
     if (adv.resolved) continue
 

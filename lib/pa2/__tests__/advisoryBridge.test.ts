@@ -187,11 +187,17 @@ describe('advisoriesToDetectPayload', () => {
     expect(advisoriesToDetectPayload([adv], 0.7, 0.25)).toEqual([])
   })
 
-  it('includes low-confidence advisories above soft floor', () => {
+  it('skips advisories below minConfidence even if above soft floor', () => {
     const adv = makeAdvisory({ confidence: 0.4 })
+    // 0.4 is above softFloor (0.25) but below minConfidence (0.7) — should be filtered
+    expect(advisoriesToDetectPayload([adv], 0.7, 0.25)).toEqual([])
+  })
+
+  it('includes advisories at or above minConfidence', () => {
+    const adv = makeAdvisory({ confidence: 0.75 })
     const payload = advisoriesToDetectPayload([adv], 0.7, 0.25)
     expect(payload).toHaveLength(1)
-    expect(payload[0].confidence).toBe(0.4)
+    expect(payload[0].confidence).toBe(0.75)
   })
 
   it('creates payload with correct fields', () => {

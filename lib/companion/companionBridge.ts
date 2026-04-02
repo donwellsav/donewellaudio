@@ -184,14 +184,14 @@ export class CompanionBridge {
   }
 }
 
-/** Singleton bridge instance */
-let bridgeInstance: CompanionBridge | null = null
+/** Bridge instances cached by pairing code — prevents cross-code message routing */
+const bridgeCache = new Map<string, CompanionBridge>()
 
 export function getCompanionBridge(pairingCode: string): CompanionBridge {
-  if (!bridgeInstance) {
-    bridgeInstance = new CompanionBridge(pairingCode)
-  } else {
-    bridgeInstance.configure(pairingCode)
+  let bridge = bridgeCache.get(pairingCode)
+  if (!bridge) {
+    bridge = new CompanionBridge(pairingCode)
+    bridgeCache.set(pairingCode, bridge)
   }
-  return bridgeInstance
+  return bridge
 }
