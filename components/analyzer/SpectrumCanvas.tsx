@@ -8,6 +8,8 @@ import { freqToLogPosition, logPositionToFreq, roundFreqToNice, clamp } from '@/
 import { formatFrequency } from '@/lib/utils/pitchUtils'
 import { CANVAS_SETTINGS } from '@/lib/dsp/constants'
 import { thresholdDraggedStorage } from '@/lib/storage/dwaStorage'
+import { OVERLAY_TEXT, OVERLAY_ACCENT } from '@/lib/canvas/canvasTokens'
+import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import type { SpectrumData, Advisory } from '@/types/advisory'
 import type { RoomMode } from '@/lib/dsp/acousticUtils'
 import type { EarlyWarning } from '@/hooks/useAudioAnalyzer'
@@ -272,7 +274,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
 
     drawFreqRangeOverlay(ctx, plotWidth, plotHeight, range, freqRangeRef.current, canvasThemeRef.current)
     const notchedIds = drawNotchOverlays(ctx, plotWidth, plotHeight, range, advisoriesRef.current, clearedIdsRef.current, canvasThemeRef.current)
-    drawMarkers(ctx, plotWidth, plotHeight, range, earlyWarning, advisoriesRef.current, clearedIdsRef.current, peakMarkerRadius, fontSize, canvasThemeRef.current, notchedIds)
+    drawMarkers(ctx, plotWidth, plotHeight, range, earlyWarning, advisoriesRef.current, clearedIdsRef.current, peakMarkerRadius, fontSize, canvasThemeRef.current, notchedIds, hoverPosRef.current?.x ?? null)
 
     // Frozen badge — top-right of plot area
     if (isFrozenRef.current) {
@@ -291,28 +293,60 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
       ctx.lineWidth = 1
       ctx.stroke()
 
-      ctx.fillStyle = '#60a5fa'
+      ctx.fillStyle = OVERLAY_ACCENT
       ctx.textAlign = 'left'
       ctx.textBaseline = 'top'
       ctx.fillText(badgeText, bx, by + py)
     }
 
-    // Hover tooltip — freq + dB readout at cursor position
+    // Hover tooltip — freq + dB readout, with advisory detail when near a marker
     const hover = hoverPosRef.current
     if (hover && !dragRef.current) {
       const hPos = clamp(hover.x / plotWidth, 0, 1)
       const hoverFreq = logPositionToFreq(hPos, range.freqMin, range.freqMax)
       const hoverDb = range.dbMax - (hover.y / plotHeight) * (range.dbMax - range.dbMin)
 
-      const freqStr = formatFrequency(hoverFreq)
-      const dbStr = `${Math.round(hoverDb)} dB`
-      const label = `${freqStr}  ${dbStr}`
+      // Find nearest advisory within 100 cents of cursor frequency
+      const CENTS_THRESHOLD = 100
+      let nearestAdvisory: Advisory | null = null
+      let nearestCents = Infinity
+      const cleared = clearedIdsRef.current
+      for (const a of advisoriesRef.current) {
+        if (cleared?.has(a.id) || a.trueFrequencyHz == null) continue
+        const cents = Math.abs(1200 * Math.log2(a.trueFrequencyHz / hoverFreq))
+        if (cents < CENTS_THRESHOLD && cents < nearestCents) {
+          nearestCents = cents
+          nearestAdvisory = a
+        }
+      }
 
-      ctx.font = `bold ${fontSize - 1}px monospace`
-      const tw = ctx.measureText(label).width
+      // Build tooltip lines
+      const tipFont = `bold ${fontSize - 1}px monospace`
+      ctx.font = tipFont
       const tipPad = 6
-      const tipH = fontSize + tipPad * 2
-      const tipW = tw + tipPad * 2
+      const lineH = fontSize + 2
+      const lines: { text: string; color: string }[] = []
+
+      if (nearestAdvisory) {
+        // Advisory-rich tooltip
+        const a = nearestAdvisory
+        lines.push({ text: formatFrequency(a.trueFrequencyHz), color: OVERLAY_TEXT })
+        lines.push({ text: `${a.severity}  ${a.confidence != null ? Math.round(a.confidence * 100) + '%' : ''}`, color: getSeverityColor(a.severity) })
+        if (a.advisory?.peq) {
+          const peq = a.advisory.peq
+          lines.push({ text: `Cut ${peq.gainDb}dB  Q:${peq.q.toFixed(1)}`, color: OVERLAY_ACCENT })
+        }
+        if (a.velocityDbPerSec != null && a.velocityDbPerSec > 0) {
+          lines.push({ text: `+${a.velocityDbPerSec.toFixed(0)} dB/s`, color: '#fb923c' })
+        }
+      } else {
+        // Basic freq + dB readout
+        lines.push({ text: `${formatFrequency(hoverFreq)}  ${Math.round(hoverDb)} dB`, color: OVERLAY_TEXT })
+      }
+
+      const maxLineW = Math.max(...lines.map(l => ctx.measureText(l.text).width))
+      const tipW = maxLineW + tipPad * 2
+      const tipH = lines.length * lineH + tipPad * 2
 
       // Position tooltip near cursor, flip if near edges
       let tipX = hover.x + 12
@@ -321,19 +355,27 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
       if (tipY < 0) tipY = hover.y + 16
 
       // Background pill
-      ctx.fillStyle = 'rgba(0,0,0,0.8)'
+      ctx.fillStyle = nearestAdvisory ? 'rgba(0,0,0,0.88)' : 'rgba(0,0,0,0.8)'
       ctx.beginPath()
       ctx.roundRect(tipX, tipY, tipW, tipH, 4)
       ctx.fill()
 
-      // Text
-      ctx.fillStyle = '#e5e5e5'
+      // Severity accent left edge when showing advisory
+      if (nearestAdvisory) {
+        ctx.fillStyle = getSeverityColor(nearestAdvisory.severity)
+        ctx.fillRect(tipX, tipY + 2, 2, tipH - 4)
+      }
+
+      // Text lines
       ctx.textAlign = 'left'
       ctx.textBaseline = 'top'
-      ctx.fillText(label, tipX + tipPad, tipY + tipPad)
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillStyle = lines[i].color
+        ctx.fillText(lines[i].text, tipX + tipPad + (nearestAdvisory ? 4 : 0), tipY + tipPad + i * lineH)
+      }
 
       // Crosshair lines (subtle)
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)'
+      ctx.strokeStyle = nearestAdvisory ? `${getSeverityColor(nearestAdvisory.severity)}30` : 'rgba(255,255,255,0.15)'
       ctx.lineWidth = 1
       ctx.setLineDash([4, 4])
       ctx.beginPath()

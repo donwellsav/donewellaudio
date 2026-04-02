@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback, useState, memo } from 'react'
 import { useTheme } from 'next-themes'
 import { useWheelStep } from '@/hooks/useWheelStep'
+import { meterBg, applyMeterStops } from '@/lib/canvas/canvasTokens'
 
 interface InputMeterSliderProps {
   value: number
@@ -104,18 +105,13 @@ export const InputMeterSlider = memo(function InputMeterSlider({
     ctx.clearRect(0, 0, w, h)
 
     // Background
-    ctx.fillStyle = isDark ? '#0e1012' : '#e8eaee'
+    ctx.fillStyle = meterBg(isDark)
     ctx.fillRect(0, 0, w, h)
 
     // Cached meter gradient — only recreated when width changes
     let gradient = gradientRef.current
     if (!gradient || gradientWidthRef.current !== w) {
-      gradient = ctx.createLinearGradient(0, 0, w, 0)
-      gradient.addColorStop(0, '#4B92FF')
-      gradient.addColorStop(0.6, '#4B92FF')
-      gradient.addColorStop(0.8, '#eab308')
-      gradient.addColorStop(0.95, '#ef4444')
-      gradient.addColorStop(1, '#ef4444')
+      gradient = applyMeterStops(ctx.createLinearGradient(0, 0, w, 0))
       gradientRef.current = gradient
       gradientWidthRef.current = w
     }

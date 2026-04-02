@@ -1,10 +1,11 @@
 'use client'
 
-import { useRef, useEffect, useCallback, useMemo, memo } from 'react'
+import { useRef, useEffect, useCallback, useMemo, useState, memo } from 'react'
 import { useTheme } from 'next-themes'
 import { useAnimationFrame } from '@/hooks/useAnimationFrame'
 import { ISO_31_BANDS, VIZ_COLORS } from '@/lib/dsp/constants'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
+import { geqBg, geqGrid, geqCenter, GEQ_BAR_OUTLINE, GEQ_AXIS_LABEL_LIGHT } from '@/lib/canvas/canvasTokens'
 import type { Advisory } from '@/types/advisory'
 
 // ISO 31-band labels matching standard GEQ notation
@@ -28,7 +29,7 @@ function drawGEQGrid(
   isDark: boolean,
 ) {
   // Background
-  ctx.fillStyle = isDark ? '#08101a' : '#f0f1f4'
+  ctx.fillStyle = geqBg(isDark)
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
   // Radial vignette
@@ -42,7 +43,7 @@ function drawGEQGrid(
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
   // Grid lines at ±6, ±12 dB (drawn first, underneath)
-  ctx.strokeStyle = isDark ? '#1e2533' : '#d0d4da'
+  ctx.strokeStyle = geqGrid(isDark)
   ctx.lineWidth = 0.5
   ctx.setLineDash([2, 2])
   for (const db of [-12, -6, 6, 12]) {
@@ -55,7 +56,7 @@ function drawGEQGrid(
   ctx.setLineDash([])
 
   // Center line (0 dB) — major reference line, on top
-  ctx.strokeStyle = isDark ? '#27303f' : '#c0c5cc'
+  ctx.strokeStyle = geqCenter(isDark)
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(0, centerY)
@@ -147,7 +148,7 @@ function drawBars(
       ctx.roundRect(x, ghostY, barWidth, ghostHeight, 2)
       ctx.fill()
       // Faint outline
-      ctx.strokeStyle = '#121416'
+      ctx.strokeStyle = GEQ_BAR_OUTLINE
       ctx.lineWidth = 0.5
       ctx.stroke()
     }
@@ -214,7 +215,7 @@ function drawGEQAxisLabels(
 ) {
   // Band labels (rotated vertical to fit) — shadow for readability
   const labelFontSize = Math.min(Math.max(Math.floor(barSpacing * 0.85), 9), 13)
-  ctx.fillStyle = isDark ? VIZ_COLORS.AXIS_LABEL : '#5a6478'
+  ctx.fillStyle = isDark ? VIZ_COLORS.AXIS_LABEL : GEQ_AXIS_LABEL_LIGHT
   ctx.font = `${labelFontSize}px monospace`
   ctx.textAlign = 'right'
   ctx.textBaseline = 'middle'
@@ -234,7 +235,7 @@ function drawGEQAxisLabels(
   // Y-axis labels
   ctx.textAlign = 'right'
   ctx.textBaseline = 'middle'
-  ctx.fillStyle = isDark ? VIZ_COLORS.AXIS_LABEL : '#5a6478'
+  ctx.fillStyle = isDark ? VIZ_COLORS.AXIS_LABEL : GEQ_AXIS_LABEL_LIGHT
   ctx.font = `${fontSize}px monospace`
   ctx.fillText('0', padding.left - 5, padding.top + centerY)
   ctx.fillText('-12', padding.left - 5, padding.top + centerY + (12 / 18) * (plotHeight / 2))
@@ -267,6 +268,11 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
   // Dirty-bit: skip canvas redraw when nothing has changed
   const dirtyRef = useRef(true) // Start dirty to ensure first frame draws
 
+  // Hover tooltip state — track which band the cursor is over
+  const [hoverBand, setHoverBand] = useState<number | null>(null)
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
+  const layoutRef = useRef({ paddingLeft: 0, barSpacing: 0, numBands: 31 })
+
   // Build map of band recommendations — memoised so it only rebuilds when advisories change
   const bandRecommendations = useMemo(() => {
     const map = new Map<number, BandRecommendation>()
@@ -280,7 +286,7 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
       if (!existing || advisory.advisory.geq.suggestedDb < existing.suggestedDb) {
         map.set(bandIndex, {
           suggestedDb: advisory.advisory.geq.suggestedDb,
-          color: getSeverityColor(advisory.severity),
+          color: getSeverityColor(advisory.severity, isDark),
           freq: advisory.trueFrequencyHz,
           clusterCount: existing ? existing.clusterCount + advisoryCluster : advisoryCluster,
         })
@@ -290,7 +296,7 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
       }
     }
     return map
-  }, [advisories, clearedIds])
+  }, [advisories, clearedIds, isDark])
 
   // Handle resize
   useEffect(() => {
@@ -362,6 +368,9 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
     const maxCut = -18
     const centerY = plotHeight / 2
 
+    // Cache layout for mouse hit-testing
+    layoutRef.current = { paddingLeft: padding.left, barSpacing, numBands }
+
     // ── Draw phases ──────────────────────────────────────────────
     ctx.save()
     ctx.translate(padding.left, padding.top)
@@ -382,9 +391,50 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
 
   const hasRecommendations = bandRecommendations.size > 0
 
+  // Mouse move → hit-test which band the cursor is over
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const { paddingLeft, barSpacing, numBands } = layoutRef.current
+    const bandIndex = Math.floor((x - paddingLeft) / barSpacing)
+    if (bandIndex >= 0 && bandIndex < numBands && bandRecommendations.has(bandIndex)) {
+      setHoverBand(bandIndex)
+      setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+    } else {
+      setHoverBand(null)
+    }
+  }, [bandRecommendations])
+
+  const handleMouseLeave = useCallback(() => setHoverBand(null), [])
+
+  // Tooltip data for hovered band
+  const hoverRec = hoverBand != null ? bandRecommendations.get(hoverBand) : null
+  const hoverLabel = hoverBand != null ? GEQ_BAND_LABELS[hoverBand] : null
+
   return (
-    <div ref={containerRef} className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
       <canvas ref={canvasRef} className="w-full h-full" role="img" aria-label="Graphic equalizer band view with recommended cuts" />
+      {/* Hover tooltip for GEQ bars */}
+      {hoverRec && hoverLabel && (
+        <div
+          className="absolute z-30 pointer-events-none px-2.5 py-1.5 rounded bg-card/95 backdrop-blur-sm border border-border/60 shadow-lg font-mono text-xs leading-relaxed"
+          style={{
+            left: Math.min(hoverPos.x + 12, (containerRef.current?.clientWidth ?? 300) - 140),
+            top: Math.max(hoverPos.y - 50, 4),
+          }}
+        >
+          <div className="font-bold text-foreground">{hoverLabel} Hz</div>
+          <div style={{ color: hoverRec.color }}>Cut: {hoverRec.suggestedDb} dB</div>
+          {hoverRec.freq > 0 && (
+            <div className="text-muted-foreground">Peak: {hoverRec.freq >= 1000 ? `${(hoverRec.freq / 1000).toFixed(2)} kHz` : `${hoverRec.freq.toFixed(1)} Hz`}</div>
+          )}
+          {hoverRec.clusterCount > 1 && (
+            <div className="text-muted-foreground">{hoverRec.clusterCount} peaks merged</div>
+          )}
+        </div>
+      )}
       {/* Instructional overlay when no EQ recommendations exist */}
       {!hasRecommendations && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1">

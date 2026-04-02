@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useTheme } from 'next-themes'
 import { formatFrequency } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import { AlertTriangle, Check, ChevronRight, Download, SkipForward, X } from 'lucide-react'
@@ -44,6 +45,8 @@ export const RingOutWizard = memo(function RingOutWizard({
   isRunning,
   roomModes,
 }: RingOutWizardProps) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme !== 'light'
   const [phase, setPhase] = useState<WizardPhase>('listening')
   const [notched, setNotched] = useState<NotchedFreq[]>([])
   const [currentAdvisory, setCurrentAdvisory] = useState<Advisory | null>(null)
@@ -197,7 +200,7 @@ export const RingOutWizard = memo(function RingOutWizard({
   // ── Detected Phase ─────────────────────────────────────────────────
   if (phase === 'detected' && currentAdvisory) {
     const { trueFrequencyHz, severity, advisory: eqAdv } = currentAdvisory
-    const color = getSeverityColor(severity)
+    const color = getSeverityColor(severity, isDark)
     const pitchInfo = eqAdv.pitch
     const pitch = `${pitchInfo.note}${pitchInfo.octave}`
 

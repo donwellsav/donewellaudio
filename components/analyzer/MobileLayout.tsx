@@ -611,7 +611,7 @@ export const MobileLayout = memo(function MobileLayout({
                 {/* #19 Bounce animation on active icon */}
                 <tab.Icon className={mobileTab === tab.id ? 'w-[22px] h-[22px] motion-safe:animate-tab-bounce' : 'w-5 h-5'} />
                 {tab.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 bg-[var(--console-amber)] text-[#0a0d10] text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-bold leading-none px-0.5">
+                  <span className="absolute -top-1.5 -right-2.5 bg-[var(--console-amber)] text-background text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-bold leading-none px-0.5">
                     {tab.badge}
                   </span>
                 )}

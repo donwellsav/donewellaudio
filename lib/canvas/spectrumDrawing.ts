@@ -730,6 +730,8 @@ export function drawMarkers(
   fontSize: number,
   theme: CanvasTheme = DARK_CANVAS_THEME,
   notchedIds?: Set<string>,
+  /** When set, suppress frequency labels within this distance (px) of cursor */
+  hoverSuppressX?: number | null,
 ) {
   const isDark = theme === DARK_CANVAS_THEME
   // Early warning predictions
@@ -873,7 +875,11 @@ export function drawMarkers(
     ctx.fill()
 
     // Frequency label — only show if not occluded by a higher-priority label
-    if (labelShowFlags[i]) {
+    // Also suppress when hover tooltip is nearby (avoids overlapping text clutter)
+    // Check against the label's full x-range, not just center, so pills left of the cursor also hide
+    const labelRange = labelXRanges[i]
+    const suppressedByHover = hoverSuppressX != null && hoverSuppressX >= labelRange.left - 20 && hoverSuppressX <= labelRange.right + 20
+    if (labelShowFlags[i] && !suppressedByHover) {
       const labelText = mergedLabelText.get(i) ?? formatFrequency(freq)
 
       // Merged range highlight band — severity-tinted full-height fill

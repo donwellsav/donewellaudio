@@ -163,7 +163,7 @@ export const DesktopLayout = memo(function DesktopLayout({
             </div>
             {/* Settings sub-tab bar — flex-shrink-0 sibling, zero gap, solid background */}
             {activeSidebarTab === 'controls' && (
-              <div className="flex-shrink-0 flex gap-0 bg-[#070c12] border-b border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.14)]">
+              <div className="flex-shrink-0 flex gap-0 bg-card/80 border-b border-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.14)]">
                 {SETTINGS_TABS.map(({ id, label, shortLabel, Icon }) => (
                   <button
                     key={id}

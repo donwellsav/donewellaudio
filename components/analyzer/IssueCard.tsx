@@ -3,6 +3,7 @@
 import { useMemo, useState, useCallback, memo } from 'react'
 import { formatFrequency, formatFrequencyRange, formatPitch } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
+import { confidenceColor, RUNAWAY_COLOR } from '@/lib/canvas/canvasTokens'
 import { getSeverityText } from '@/lib/dsp/classifier'
 import { AlertTriangle, TrendingUp } from 'lucide-react'
 import { useTheme } from 'next-themes'
@@ -336,7 +337,7 @@ export const IssueCard = memo(function IssueCard({
                   <svg width="18" height="18" viewBox="0 0 18 18" className="flex-shrink-0" aria-hidden>
                     <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" opacity={0.1} />
                     <circle cx="9" cy="9" r="7" fill="none"
-                      stroke={advisory.confidence >= 0.85 ? '#34d399' : advisory.confidence >= 0.70 ? '#60a5fa' : advisory.confidence >= 0.45 ? '#fbbf24' : '#6b7280'}
+                      stroke={confidenceColor(advisory.confidence ?? 0)}
                       strokeWidth="1.5" strokeLinecap="round"
                       strokeDasharray={`${advisory.confidence * 44} 44`}
                       transform="rotate(-90 9 9)"
@@ -452,7 +453,7 @@ export const IssueCard = memo(function IssueCard({
               className="absolute inset-0 h-full rounded-full transition-[width,opacity] duration-500 ease-linear"
               style={{
                 width: `${Math.max(0, (1 - ageSec / 60)) * 100}%`,
-                backgroundColor: '#ef4444',
+                backgroundColor: RUNAWAY_COLOR,
                 opacity: Math.min(0.55, ((ageSec - 20) / 40) * 0.55),
               }}
             />
