@@ -19,6 +19,12 @@ import type { AlgorithmMode, Algorithm } from '@/types/advisory'
 import type { ConsentStatus } from '@/types/data'
 import { useCompanion } from '@/hooks/useCompanion'
 
+const PRIVACY_SUMMARY = [
+  'Magnitude spectrum only \u2014 no audio',
+  'No device IDs or IP addresses',
+  'Random session IDs, never linked to accounts',
+]
+
 export interface AdvancedTabProps extends TabSettingsProps {
   consentStatus?: ConsentStatus
   isCollecting?: boolean
@@ -315,9 +321,3 @@ const CompanionSection = memo(function CompanionSection({ showTooltips }: { show
     </Section>
   )
 })
-
-const PRIVACY_SUMMARY = [
-  'Magnitude spectrum only \u2014 no audio',
-  'No device IDs or IP addresses',
-  'Random session IDs, never linked to accounts',
-]

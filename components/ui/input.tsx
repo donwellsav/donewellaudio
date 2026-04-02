@@ -22,7 +22,8 @@ function Input({ className, type, onChange, ...props }: React.ComponentProps<'in
   const min = isNumber ? parseFloat(String(props.min ?? 0)) : 0
   const max = isNumber ? parseFloat(String(props.max ?? 100)) : 100
   const step = isNumber ? parseFloat(String(props.step ?? 1)) : 1
-  const numValue = isNumber ? parseFloat(String(props.value ?? 0)) || 0 : 0
+  const parsedValue = isNumber ? parseFloat(String(props.value ?? 0)) : NaN
+  const numValue = isNaN(parsedValue) ? 0 : parsedValue
 
   useWheelStep(
     isNumber ? ref : { current: null },

@@ -29,7 +29,7 @@ export function middleware(request: NextRequest) {
     "default-src 'self'",
     isDev
       ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
-      : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+      : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'`,
     "style-src 'self' 'unsafe-inline'",
     "worker-src 'self' blob:",
     isDev

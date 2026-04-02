@@ -17,6 +17,26 @@ import { IssueCardActions } from './IssueCardActions'
 const RUNAWAY_VELOCITY_THRESHOLD = 15 // dB/s
 const WARNING_VELOCITY_THRESHOLD = 10 // dB/s
 
+/** Severity-graded card entrance animation — RUNAWAY = instant, all others = slow 5s fade */
+const SEVERITY_ENTER_CLASS: Record<string, string> = {
+  RUNAWAY: '',
+  GROWING: 'animate-issue-enter-slow',
+  RESONANCE: 'animate-issue-enter-slow',
+  POSSIBLE_RING: 'animate-issue-enter-slow',
+  WHISTLE: 'animate-issue-enter-slow',
+  INSTRUMENT: 'animate-issue-enter-slow',
+}
+
+/** Matching strip flash speed per severity — RUNAWAY instant, all others 5s */
+const SEVERITY_STRIP_CLASS: Record<string, string> = {
+  RUNAWAY: '',
+  GROWING: 'animate-strip-flash-slow',
+  RESONANCE: 'animate-strip-flash-slow',
+  POSSIBLE_RING: 'animate-strip-flash-slow',
+  WHISTLE: 'animate-strip-flash-slow',
+  INSTRUMENT: 'animate-strip-flash-slow',
+}
+
 // ── Types ────────────────────────────────────────────────────────────
 
 export interface IssueCardProps {
@@ -51,9 +71,12 @@ export const IssueCard = memo(function IssueCard({
   // ── Derived values ───────────────────────────────────────────────
   // #15: Split memo — advisory-derived data recalculates only when advisory changes,
   // not on theme toggle. severityColor is the only theme-dependent value.
+  // All advisory-derived data in one memo — recalculates only when advisory changes,
+  // not on theme toggle. severityColor is the only theme-dependent value (separate memo).
   const {
     pitchStr, exactFreqStr, isClustered,
     velocity, isRunaway, isWarning, isResolved, timeToClipStr,
+    detailParts, peqNotchSvgPath,
   } = useMemo(() => {
     const _pitchStr = advisory.advisory?.pitch ? formatPitch(advisory.advisory.pitch) : null
     const _isClustered = (advisory.clusterCount ?? 1) > 1 && advisory.clusterMinHz != null && advisory.clusterMaxHz != null
@@ -72,30 +95,41 @@ export const IssueCard = memo(function IssueCard({
     const _timeToClipStr = _timeToClipMs != null && _timeToClipMs < 5000
       ? `~${(_timeToClipMs / 1000).toFixed(1)}s`
       : null
+
+    // Detail tooltip parts
+    const _detailParts: string[] = []
+    if (advisory.modalOverlapFactor != null && advisory.modalOverlapFactor < 0.3)
+      _detailParts.push(`Modal overlap: ${advisory.modalOverlapFactor.toFixed(2)} (isolated)`)
+    if (advisory.cumulativeGrowthDb != null && advisory.cumulativeGrowthDb > 3)
+      _detailParts.push(`Buildup: +${advisory.cumulativeGrowthDb.toFixed(1)}dB`)
+    if (advisory.frequencyBand)
+      _detailParts.push(`Band: ${advisory.frequencyBand}`)
+
+    // PEQ notch SVG path — bell curve dip on a log-scale frequency axis
+    let _peqNotchSvgPath: string | null = null
+    const peq = advisory.advisory?.peq
+    if (peq) {
+      const logMin = Math.log10(20)
+      const logMax = Math.log10(20000)
+      const cx = ((Math.log10(Math.max(20, peq.hz)) - logMin) / (logMax - logMin)) * 40
+      const depth = Math.min(10, (Math.abs(peq.gainDb) / 12) * 10)
+      const hw = Math.max(2, Math.min(14, 20 / peq.q))
+      const x1 = Math.max(0, cx - hw)
+      const x2 = Math.min(40, cx + hw)
+      const bl = 5
+      _peqNotchSvgPath = `M 0 ${bl} L ${x1.toFixed(1)} ${bl} Q ${cx.toFixed(1)} ${(bl + depth).toFixed(1)} ${x2.toFixed(1)} ${bl} L 40 ${bl}`
+    }
+
     return {
       pitchStr: _pitchStr, exactFreqStr: _exactFreqStr,
       velocity: _velocity, isRunaway: _isRunaway, isWarning: _isWarning,
       isResolved: _isResolved, timeToClipStr: _timeToClipStr, isClustered: _isClustered,
+      detailParts: _detailParts, peqNotchSvgPath: _peqNotchSvgPath,
     }
   }, [advisory])
 
   // Theme-dependent color — separate memo so theme toggle doesn't recompute advisory data
   const severityColor = useMemo(() => getSeverityColor(advisory.severity, isDark), [advisory.severity, isDark])
-
-  // PEQ notch SVG path — bell curve dip on a log-scale frequency axis
-  const peqNotchSvgPath = useMemo(() => {
-    const peq = advisory.advisory?.peq
-    if (!peq) return null
-    const logMin = Math.log10(20)
-    const logMax = Math.log10(20000)
-    const cx = ((Math.log10(Math.max(20, peq.hz)) - logMin) / (logMax - logMin)) * 40
-    const depth = Math.min(10, (Math.abs(peq.gainDb) / 12) * 10)
-    const hw = Math.max(2, Math.min(14, 20 / peq.q))
-    const x1 = Math.max(0, cx - hw)
-    const x2 = Math.min(40, cx + hw)
-    const bl = 5
-    return `M 0 ${bl} L ${x1.toFixed(1)} ${bl} Q ${cx.toFixed(1)} ${(bl + depth).toFixed(1)} ${x2.toFixed(1)} ${bl} L 40 ${bl}`
-  }, [advisory.advisory?.peq])
 
   // Age display — refreshes naturally on advisory updates (~10Hz)
   // eslint-disable-next-line react-hooks/purity -- benign: Date.now() in render is intentional for live age display
@@ -116,18 +150,6 @@ export const IssueCard = memo(function IssueCard({
     })
   }, [exactFreqStr, pitchStr])
 
-  // ── Detail tooltip ───────────────────────────────────────────────
-  const detailParts = useMemo(() => {
-    const parts: string[] = []
-    if (advisory.modalOverlapFactor != null && advisory.modalOverlapFactor < 0.3)
-      parts.push(`Modal overlap: ${advisory.modalOverlapFactor.toFixed(2)} (isolated)`)
-    if (advisory.cumulativeGrowthDb != null && advisory.cumulativeGrowthDb > 3)
-      parts.push(`Buildup: +${advisory.cumulativeGrowthDb.toFixed(1)}dB`)
-    if (advisory.frequencyBand)
-      parts.push(`Band: ${advisory.frequencyBand}`)
-    return parts
-  }, [advisory.modalOverlapFactor, advisory.cumulativeGrowthDb, advisory.frequencyBand])
-
   // ── Swipe gesture ────────────────────────────────────────────────
   const { swipeX, swiping, swipeProgress, swipeDirection, handlers } = useSwipeGesture({
     enabled: !!swipeLabeling,
@@ -145,12 +167,15 @@ export const IssueCard = memo(function IssueCard({
     : null // touchFriendly && swipeLabeling — swipe gestures handle it
 
   // Bridge: IssueCard receives (advisory: Advisory) => void, actions expects () => void
-  const handleSendToMixer = onSendToMixer ? () => onSendToMixer(advisory) : undefined
+  const handleSendToMixer = useMemo(
+    () => onSendToMixer ? () => onSendToMixer(advisory) : undefined,
+    [onSendToMixer, advisory],
+  )
 
   // ── Render ───────────────────────────────────────────────────────
   return (
     <div
-      className={`relative flex flex-col rounded glass-card animate-issue-enter overflow-hidden ${
+      className={`relative flex flex-col rounded glass-card ${SEVERITY_ENTER_CLASS[advisory.severity] ?? 'animate-issue-enter'} overflow-hidden ${
         isFalsePositive
           ? 'border-red-500/30 opacity-50'
           : isResolved
@@ -195,7 +220,7 @@ export const IssueCard = memo(function IssueCard({
 
       {/* Left severity accent — glowing strip, wider + brighter for RUNAWAY */}
       <div
-        className={`absolute left-0 top-0 bottom-0 animate-strip-flash ${isRunaway ? 'severity-accent-strip-runaway' : 'severity-accent-strip'}`}
+        className={`absolute left-0 top-0 bottom-0 ${SEVERITY_STRIP_CLASS[advisory.severity] ?? 'animate-strip-flash'} ${isRunaway ? 'severity-accent-strip-runaway' : 'severity-accent-strip'}`}
         style={{
           backgroundColor: isResolved ? 'hsl(var(--muted))' : severityColor,
           boxShadow: isResolved ? 'none' : isRunaway

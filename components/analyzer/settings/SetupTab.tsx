@@ -45,6 +45,8 @@ interface SetupTabProps {
 
 const metadataStorage = typedStorage<ExportMetadata>('dwa-export-metadata', {})
 
+function dateSlug() { return new Date().toISOString().slice(0, 10) }
+
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const MODES = [
@@ -77,8 +79,6 @@ export const SetupTab = memo(function SetupTab({
       return next
     })
   }, [])
-
-  const dateSlug = () => new Date().toISOString().slice(0, 10)
 
   const handleExportTxt = useCallback(() => {
     const history = getFeedbackHistory()

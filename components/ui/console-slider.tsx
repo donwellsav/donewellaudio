@@ -7,7 +7,6 @@ import { ResetDefault } from '@/components/ui/reset-default'
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { HelpCircle } from 'lucide-react'
@@ -107,7 +106,7 @@ export const ConsoleSlider = memo(function ConsoleSlider({
   // Click-to-edit state for the value readout
   const [editing, setEditing] = useState(false)
   const commitEdit = useCallback((raw: string) => {
-    const parsed = parseFloat(raw)
+    const parsed = parseFloat(raw.replace(',', '.'))
     if (!isNaN(parsed)) {
       // Round to step precision and clamp
       const rounded = Math.round(parsed / step) * step
@@ -117,7 +116,6 @@ export const ConsoleSlider = memo(function ConsoleSlider({
   }, [min, max, step, onChange])
 
   return (
-    <TooltipProvider delayDuration={300}>
       <div className={cn('space-y-1', className)}>
         {/* Header: label + value readout (click to edit) */}
         <div className="flex items-center justify-between">
@@ -201,6 +199,5 @@ export const ConsoleSlider = memo(function ConsoleSlider({
           </Tooltip>
         </SliderPrimitive.Root>
       </div>
-    </TooltipProvider>
   )
 })

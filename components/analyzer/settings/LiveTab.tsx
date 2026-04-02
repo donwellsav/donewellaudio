@@ -6,6 +6,7 @@ import { ConsoleSlider } from '@/components/ui/console-slider'
 import { useSettings } from '@/contexts/SettingsContext'
 import type { DetectorSettings } from '@/types/advisory'
 import { FREQ_RANGE_PRESETS } from '@/lib/dsp/constants'
+import { formatFreqLabel } from '@/lib/utils/pitchUtils'
 import { roundFreqToNice } from '@/lib/utils/mathHelpers'
 import { MODE_BASELINES } from '@/lib/settings/modeBaselines'
 
@@ -13,14 +14,6 @@ import { MODE_BASELINES } from '@/lib/settings/modeBaselines'
 
 const LOG_MIN = Math.log10(20)
 const LOG_MAX = Math.log10(20000)
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatFreqLabel(hz: number): string {
-  if (hz >= 10000) return `${(hz / 1000).toFixed(0)}k`
-  if (hz >= 1000) return `${(hz / 1000).toFixed(1)}k`
-  return `${hz}`
-}
 
 // ── Props ────────────────────────────────────────────────────────────────────
 

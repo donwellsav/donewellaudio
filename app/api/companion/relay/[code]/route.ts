@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createRateLimiter } from '@/lib/api/rateLimit'
 
 /**
  * Cloud relay for Companion integration.
@@ -26,6 +27,8 @@ const relays = new Map<string, { advisories: unknown[]; lastActivity: number }>(
 
 /** Max advisories per relay to prevent memory bloat */
 const MAX_QUEUE = 20
+/** Max POST body size in bytes (50 KB — advisories are typically <2 KB) */
+const MAX_PAYLOAD_BYTES = 50_000
 /** Relay expires after 2 hours of inactivity */
 const EXPIRY_MS = 2 * 60 * 60 * 1000
 
@@ -41,46 +44,7 @@ function prune() {
 
 // ─── Rate limiting ────────────────────────────────────────────────────────────
 
-const RATE_WINDOW_MS = 60_000
-const RATE_MAX_REQUESTS = 30
-const MAX_RATE_LIMIT_ENTRIES = 10_000
-const relayRateMap = new Map<string, { count: number; windowStart: number }>()
-let _rateLimitCallCount = 0
-
-function getClientIp(request: NextRequest): string {
-  return (request as NextRequest & { ip?: string }).ip
-    ?? request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    ?? 'unknown'
-}
-
-function isRateLimited(request: NextRequest): boolean {
-  const ip = getClientIp(request)
-  const now = Date.now()
-  const entry = relayRateMap.get(ip)
-
-  _rateLimitCallCount++
-  if (_rateLimitCallCount % 100 === 0 || relayRateMap.size > MAX_RATE_LIMIT_ENTRIES) {
-    for (const [k, v] of relayRateMap) {
-      if (now - v.windowStart > RATE_WINDOW_MS) relayRateMap.delete(k)
-    }
-    if (relayRateMap.size > MAX_RATE_LIMIT_ENTRIES) {
-      const excess = relayRateMap.size - MAX_RATE_LIMIT_ENTRIES
-      const iter = relayRateMap.keys()
-      for (let i = 0; i < excess; i++) {
-        const k = iter.next().value
-        if (k !== undefined) relayRateMap.delete(k)
-      }
-    }
-  }
-
-  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
-    relayRateMap.set(ip, { count: 1, windowStart: now })
-    return false
-  }
-
-  entry.count++
-  return entry.count > RATE_MAX_REQUESTS
-}
+const isRateLimited = createRateLimiter({ windowMs: 60_000, maxRequests: 30, maxEntries: 10_000 })
 
 // ─── Payload validation ───────────────────────────────────────────────────────
 
@@ -175,7 +139,11 @@ export async function POST(
 
   let advisory: unknown
   try {
-    advisory = await request.json()
+    const text = await request.text()
+    if (text.length > MAX_PAYLOAD_BYTES) {
+      return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
+    }
+    advisory = JSON.parse(text)
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
@@ -207,9 +175,13 @@ export async function POST(
 
 // DELETE — Clear relay
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ code: string }> },
 ) {
+  if (isRateLimited(request)) {
+    return NextResponse.json({ error: 'Rate limited' }, { status: 429, headers: { 'Retry-After': '60' } })
+  }
+
   const { code } = await params
   if (!VALID_CODE.test(code)) {
     return NextResponse.json({ error: 'Invalid code' }, { status: 400 })
