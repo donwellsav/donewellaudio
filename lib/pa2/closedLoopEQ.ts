@@ -87,31 +87,57 @@ export function verifyGEQCorrections(
  * @param settleMs - Milliseconds to wait for room to settle (default 2000)
  * @param signal - AbortSignal for cancellation
  */
+export type ClosedLoopResult = {
+  applied: boolean
+  /** True when corrections were sent to hardware but verification failed or was aborted */
+  appliedButUnverified: boolean
+  results: VerifyResult[]
+  deepened: Record<string, number>
+}
+
 export async function runClosedLoopCycle(
   client: PA2Client,
   corrections: Record<string, number>,
   settleMs: number = 2000,
   signal?: AbortSignal,
-): Promise<{ applied: boolean; results: VerifyResult[]; deepened: Record<string, number> }> {
-  // 1. Take pre-correction RTA snapshot
+): Promise<ClosedLoopResult> {
+  // 1. Take pre-correction RTA snapshot + capture current GEQ state for rollback
   const preLoop = await client.getLoop(signal)
   const preRTA = preLoop.rta
+  const preGEQ: Record<string, number> = {}
+  for (const band of Object.keys(corrections)) {
+    preGEQ[band] = preRTA[band] ?? 0
+  }
 
   // 2. Apply corrections
   await client.setGEQBands(corrections)
 
-  // 3. Wait for room to settle
-  await new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(resolve, settleMs)
-    signal?.addEventListener('abort', () => {
-      clearTimeout(timer)
-      reject(new DOMException('Aborted', 'AbortError'))
-    }, { once: true })
-  })
+  // 3. Wait for room to settle — rollback on abort
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(resolve, settleMs)
+      signal?.addEventListener('abort', () => {
+        clearTimeout(timer)
+        reject(new DOMException('Aborted', 'AbortError'))
+      }, { once: true })
+    })
+  } catch (err) {
+    // Abort during settle — rollback to pre-change state
+    try { await client.setGEQBands(preGEQ) } catch { /* best-effort rollback */ }
+    throw err
+  }
 
-  // 4. Read post-correction RTA
-  const postLoop = await client.getLoop(signal)
-  const postRTA = postLoop.rta
+  // 4. Read post-correction RTA — rollback on failure
+  let postRTA: Record<string, number>
+  try {
+    const postLoop = await client.getLoop(signal)
+    postRTA = postLoop.rta
+  } catch (err) {
+    // Post-read failed — corrections are applied but unverified
+    // Rollback to pre-change state since we can't confirm the effect
+    try { await client.setGEQBands(preGEQ) } catch { /* best-effort rollback */ }
+    return { applied: true, appliedButUnverified: true, results: [], deepened: {} }
+  }
 
   // 5. Verify
   const results = verifyGEQCorrections(corrections, preRTA, postRTA)
@@ -124,5 +150,5 @@ export async function runClosedLoopCycle(
     }
   }
 
-  return { applied: true, results, deepened }
+  return { applied: true, appliedButUnverified: false, results, deepened }
 }

@@ -142,8 +142,9 @@ export class MLInferenceEngine {
     if (!this._available || !this._session || !this._onnx) return null
     if (features.length !== ML_SETTINGS.FEATURE_COUNT) return null
 
-    // Store latest features for async processing
-    this._pendingFeatures = features
+    // Snapshot features — caller may reuse the same buffer across frames,
+    // so we must copy to avoid reading mutated data during async inference
+    this._pendingFeatures = new Float32Array(features)
 
     // Kick off inference if not already in flight
     if (!this._inferenceInFlight) {

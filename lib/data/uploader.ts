@@ -42,13 +42,24 @@ export class SnapshotUploader {
     this._processQueue()
   }
 
-  /** Try to upload any batches that failed in a previous session (from IndexedDB) */
+  /**
+   * Retry batches that failed in a previous session (from IndexedDB).
+   *
+   * Routes through enqueue() so retries share the serialized pipeline
+   * (single-flight guard + RATE_LIMIT_MS). IDB entries are removed on:
+   *   - Success (2xx confirmed)
+   *   - Terminal 4xx client errors (poison pill prevention)
+   * Transient failures (5xx, network) keep the IDB entry for next session.
+   */
   async retryQueued(): Promise<void> {
     const queued = await loadFromIDB()
     for (const item of queued) {
-      // Re-enqueue as a fresh batch
-      this.enqueue(item.batch)
+      // Remove from IDB before enqueuing — the in-memory queue is now
+      // the owner. If _processQueue → _uploadWithRetry fails transiently
+      // (5xx, network), _processQueue re-saves to IDB for next session.
+      // Terminal 4xx errors are dropped (not re-saved) to prevent poison pills.
       await removeFromIDB(item.id)
+      this.enqueue(item.batch)
     }
   }
 
@@ -83,8 +94,12 @@ export class SnapshotUploader {
     try {
       const result = await this._uploadWithRetry(batch)
       if (!result.ok) {
-        // All retries failed — queue to IndexedDB for next session
-        await saveToIDB(batch)
+        // Terminal 4xx = bad payload, don't persist (poison pill prevention)
+        // Transient 5xx / network / cap = save to IDB for next session
+        const isTerminal = result.status >= 400 && result.status < 500
+        if (!isTerminal) {
+          await saveToIDB(batch)
+        }
       }
     } catch {
       await saveToIDB(batch)
