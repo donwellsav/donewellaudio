@@ -48,7 +48,7 @@ export const FullscreenOverlay = memo(function FullscreenOverlay({
 
       {/* Active issue count badge */}
       {activeAdvisoryCount > 0 && (
-        <span className="bg-[var(--console-amber)] text-[#0a0d10] text-xs rounded-full min-w-[20px] h-[20px] flex items-center justify-center font-mono font-bold leading-none px-1">
+        <span className="bg-[var(--console-amber)] text-background text-xs rounded-full min-w-[20px] h-[20px] flex items-center justify-center font-mono font-bold leading-none px-1">
           {activeAdvisoryCount}
         </span>
       )}

@@ -8,6 +8,7 @@ import { freqToLogPosition, logPositionToFreq, roundFreqToNice, clamp } from '@/
 import { formatFrequency } from '@/lib/utils/pitchUtils'
 import { CANVAS_SETTINGS } from '@/lib/dsp/constants'
 import { thresholdDraggedStorage } from '@/lib/storage/dwaStorage'
+import { OVERLAY_TEXT, OVERLAY_ACCENT } from '@/lib/canvas/canvasTokens'
 import type { SpectrumData, Advisory } from '@/types/advisory'
 import type { RoomMode } from '@/lib/dsp/acousticUtils'
 import type { EarlyWarning } from '@/hooks/useAudioAnalyzer'
@@ -291,7 +292,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
       ctx.lineWidth = 1
       ctx.stroke()
 
-      ctx.fillStyle = '#60a5fa'
+      ctx.fillStyle = OVERLAY_ACCENT
       ctx.textAlign = 'left'
       ctx.textBaseline = 'top'
       ctx.fillText(badgeText, bx, by + py)
@@ -327,7 +328,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
       ctx.fill()
 
       // Text
-      ctx.fillStyle = '#e5e5e5'
+      ctx.fillStyle = OVERLAY_TEXT
       ctx.textAlign = 'left'
       ctx.textBaseline = 'top'
       ctx.fillText(label, tipX + tipPad, tipY + tipPad)

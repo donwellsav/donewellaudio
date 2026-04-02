@@ -3,7 +3,7 @@
 import { useMemo, useState, useCallback, memo } from 'react'
 import { formatFrequency, formatFrequencyRange, formatPitch } from '@/lib/utils/pitchUtils'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
-import { confidenceColor } from '@/lib/canvas/canvasTokens'
+import { confidenceColor, RUNAWAY_COLOR } from '@/lib/canvas/canvasTokens'
 import { getSeverityText } from '@/lib/dsp/classifier'
 import { AlertTriangle, TrendingUp } from 'lucide-react'
 import { useTheme } from 'next-themes'
@@ -453,7 +453,7 @@ export const IssueCard = memo(function IssueCard({
               className="absolute inset-0 h-full rounded-full transition-[width,opacity] duration-500 ease-linear"
               style={{
                 width: `${Math.max(0, (1 - ageSec / 60)) * 100}%`,
-                backgroundColor: '#ef4444',
+                backgroundColor: RUNAWAY_COLOR,
                 opacity: Math.min(0.55, ((ageSec - 20) / 40) * 0.55),
               }}
             />

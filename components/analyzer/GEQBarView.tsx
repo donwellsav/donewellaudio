@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes'
 import { useAnimationFrame } from '@/hooks/useAnimationFrame'
 import { ISO_31_BANDS, VIZ_COLORS } from '@/lib/dsp/constants'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
-import { geqBg, geqGrid, geqCenter, GEQ_BAR_OUTLINE } from '@/lib/canvas/canvasTokens'
+import { geqBg, geqGrid, geqCenter, GEQ_BAR_OUTLINE, GEQ_AXIS_LABEL_LIGHT } from '@/lib/canvas/canvasTokens'
 import type { Advisory } from '@/types/advisory'
 
 // ISO 31-band labels matching standard GEQ notation
@@ -215,7 +215,7 @@ function drawGEQAxisLabels(
 ) {
   // Band labels (rotated vertical to fit) — shadow for readability
   const labelFontSize = Math.min(Math.max(Math.floor(barSpacing * 0.85), 9), 13)
-  ctx.fillStyle = isDark ? VIZ_COLORS.AXIS_LABEL : '#5a6478'
+  ctx.fillStyle = isDark ? VIZ_COLORS.AXIS_LABEL : GEQ_AXIS_LABEL_LIGHT
   ctx.font = `${labelFontSize}px monospace`
   ctx.textAlign = 'right'
   ctx.textBaseline = 'middle'
@@ -235,7 +235,7 @@ function drawGEQAxisLabels(
   // Y-axis labels
   ctx.textAlign = 'right'
   ctx.textBaseline = 'middle'
-  ctx.fillStyle = isDark ? VIZ_COLORS.AXIS_LABEL : '#5a6478'
+  ctx.fillStyle = isDark ? VIZ_COLORS.AXIS_LABEL : GEQ_AXIS_LABEL_LIGHT
   ctx.font = `${fontSize}px monospace`
   ctx.fillText('0', padding.left - 5, padding.top + centerY)
   ctx.fillText('-12', padding.left - 5, padding.top + centerY + (12 / 18) * (plotHeight / 2))

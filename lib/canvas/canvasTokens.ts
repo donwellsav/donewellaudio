@@ -47,6 +47,7 @@ export const GEQ_GRID_LIGHT = '#d0d4da'
 export const GEQ_CENTER_DARK = '#27303f'
 export const GEQ_CENTER_LIGHT = '#c0c5cc'
 export const GEQ_BAR_OUTLINE = '#121416'
+export const GEQ_AXIS_LABEL_LIGHT = '#5a6478'
 
 export function geqBg(isDark: boolean): string {
   return isDark ? GEQ_BG_DARK : GEQ_BG_LIGHT
@@ -57,6 +58,15 @@ export function geqGrid(isDark: boolean): string {
 export function geqCenter(isDark: boolean): string {
   return isDark ? GEQ_CENTER_DARK : GEQ_CENTER_LIGHT
 }
+
+// ── Canvas overlay colors (drag hints, tooltips) ─────────────────────────────
+
+export const OVERLAY_TEXT = '#e5e5e5'
+export const OVERLAY_ACCENT = '#60a5fa'  // blue-400
+
+// ── Severity colors (for inline styles where CSS vars aren't available) ───────
+
+export const RUNAWAY_COLOR = '#ef4444'  // red-500 — matches VIZ_COLORS.RUNAWAY
 
 // ── Confidence ring colors ───────────────────────────────────────────────────
 
