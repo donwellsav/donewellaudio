@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useCallback, useMemo, memo } from 'react'
+import { useRef, useEffect, useCallback, useMemo, useState, memo } from 'react'
 import { useTheme } from 'next-themes'
 import { useAnimationFrame } from '@/hooks/useAnimationFrame'
 import { ISO_31_BANDS, VIZ_COLORS } from '@/lib/dsp/constants'
@@ -268,6 +268,11 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
   // Dirty-bit: skip canvas redraw when nothing has changed
   const dirtyRef = useRef(true) // Start dirty to ensure first frame draws
 
+  // Hover tooltip state — track which band the cursor is over
+  const [hoverBand, setHoverBand] = useState<number | null>(null)
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
+  const layoutRef = useRef({ paddingLeft: 0, barSpacing: 0, numBands: 31 })
+
   // Build map of band recommendations — memoised so it only rebuilds when advisories change
   const bandRecommendations = useMemo(() => {
     const map = new Map<number, BandRecommendation>()
@@ -363,6 +368,9 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
     const maxCut = -18
     const centerY = plotHeight / 2
 
+    // Cache layout for mouse hit-testing
+    layoutRef.current = { paddingLeft: padding.left, barSpacing, numBands }
+
     // ── Draw phases ──────────────────────────────────────────────
     ctx.save()
     ctx.translate(padding.left, padding.top)
@@ -383,9 +391,50 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
 
   const hasRecommendations = bandRecommendations.size > 0
 
+  // Mouse move → hit-test which band the cursor is over
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const { paddingLeft, barSpacing, numBands } = layoutRef.current
+    const bandIndex = Math.floor((x - paddingLeft) / barSpacing)
+    if (bandIndex >= 0 && bandIndex < numBands && bandRecommendations.has(bandIndex)) {
+      setHoverBand(bandIndex)
+      setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+    } else {
+      setHoverBand(null)
+    }
+  }, [bandRecommendations])
+
+  const handleMouseLeave = useCallback(() => setHoverBand(null), [])
+
+  // Tooltip data for hovered band
+  const hoverRec = hoverBand != null ? bandRecommendations.get(hoverBand) : null
+  const hoverLabel = hoverBand != null ? GEQ_BAND_LABELS[hoverBand] : null
+
   return (
-    <div ref={containerRef} className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
       <canvas ref={canvasRef} className="w-full h-full" role="img" aria-label="Graphic equalizer band view with recommended cuts" />
+      {/* Hover tooltip for GEQ bars */}
+      {hoverRec && hoverLabel && (
+        <div
+          className="absolute z-30 pointer-events-none px-2.5 py-1.5 rounded bg-card/95 backdrop-blur-sm border border-border/60 shadow-lg font-mono text-xs leading-relaxed"
+          style={{
+            left: Math.min(hoverPos.x + 12, (containerRef.current?.clientWidth ?? 300) - 140),
+            top: Math.max(hoverPos.y - 50, 4),
+          }}
+        >
+          <div className="font-bold text-foreground">{hoverLabel} Hz</div>
+          <div style={{ color: hoverRec.color }}>Cut: {hoverRec.suggestedDb} dB</div>
+          {hoverRec.freq > 0 && (
+            <div className="text-muted-foreground">Peak: {hoverRec.freq >= 1000 ? `${(hoverRec.freq / 1000).toFixed(2)} kHz` : `${hoverRec.freq.toFixed(1)} Hz`}</div>
+          )}
+          {hoverRec.clusterCount > 1 && (
+            <div className="text-muted-foreground">{hoverRec.clusterCount} peaks merged</div>
+          )}
+        </div>
+      )}
       {/* Instructional overlay when no EQ recommendations exist */}
       {!hasRecommendations && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1">
