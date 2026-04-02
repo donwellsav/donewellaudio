@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes'
 import { useAnimationFrame } from '@/hooks/useAnimationFrame'
 import { ISO_31_BANDS, VIZ_COLORS } from '@/lib/dsp/constants'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
+import { geqBg, geqGrid, geqCenter, GEQ_BAR_OUTLINE } from '@/lib/canvas/canvasTokens'
 import type { Advisory } from '@/types/advisory'
 
 // ISO 31-band labels matching standard GEQ notation
@@ -28,7 +29,7 @@ function drawGEQGrid(
   isDark: boolean,
 ) {
   // Background
-  ctx.fillStyle = isDark ? '#08101a' : '#f0f1f4'
+  ctx.fillStyle = geqBg(isDark)
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
   // Radial vignette
@@ -42,7 +43,7 @@ function drawGEQGrid(
   ctx.fillRect(0, 0, plotWidth, plotHeight)
 
   // Grid lines at ±6, ±12 dB (drawn first, underneath)
-  ctx.strokeStyle = isDark ? '#1e2533' : '#d0d4da'
+  ctx.strokeStyle = geqGrid(isDark)
   ctx.lineWidth = 0.5
   ctx.setLineDash([2, 2])
   for (const db of [-12, -6, 6, 12]) {
@@ -55,7 +56,7 @@ function drawGEQGrid(
   ctx.setLineDash([])
 
   // Center line (0 dB) — major reference line, on top
-  ctx.strokeStyle = isDark ? '#27303f' : '#c0c5cc'
+  ctx.strokeStyle = geqCenter(isDark)
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(0, centerY)
@@ -147,7 +148,7 @@ function drawBars(
       ctx.roundRect(x, ghostY, barWidth, ghostHeight, 2)
       ctx.fill()
       // Faint outline
-      ctx.strokeStyle = '#121416'
+      ctx.strokeStyle = GEQ_BAR_OUTLINE
       ctx.lineWidth = 0.5
       ctx.stroke()
     }
@@ -280,7 +281,7 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
       if (!existing || advisory.advisory.geq.suggestedDb < existing.suggestedDb) {
         map.set(bandIndex, {
           suggestedDb: advisory.advisory.geq.suggestedDb,
-          color: getSeverityColor(advisory.severity),
+          color: getSeverityColor(advisory.severity, isDark),
           freq: advisory.trueFrequencyHz,
           clusterCount: existing ? existing.clusterCount + advisoryCluster : advisoryCluster,
         })
@@ -290,7 +291,7 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
       }
     }
     return map
-  }, [advisories, clearedIds])
+  }, [advisories, clearedIds, isDark])
 
   // Handle resize
   useEffect(() => {

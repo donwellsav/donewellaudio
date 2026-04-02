@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback, useState, memo } from 'react'
 import { useTheme } from 'next-themes'
 import { useWheelStep } from '@/hooks/useWheelStep'
+import { meterBg, applyMeterStops } from '@/lib/canvas/canvasTokens'
 
 /**
  * Guidance hint for the sensitivity fader — computed by the parent
@@ -152,18 +153,13 @@ export const SingleFader = memo(function SingleFader({
     ctx.clearRect(0, 0, w, h)
 
     // Background
-    ctx.fillStyle = isDark ? '#0e1012' : '#e8eaee'
+    ctx.fillStyle = meterBg(isDark)
     ctx.fillRect(0, 0, w, h)
 
     // Cached vertical gradient — bottom-to-top
     let gradient = gradientRef.current
     if (!gradient || gradientHeightRef.current !== h) {
-      gradient = ctx.createLinearGradient(0, h, 0, 0)
-      gradient.addColorStop(0, '#4B92FF')
-      gradient.addColorStop(0.6, '#4B92FF')
-      gradient.addColorStop(0.8, '#eab308')
-      gradient.addColorStop(0.95, '#ef4444')
-      gradient.addColorStop(1, '#ef4444')
+      gradient = applyMeterStops(ctx.createLinearGradient(0, h, 0, 0))
       gradientRef.current = gradient
       gradientHeightRef.current = h
     }

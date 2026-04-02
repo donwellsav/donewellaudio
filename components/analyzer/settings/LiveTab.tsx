@@ -89,7 +89,7 @@ export const LiveTab = memo(function LiveTab({ settings }: LiveTabProps) {
         </div>
         <div className="flex items-center justify-between">
           <span className="section-label" style={{ color: 'var(--console-blue)' }}>Freq Range</span>
-          <span className="font-mono text-[13px] font-semibold tabular-nums text-[#4B92FF] dark:text-[#4B92FF]">{formatFreqLabel(settings.minFrequency)} – {formatFreqLabel(settings.maxFrequency)}</span>
+          <span className="font-mono text-[13px] font-semibold tabular-nums" style={{ color: 'var(--console-blue)' }}>{formatFreqLabel(settings.minFrequency)} – {formatFreqLabel(settings.maxFrequency)}</span>
         </div>
         <Slider value={[Math.log10(Math.max(20, settings.minFrequency)), Math.log10(Math.min(20000, settings.maxFrequency))]} onValueChange={handleFreqSliderChange} min={LOG_MIN} max={LOG_MAX} step={0.005} minStepsBetweenThumbs={0.1} />
       </div>
