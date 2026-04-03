@@ -256,7 +256,7 @@ export const IssueCard = memo(function IssueCard({
           {SeverityIconEl && (
             <span
               className="flex-shrink-0 inline-flex items-center justify-center self-center"
-              style={{ color: severityColor, opacity: 0.7 }}
+              style={{ color: severityColor, opacity: 0.8 }}
               title={getSeverityText(advisory.severity)}
             >
               <SeverityIconEl className="w-3.5 h-3.5" />
@@ -268,7 +268,7 @@ export const IssueCard = memo(function IssueCard({
           <span className={`font-mono font-black leading-none tracking-tight cursor-default ${
             isRunaway ? 'text-4xl' : 'text-3xl'
           } ${
-            isFalsePositive ? 'line-through opacity-40' : ''
+            isFalsePositive ? 'line-through opacity-50' : ''
           }`}
             style={{
               fontVariantNumeric: 'tabular-nums slashed-zero',
@@ -294,6 +294,7 @@ export const IssueCard = memo(function IssueCard({
             {occurrenceCount >= 3 && (
               <span
                 className="inline-flex items-center gap-0.5 text-[11px] font-bold text-amber-400 bg-amber-500/15 px-1.5 py-0.5 rounded-sm leading-none border border-amber-500/30"
+                aria-label={`Repeat offender: detected ${occurrenceCount} times`}
                 title={`Repeat offender: detected ${occurrenceCount} times`}
               >
                 <TrendingUp className="w-2.5 h-2.5" />

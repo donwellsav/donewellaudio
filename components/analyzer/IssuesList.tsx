@@ -379,7 +379,7 @@ const SwipeHint = memo(function SwipeHint({ onDismiss }: { onDismiss: () => void
       role="button"
       tabIndex={0}
       onClick={onDismiss}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Escape') onDismiss() }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); onDismiss() } }}
       aria-label="Swipe gestures: left to dismiss, right to confirm, long-press for false positive. Press to close hint."
     >
       <span className="flex items-center gap-1">

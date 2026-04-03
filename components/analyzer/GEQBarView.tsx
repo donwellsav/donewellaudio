@@ -415,7 +415,7 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
 
   return (
     <div ref={containerRef} className="relative w-full h-full" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
-      <canvas ref={canvasRef} className="w-full h-full" role="img" aria-label="Graphic equalizer band view with recommended cuts" />
+      <canvas ref={canvasRef} className="w-full h-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring rounded-sm" tabIndex={0} role="img" aria-label={`Graphic equalizer: ${bandRecommendations.size > 0 ? `${bandRecommendations.size} active cuts` : 'no active cuts'}`} />
       {/* Hover tooltip for GEQ bars */}
       {hoverRec && hoverLabel && (
         <div
