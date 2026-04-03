@@ -68,7 +68,7 @@ export const IssueCardActions = memo(function IssueCardActions({
   // ── Desktop mode — single horizontal row ────────────────────────
   if (layout === 'desktop') {
     return (
-      <div className="flex items-center gap-0.5 flex-shrink-0">
+      <div className="flex items-center gap-0.5 flex-shrink-0 flex-wrap">
         {onFalsePositive && (
           <button
             onClick={() => onFalsePositive(advisoryId)}

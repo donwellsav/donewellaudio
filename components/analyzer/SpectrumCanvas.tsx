@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect, useCallback, useState, memo, useMemo } from 'react'
+import React, { useRef, useEffect, useCallback, useState, memo, useMemo, useId } from 'react'
 import { useTheme } from 'next-themes'
 import { Spinner } from '@/components/ui/spinner'
 import { useAnimationFrame } from '@/hooks/useAnimationFrame'
@@ -73,6 +73,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
   const { isRunning, isStarting = false, error, onStart } = lifecycle
   const { graphFontSize = 11, rtaDbMin: rtaDbMinProp, rtaDbMax: rtaDbMaxProp, spectrumLineWidth: spectrumLineWidthProp, canvasTargetFps, showFreqZones = false, showRoomModeLines = false, showThresholdLine = false, spectrumWarmMode = false } = display
   const { minFrequency = 20, maxFrequency = 20000, feedbackThresholdDb } = range
+  const descId = useId()
   const { resolvedTheme } = useTheme()
   const canvasThemeRef = useRef<CanvasTheme>(DARK_CANVAS_THEME)
   canvasThemeRef.current = resolvedTheme === 'dark' ? DARK_CANVAS_THEME : LIGHT_CANVAS_THEME
@@ -636,9 +637,9 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
       aria-valuetext={onFreqRangeChange ? `${minFrequency} Hz to ${maxFrequency} Hz` : undefined}
       onKeyDown={onFreqRangeChange ? handleKeyDown : undefined}
     >
-      <canvas ref={canvasRef} className="w-full h-full" role="img" aria-label="Real-time audio frequency spectrum display" aria-describedby="rta-screen-reader-desc" />
+      <canvas ref={canvasRef} className="w-full h-full" role="img" aria-label="Real-time audio frequency spectrum display" aria-describedby={descId} />
       {/* Screen reader description — summarizes RTA state for assistive technology */}
-      <div id="rta-screen-reader-desc" className="sr-only">
+      <div id={descId} className="sr-only">
         {isRunning
           ? `Spectrum analyzer active. Displaying frequencies from ${minFrequency} Hz to ${maxFrequency} Hz, ${rtaDbMinProp ?? -100} to ${rtaDbMaxProp ?? 0} dB range.${
               advisories.length > 0
