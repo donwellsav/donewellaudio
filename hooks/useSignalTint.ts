@@ -95,7 +95,7 @@ export function useSignalTint(): void {
     }
   }, [rawUrgency, displayedUrgency])
 
-  const [r, g, b] = enabled ? tintForUrgency(displayedUrgency, isRunning, isLowSignal) : TINT_AMBER
+  const [r, g, b] = enabled ? tintForUrgency(displayedUrgency, isRunning, isLowSignal) : TINT_IDLE
   const isRunaway = enabled && displayedUrgency >= 5
 
   useEffect(() => {
@@ -110,9 +110,9 @@ export function useSignalTint(): void {
       root.classList.remove('tint-runaway')
     }
     return () => {
-      root.style.setProperty('--tint-r', '245')
-      root.style.setProperty('--tint-g', '158')
-      root.style.setProperty('--tint-b', '11')
+      root.style.setProperty('--tint-r', String(TINT_IDLE[0]))
+      root.style.setProperty('--tint-g', String(TINT_IDLE[1]))
+      root.style.setProperty('--tint-b', String(TINT_IDLE[2]))
       root.classList.remove('tint-runaway')
     }
   }, [r, g, b, isRunaway])
