@@ -241,7 +241,7 @@ export const IssueCard = memo(function IssueCard({
       />
 
       <div
-        className="flex flex-col gap-1 relative z-10 @container pl-3 pr-1.5 py-1.5"
+        className="flex flex-col gap-0.5 relative z-10 @container pl-3 pr-1 py-1"
         style={swipeLabeling && swiping ? {
           transform: `translateX(${swipeX}px)`,
           transition: swiping ? 'none' : 'transform 200ms ease-out',
@@ -347,50 +347,46 @@ export const IssueCard = memo(function IssueCard({
           </div>
         </div>
 
-        {/* ── Row 2: EQ recommendation (the actionable info) + velocity ── */}
-        {(advisory.advisory?.peq || (velocity > 0 && !isResolved)) && (
-          <div className="flex items-center gap-2 text-[11px] font-mono leading-none">
-            {/* PEQ cut recommendation — the most important actionable info */}
-            {advisory.advisory?.peq && (
-              <span className="text-muted-foreground/70">
-                <span style={{ color: severityColor }}>{advisory.advisory.peq.gainDb}dB</span>
-                {' '}Q:{advisory.advisory.peq.q.toFixed(1)} @ {advisory.advisory.peq.hz.toFixed(0)}Hz
-              </span>
-            )}
-            {/* Velocity indicator */}
-            {velocity > 0 && !isResolved && (
-              <span className={`ml-auto flex items-center gap-0.5 ${
-                isRunaway ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-muted-foreground/50'
-              }`}>
-                {(isRunaway || isWarning) && <AlertTriangle className={`w-2.5 h-2.5 flex-shrink-0 ${isRunaway ? 'motion-safe:animate-pulse' : ''}`} />}
-                <span>+{velocity.toFixed(0)} dB/s</span>
-                {timeToClipStr && <span className="opacity-70">{timeToClipStr}</span>}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* ── Row 3: Actions (desktop) — aligned as a clean row ── */}
-        {(actionsLayout === 'desktop' || actionsLayout === 'copy-only') && (
-          <div className="flex items-center justify-end -mr-0.5">
-            <IssueCardActions
-              advisoryId={advisory.id}
-              advisory={advisory}
-              exactFreqStr={exactFreqStr}
-              onFalsePositive={onFalsePositive}
-              isFalsePositive={isFalsePositive}
-              onConfirmFeedback={onConfirmFeedback}
-              isConfirmed={isConfirmed}
-              onDismiss={onDismiss}
-              onCopy={handleCopy}
-              copied={copied}
-              onSendToMixer={handleSendToMixer}
-              onSendToPA2={onSendToPA2}
-              pa2Connected={pa2Connected}
-              layout={actionsLayout}
-            />
-          </div>
-        )}
+        {/* ── Row 2: EQ rec + velocity + actions — all on one line ── */}
+        <div className="flex items-center gap-1.5 text-[10px] font-mono leading-none">
+          {/* PEQ cut recommendation */}
+          {advisory.advisory?.peq && (
+            <span className="text-muted-foreground/60">
+              <span className="font-bold" style={{ color: severityColor, opacity: 0.8 }}>{advisory.advisory.peq.gainDb}dB</span>
+              {' '}Q:{advisory.advisory.peq.q.toFixed(1)}
+            </span>
+          )}
+          {/* Velocity indicator */}
+          {velocity > 0 && !isResolved && (
+            <span className={`flex items-center gap-0.5 ${
+              isRunaway ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-muted-foreground/40'
+            }`}>
+              {(isRunaway || isWarning) && <AlertTriangle className={`w-2 h-2 flex-shrink-0 ${isRunaway ? 'motion-safe:animate-pulse' : ''}`} />}
+              <span>+{velocity.toFixed(0)}dB/s</span>
+            </span>
+          )}
+          {/* Actions pushed right — same row as EQ rec */}
+          {(actionsLayout === 'desktop' || actionsLayout === 'copy-only') && (
+            <div className="ml-auto flex items-center">
+              <IssueCardActions
+                advisoryId={advisory.id}
+                advisory={advisory}
+                exactFreqStr={exactFreqStr}
+                onFalsePositive={onFalsePositive}
+                isFalsePositive={isFalsePositive}
+                onConfirmFeedback={onConfirmFeedback}
+                isConfirmed={isConfirmed}
+                onDismiss={onDismiss}
+                onCopy={handleCopy}
+                copied={copied}
+                onSendToMixer={handleSendToMixer}
+                onSendToPA2={onSendToPA2}
+                pa2Connected={pa2Connected}
+                layout={actionsLayout}
+              />
+            </div>
+          )}
+        </div>
 
         {/* ── Debug rows (opt-in via Display settings) ── */}
         {showAlgorithmScores && advisory.algorithmScores && (

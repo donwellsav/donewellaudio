@@ -5,7 +5,7 @@ import { Copy, Check, X } from 'lucide-react'
 import type { Advisory } from '@/types/advisory'
 
 // ── Shared button class bases ────────────────────────────────────────
-const ACTION_BTN = 'rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1.5 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-8 min-w-[44px]'
+const ACTION_BTN = 'rounded text-[10px] font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-7 min-w-[36px]'
 const COPY_BTN = 'rounded btn-glow flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 // ── Types ────────────────────────────────────────────────────────────
