@@ -248,38 +248,40 @@ export const IssueCard = memo(function IssueCard({
         } : undefined}
       >
 
-        {/* ── Row 1: Severity icon + Frequency hero + Pitch + Age + Badges ── */}
-        <div className="flex items-center gap-2">
-          {/* Severity icon — type at a glance, left of frequency */}
+        {/* ── Row 1: FREQUENCY HERO — the most important element in the app ── */}
+        <div className="flex items-baseline gap-1.5">
+          {/* Severity icon — small, left of frequency */}
           {(() => {
             const Icon = SEVERITY_ICON[advisory.severity]
             return Icon ? (
               <span
-                className="flex-shrink-0 inline-flex items-center justify-center rounded"
-                style={{ color: severityColor }}
+                className="flex-shrink-0 inline-flex items-center justify-center self-center"
+                style={{ color: severityColor, opacity: 0.7 }}
                 title={getSeverityText(advisory.severity)}
               >
-                <Icon className={`${isRunaway ? 'w-5 h-5' : 'w-4 h-4'}`} />
+                <Icon className="w-3.5 h-3.5" />
               </span>
             ) : null
           })()}
 
-          {/* Frequency hero */}
+          {/* FREQUENCY — dominant, severity-tinted, LED-glow readout */}
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className={`font-mono font-bold leading-none tracking-wide cursor-default ${
-                  isRunaway ? 'text-2xl' : 'text-xl'
+                <span className={`font-mono font-black leading-none tracking-tight cursor-default ${
+                  isRunaway ? 'text-4xl' : 'text-3xl'
                 } ${
-                  isFalsePositive ? 'text-red-400/60 line-through' : 'text-foreground'
+                  isFalsePositive ? 'line-through opacity-40' : ''
                 }`}
                   style={{
                     fontVariantNumeric: 'tabular-nums slashed-zero',
+                    color: isFalsePositive ? undefined : isResolved ? 'hsl(var(--muted-foreground))' : severityColor,
                     textShadow: isFalsePositive || isResolved ? 'none' : isRunaway
-                      ? `0 0 16px ${severityColor}80, 0 0 6px ${severityColor}40`
+                      ? `0 0 24px ${severityColor}90, 0 0 10px ${severityColor}60, 0 0 3px ${severityColor}40`
                       : isWarning
-                        ? `0 0 10px ${severityColor}60, 0 0 4px ${severityColor}30`
-                        : `0 0 8px ${severityColor}40`,
+                        ? `0 0 16px ${severityColor}70, 0 0 6px ${severityColor}40`
+                        : `0 0 12px ${severityColor}50, 0 0 4px ${severityColor}30`,
+                    letterSpacing: '-0.02em',
                   }}
                 >
                   {exactFreqStr}
@@ -293,20 +295,16 @@ export const IssueCard = memo(function IssueCard({
             </Tooltip>
           </TooltipProvider>
 
-          {/* Pitch + age — inline after frequency */}
+          {/* Pitch — secondary, smaller, dimmer */}
           {pitchStr && (
-            <span className="text-xs font-mono text-muted-foreground/70 leading-none">{pitchStr}</span>
-          )}
-          {!isResolved && (
-            <span className="text-xs text-muted-foreground/50 leading-none font-mono">{ageStr}</span>
+            <span className="text-[11px] font-mono text-muted-foreground/50 leading-none self-end mb-0.5">{pitchStr}</span>
           )}
 
-          {/* Right-aligned badges */}
-          <div className="ml-auto flex items-center gap-1 flex-shrink-0">
+          {/* Right-aligned: badges + confidence — tertiary info */}
+          <div className="ml-auto flex items-center gap-1 flex-shrink-0 self-center">
             {occurrenceCount >= 3 && (
               <span
-                className="inline-flex items-center gap-0.5 text-[10px] text-amber-400 bg-amber-500/15 px-1 py-0.5 rounded-sm leading-none border border-amber-500/25"
-                aria-label={`Repeat offender: detected ${occurrenceCount} times`}
+                className="inline-flex items-center gap-0.5 text-[9px] text-amber-400/80 bg-amber-500/10 px-1 py-0.5 rounded-sm leading-none border border-amber-500/20"
                 title={`Repeat offender: detected ${occurrenceCount} times`}
               >
                 <TrendingUp className="w-2 h-2" />
@@ -315,7 +313,7 @@ export const IssueCard = memo(function IssueCard({
             )}
             {isClustered && (
               <span
-                className="inline-flex items-center text-[10px] text-sky-400 bg-sky-500/15 px-1 py-0.5 rounded-sm leading-none border border-sky-500/25"
+                className="inline-flex items-center text-[9px] text-sky-400/80 bg-sky-500/10 px-1 py-0.5 rounded-sm leading-none border border-sky-500/20"
                 title={`Merged cluster — Q widened. Center: ${advisory.trueFrequencyHz != null ? formatFrequency(advisory.trueFrequencyHz) : '---'}`}
               >
                 {advisory.clusterCount}pk
@@ -323,11 +321,11 @@ export const IssueCard = memo(function IssueCard({
             )}
             {advisory.confidence != null && (
               <span
-                className="inline-flex items-center gap-0.5 text-[10px] font-mono leading-none"
+                className="inline-flex items-center gap-0.5 text-[9px] font-mono leading-none"
                 title={`${Math.round(advisory.confidence * 100)}% confidence`}
               >
-                <svg width="14" height="14" viewBox="0 0 18 18" className="flex-shrink-0" aria-hidden>
-                  <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" opacity={0.08} />
+                <svg width="12" height="12" viewBox="0 0 18 18" className="flex-shrink-0" aria-hidden>
+                  <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" opacity={0.06} />
                   <circle cx="9" cy="9" r="7" fill="none"
                     stroke={confidenceColor(advisory.confidence ?? 0)}
                     strokeWidth="2" strokeLinecap="round"
@@ -336,12 +334,15 @@ export const IssueCard = memo(function IssueCard({
                   />
                 </svg>
                 <span className={`${
-                  advisory.confidence >= 0.85 ? 'text-emerald-400'
-                  : advisory.confidence >= 0.70 ? 'text-blue-400'
-                  : advisory.confidence >= 0.45 ? 'text-amber-400'
-                  : 'text-muted-foreground/60'
+                  advisory.confidence >= 0.85 ? 'text-emerald-400/70'
+                  : advisory.confidence >= 0.70 ? 'text-blue-400/70'
+                  : advisory.confidence >= 0.45 ? 'text-amber-400/70'
+                  : 'text-muted-foreground/40'
                 }`}>{Math.round(advisory.confidence * 100)}%</span>
               </span>
+            )}
+            {!isResolved && (
+              <span className="text-[9px] text-muted-foreground/30 font-mono leading-none">{ageStr}</span>
             )}
           </div>
         </div>
