@@ -28,6 +28,10 @@ vi.mock('@/contexts/MeteringContext', () => ({
   useMetering: () => ({ inputLevel: mockInputLevel }),
 }))
 
+vi.mock('@/contexts/SettingsContext', () => ({
+  useSettings: () => ({ settings: { signalTintEnabled: true } }),
+}))
+
 // Import after mocks are set up
 import { useSignalTint } from '../useSignalTint'
 

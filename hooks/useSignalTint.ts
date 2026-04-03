@@ -19,6 +19,7 @@ import { useMemo, useEffect, useState, useRef } from 'react'
 import { useAdvisories } from '@/contexts/AdvisoryContext'
 import { useEngine } from '@/contexts/EngineContext'
 import { useMetering } from '@/contexts/MeteringContext'
+import { useSettings } from '@/contexts/SettingsContext'
 import { getSeverityUrgency } from '@/lib/dsp/severityUtils'
 
 type RGB = [number, number, number]
@@ -56,6 +57,8 @@ export function useSignalTint(): void {
   const { advisories, dismissedIds } = useAdvisories()
   const { isRunning } = useEngine()
   const { inputLevel } = useMetering()
+  const { settings } = useSettings()
+  const enabled = settings.signalTintEnabled
   const isLowSignal = isRunning && inputLevel < LOW_SIGNAL_THRESHOLD_DB
 
   const rawUrgency = useMemo(() => {
@@ -92,8 +95,8 @@ export function useSignalTint(): void {
     }
   }, [rawUrgency, displayedUrgency])
 
-  const [r, g, b] = tintForUrgency(displayedUrgency, isRunning, isLowSignal)
-  const isRunaway = displayedUrgency >= 5
+  const [r, g, b] = enabled ? tintForUrgency(displayedUrgency, isRunning, isLowSignal) : TINT_AMBER
+  const isRunaway = enabled && displayedUrgency >= 5
 
   useEffect(() => {
     const root = document.documentElement
