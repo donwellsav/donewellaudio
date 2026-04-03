@@ -81,17 +81,6 @@ export const IssueCardActions = memo(function IssueCardActions({
           </button>
         )}
         {onConfirmFeedback && (
-            <button
-              onClick={() => onConfirmFeedback(advisoryId)}
-              aria-label={`${isConfirmed ? 'Unconfirm' : 'Confirm'} ${exactFreqStr} as real feedback`}
-              className={`${ACTION_BTN} ${
-                isConfirmed ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/15 border border-[var(--console-amber)]/35' : 'text-muted-foreground/50 hover:text-[var(--console-amber)] hover:bg-[var(--console-amber)]/10 border border-transparent'
-              }`}
-            >
-              CONFIRM
-            </button>
-          )}
-        {onConfirmFeedback && (
           <button
             onClick={() => onConfirmFeedback(advisoryId)}
             aria-label={`${isConfirmed ? 'Unconfirm' : 'Confirm'} ${exactFreqStr} as real feedback`}
