@@ -183,6 +183,8 @@ export const IssueCard = memo(function IssueCard({
     [onSendToMixer, advisory],
   )
 
+  const SeverityIconEl = SEVERITY_ICON[advisory.severity] ?? null
+
   // ── Render ───────────────────────────────────────────────────────
   return (
     <div
@@ -251,18 +253,15 @@ export const IssueCard = memo(function IssueCard({
         {/* ── Row 1: FREQUENCY HERO — the most important element in the app ── */}
         <div className="flex items-baseline gap-1.5">
           {/* Severity icon — small, left of frequency */}
-          {(() => {
-            const Icon = SEVERITY_ICON[advisory.severity]
-            return Icon ? (
-              <span
-                className="flex-shrink-0 inline-flex items-center justify-center self-center"
-                style={{ color: severityColor, opacity: 0.7 }}
-                title={getSeverityText(advisory.severity)}
-              >
-                <Icon className="w-3.5 h-3.5" />
-              </span>
-            ) : null
-          })()}
+          {SeverityIconEl && (
+            <span
+              className="flex-shrink-0 inline-flex items-center justify-center self-center"
+              style={{ color: severityColor, opacity: 0.7 }}
+              title={getSeverityText(advisory.severity)}
+            >
+              <SeverityIconEl className="w-3.5 h-3.5" />
+            </span>
+          )}
 
           {/* FREQUENCY — dominant, severity-tinted, LED-glow readout */}
           {/* Frequency hero — no tooltip, keep it clean and unobstructed */}

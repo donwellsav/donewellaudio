@@ -1,6 +1,6 @@
 # CLAUDE.md — DoneWell Audio Project Intelligence
 
-> **Last updated April 2026. 483 TypeScript/TSX files, 1257 tests (1257 pass, 4 skip), 66 suites. Version 0.61.0.**
+> **Last updated April 2026. 483 TypeScript/TSX files, 1261 tests (1257 pass, 4 skip), 66 suites. Version 0.61.0.**
 > Signal tint toggle. Severity-graded fade. Issue card redesign (frequency hero, severity icons, icon legend). GEQ/RTA hover tooltips. Low signal hysteresis. Canvas color token system. Design system audit (93/100). 5 rounds Codex adversarial fixes. Scroll-wheel settings. Click-to-edit controls. 33+ codebase improvements.
 
 ## CRITICAL RULES
@@ -133,7 +133,7 @@ pnpm dev              # Dev server on :3000 (Turbopack, no SW)
 pnpm build            # Production build (webpack, generates SW)
 pnpm start            # Production server
 pnpm lint             # ESLint (flat config)
-pnpm test             # Vitest (1257 tests: 1257 pass + 4 skip)
+pnpm test             # Vitest (1261 tests: 1257 pass + 4 skip)
 pnpm test:watch       # Vitest watch mode
 pnpm test:coverage    # Vitest with V8 coverage
 npx tsc --noEmit      # Type-check (run BEFORE pnpm build)
