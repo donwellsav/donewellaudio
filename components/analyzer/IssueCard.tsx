@@ -7,7 +7,7 @@ import { confidenceColor, RUNAWAY_COLOR } from '@/lib/canvas/canvasTokens'
 import { getSeverityText } from '@/lib/dsp/classifier'
 import { AlertTriangle, TrendingUp, Zap, ArrowUpRight, Radio, CircleDot, Music, Waves } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+// Tooltip imports removed — frequency hero tooltip was cluttering the card
 import type { Advisory } from '@/types/advisory'
 import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import { IssueCardActions } from './IssueCardActions'
@@ -265,35 +265,25 @@ export const IssueCard = memo(function IssueCard({
           })()}
 
           {/* FREQUENCY — dominant, severity-tinted, LED-glow readout */}
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className={`font-mono font-black leading-none tracking-tight cursor-default ${
-                  isRunaway ? 'text-4xl' : 'text-3xl'
-                } ${
-                  isFalsePositive ? 'line-through opacity-40' : ''
-                }`}
-                  style={{
-                    fontVariantNumeric: 'tabular-nums slashed-zero',
-                    color: isFalsePositive ? undefined : isResolved ? 'hsl(var(--muted-foreground))' : severityColor,
-                    textShadow: isFalsePositive || isResolved ? 'none' : isRunaway
-                      ? `0 0 24px ${severityColor}90, 0 0 10px ${severityColor}60, 0 0 3px ${severityColor}40`
-                      : isWarning
-                        ? `0 0 16px ${severityColor}70, 0 0 6px ${severityColor}40`
-                        : `0 0 12px ${severityColor}50, 0 0 4px ${severityColor}30`,
-                    letterSpacing: '-0.02em',
-                  }}
-                >
-                  {exactFreqStr}
-                </span>
-              </TooltipTrigger>
-              {detailParts.length > 0 && (
-                <TooltipContent side="top" className="text-sm space-y-0.5">
-                  {detailParts.map((d) => <div key={d}>{d}</div>)}
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
+          {/* Frequency hero — no tooltip, keep it clean and unobstructed */}
+          <span className={`font-mono font-black leading-none tracking-tight cursor-default ${
+            isRunaway ? 'text-4xl' : 'text-3xl'
+          } ${
+            isFalsePositive ? 'line-through opacity-40' : ''
+          }`}
+            style={{
+              fontVariantNumeric: 'tabular-nums slashed-zero',
+              color: isFalsePositive ? undefined : isResolved ? 'hsl(var(--muted-foreground))' : severityColor,
+              textShadow: isFalsePositive || isResolved ? 'none' : isRunaway
+                ? `0 0 24px ${severityColor}90, 0 0 10px ${severityColor}60, 0 0 3px ${severityColor}40`
+                : isWarning
+                  ? `0 0 16px ${severityColor}70, 0 0 6px ${severityColor}40`
+                  : `0 0 12px ${severityColor}50, 0 0 4px ${severityColor}30`,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {exactFreqStr}
+          </span>
 
           {/* Pitch — secondary, smaller, dimmer */}
           {pitchStr && (
