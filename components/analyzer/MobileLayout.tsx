@@ -137,7 +137,10 @@ export const MobileLayout = memo(function MobileLayout({
 
   // Inline graph — mode and resizable height
   const [inlineGraphMode, setInlineGraphMode] = useState<'rta' | 'geq'>('rta')
-  const [graphHeightVh, setGraphHeightVh] = useState(28)
+  // Default graph height: shorter on small phones (SE = 667px), taller on tablets
+  const [graphHeightVh, setGraphHeightVh] = useState(() =>
+    typeof window !== 'undefined' && window.innerHeight < 700 ? 20 : 28
+  )
   const resizeDragRef = useRef<{ startY: number; startH: number } | null>(null)
   const graphTouchStart = useRef<{ x: number; y: number } | null>(null)
 
@@ -480,7 +483,7 @@ export const MobileLayout = memo(function MobileLayout({
       {/* ── Landscape mobile: 40% Issues / 55% Graphs / 5% fader sidecar (< md only) ── */}
       <div className="hidden landscape:flex md:landscape:hidden flex-1 overflow-hidden">
         {/* Left panel — toggleable Issues ↔ Settings */}
-        <div className="w-[40%] flex flex-col overflow-hidden border-r border-border/50">
+        <div className={`${landscapePanel === 'settings' ? 'w-[45%]' : 'w-[40%]'} flex flex-col overflow-hidden border-r border-border/50 transition-[width] duration-200`}>
           {/* Panel toggle header */}
           <div className="flex-shrink-0 flex items-center border-b border-border/40 bg-card/30" role="tablist" aria-label="Landscape panel">
             <button
@@ -569,7 +572,7 @@ export const MobileLayout = memo(function MobileLayout({
           </div>
         </div>
         {/* Graph — 54%, single graph with RTA/GEQ toggle */}
-        <div className="w-[54%] flex flex-col overflow-hidden p-0.5">
+        <div className={`${landscapePanel === 'settings' ? 'w-[49%]' : 'w-[54%]'} flex flex-col overflow-hidden p-0.5 transition-[width] duration-200`}>
           {/* Graph toggle + controls */}
           <div className="flex-shrink-0 flex items-center gap-1 px-1 pb-0.5">
             <div className="flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden">
