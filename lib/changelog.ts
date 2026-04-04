@@ -14,6 +14,27 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.78.0',
+    date: '2026-04-04',
+    changes: [
+      { type: 'feat', description: '**Touch targets**: ACTION_BTN_MOBILE h-8→h-11 (44px), copy button 44×44px' },
+      { type: 'feat', description: '**Safe area insets**: CSS vars (--safe-top/right/bottom/left), tab bar pb-safe, header pl/pr-safe, landscape sheet pb-safe' },
+      { type: 'feat', description: '**viewport-fit: cover** in layout.tsx for notched devices' },
+      { type: 'feat', description: '**Frequency text overflow**: responsive text-2xl default, text-3xl at @[320px]+' },
+      { type: 'feat', description: '**Dropdown overflow**: max-w-[360px] → max-w-[min(360px,90vw)]' },
+      { type: 'feat', description: '**Drag handle**: py-2.5 (~22px) → min-h-[44px]' },
+      { type: 'feat', description: '**Fader sidecar**: w-12→w-14, SingleFader width={48}, overflow-hidden' },
+      { type: 'feat', description: '**PEQ row**: removed redundant frequency (already in hero), Q rounded to integer' },
+      { type: 'feat', description: '**PEQ text**: bumped from 11px→14px (text-sm) at 80% opacity' },
+      { type: 'feat', description: '**Card padding**: removed py-1 + gap-0.5, added pt-0.5 top breathing room' },
+      { type: 'feat', description: '**Desktop buttons**: dismiss/copy shrunk to h-7 w-7 (mouse targets, not touch)' },
+      { type: 'feat', description: '[ ] Tests pass — 66 suites, 1257 pass, 4 skip' },
+      { type: 'feat', description: '[ ] Mobile: buttons ≥44px, safe areas on notched devices' },
+      { type: 'feat', description: '[ ] Cards: PEQ shows "-4dB Q:89" (no redundant frequency)' },
+      { type: 'feat', description: '[ ] Fader visible and not clipped on 375px viewport' },
+    ],
+  },
+  {
     version: '0.77.0',
     date: '2026-04-04',
     changes: [
