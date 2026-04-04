@@ -141,7 +141,7 @@ function drawBars(
     } else {
       // Inactive — ghost bar with breathing opacity (indicates "GEQ waiting for data")
       const ghostHeight = (plotHeight - 10) * (0.08 + 0.04 * Math.sin(i * 0.7)) // vary per band
-      const breathe = 0.04 + 0.03 * Math.sin(Date.now() / 1500 + i * 0.5) // subtle breathing
+      const breathe = 0.07 + 0.05 * Math.sin(Date.now() / 1500 + i * 0.5) // gentle breathing
       ctx.fillStyle = `rgba(75, 146, 255, ${breathe})`
       const ghostY = centerY - ghostHeight / 2
       ctx.beginPath()
@@ -252,9 +252,10 @@ interface GEQBarViewProps {
   advisories: Advisory[]
   graphFontSize?: number
   clearedIds?: Set<string>
+  isRunning?: boolean
 }
 
-export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize = 11, clearedIds }: GEQBarViewProps) {
+export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize = 11, clearedIds, isRunning = false }: GEQBarViewProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme !== 'light'
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -448,7 +449,7 @@ export const GEQBarView = memo(function GEQBarView({ advisories, graphFontSize =
       {!hasRecommendations && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-1">
           <span className="font-mono text-xs text-muted-foreground/50 tracking-wide text-center px-4">
-            Engage to see cuts
+            {isRunning ? 'All clear — no cuts needed' : 'Engage to see cuts'}
           </span>
         </div>
       )}

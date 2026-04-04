@@ -241,10 +241,10 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
             </div>
           </div>
         ) : (
-          <div className="relative flex flex-col items-center justify-center flex-1 min-h-[80px] py-6 gap-2">
+          <div className="relative flex flex-col items-center justify-start flex-1 min-h-[80px] pt-10 gap-2">
             {/* Both states rendered — crossfade via opacity transition */}
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 transition-opacity duration-[2000ms] ease-in-out"
+              className="absolute inset-0 flex flex-col items-center justify-start pt-10 gap-2 transition-opacity duration-[2000ms] ease-in-out"
               style={{ opacity: isLowSignal ? 1 : 0, pointerEvents: isLowSignal ? 'auto' : 'none' }}
               aria-hidden={!isLowSignal}
             >
@@ -263,7 +263,7 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
               </div>
             </div>
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 transition-opacity duration-[2000ms] ease-in-out"
+              className="absolute inset-0 flex flex-col items-center justify-start pt-10 gap-2 transition-opacity duration-[2000ms] ease-in-out"
               style={{ opacity: isLowSignal ? 0 : 1, pointerEvents: isLowSignal ? 'none' : 'auto' }}
               aria-hidden={isLowSignal}
             >
