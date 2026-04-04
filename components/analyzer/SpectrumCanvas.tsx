@@ -8,7 +8,7 @@ import { freqToLogPosition, logPositionToFreq, roundFreqToNice, clamp } from '@/
 import { formatFrequency } from '@/lib/utils/pitchUtils'
 import { CANVAS_SETTINGS } from '@/lib/dsp/constants'
 import { thresholdDraggedStorage } from '@/lib/storage/dwaStorage'
-import { OVERLAY_TEXT, OVERLAY_ACCENT } from '@/lib/canvas/canvasTokens'
+import { OVERLAY_TEXT, OVERLAY_ACCENT, GROWING_COLOR } from '@/lib/canvas/canvasTokens'
 import { getSeverityColor } from '@/lib/dsp/eqAdvisor'
 import type { SpectrumData, Advisory } from '@/types/advisory'
 import type { RoomMode } from '@/lib/dsp/acousticUtils'
@@ -344,7 +344,7 @@ export const SpectrumCanvas = memo(function SpectrumCanvas({ spectrumRef, adviso
           lines.push({ text: `Cut ${peq.gainDb}dB  Q:${peq.q.toFixed(1)}`, color: OVERLAY_ACCENT })
         }
         if (a.velocityDbPerSec != null && a.velocityDbPerSec > 0) {
-          lines.push({ text: `+${a.velocityDbPerSec.toFixed(0)} dB/s`, color: '#fb923c' })
+          lines.push({ text: `+${a.velocityDbPerSec.toFixed(0)} dB/s`, color: GROWING_COLOR })
         }
       } else {
         // Basic freq + dB readout
