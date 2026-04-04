@@ -1,6 +1,6 @@
 # CLAUDE.md — DoneWell Audio Project Intelligence
 
-> **Last updated April 2026. 483 TypeScript/TSX files, 1261 tests (1257 pass, 4 skip), 66 suites. Version 0.61.0.**
+> **Last updated April 2026. 483 TypeScript/TSX files, 1261 tests (1257 pass, 4 skip), 66 suites. Version 0.79.0.**
 > Signal tint toggle. Severity-graded fade. Issue card redesign (frequency hero, severity icons, icon legend). GEQ/RTA hover tooltips. Low signal hysteresis. Canvas color token system. Design system audit (93/100). 5 rounds Codex adversarial fixes. Scroll-wheel settings. Click-to-edit controls. 33+ codebase improvements.
 
 ## CRITICAL RULES
@@ -568,15 +568,22 @@ Then when user says "PR":
 - **Help menu uses `--console-blue`** — it's reference documentation (scope/analysis), not detection controls. All Help text, icons, tab borders, and accordion labels are blue.
 
 ### Layout & Navigation
-- **Dual entry point:** Two start buttons — "Press to Start Analysis" (normal mode) and "Ring Out Room" (ring-out wizard). No settings menu required to switch modes.
+- **Dual entry point:** Two start buttons — "Start Analysis" (normal mode) and "Ring Out Room" (ring-out wizard). No settings menu required to switch modes.
 - **Desktop layout:** 3-panel — Controls sidebar | Issues panel | RTA + GEQ graphs. 4-tab settings (Live | Setup | Display | Advanced) with accordion sections per tab. Fader strip (w-20, 80px) on far right.
-- **Mobile portrait (2-tab):** Tab 1 = Issues + inline resizable RTA/GEQ graph (drag handle to resize, swipe to switch RTA↔GEQ). Tab 2 = Settings. Graph tab removed — graphs are inline above cards.
-- **Mobile landscape:** 40/55/5 split (Issues/Graph/Controls). `LandscapeSettingsSheet.tsx` for bottom-sheet settings.
+- **Mobile portrait (2-tab):** Tab 1 = Issues + inline resizable RTA/GEQ graph (drag handle with keyboard slider ARIA, swipe to switch RTA↔GEQ). Tab 2 = Settings with compact RTA preview (18vh) above scrollable settings. SettingsPanel renders inline tab bar (LIVE/SETUP/DISPLAY/ADV) when uncontrolled.
+- **Mobile landscape:** Issues/Settings toggle in left panel (40-45% width, dynamic based on active panel). Single full-height RTA/GEQ graph (54-49%) with toggle pill. Fader sidecar (6%, min 56px). Replaces old bottom-sheet settings modal.
+- **Mobile transport:** ENGAGE/STOP visible at all sizes (compact h-9 on mobile). PAUSE/CLEAR hidden below 420px to prevent header overflow.
+- **Mobile safe areas:** CSS vars `--safe-top/right/bottom/left` via `env(safe-area-inset-*)`. `viewport-fit: cover` in layout.tsx. Tab bar, header, landscape sheet all use safe-area padding.
+- **Responsive graph height:** Default 20vh on short phones (<700px), 28vh on tall. User drag-adjustable (8-40vh). Keyboard accessible via ArrowUp/Down.
+- **Mobile fader:** width={48} in w-14 container with overflow-hidden. Mode toggle (Gain/Sens) with aria-label.
 - **Fullscreen:** Separate app fullscreen (Maximize2 icon) and RTA fullscreen (Expand icon). Distinct icons and behavior.
 
 ### Issue Cards & Labeling
 - **Swipe gestures (v0.148.0):** Swipe left = dismiss (removes from view). Swipe right = confirm as real feedback. Long-press = flag as false positive. 60px threshold, vertical-scroll-safe. Mobile always-on, desktop opt-in via Display settings.
 - **Issue card display:** PEQ-only recommendations. Copy button. 3s minimum display time for stability. Top 5 on mobile (`MOBILE_MAX_DISPLAYED_ISSUES`).
+- **2-row card layout:** Row 1: severity icon + frequency hero (text-2xl/3xl, severity-colored LED glow) + pitch + badges. Row 2: PEQ rec (text-sm, severity-tinted) + velocity + actions. Desktop actions visible on hover only (opacity transition).
+- **Severity-graded accent strip:** RUNAWAY=6px, GROWING=4px, default=2px — visual weight hierarchy.
+- **CONFIRM FEEDBACK:** Two-line button label — "CONFIRM" with "FEEDBACK" subscript (7px, 60% opacity).
 - **Algorithm scores debug:** Toggle in Display settings shows MSD/PH/SP/CM/IH/PT/ML scores on each card.
 
 ### Theme & Branding

@@ -14,6 +14,33 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.79.0',
+    date: '2026-04-04',
+    highlights: 'Mobile overhaul, issue card redesign, design system 100/100, 5 Codex adversarial rounds',
+    changes: [
+      { type: 'ui', description: 'Issue card redesign: frequency hero (text-3xl, severity-colored LED glow), 2-row layout, hover-only desktop actions' },
+      { type: 'ui', description: 'Severity icons replace text labels (Zap, ArrowUpRight, Radio, CircleDot, Waves, Music) with icon legend' },
+      { type: 'ui', description: 'Severity-graded fade: RUNAWAY instant, all others 5s opacity. Accent strip width: 2/4/6px by severity' },
+      { type: 'ui', description: 'CONFIRM FEEDBACK subscript label. PEQ row promoted to card body (text-sm, severity-tinted, no redundant freq)' },
+      { type: 'feat', description: 'Signal Tint toggle in Display settings (off = neutral slate gray). Low signal hysteresis (3.5s/5s + 2s crossfade)' },
+      { type: 'feat', description: 'GEQ/RTA hover tooltips with advisory detail. Marker label suppression near cursor' },
+      { type: 'feat', description: 'Scroll-wheel, click-to-edit, reset-to-default for all settings controls' },
+      { type: 'feat', description: 'Mobile: ENGAGE/STOP/PAUSE/CLEAR visible at all sizes. Settings tab bar (LIVE/SETUP/DISPLAY/ADV) inline on mobile' },
+      { type: 'feat', description: 'Mobile: RTA preview above settings tab. Landscape Issues/Settings inline toggle (replaces bottom sheet)' },
+      { type: 'feat', description: 'Mobile: single graph with RTA/GEQ toggle in landscape (was stacked dual). Responsive graph height (20vh short, 28vh tall)' },
+      { type: 'feat', description: 'Mobile: safe area insets (viewport-fit: cover, CSS vars), 44px touch targets, fader width={48}' },
+      { type: 'refactor', description: 'Canvas color token system (canvasTokens.ts): meterBg, applyMeterStops, geqBg/Grid/Center, confidenceColor' },
+      { type: 'refactor', description: 'Design system 100/100 — zero hardcoded hex in components. Sheet/alert-dialog bg-card' },
+      { type: 'refactor', description: 'SpectrumCanvas props: 23 → 9 (display + range + lifecycle sub-objects). Memoized configs in MobileLayout' },
+      { type: 'refactor', description: 'DRY: useRoomModes, useLowSignal, useThresholdChange hooks. createRateLimiter utility. formatFreqLabel shared' },
+      { type: 'fix', description: '5 rounds Codex adversarial fixes: PA2 idempotency, storage validation, consent re-prompt, ML buffer race, mode sync' },
+      { type: 'fix', description: 'useAdvisoryMap frozenRef deps (3 hooks). Uploader retry durability. Companion bridge cached by pairing code' },
+      { type: 'fix', description: 'WCAG 2.1 AA: 23 accessibility findings fixed (touch targets, ARIA roles, contrast, keyboard nav, screen reader)' },
+      { type: 'fix', description: 'UX copy: "All Clear", "Engage to see cuts", "Start Analysis", trimmed tooltips' },
+      { type: 'perf', description: 'TooltipProvider lifted to SettingsPanel. Memoized handleSendToMixer, hasClearableContent, RingOut filter' },
+    ],
+  },
+  {
     version: '0.61.0',
     date: '2026-03-31',
     changes: [

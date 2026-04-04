@@ -277,7 +277,7 @@ export const MobileLayout = memo(function MobileLayout({
               {/* Graph mode toggle — tappable segmented pill (swipe gesture preserved) */}
               <div className="absolute top-0.5 left-0.5 z-20 flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden" role="group" aria-label="Graph mode">
                 <button
-                  onClick={() => setInlineGraphMode('rta')}
+                  onClick={() => { haptic(); setInlineGraphMode('rta') }}
                   aria-pressed={inlineGraphMode === 'rta'}
                   className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                     inlineGraphMode === 'rta' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
@@ -287,7 +287,7 @@ export const MobileLayout = memo(function MobileLayout({
                   RTA
                 </button>
                 <button
-                  onClick={() => setInlineGraphMode('geq')}
+                  onClick={() => { haptic(); setInlineGraphMode('geq') }}
                   aria-pressed={inlineGraphMode === 'geq'}
                   className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                     inlineGraphMode === 'geq' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
@@ -577,7 +577,7 @@ export const MobileLayout = memo(function MobileLayout({
           <div className="flex-shrink-0 flex items-center gap-1 px-1 pb-0.5">
             <div className="flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden">
               <button
-                onClick={() => setInlineGraphMode('rta')}
+                onClick={() => { haptic(); setInlineGraphMode('rta') }}
                 className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                   inlineGraphMode === 'rta' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
                 }`}
@@ -585,7 +585,7 @@ export const MobileLayout = memo(function MobileLayout({
                 RTA
               </button>
               <button
-                onClick={() => setInlineGraphMode('geq')}
+                onClick={() => { haptic(); setInlineGraphMode('geq') }}
                 className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                   inlineGraphMode === 'geq' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
                 }`}
