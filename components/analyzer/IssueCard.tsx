@@ -247,7 +247,7 @@ export const IssueCard = memo(function IssueCard({
       />
 
       <div
-        className="flex flex-col gap-0.5 relative z-10 @container pl-3 pr-1 py-1"
+        className="flex flex-col relative z-10 @container pl-3 pr-1"
         style={swipeLabeling && swiping ? {
           transform: `translateX(${swipeX}px)`,
           transition: swiping ? 'none' : 'transform 200ms ease-out',
@@ -344,7 +344,7 @@ export const IssueCard = memo(function IssueCard({
         </div>
 
         {/* ── Row 2: EQ rec + velocity + actions — all on one line ── */}
-        <div className="flex items-center gap-1.5 text-xs font-mono leading-none">
+        <div className="flex items-center gap-1.5 text-sm font-mono leading-none">
           {/* PEQ cut recommendation — severity-tinted for scanability */}
           {advisory.advisory?.peq && (
             <span style={{ color: severityColor, opacity: 0.8 }}>
