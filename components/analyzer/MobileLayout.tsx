@@ -56,6 +56,9 @@ export const MobileLayout = memo(function MobileLayout({
 
   const handleThresholdChange = useThresholdChange(session, setSensitivityOffset)
 
+  // ── Landscape left panel toggle (Issues ↔ Settings) ─────────────────────
+  const [landscapePanel, setLandscapePanel] = useState<'issues' | 'settings'>('issues')
+
   // ── Mobile fader: local mode toggle (gain ↔ sensitivity) ──────────────────
   const [mobileFaderMode, setMobileFaderMode] = useState<'gain' | 'sensitivity'>('sensitivity')
   const mobileFaderValue = mobileFaderMode === 'sensitivity' ? settings.feedbackThresholdDb : settings.inputGainDb
@@ -463,53 +466,89 @@ export const MobileLayout = memo(function MobileLayout({
 
       {/* ── Landscape mobile: 40% Issues / 55% Graphs / 5% fader sidecar (< md only) ── */}
       <div className="hidden landscape:flex md:landscape:hidden flex-1 overflow-hidden">
-        {/* Issues — 40% */}
+        {/* Left panel — toggleable Issues ↔ Settings */}
         <div className="w-[40%] flex flex-col overflow-hidden border-r border-border/50">
+          {/* Panel toggle header */}
+          <div className="flex-shrink-0 flex items-center border-b border-border/40 bg-card/30">
+            <button
+              onClick={() => setLandscapePanel('issues')}
+              className={`flex-1 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
+                landscapePanel === 'issues' ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/10' : 'text-muted-foreground/50 hover:text-foreground'
+              }`}
+            >
+              Issues {activeAdvisoryCount > 0 && <span className="text-[var(--console-amber)]">{activeAdvisoryCount}</span>}
+            </button>
+            <button
+              onClick={() => setLandscapePanel('settings')}
+              className={`flex-1 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
+                landscapePanel === 'settings' ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/10' : 'text-muted-foreground/50 hover:text-foreground'
+              }`}
+            >
+              Settings
+            </button>
+          </div>
           <div className="flex-1 overflow-y-auto p-2">
-            <h2 className="section-label mb-1 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                Issues
-                <span className="text-[var(--console-amber)] font-mono">{activeAdvisoryCount}</span>
-              </span>
-              <LandscapeSettingsSheet
-                settings={settings}
-                
-                onModeChange={handleModeChange}
-                onReset={resetSettings}
-                calibration={calibration}
-                dataCollection={dataCollection}
-              />
-            </h2>
-            {isWizardActive ? (
-              <RingOutWizard
-                advisories={advisories}
-                onFinish={() => onFinishWizard?.()}
-                isRunning={isRunning}
-                roomModes={roomModes}
-              />
-            ) : (
-              <IssuesList
-                advisories={mobileAdvisories}
-                maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
-                dismissedIds={dismissedIds}
-                onClearAll={onClearAll}
-                onClearResolved={onClearResolved}
-                touchFriendly
-                isRunning={isRunning}
-                onStart={start}
-                onFalsePositive={onFalsePositive}
-                falsePositiveIds={falsePositiveIds}
-                onConfirmFeedback={onConfirmFeedback}
-                confirmedIds={confirmedIds}
-                isLowSignal={isLowSignal}
-                swipeLabeling
-                showAlgorithmScores={settings.showAlgorithmScores}
-                showPeqDetails={settings.showPeqDetails}
+            {landscapePanel === 'issues' ? (
+              <>
+                {isWizardActive ? (
+                  <RingOutWizard
+                    advisories={advisories}
+                    onFinish={() => onFinishWizard?.()}
+                    isRunning={isRunning}
+                    roomModes={roomModes}
+                  />
+                ) : (
+                  <IssuesList
+                    advisories={mobileAdvisories}
+                    maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
+                    dismissedIds={dismissedIds}
+                    onClearAll={onClearAll}
+                    onClearResolved={onClearResolved}
+                    touchFriendly
+                    isRunning={isRunning}
+                    onStart={start}
+                    onFalsePositive={onFalsePositive}
+                    falsePositiveIds={falsePositiveIds}
+                    onConfirmFeedback={onConfirmFeedback}
+                    confirmedIds={confirmedIds}
+                    isLowSignal={isLowSignal}
+                    swipeLabeling
+                    showAlgorithmScores={settings.showAlgorithmScores}
+                    showPeqDetails={settings.showPeqDetails}
                 onStartRingOut={onStartRingOut}
                     onDismiss={onDismiss}
               />
             )}
             <EarlyWarningPanel earlyWarning={earlyWarning} />
+              </>
+            ) : (
+              /* Settings panel in landscape left panel */
+              <div className="space-y-2">
+                <section className="rounded border border-border/40 bg-card/30 p-2">
+                  <h3 className="section-label mb-1 text-[10px]">Input Gain</h3>
+                  <InputMeterSlider
+                    value={settings.inputGainDb}
+                    onChange={(v) => setInputGain(v)}
+                    level={inputLevel}
+                    fullWidth
+                    compact
+                    autoGainEnabled={isAutoGain}
+                    autoGainDb={autoGainDb}
+                    autoGainLocked={autoGainLocked}
+                    onAutoGainToggle={(enabled) => setAutoGain(enabled)}
+                  />
+                </section>
+                <div className="rounded border border-border/40 bg-card/30 p-2">
+                  <SettingsPanel
+                    settings={settings}
+                    onModeChange={handleModeChange}
+                    onReset={resetSettings}
+                    calibration={calibration}
+                    dataCollection={dataCollection}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {/* Graphs — 54% */}
