@@ -312,7 +312,7 @@ export const MobileLayout = memo(function MobileLayout({
 
             {/* ── Drag handle to resize graph ─────────────────────── */}
             <div
-              className="flex-shrink-0 flex items-center justify-center py-2.5 cursor-row-resize touch-none active:bg-muted/30 transition-colors"
+              className="flex-shrink-0 flex items-center justify-center min-h-[44px] cursor-row-resize touch-none active:bg-muted/30 transition-colors"
               onTouchStart={onResizeStart}
               onTouchMove={onResizeMove}
               onTouchEnd={onResizeEnd}
@@ -400,7 +400,7 @@ export const MobileLayout = memo(function MobileLayout({
         </div>
         </div>
         {/* Fader sidecar — persistent across all tabs, with local mode toggle */}
-        <div className="flex-shrink-0 w-12 min-[375px]:w-16 border-l border-border bg-card/30 channel-strip flex flex-col">
+        <div className="flex-shrink-0 w-14 min-[375px]:w-16 border-l border-border bg-card/30 channel-strip flex flex-col overflow-hidden">
           {/* Mode toggle button */}
           <button
             onClick={() => { haptic(); setMobileFaderMode(m => m === 'gain' ? 'sensitivity' : 'gain') }}
@@ -426,6 +426,7 @@ export const MobileLayout = memo(function MobileLayout({
               onAutoGainToggle={mobileFaderMode === 'gain' ? (enabled) => setAutoGain(enabled) : undefined}
               noiseFloorDb={mobileFaderMode === 'gain' ? noiseFloorDb : null}
               guidance={mobileFaderMode === 'sensitivity' ? mobileGuidance : undefined}
+              width={48}
             />
           </div>
         </div>
@@ -582,13 +583,14 @@ export const MobileLayout = memo(function MobileLayout({
               onAutoGainToggle={mobileFaderMode === 'gain' ? (enabled) => setAutoGain(enabled) : undefined}
               noiseFloorDb={mobileFaderMode === 'gain' ? noiseFloorDb : null}
               guidance={mobileFaderMode === 'sensitivity' ? mobileGuidance : undefined}
+              width={48}
             />
           </div>
         </div>
       </div>
 
       {/* ── Mobile bottom tab bar (portrait only) ──────────────── */}
-      <nav className="landscape:hidden lg:hidden flex-shrink-0 border-t border-border/60 bg-card/90 backdrop-blur-sm">
+      <nav className="landscape:hidden lg:hidden flex-shrink-0 border-t border-border/60 bg-card/90 backdrop-blur-sm" style={{ paddingBottom: 'var(--safe-bottom)' }}>
         <div className="flex items-stretch relative" role="tablist" onKeyDown={handleTabKeyDown}>
           {/* #20 Sliding amber indicator bar */}
           <div
