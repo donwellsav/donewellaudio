@@ -188,7 +188,7 @@ export const IssueCard = memo(function IssueCard({
   // ── Render ───────────────────────────────────────────────────────
   return (
     <div
-      className={`relative flex flex-col rounded glass-card ${SEVERITY_ENTER_CLASS[advisory.severity] ?? 'animate-issue-enter'} overflow-hidden ${
+      className={`group relative flex flex-col rounded glass-card ${SEVERITY_ENTER_CLASS[advisory.severity] ?? 'animate-issue-enter'} overflow-hidden ${
         isFalsePositive
           ? 'border-red-500/30 opacity-50'
           : isResolved
@@ -233,7 +233,11 @@ export const IssueCard = memo(function IssueCard({
 
       {/* Left severity accent — glowing strip, wider + brighter for RUNAWAY */}
       <div
-        className={`absolute left-0 top-0 bottom-0 ${SEVERITY_STRIP_CLASS[advisory.severity] ?? 'animate-strip-flash'} ${isRunaway ? 'severity-accent-strip-runaway' : 'severity-accent-strip'}`}
+        className={`absolute left-0 top-0 bottom-0 ${SEVERITY_STRIP_CLASS[advisory.severity] ?? 'animate-strip-flash'} ${
+          isRunaway ? 'severity-accent-strip-runaway'
+          : advisory.severity === 'GROWING' ? 'severity-accent-strip-growing'
+          : 'severity-accent-strip'
+        }`}
         style={{
           backgroundColor: isResolved ? 'hsl(var(--muted))' : severityColor,
           boxShadow: isResolved ? 'none' : isRunaway
@@ -340,12 +344,12 @@ export const IssueCard = memo(function IssueCard({
         </div>
 
         {/* ── Row 2: EQ rec + velocity + actions — all on one line ── */}
-        <div className="flex items-center gap-1.5 text-[10px] font-mono leading-none">
-          {/* PEQ cut recommendation */}
+        <div className="flex items-center gap-1.5 text-[11px] font-mono leading-none">
+          {/* PEQ cut recommendation — severity-tinted for scanability */}
           {advisory.advisory?.peq && (
-            <span className="text-muted-foreground/60">
-              <span className="font-bold" style={{ color: severityColor, opacity: 0.8 }}>{advisory.advisory.peq.gainDb}dB</span>
-              {' '}Q:{advisory.advisory.peq.q.toFixed(1)}
+            <span style={{ color: severityColor, opacity: 0.7 }}>
+              <span className="font-bold">{advisory.advisory.peq.gainDb}dB</span>
+              {' '}Q:{advisory.advisory.peq.q.toFixed(1)} @ {advisory.advisory.peq.hz.toFixed(0)}Hz
             </span>
           )}
           {/* Velocity indicator */}
@@ -357,9 +361,9 @@ export const IssueCard = memo(function IssueCard({
               <span>+{velocity.toFixed(0)}dB/s</span>
             </span>
           )}
-          {/* Actions pushed right — same row as EQ rec */}
+          {/* Actions — visible on card hover/focus only (desktop), always visible on mobile */}
           {(actionsLayout === 'desktop' || actionsLayout === 'copy-only') && (
-            <div className="ml-auto flex items-center">
+            <div className="ml-auto flex items-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150">
               <IssueCardActions
                 advisoryId={advisory.id}
                 advisory={advisory}
