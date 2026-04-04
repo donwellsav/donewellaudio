@@ -56,6 +56,9 @@ export const MobileLayout = memo(function MobileLayout({
 
   const handleThresholdChange = useThresholdChange(session, setSensitivityOffset)
 
+  // ── Landscape left panel toggle (Issues ↔ Settings) ─────────────────────
+  const [landscapePanel, setLandscapePanel] = useState<'issues' | 'settings'>('issues')
+
   // ── Mobile fader: local mode toggle (gain ↔ sensitivity) ──────────────────
   const [mobileFaderMode, setMobileFaderMode] = useState<'gain' | 'sensitivity'>('sensitivity')
   const mobileFaderValue = mobileFaderMode === 'sensitivity' ? settings.feedbackThresholdDb : settings.inputGainDb
@@ -134,7 +137,10 @@ export const MobileLayout = memo(function MobileLayout({
 
   // Inline graph — mode and resizable height
   const [inlineGraphMode, setInlineGraphMode] = useState<'rta' | 'geq'>('rta')
-  const [graphHeightVh, setGraphHeightVh] = useState(28)
+  // Default graph height: shorter on small phones (SE = 667px), taller on tablets
+  const [graphHeightVh, setGraphHeightVh] = useState(() =>
+    typeof window !== 'undefined' && window.innerHeight < 700 ? 20 : 28
+  )
   const resizeDragRef = useRef<{ startY: number; startH: number } | null>(null)
   const graphTouchStart = useRef<{ x: number; y: number } | null>(null)
 
@@ -269,9 +275,10 @@ export const MobileLayout = memo(function MobileLayout({
               onTouchEnd={onGraphTouchEnd}
             >
               {/* Graph mode toggle — tappable segmented pill (swipe gesture preserved) */}
-              <div className="absolute top-0.5 left-0.5 z-20 flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden">
+              <div className="absolute top-0.5 left-0.5 z-20 flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden" role="group" aria-label="Graph mode">
                 <button
-                  onClick={() => setInlineGraphMode('rta')}
+                  onClick={() => { haptic(); setInlineGraphMode('rta') }}
+                  aria-pressed={inlineGraphMode === 'rta'}
                   className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                     inlineGraphMode === 'rta' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
                   }`}
@@ -280,7 +287,8 @@ export const MobileLayout = memo(function MobileLayout({
                   RTA
                 </button>
                 <button
-                  onClick={() => setInlineGraphMode('geq')}
+                  onClick={() => { haptic(); setInlineGraphMode('geq') }}
+                  aria-pressed={inlineGraphMode === 'geq'}
                   className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                     inlineGraphMode === 'geq' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
                   }`}
@@ -312,11 +320,22 @@ export const MobileLayout = memo(function MobileLayout({
 
             {/* ── Drag handle to resize graph ─────────────────────── */}
             <div
-              className="flex-shrink-0 flex items-center justify-center min-h-[44px] cursor-row-resize touch-none active:bg-muted/30 transition-colors"
+              className="flex-shrink-0 flex items-center justify-center min-h-[44px] cursor-row-resize touch-none active:bg-muted/30 transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
               onTouchStart={onResizeStart}
               onTouchMove={onResizeMove}
               onTouchEnd={onResizeEnd}
-              aria-label="Drag to resize graph"
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp') { e.preventDefault(); setGraphHeightVh(h => Math.min(40, h + 3)) }
+                if (e.key === 'ArrowDown') { e.preventDefault(); setGraphHeightVh(h => Math.max(8, h - 3)) }
+              }}
+              role="slider"
+              aria-label="Graph height"
+              aria-orientation="vertical"
+              aria-valuemin={8}
+              aria-valuemax={40}
+              aria-valuenow={graphHeightVh}
+              aria-valuetext={`${graphHeightVh}% viewport height`}
+              tabIndex={0}
             >
               <div className="flex flex-col items-center gap-[3px]">
                 <div className="w-8 h-[2px] rounded-full bg-muted-foreground/30" />
@@ -363,38 +382,43 @@ export const MobileLayout = memo(function MobileLayout({
             </div>
           </div>
 
-          {/* Settings panel */}
+          {/* Settings panel — graph on top for live visual feedback while adjusting */}
           <div
             id="mobile-tabpanel-settings"
-            className="w-full flex-shrink-0 h-full overflow-y-auto p-4 space-y-4 bg-background scroll-fade-bottom max-w-md mx-auto"
+            className="w-full flex-shrink-0 h-full flex flex-col overflow-hidden bg-background"
             role="tabpanel"
             aria-labelledby="mobile-tab-settings"
             aria-hidden={mobileTab !== 'settings'}
             inert={mobileTab !== 'settings' || undefined}
           >
-            <section className="rounded-lg border border-border/40 bg-card/30 p-3">
-              <h3 className="section-label mb-2">Input Gain</h3>
-              <InputMeterSlider
-                value={settings.inputGainDb}
-                onChange={(v) => setInputGain(v)}
-                level={inputLevel}
-                fullWidth
-                autoGainEnabled={isAutoGain}
-                autoGainDb={autoGainDb}
-                autoGainLocked={autoGainLocked}
-                onAutoGainToggle={(enabled) => setAutoGain(enabled)}
-              />
-            </section>
-            <div className="rounded-lg border border-border/40 bg-card/30 p-3">
-              <h3 className="section-label mb-2">Configuration</h3>
-              <SettingsPanel
-                settings={settings}
-                onModeChange={handleModeChange}
-
-                onReset={resetSettings}
-                calibration={calibration}
-                dataCollection={dataCollection}
-              />
+            {/* Compact RTA preview — see the effect of settings changes in real-time */}
+            <div className="flex-shrink-0 h-[18vh] min-h-[80px] bg-card/40 border-b border-border/40 overflow-hidden">
+              <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} lifecycle={spectrumLifecycle} earlyWarning={earlyWarning} clearedIds={rtaClearedIds} isFrozen={isFrozen} roomModes={roomModes} display={spectrumDisplay} range={spectrumRange} onFreqRangeChange={handleFreqRangeChange} onThresholdChange={handleThresholdChange} />
+            </div>
+            {/* Scrollable settings */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 scroll-fade-bottom">
+              <section className="rounded-lg border border-border/40 bg-card/30 p-3">
+                <h3 className="section-label mb-2">Input Gain</h3>
+                <InputMeterSlider
+                  value={settings.inputGainDb}
+                  onChange={(v) => setInputGain(v)}
+                  level={inputLevel}
+                  fullWidth
+                  autoGainEnabled={isAutoGain}
+                  autoGainDb={autoGainDb}
+                  autoGainLocked={autoGainLocked}
+                  onAutoGainToggle={(enabled) => setAutoGain(enabled)}
+                />
+              </section>
+              <div className="rounded-lg border border-border/40 bg-card/30 p-3">
+                <SettingsPanel
+                  settings={settings}
+                  onModeChange={handleModeChange}
+                  onReset={resetSettings}
+                  calibration={calibration}
+                  dataCollection={dataCollection}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -407,7 +431,7 @@ export const MobileLayout = memo(function MobileLayout({
             className={`flex-shrink-0 py-1 text-[11px] font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
               mobileFaderMode === 'sensitivity' ? 'text-blue-400' : 'text-[var(--console-amber)]'
             }`}
-            title={`Switch to ${mobileFaderMode === 'gain' ? 'sensitivity' : 'gain'} fader`}
+            aria-label={`Switch to ${mobileFaderMode === 'gain' ? 'sensitivity' : 'gain'} fader`}
           >
             {mobileFaderMode === 'sensitivity' ? 'Sens' : 'Gain'}
           </button>
@@ -458,104 +482,152 @@ export const MobileLayout = memo(function MobileLayout({
 
       {/* ── Landscape mobile: 40% Issues / 55% Graphs / 5% fader sidecar (< md only) ── */}
       <div className="hidden landscape:flex md:landscape:hidden flex-1 overflow-hidden">
-        {/* Issues — 40% */}
-        <div className="w-[40%] flex flex-col overflow-hidden border-r border-border/50">
+        {/* Left panel — toggleable Issues ↔ Settings */}
+        <div className={`${landscapePanel === 'settings' ? 'w-[45%]' : 'w-[40%]'} flex flex-col overflow-hidden border-r border-border/50 transition-[width] duration-200`}>
+          {/* Panel toggle header */}
+          <div className="flex-shrink-0 flex items-center border-b border-border/40 bg-card/30" role="tablist" aria-label="Landscape panel">
+            <button
+              role="tab"
+              aria-selected={landscapePanel === 'issues'}
+              onClick={() => setLandscapePanel('issues')}
+              className={`flex-1 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+                landscapePanel === 'issues' ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/10' : 'text-muted-foreground/50 hover:text-foreground'
+              }`}
+            >
+              Issues {activeAdvisoryCount > 0 && <span className="text-[var(--console-amber)]">{activeAdvisoryCount}</span>}
+            </button>
+            <button
+              role="tab"
+              aria-selected={landscapePanel === 'settings'}
+              onClick={() => setLandscapePanel('settings')}
+              className={`flex-1 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+                landscapePanel === 'settings' ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/10' : 'text-muted-foreground/50 hover:text-foreground'
+              }`}
+            >
+              Settings
+            </button>
+          </div>
           <div className="flex-1 overflow-y-auto p-2">
-            <h2 className="section-label mb-1 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                Issues
-                <span className="text-[var(--console-amber)] font-mono">{activeAdvisoryCount}</span>
-              </span>
-              <LandscapeSettingsSheet
-                settings={settings}
-                
-                onModeChange={handleModeChange}
-                onReset={resetSettings}
-                calibration={calibration}
-                dataCollection={dataCollection}
-              />
-            </h2>
-            {isWizardActive ? (
-              <RingOutWizard
-                advisories={advisories}
-                onFinish={() => onFinishWizard?.()}
-                isRunning={isRunning}
-                roomModes={roomModes}
-              />
-            ) : (
-              <IssuesList
-                advisories={mobileAdvisories}
-                maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
-                dismissedIds={dismissedIds}
-                onClearAll={onClearAll}
-                onClearResolved={onClearResolved}
-                touchFriendly
-                isRunning={isRunning}
-                onStart={start}
-                onFalsePositive={onFalsePositive}
-                falsePositiveIds={falsePositiveIds}
-                onConfirmFeedback={onConfirmFeedback}
-                confirmedIds={confirmedIds}
-                isLowSignal={isLowSignal}
-                swipeLabeling
-                showAlgorithmScores={settings.showAlgorithmScores}
-                showPeqDetails={settings.showPeqDetails}
+            {landscapePanel === 'issues' ? (
+              <>
+                {isWizardActive ? (
+                  <RingOutWizard
+                    advisories={advisories}
+                    onFinish={() => onFinishWizard?.()}
+                    isRunning={isRunning}
+                    roomModes={roomModes}
+                  />
+                ) : (
+                  <IssuesList
+                    advisories={mobileAdvisories}
+                    maxIssues={MOBILE_MAX_DISPLAYED_ISSUES}
+                    dismissedIds={dismissedIds}
+                    onClearAll={onClearAll}
+                    onClearResolved={onClearResolved}
+                    touchFriendly
+                    isRunning={isRunning}
+                    onStart={start}
+                    onFalsePositive={onFalsePositive}
+                    falsePositiveIds={falsePositiveIds}
+                    onConfirmFeedback={onConfirmFeedback}
+                    confirmedIds={confirmedIds}
+                    isLowSignal={isLowSignal}
+                    swipeLabeling
+                    showAlgorithmScores={settings.showAlgorithmScores}
+                    showPeqDetails={settings.showPeqDetails}
                 onStartRingOut={onStartRingOut}
                     onDismiss={onDismiss}
               />
             )}
             <EarlyWarningPanel earlyWarning={earlyWarning} />
+              </>
+            ) : (
+              /* Settings panel in landscape left panel */
+              <div className="space-y-2">
+                <section className="rounded border border-border/40 bg-card/30 p-2">
+                  <h3 className="section-label mb-1 text-[10px]">Input Gain</h3>
+                  <InputMeterSlider
+                    value={settings.inputGainDb}
+                    onChange={(v) => setInputGain(v)}
+                    level={inputLevel}
+                    fullWidth
+                    compact
+                    autoGainEnabled={isAutoGain}
+                    autoGainDb={autoGainDb}
+                    autoGainLocked={autoGainLocked}
+                    onAutoGainToggle={(enabled) => setAutoGain(enabled)}
+                  />
+                </section>
+                <div className="rounded border border-border/40 bg-card/30 p-2">
+                  <SettingsPanel
+                    settings={settings}
+                    onModeChange={handleModeChange}
+                    onReset={resetSettings}
+                    calibration={calibration}
+                    dataCollection={dataCollection}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        {/* Graphs — 54% */}
-        <div className="w-[54%] flex flex-col gap-0.5 overflow-hidden p-0.5">
-          {/* RTA — top half */}
-          <div ref={rtaContainerRef} className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
-            <div className="absolute top-1 left-1.5 z-20 flex items-center gap-1">
-              <span className="text-sm text-muted-foreground font-mono font-bold uppercase tracking-[0.2em]">RTA</span>
+        {/* Graph — 54%, single graph with RTA/GEQ toggle */}
+        <div className={`${landscapePanel === 'settings' ? 'w-[49%]' : 'w-[54%]'} flex flex-col overflow-hidden p-0.5 transition-[width] duration-200`}>
+          {/* Graph toggle + controls */}
+          <div className="flex-shrink-0 flex items-center gap-1 px-1 pb-0.5">
+            <div className="flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden">
               <button
-                onClick={toggleRtaFullscreen}
-                className="cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 min-h-[44px] min-w-[44px] rounded text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
-                aria-label={isRtaFullscreen ? 'Collapse RTA' : 'Expand RTA'}
+                onClick={() => { haptic(); setInlineGraphMode('rta') }}
+                className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                  inlineGraphMode === 'rta' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
+                }`}
               >
-                {isRtaFullscreen ? <Shrink className="w-4 h-4" /> : <Expand className="w-4 h-4" />}
+                RTA
+              </button>
+              <button
+                onClick={() => { haptic(); setInlineGraphMode('geq') }}
+                className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                  inlineGraphMode === 'geq' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
+                }`}
+              >
+                GEQ
               </button>
             </div>
-            {isRunning && (
-              <button
-                onClick={toggleFreeze}
-                className={`cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 absolute top-1 z-20 px-2 py-0.5 min-h-[44px] min-w-[44px] rounded text-sm font-medium border transition-colors flex items-center justify-center ${
-                  isFrozen
-                    ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                    : 'bg-card/80 text-muted-foreground border-border hover:text-foreground'
-                }`}
-                style={{ right: hasActiveRTAMarkers ? '3.5rem' : '0.25rem' }}
-              >
-                {isFrozen ? 'Live' : 'Freeze'}
-              </button>
+            {inlineGraphMode === 'rta' && (
+              <>
+                <button
+                  onClick={toggleRtaFullscreen}
+                  className="cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 p-1 rounded text-muted-foreground/60 hover:text-foreground transition-colors"
+                  aria-label={isRtaFullscreen ? 'Collapse RTA' : 'Expand RTA'}
+                >
+                  {isRtaFullscreen ? <Shrink className="w-3.5 h-3.5" /> : <Expand className="w-3.5 h-3.5" />}
+                </button>
+                {isRunning && (
+                  <button
+                    onClick={toggleFreeze}
+                    className={`cursor-pointer outline-none text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded transition-colors ${
+                      isFrozen ? 'text-blue-400' : 'text-muted-foreground/50 hover:text-foreground'
+                    }`}
+                  >
+                    {isFrozen ? 'Live' : 'Freeze'}
+                  </button>
+                )}
+                {hasActiveRTAMarkers && (
+                  <button onClick={onClearRTA} className="cursor-pointer text-[10px] font-mono text-muted-foreground/50 hover:text-foreground px-1.5 py-0.5 rounded transition-colors">Clear</button>
+                )}
+              </>
             )}
-            {hasActiveRTAMarkers && (
-              <button
-                onClick={onClearRTA}
-                className="cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 absolute top-1 right-1 z-20 px-2 py-0.5 min-h-[44px] min-w-[44px] rounded text-sm font-medium bg-card/80 text-muted-foreground border border-border hover:text-foreground transition-colors flex items-center justify-center"
-              >
-                Clear
-              </button>
+            {inlineGraphMode === 'geq' && hasActiveGEQBars && (
+              <button onClick={onClearGEQ} className="cursor-pointer text-[10px] font-mono text-muted-foreground/50 hover:text-foreground px-1.5 py-0.5 rounded transition-colors">Clear</button>
             )}
-            <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} lifecycle={spectrumLifecycleWithStart} earlyWarning={earlyWarning} clearedIds={rtaClearedIds} isFrozen={isFrozen} roomModes={roomModes} display={spectrumDisplay} range={spectrumRange} onFreqRangeChange={handleFreqRangeChange} onThresholdChange={handleThresholdChange} />
           </div>
-          {/* GEQ — bottom half */}
-          <div className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
-            <span className="absolute top-1 left-1.5 z-20 text-sm text-muted-foreground font-mono font-bold uppercase tracking-[0.2em] pointer-events-none">GEQ</span>
-            {hasActiveGEQBars && (
-              <button
-                onClick={onClearGEQ}
-                className="cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 absolute top-1 right-1 z-20 px-2 py-0.5 min-h-[44px] min-w-[44px] rounded text-sm font-medium bg-card/80 text-muted-foreground border border-border hover:text-foreground transition-colors flex items-center justify-center"
-              >
-                Clear
-              </button>
+          {/* Single graph — full height */}
+          <div ref={inlineGraphMode === 'rta' ? rtaContainerRef : undefined} className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden">
+            {inlineGraphMode === 'rta' ? (
+              <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} lifecycle={spectrumLifecycleWithStart} earlyWarning={earlyWarning} clearedIds={rtaClearedIds} isFrozen={isFrozen} roomModes={roomModes} display={spectrumDisplay} range={spectrumRange} onFreqRangeChange={handleFreqRangeChange} onThresholdChange={handleThresholdChange} />
+            ) : (
+              <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} isRunning={isRunning} />
             )}
-            <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} isRunning={isRunning} />
           </div>
         </div>
         {/* Right fader sidecar — 6% */}

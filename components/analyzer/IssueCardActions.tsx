@@ -184,6 +184,7 @@ export const IssueCardActions = memo(function IssueCardActions({
         <button
           onClick={onCopy}
           aria-label={`Copy ${exactFreqStr}`}
+          aria-pressed={copied}
           className={`${COPY_BTN} min-w-[44px] min-h-[44px] ${
             copied ? 'text-[var(--console-amber)]' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
           }`}

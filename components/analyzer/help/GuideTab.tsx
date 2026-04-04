@@ -22,7 +22,7 @@ export const GuideTab = memo(function GuideTab() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
           <HelpSection title="Quick Start" color="amber">
             <ol className="list-decimal list-inside space-y-2">
-              <li>Click <strong>Press to Start Analysis</strong> for live detection, or <strong>Ring Out Room</strong> for guided calibration wizard</li>
+              <li>Click <strong>Start Analysis</strong> for live detection, or <strong>Ring Out Room</strong> for guided calibration wizard</li>
               <li>Detected issues appear in the <strong>Active Issues</strong> panel, sorted by frequency</li>
               <li>Each issue card shows frequency, pitch, severity, and recommended GEQ/PEQ cuts</li>
               <li>Tap the <strong>copy</strong> icon on a card to copy EQ settings to clipboard</li>
@@ -34,7 +34,8 @@ export const GuideTab = memo(function GuideTab() {
           <HelpSection title="Display Areas" color="blue">
             <ul className="space-y-2">
               <li><strong>Desktop — Resizable Split:</strong> RTA spectrum (60%) and GEQ bar view (40%) side by side. Drag the divider to resize.</li>
-              <li><strong>Mobile — Tabbed:</strong> Two tabs — Issues (with inline resizable graph) and Settings. Swipe the graph area to switch between RTA and GEQ. Drag the handle below the graph to resize.</li>
+              <li><strong>Mobile Portrait — Tabbed:</strong> Two tabs — Issues (with inline resizable RTA/GEQ graph) and Settings (with compact RTA preview). Swipe the graph area or tap the toggle to switch RTA↔GEQ. Drag the handle to resize. All 4 settings tabs (Live/Setup/Display/Adv) accessible inline.</li>
+              <li><strong>Mobile Landscape:</strong> Issues/Settings toggle on the left (40-45%), single full-height RTA or GEQ graph on the right (49-54%), fader sidecar. Tap the toggle to switch between issues and settings without leaving the view.</li>
               <li><strong>Issues Panel:</strong> Active detected issues sorted by frequency. RUNAWAY issues pulse red. Copy EQ settings to clipboard.</li>
               <li><strong>Controls Panel:</strong> Four tabs — Live (sensitivity + frequency range), Setup (mode, room, calibration, presets), Display (graph settings, tooltips, themes), Advanced (algorithms, DSP, diagnostics).</li>
               <li><strong>Algorithm Status Bar:</strong> Shows algorithm mode, active algorithms (Auto mode), FPS counter, content type (speech/music/compressed via temporal envelope + spectral analysis), and compression status.</li>

@@ -218,7 +218,7 @@ export const IssuesList = memo(function IssuesList({ advisories, maxIssues = 10,
                 <button
                   onClick={onStartRingOut}
                   aria-label="Start ring-out wizard"
-                  className="group relative flex items-center justify-center gap-2 w-full max-w-[220px] py-2 px-4 rounded-lg border border-amber-500/15 hover:border-amber-500/30 bg-transparent hover:bg-amber-500/5 transition-[color,background-color,border-color] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-amber-500"
+                  className="group relative flex items-center justify-center gap-2 w-full max-w-[220px] min-h-[44px] py-2 px-4 rounded-lg border border-amber-500/15 hover:border-amber-500/30 bg-transparent hover:bg-amber-500/5 transition-[color,background-color,border-color] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-amber-500"
                 >
                   <span className="font-mono text-[11px] font-bold tracking-[0.12em] uppercase text-amber-500/70 dark:text-amber-400/70 group-hover:text-amber-400">
                     Ring Out Room
@@ -374,7 +374,7 @@ const SwipeHint = memo(function SwipeHint({ onDismiss }: { onDismiss: () => void
       tabIndex={0}
       onClick={onDismiss}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); onDismiss() } }}
-      aria-label="Swipe gestures: left to dismiss, right to confirm, long-press for false positive. Press to close hint."
+      aria-label="Swipe gesture guide. Press Enter to close."
     >
       <span className="flex items-center gap-1">
         <ArrowLeft className="w-3 h-3 text-muted-foreground" />
