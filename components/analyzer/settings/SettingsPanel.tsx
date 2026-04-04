@@ -125,10 +125,12 @@ export const SettingsPanel = memo(function SettingsPanel({
 
         {/* ── Tab bar — rendered inline when uncontrolled (mobile) ── */}
         {!controlledTab && (
-          <div className="flex gap-1 mb-2">
+          <div className="flex gap-1 mb-2" role="tablist" aria-label="Settings tabs">
             {SETTINGS_TABS.map(({ id, label, shortLabel, Icon }) => (
               <button
                 key={id}
+                role="tab"
+                aria-selected={activeTab === id}
                 onClick={() => setActiveTab(id)}
                 className={`flex-1 flex items-center justify-center gap-1 py-2 rounded text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                   activeTab === id

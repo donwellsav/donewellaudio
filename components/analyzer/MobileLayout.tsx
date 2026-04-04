@@ -272,9 +272,10 @@ export const MobileLayout = memo(function MobileLayout({
               onTouchEnd={onGraphTouchEnd}
             >
               {/* Graph mode toggle — tappable segmented pill (swipe gesture preserved) */}
-              <div className="absolute top-0.5 left-0.5 z-20 flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden">
+              <div className="absolute top-0.5 left-0.5 z-20 flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden" role="group" aria-label="Graph mode">
                 <button
                   onClick={() => setInlineGraphMode('rta')}
+                  aria-pressed={inlineGraphMode === 'rta'}
                   className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                     inlineGraphMode === 'rta' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
                   }`}
@@ -284,6 +285,7 @@ export const MobileLayout = memo(function MobileLayout({
                 </button>
                 <button
                   onClick={() => setInlineGraphMode('geq')}
+                  aria-pressed={inlineGraphMode === 'geq'}
                   className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
                     inlineGraphMode === 'geq' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
                   }`}
@@ -315,11 +317,22 @@ export const MobileLayout = memo(function MobileLayout({
 
             {/* ── Drag handle to resize graph ─────────────────────── */}
             <div
-              className="flex-shrink-0 flex items-center justify-center min-h-[44px] cursor-row-resize touch-none active:bg-muted/30 transition-colors"
+              className="flex-shrink-0 flex items-center justify-center min-h-[44px] cursor-row-resize touch-none active:bg-muted/30 transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
               onTouchStart={onResizeStart}
               onTouchMove={onResizeMove}
               onTouchEnd={onResizeEnd}
-              aria-label="Drag to resize graph"
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp') { e.preventDefault(); setGraphHeightVh(h => Math.min(40, h + 3)) }
+                if (e.key === 'ArrowDown') { e.preventDefault(); setGraphHeightVh(h => Math.max(8, h - 3)) }
+              }}
+              role="slider"
+              aria-label="Graph height"
+              aria-orientation="vertical"
+              aria-valuemin={8}
+              aria-valuemax={40}
+              aria-valuenow={graphHeightVh}
+              aria-valuetext={`${graphHeightVh}% viewport height`}
+              tabIndex={0}
             >
               <div className="flex flex-col items-center gap-[3px]">
                 <div className="w-8 h-[2px] rounded-full bg-muted-foreground/30" />
@@ -415,7 +428,7 @@ export const MobileLayout = memo(function MobileLayout({
             className={`flex-shrink-0 py-1 text-[11px] font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
               mobileFaderMode === 'sensitivity' ? 'text-blue-400' : 'text-[var(--console-amber)]'
             }`}
-            title={`Switch to ${mobileFaderMode === 'gain' ? 'sensitivity' : 'gain'} fader`}
+            aria-label={`Switch to ${mobileFaderMode === 'gain' ? 'sensitivity' : 'gain'} fader`}
           >
             {mobileFaderMode === 'sensitivity' ? 'Sens' : 'Gain'}
           </button>
@@ -469,18 +482,22 @@ export const MobileLayout = memo(function MobileLayout({
         {/* Left panel — toggleable Issues ↔ Settings */}
         <div className="w-[40%] flex flex-col overflow-hidden border-r border-border/50">
           {/* Panel toggle header */}
-          <div className="flex-shrink-0 flex items-center border-b border-border/40 bg-card/30">
+          <div className="flex-shrink-0 flex items-center border-b border-border/40 bg-card/30" role="tablist" aria-label="Landscape panel">
             <button
+              role="tab"
+              aria-selected={landscapePanel === 'issues'}
               onClick={() => setLandscapePanel('issues')}
-              className={`flex-1 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
+              className={`flex-1 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                 landscapePanel === 'issues' ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/10' : 'text-muted-foreground/50 hover:text-foreground'
               }`}
             >
               Issues {activeAdvisoryCount > 0 && <span className="text-[var(--console-amber)]">{activeAdvisoryCount}</span>}
             </button>
             <button
+              role="tab"
+              aria-selected={landscapePanel === 'settings'}
               onClick={() => setLandscapePanel('settings')}
-              className={`flex-1 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
+              className={`flex-1 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-center cursor-pointer transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                 landscapePanel === 'settings' ? 'text-[var(--console-amber)] bg-[var(--console-amber)]/10' : 'text-muted-foreground/50 hover:text-foreground'
               }`}
             >
