@@ -108,7 +108,7 @@ When the user asks to cut a release or "update the usuals":
 
 ## Project Overview
 
-**DoneWell Audio** (donewellaudio.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using seven fused detection algorithms (six classical + ML), and delivers EQ recommendations with pitch translation. Version 0.52.0. Repository: github.com/donwellsav/donewellaudio.
+**DoneWell Audio** (donewellaudio.com) is a browser-based real-time acoustic feedback detection PWA for live sound engineers. It captures microphone input via the Web Audio API, identifies feedback frequencies using seven fused detection algorithms (six classical + ML), and delivers EQ recommendations with pitch translation. Repository: github.com/donwellsav/donewellaudio.
 
 ## Tech Stack
 
@@ -118,10 +118,10 @@ When the user asks to cut a release or "update the usuals":
 | Language | TypeScript 5.7 (strict mode, zero `any`) |
 | UI | shadcn/ui (New York), Tailwind CSS v4, Radix primitives |
 | Audio | Web Audio API (AnalyserNode, 8192-point FFT at 50fps) |
-| DSP Offload | Web Worker (dspWorker.ts, ~458 lines) |
+| DSP Offload | Web Worker (dspWorker.ts, ~745 lines) |
 | Visualization | HTML5 Canvas at 30fps |
 | State | React 19 hooks + 4 context providers (no external state library) |
-| Testing | Vitest (1257 tests, 66 suites, under 20s) |
+| Testing | Vitest (1220 tests, 65 suites, under 25s) |
 | Error Reporting | Sentry (browser + server + worker runtimes) |
 | PWA | Serwist (service worker, offline caching, installable) |
 | Package Manager | pnpm |
@@ -198,7 +198,7 @@ Mic -> getUserMedia -> GainNode -> AnalyserNode (8192 FFT)
 
 ## Known Bugs
 
-All previously tracked bugs (P1–P3) have been resolved as of v0.127.0. All Phase 0 control surface bugs (B1–B7) are resolved as of v0.14.0. See git history for details.
+None. All previously tracked bugs resolved. See git history for details.
 
 ## Known False Positives
 
@@ -332,6 +332,13 @@ scripts/ml/                     # ML training pipeline
   train_fp_filter.py            #   Train MLP, export ONNX, update manifest
 .github/workflows/ml-train.yml  # Weekly/manual ML training workflow
 ```
+
+## Architecture Gotchas
+
+- **Do not extract interaction logic from SpectrumCanvas.tsx into a separate hook.** The dirty-bit skip pattern (`dirtyRef`, `hoverPosRef`, `dragRef`) depends on refs being declared in the same component scope as the `useAnimationFrame` render callback. Moving them to a hook broke frame skipping and dropped FPS from 100+ to under 20. Reverted in v0.80.0.
+- **Barrel re-exports are safe for pure-function splits.** acousticUtils, spectrumDrawing, classifier, and feedbackDetector were all split into sub-modules with barrel re-exports. Zero runtime impact — all consumer imports unchanged. Pattern: create subdirectory, move functions, keep original file as `export * from './submodule'` barrel.
+- **Do not split stateful class methods** from FeedbackDetector into separate files unless they are pure computation (no `this.` mutations). The class has ~40 private fields shared across 24 methods on a 50fps hot path.
+- **Archived docs:** 71 stale docs, plans, papers, and aifightclub files moved to `docs/archive/` in v0.80.0. Only 10 living docs remain in `docs/`. Check `docs/archive/` for historical audits, design plans, and AI handoff docs.
 
 ## Key Performance Constraints
 
@@ -627,12 +634,10 @@ Then when user says "PR":
 - **Custom presets:** Save/load named presets (up to 5). Mode selector + saved presets in Detect accordion.
 
 ### Issue Card Design
-- **Frequency hero:** `text-3xl` (4xl for RUNAWAY), `font-black`, severity-colored with LED glow text-shadow. The most important element in the app — readable from across the room.
-- **Severity icons:** Lucide icons replace text labels — `Zap` (RUNAWAY), `ArrowUpRight` (GROWING), `Radio` (RESONANCE), `CircleDot` (POSSIBLE_RING), `Waves` (WHISTLE), `Music` (INSTRUMENT). Exported as `SEVERITY_ICON` from `IssueCard.tsx`.
-- **2-row layout:** Row 1: severity icon + frequency + pitch + badges. Row 2: PEQ rec + velocity + actions (single horizontal row).
-- **Icon legend:** `SeverityLegend` component at bottom of IssuesList, shows all 6 icons with labels and colors.
-- **CONFIRM FEEDBACK:** Two-line button label — "CONFIRM" with "FEEDBACK" subscript (7px, 60% opacity) for clarity.
-- **Severity-graded fade:** RUNAWAY = instant (no animation), all others = 5s opacity fade via `issue-enter-slow` keyframes. Strip accent uses matching `strip-fade-in`.
+- **Frequency hero:** `text-3xl` (4xl for RUNAWAY), `font-black`, severity-colored with LED glow text-shadow. Readable from across the room.
+- **Severity icons:** Lucide icons — `Zap` (RUNAWAY), `ArrowUpRight` (GROWING), `Radio` (RESONANCE), `CircleDot` (POSSIBLE_RING), `Waves` (WHISTLE), `Music` (INSTRUMENT). Exported as `SEVERITY_ICON` from `IssueCard.tsx`.
+- **Icon legend:** `SeverityLegend` component at bottom of IssuesList.
+- **Severity-graded fade:** RUNAWAY = instant (no animation), all others = 5s opacity fade via `issue-enter-slow` keyframes.
 
 ### Signal Tint
 - **Signal Tint toggle:** `signalTintEnabled` in Display settings (default: true). When off, console stays neutral slate gray — colors only appear when they mean something.
