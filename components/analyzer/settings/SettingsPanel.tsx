@@ -123,8 +123,28 @@ export const SettingsPanel = memo(function SettingsPanel({
     <TooltipProvider delayDuration={400}>
       <div className="@container space-y-1.5">
 
-        {/* ── Content (tab bar is rendered in DesktopLayout as flex-shrink-0) ── */}
-        {/* Badge on ADV tab: exposed via hasCustomGates so parent can show indicator */}
+        {/* ── Tab bar — rendered inline when uncontrolled (mobile) ── */}
+        {!controlledTab && (
+          <div className="flex gap-1 mb-2">
+            {SETTINGS_TABS.map(({ id, label, shortLabel, Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`flex-1 flex items-center justify-center gap-1 py-2 rounded text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+                  activeTab === id
+                    ? 'bg-[var(--console-amber)]/15 text-[var(--console-amber)] border border-[var(--console-amber)]/30'
+                    : 'text-muted-foreground hover:text-foreground border border-transparent'
+                }`}
+              >
+                <Icon className="w-3 h-3" />
+                {shortLabel ?? label}
+                {id === 'advanced' && hasCustomGates && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--console-amber)]" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
         <div key={activeTab} className="tab-content-fade">
           {activeTab === 'live' && (
             <LiveTab settings={settings} />
