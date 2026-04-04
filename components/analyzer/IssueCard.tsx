@@ -270,7 +270,7 @@ export const IssueCard = memo(function IssueCard({
           {/* FREQUENCY — dominant, severity-tinted, LED-glow readout */}
           {/* Frequency hero — no tooltip, keep it clean and unobstructed */}
           <span className={`font-mono font-black leading-none tracking-tight cursor-default ${
-            isRunaway ? 'text-4xl' : 'text-3xl'
+            isRunaway ? 'text-3xl @[320px]:text-4xl' : 'text-2xl @[320px]:text-3xl'
           } ${
             isFalsePositive ? 'line-through opacity-50' : ''
           }`}

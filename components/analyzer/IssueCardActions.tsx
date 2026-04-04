@@ -7,7 +7,7 @@ import type { Advisory } from '@/types/advisory'
 // ── Shared button class bases ────────────────────────────────────────
 // Desktop: 36px min-width (mouse pointer, compact). Mobile: 44px (WCAG 2.5.5 touch target)
 const ACTION_BTN_DESKTOP = 'rounded text-[10px] font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-1 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-7 min-w-[36px]'
-const ACTION_BTN_MOBILE = 'rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-2 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-8 min-w-[44px]'
+const ACTION_BTN_MOBILE = 'rounded text-xs font-mono font-bold tracking-wider transition-colors flex items-center justify-center px-2 cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 h-11 min-w-[44px]'
 const COPY_BTN = 'rounded btn-glow flex items-center justify-center cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -184,7 +184,7 @@ export const IssueCardActions = memo(function IssueCardActions({
         <button
           onClick={onCopy}
           aria-label={`Copy ${exactFreqStr}`}
-          className={`${COPY_BTN} w-9 h-8 ${
+          className={`${COPY_BTN} min-w-[44px] min-h-[44px] ${
             copied ? 'text-[var(--console-amber)]' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/60'
           }`}
         >

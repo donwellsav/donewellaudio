@@ -78,6 +78,11 @@
 html {
   touch-action: manipulation;
   overscroll-behavior: contain;
+  /* Safe area insets for notched/island devices (iPhone X+, Galaxy Fold, etc.) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
   /* Subtle radial vignette — center stays neutral, edges darken slightly */
   background: radial-gradient(ellipse 120% 80% at 50% 0%, rgba(20, 35, 60, 0.18) 0%, transparent 70%),
               radial-gradient(ellipse 80% 60% at 80% 100%, rgba(10, 18, 35, 0.25) 0%, transparent 70%),

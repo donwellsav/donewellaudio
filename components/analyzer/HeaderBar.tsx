@@ -40,7 +40,7 @@ export const HeaderBar = memo(function HeaderBar() {
   )
 
   return (
-    <header className="header-glow relative flex flex-row items-center gap-2 sm:gap-4 px-3 py-1 channel-strip amber-panel-header border-b border-b-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.20)] shadow-[0_1px_16px_rgba(0,0,0,0.15),0_2px_4px_rgba(0,0,0,0.1),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.06)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.55),0_2px_4px_rgba(0,0,0,0.3),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.09)] sm:px-4 sm:py-1">
+    <header className="header-glow relative flex flex-row items-center gap-2 sm:gap-4 py-1 channel-strip amber-panel-header border-b border-b-[rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.20)] shadow-[0_1px_16px_rgba(0,0,0,0.15),0_2px_4px_rgba(0,0,0,0.1),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.06)] dark:shadow-[0_1px_16px_rgba(0,0,0,0.55),0_2px_4px_rgba(0,0,0,0.3),0_1px_0_rgba(var(--tint-r),var(--tint-g),var(--tint-b),0.09)] sm:py-1" style={{ paddingLeft: 'max(0.75rem, var(--safe-left))', paddingRight: 'max(0.75rem, var(--safe-right))', paddingTop: 'max(0.25rem, var(--safe-top))' }}>
 
       {/* ── Left: Logo + text + device (flex-1 to balance center) ── */}
       <div className="flex items-center gap-2 sm:gap-2.5 flex-1 min-w-0">
@@ -84,7 +84,7 @@ export const HeaderBar = memo(function HeaderBar() {
                 Audio input
               </TooltipContent>
             </Tooltip>
-            <DropdownMenuContent align="start" className="max-w-[360px]">
+            <DropdownMenuContent align="start" className="max-w-[min(360px,90vw)]">
               <DropdownMenuRadioGroup value={selectedDeviceId} onValueChange={handleDeviceChange}>
                 <DropdownMenuRadioItem value="" className="text-sm">
                   Default (System)
