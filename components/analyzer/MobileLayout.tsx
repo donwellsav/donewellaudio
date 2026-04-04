@@ -551,55 +551,63 @@ export const MobileLayout = memo(function MobileLayout({
             )}
           </div>
         </div>
-        {/* Graphs — 54% */}
-        <div className="w-[54%] flex flex-col gap-0.5 overflow-hidden p-0.5">
-          {/* RTA — top half */}
-          <div ref={rtaContainerRef} className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
-            <div className="absolute top-1 left-1.5 z-20 flex items-center gap-1">
-              <span className="text-sm text-muted-foreground font-mono font-bold uppercase tracking-[0.2em]">RTA</span>
+        {/* Graph — 54%, single graph with RTA/GEQ toggle */}
+        <div className="w-[54%] flex flex-col overflow-hidden p-0.5">
+          {/* Graph toggle + controls */}
+          <div className="flex-shrink-0 flex items-center gap-1 px-1 pb-0.5">
+            <div className="flex rounded-full bg-background/60 backdrop-blur-sm border border-border/40 overflow-hidden">
               <button
-                onClick={toggleRtaFullscreen}
-                className="cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 min-h-[44px] min-w-[44px] rounded text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
-                aria-label={isRtaFullscreen ? 'Collapse RTA' : 'Expand RTA'}
+                onClick={() => setInlineGraphMode('rta')}
+                className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                  inlineGraphMode === 'rta' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
+                }`}
               >
-                {isRtaFullscreen ? <Shrink className="w-4 h-4" /> : <Expand className="w-4 h-4" />}
+                RTA
+              </button>
+              <button
+                onClick={() => setInlineGraphMode('geq')}
+                className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                  inlineGraphMode === 'geq' ? 'bg-primary/20 text-primary' : 'text-muted-foreground/50'
+                }`}
+              >
+                GEQ
               </button>
             </div>
-            {isRunning && (
-              <button
-                onClick={toggleFreeze}
-                className={`cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 absolute top-1 z-20 px-2 py-0.5 min-h-[44px] min-w-[44px] rounded text-sm font-medium border transition-colors flex items-center justify-center ${
-                  isFrozen
-                    ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                    : 'bg-card/80 text-muted-foreground border-border hover:text-foreground'
-                }`}
-                style={{ right: hasActiveRTAMarkers ? '3.5rem' : '0.25rem' }}
-              >
-                {isFrozen ? 'Live' : 'Freeze'}
-              </button>
+            {inlineGraphMode === 'rta' && (
+              <>
+                <button
+                  onClick={toggleRtaFullscreen}
+                  className="cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 p-1 rounded text-muted-foreground/60 hover:text-foreground transition-colors"
+                  aria-label={isRtaFullscreen ? 'Collapse RTA' : 'Expand RTA'}
+                >
+                  {isRtaFullscreen ? <Shrink className="w-3.5 h-3.5" /> : <Expand className="w-3.5 h-3.5" />}
+                </button>
+                {isRunning && (
+                  <button
+                    onClick={toggleFreeze}
+                    className={`cursor-pointer outline-none text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded transition-colors ${
+                      isFrozen ? 'text-blue-400' : 'text-muted-foreground/50 hover:text-foreground'
+                    }`}
+                  >
+                    {isFrozen ? 'Live' : 'Freeze'}
+                  </button>
+                )}
+                {hasActiveRTAMarkers && (
+                  <button onClick={onClearRTA} className="cursor-pointer text-[10px] font-mono text-muted-foreground/50 hover:text-foreground px-1.5 py-0.5 rounded transition-colors">Clear</button>
+                )}
+              </>
             )}
-            {hasActiveRTAMarkers && (
-              <button
-                onClick={onClearRTA}
-                className="cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 absolute top-1 right-1 z-20 px-2 py-0.5 min-h-[44px] min-w-[44px] rounded text-sm font-medium bg-card/80 text-muted-foreground border border-border hover:text-foreground transition-colors flex items-center justify-center"
-              >
-                Clear
-              </button>
+            {inlineGraphMode === 'geq' && hasActiveGEQBars && (
+              <button onClick={onClearGEQ} className="cursor-pointer text-[10px] font-mono text-muted-foreground/50 hover:text-foreground px-1.5 py-0.5 rounded transition-colors">Clear</button>
             )}
-            <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} lifecycle={spectrumLifecycleWithStart} earlyWarning={earlyWarning} clearedIds={rtaClearedIds} isFrozen={isFrozen} roomModes={roomModes} display={spectrumDisplay} range={spectrumRange} onFreqRangeChange={handleFreqRangeChange} onThresholdChange={handleThresholdChange} />
           </div>
-          {/* GEQ — bottom half */}
-          <div className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden relative">
-            <span className="absolute top-1 left-1.5 z-20 text-sm text-muted-foreground font-mono font-bold uppercase tracking-[0.2em] pointer-events-none">GEQ</span>
-            {hasActiveGEQBars && (
-              <button
-                onClick={onClearGEQ}
-                className="cursor-pointer outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 absolute top-1 right-1 z-20 px-2 py-0.5 min-h-[44px] min-w-[44px] rounded text-sm font-medium bg-card/80 text-muted-foreground border border-border hover:text-foreground transition-colors flex items-center justify-center"
-              >
-                Clear
-              </button>
+          {/* Single graph — full height */}
+          <div ref={inlineGraphMode === 'rta' ? rtaContainerRef : undefined} className="flex-1 min-h-0 bg-card/40 rounded border border-border/40 overflow-hidden">
+            {inlineGraphMode === 'rta' ? (
+              <SpectrumCanvas spectrumRef={spectrumRef} advisories={mobileAdvisories} lifecycle={spectrumLifecycleWithStart} earlyWarning={earlyWarning} clearedIds={rtaClearedIds} isFrozen={isFrozen} roomModes={roomModes} display={spectrumDisplay} range={spectrumRange} onFreqRangeChange={handleFreqRangeChange} onThresholdChange={handleThresholdChange} />
+            ) : (
+              <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} isRunning={isRunning} />
             )}
-            <GEQBarView advisories={mobileAdvisories} graphFontSize={settings.graphFontSize} clearedIds={geqClearedIds} isRunning={isRunning} />
           </div>
         </div>
         {/* Right fader sidecar — 6% */}
