@@ -7,7 +7,66 @@ import type { DetectionContextValue } from '@/contexts/DetectionContext'
 import type { AnalyzerContextState } from '@/hooks/useAnalyzerContextState'
 import type { ModeId } from '@/types/settings'
 
-export function createEngineContextValue(state: AnalyzerContextState): EngineContextValue {
+type EngineContextStateFields = Pick<
+  AnalyzerContextState,
+  | 'isRunning'
+  | 'isStarting'
+  | 'error'
+  | 'workerError'
+  | 'startWithDevice'
+  | 'stop'
+  | 'switchDevice'
+  | 'devices'
+  | 'selectedDeviceId'
+  | 'handleDeviceChange'
+  | 'dspWorker'
+  | 'roomEstimate'
+  | 'roomMeasuring'
+  | 'roomProgress'
+  | 'startRoomMeasurement'
+  | 'stopRoomMeasurement'
+  | 'clearRoomEstimate'
+>
+
+type LayeredContextActions = Pick<
+  AnalyzerContextState['layered'],
+  | 'setMode'
+  | 'setEnvironment'
+  | 'setSensitivityOffset'
+  | 'setInputGain'
+  | 'setAutoGain'
+  | 'setFocusRange'
+  | 'setEqStyle'
+  | 'setMicProfile'
+  | 'updateDisplay'
+  | 'updateDiagnostics'
+  | 'updateLiveOverrides'
+>
+
+type SettingsContextStateFields = Pick<
+  AnalyzerContextState,
+  'settings' | 'resetSettings' | 'layeredSession' | 'layeredDisplay'
+> & {
+  layered: LayeredContextActions
+}
+
+type MeteringContextStateFields = Pick<
+  AnalyzerContextState,
+  | 'spectrumRef'
+  | 'tracksRef'
+  | 'spectrumStatus'
+  | 'noiseFloorDb'
+  | 'sampleRate'
+  | 'fftSize'
+  | 'inputLevel'
+  | 'isAutoGain'
+  | 'autoGainDb'
+  | 'autoGainLocked'
+>
+
+type DetectionContextStateFields = Pick<AnalyzerContextState, 'advisories' | 'earlyWarning'>
+
+export function createEngineContextValue(state: EngineContextStateFields): EngineContextValue {
   return {
     isRunning: state.isRunning,
     isStarting: state.isStarting,
@@ -29,7 +88,7 @@ export function createEngineContextValue(state: AnalyzerContextState): EngineCon
   }
 }
 
-export function createSettingsContextValue(state: AnalyzerContextState): SettingsContextValue {
+export function createSettingsContextValue(state: SettingsContextStateFields): SettingsContextValue {
   return {
     settings: state.settings,
     resetSettings: state.resetSettings,
@@ -51,7 +110,7 @@ export function createSettingsContextValue(state: AnalyzerContextState): Setting
   }
 }
 
-export function createMeteringContextValue(state: AnalyzerContextState): MeteringContextValue {
+export function createMeteringContextValue(state: MeteringContextStateFields): MeteringContextValue {
   return {
     spectrumRef: state.spectrumRef,
     tracksRef: state.tracksRef,
@@ -66,7 +125,9 @@ export function createMeteringContextValue(state: AnalyzerContextState): Meterin
   }
 }
 
-export function createDetectionContextValue(state: AnalyzerContextState): DetectionContextValue {
+export function createDetectionContextValue(
+  state: DetectionContextStateFields,
+): DetectionContextValue {
   return {
     advisories: state.advisories,
     earlyWarning: state.earlyWarning,

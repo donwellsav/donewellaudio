@@ -16,6 +16,24 @@ import type {
   SpectrumRangeConfig,
 } from '@/components/analyzer/SpectrumCanvas'
 
+type SpectrumDisplaySettings = Pick<
+  DetectorSettings,
+  | 'graphFontSize'
+  | 'rtaDbMin'
+  | 'rtaDbMax'
+  | 'spectrumLineWidth'
+  | 'canvasTargetFps'
+  | 'showFreqZones'
+  | 'showRoomModeLines'
+  | 'showThresholdLine'
+  | 'spectrumWarmMode'
+>
+
+type SpectrumRangeSettings = Pick<
+  DetectorSettings,
+  'minFrequency' | 'maxFrequency' | 'feedbackThresholdDb'
+>
+
 export function hasCustomGateOverrides(session: DwaSessionState | null | undefined): boolean {
   const diagnostics = session?.diagnostics
   if (!diagnostics) return false
@@ -36,7 +54,7 @@ export function countActiveGeqCuts(advisories: Advisory[], geqClearedIds: Set<st
   ).length
 }
 
-export function buildSpectrumDisplay(settings: DetectorSettings): SpectrumDisplayConfig {
+export function buildSpectrumDisplay(settings: SpectrumDisplaySettings): SpectrumDisplayConfig {
   return {
     graphFontSize: settings.graphFontSize,
     rtaDbMin: settings.rtaDbMin,
@@ -50,7 +68,7 @@ export function buildSpectrumDisplay(settings: DetectorSettings): SpectrumDispla
   }
 }
 
-export function buildSpectrumRange(settings: DetectorSettings): SpectrumRangeConfig {
+export function buildSpectrumRange(settings: SpectrumRangeSettings): SpectrumRangeConfig {
   return {
     minFrequency: settings.minFrequency,
     maxFrequency: settings.maxFrequency,
@@ -83,25 +101,53 @@ export function useAnalyzerLayoutState() {
   const isLowSignal = useLowSignal(isRunning, inputLevel)
   const handleThresholdChange = useThresholdChange(session, setSensitivityOffset)
   const roomModes = useRoomModes(settings)
+  const {
+    graphFontSize,
+    rtaDbMin,
+    rtaDbMax,
+    spectrumLineWidth,
+    canvasTargetFps,
+    showFreqZones,
+    showRoomModeLines,
+    showThresholdLine,
+    spectrumWarmMode,
+    minFrequency,
+    maxFrequency,
+    feedbackThresholdDb,
+  } = settings
 
   const spectrumDisplay = useMemo(
-    () => buildSpectrumDisplay(settings),
+    () => buildSpectrumDisplay({
+      graphFontSize,
+      rtaDbMin,
+      rtaDbMax,
+      spectrumLineWidth,
+      canvasTargetFps,
+      showFreqZones,
+      showRoomModeLines,
+      showThresholdLine,
+      spectrumWarmMode,
+    }),
     [
-      settings.graphFontSize,
-      settings.rtaDbMin,
-      settings.rtaDbMax,
-      settings.spectrumLineWidth,
-      settings.canvasTargetFps,
-      settings.showFreqZones,
-      settings.showRoomModeLines,
-      settings.showThresholdLine,
-      settings.spectrumWarmMode,
+      graphFontSize,
+      rtaDbMin,
+      rtaDbMax,
+      spectrumLineWidth,
+      canvasTargetFps,
+      showFreqZones,
+      showRoomModeLines,
+      showThresholdLine,
+      spectrumWarmMode,
     ],
   )
 
   const spectrumRange = useMemo(
-    () => buildSpectrumRange(settings),
-    [settings.minFrequency, settings.maxFrequency, settings.feedbackThresholdDb],
+    () => buildSpectrumRange({
+      minFrequency,
+      maxFrequency,
+      feedbackThresholdDb,
+    }),
+    [minFrequency, maxFrequency, feedbackThresholdDb],
   )
 
   const spectrumLifecycle = useMemo<SpectrumLifecycle>(() => ({

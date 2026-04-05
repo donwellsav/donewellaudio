@@ -3,8 +3,6 @@
 import { useCallback, useEffect, type RefObject } from 'react'
 import { useAudioAnalyzer, type UseAudioAnalyzerReturn } from '@/hooks/useAudioAnalyzer'
 import { useAudioDevices, type AudioDevice } from '@/hooks/useAudioDevices'
-import type { OperationMode } from '@/types/advisory'
-import type { ModeId } from '@/types/settings'
 import type { SnapshotBatch } from '@/types/data'
 import type { DataCollectionHandle } from '@/hooks/useDataCollection'
 
@@ -35,33 +33,41 @@ export function useAnalyzerContextState({
     },
     frozenRef,
   )
+  const {
+    dspWorker,
+    isRunning,
+    start,
+    switchDevice,
+    spectrumStatus,
+    settings,
+  } = analyzer
 
   useEffect(() => {
-    dataCollection.attachWorker(analyzer.dspWorker)
+    dataCollection.attachWorker(dspWorker)
     return () => dataCollection.attachWorker(null)
-  }, [analyzer.dspWorker, dataCollection])
+  }, [dataCollection, dspWorker])
 
   const { devices, selectedDeviceId, setSelectedDeviceId, refresh: refreshDevices } = useAudioDevices()
 
   useEffect(() => {
-    if (analyzer.isRunning) {
+    if (isRunning) {
       void refreshDevices()
     }
-  }, [analyzer.isRunning, refreshDevices])
+  }, [isRunning, refreshDevices])
 
   const startWithDevice = useCallback(async () => {
-    await analyzer.start({ deviceId: selectedDeviceId || undefined })
-  }, [analyzer.start, selectedDeviceId])
+    await start({ deviceId: selectedDeviceId || undefined })
+  }, [selectedDeviceId, start])
 
   const handleDeviceChange = useCallback((deviceId: string) => {
     setSelectedDeviceId(deviceId)
-    void analyzer.switchDevice(deviceId)
-  }, [analyzer.switchDevice, setSelectedDeviceId])
+    void switchDevice(deviceId)
+  }, [setSelectedDeviceId, switchDevice])
 
-  const inputLevel = analyzer.spectrumStatus?.peak ?? -60
-  const autoGainDb = analyzer.spectrumStatus?.autoGainDb
-  const isAutoGain = analyzer.spectrumStatus?.autoGainEnabled ?? analyzer.settings.autoGainEnabled
-  const autoGainLocked = analyzer.spectrumStatus?.autoGainLocked ?? false
+  const inputLevel = spectrumStatus?.peak ?? -60
+  const autoGainDb = spectrumStatus?.autoGainDb
+  const isAutoGain = spectrumStatus?.autoGainEnabled ?? settings.autoGainEnabled
+  const autoGainLocked = spectrumStatus?.autoGainLocked ?? false
 
   return {
     ...analyzer,
