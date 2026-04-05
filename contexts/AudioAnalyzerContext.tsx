@@ -1,19 +1,8 @@
 'use client'
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  type ReactNode,
-  type MutableRefObject,
-} from 'react'
-import { useAudioAnalyzer } from '@/hooks/useAudioAnalyzer'
-import { useAudioDevices } from '@/hooks/useAudioDevices'
-import type { OperationMode } from '@/types/advisory'
-import type { ModeId } from '@/types/settings'
-import type { SnapshotBatch } from '@/types/data'
-
-// ── Sub-contexts ────────────────────────────────────────────────────────────
+import { useMemo, type ReactNode } from 'react'
+import { useAnalyzerContextState } from '@/hooks/useAnalyzerContextState'
+import type { DataCollectionHandle } from '@/hooks/useDataCollection'
 
 import { EngineContext, useEngine } from '@/contexts/EngineContext'
 import type { EngineContextValue } from '@/contexts/EngineContext'
@@ -25,12 +14,22 @@ import { DetectionContext, useDetection } from '@/contexts/DetectionContext'
 import type { DetectionContextValue } from '@/contexts/DetectionContext'
 import { PA2Provider, usePA2 } from '@/contexts/PA2Context'
 import type { PA2ContextValue } from '@/contexts/PA2Context'
+import {
+  createDetectionContextValue,
+  createEngineContextValue,
+  createMeteringContextValue,
+  createSettingsContextValue,
+} from '@/contexts/audioAnalyzerContextValues'
 
-// Re-export hooks for convenience and backward compatibility
 export { useEngine, useSettings, useMetering, useDetection, usePA2 }
 
-// Re-export types consumers may need
-export type { EngineContextValue, SettingsContextValue, MeteringContextValue, DetectionContextValue, PA2ContextValue }
+export type {
+  EngineContextValue,
+  SettingsContextValue,
+  MeteringContextValue,
+  DetectionContextValue,
+  PA2ContextValue,
+}
 
 /**
  * @deprecated Use `EngineContextValue`, `SettingsContextValue`, `MeteringContextValue`,
@@ -39,214 +38,81 @@ export type { EngineContextValue, SettingsContextValue, MeteringContextValue, De
 export type AudioAnalyzerContextValue =
   EngineContextValue & SettingsContextValue & MeteringContextValue & DetectionContextValue
 
-// ── Provider props ──────────────────────────────────────────────────────────
-
 interface AudioAnalyzerProviderProps {
-  /** Ref to data collection snapshot handler — breaks circular dep with useDataCollection */
-  onSnapshotBatchRef: MutableRefObject<((batch: SnapshotBatch) => void) | null>
-  /** Shared frozen ref — synced by UIProvider, read by useAdvisoryMap to buffer card updates */
+  dataCollection: DataCollectionHandle
   frozenRef?: React.RefObject<boolean>
   children: ReactNode
 }
 
-// ── Compound Provider ───────────────────────────────────────────────────────
-
 export function AudioAnalyzerProvider({
-  onSnapshotBatchRef,
+  dataCollection,
   frozenRef,
   children,
 }: AudioAnalyzerProviderProps) {
-  // ── Core audio analyzer ───────────────────────────────────────────────
+  const state = useAnalyzerContextState({ dataCollection, frozenRef })
 
-  const {
-    isRunning,
-    isStarting,
-    error,
-    workerError,
-    noiseFloorDb,
-    spectrumStatus,
-    spectrumRef,
-    tracksRef,
-    advisories,
-    earlyWarning,
-    sampleRate,
-    fftSize,
-    settings,
-    start,
-    stop,
-    switchDevice,
-    resetSettings,
-    dspWorker,
-    roomEstimate,
-    roomMeasuring,
-    roomProgress,
-    startRoomMeasurement,
-    stopRoomMeasurement,
-    clearRoomEstimate,
-    layeredSession,
-    layeredDisplay,
-    layered,
-  } = useAudioAnalyzer({}, {
-    onSnapshotBatch: (batch: SnapshotBatch) => onSnapshotBatchRef.current?.(batch),
-  }, frozenRef)
-
-  // ── Devices ───────────────────────────────────────────────────────────
-
-  const { devices, selectedDeviceId, setSelectedDeviceId, refresh: refreshDevices } = useAudioDevices()
-
-  useEffect(() => {
-    if (isRunning) {
-      void refreshDevices()
-    }
-  }, [isRunning, refreshDevices])
-
-  // ── Wrapped start (always passes persisted device preference) ─────────
-
-  const startWithDevice = useCallback(async () => {
-    await start({ deviceId: selectedDeviceId || undefined })
-  }, [start, selectedDeviceId])
-
-  // ── Derived metering values ───────────────────────────────────────────
-
-  const inputLevel = spectrumStatus?.peak ?? -60
-  const autoGainDb = spectrumStatus?.autoGainDb
-  const isAutoGain = spectrumStatus?.autoGainEnabled ?? settings.autoGainEnabled
-  const autoGainLocked = spectrumStatus?.autoGainLocked ?? false
-
-  // ── Pure convenience callbacks ────────────────────────────────────────
-
-  // Mode change: calls setMode directly (no longer via legacy shim)
-  const handleModeChange = useCallback((mode: OperationMode) => {
-    layered.setMode(mode as ModeId)
-  }, [layered])
-
-  const handleFreqRangeChange = useCallback((min: number, max: number) => {
-    layered.setFocusRange({ kind: 'custom', minHz: min, maxHz: max })
-  }, [layered])
-
-  const handleDeviceChange = useCallback((deviceId: string) => {
-    setSelectedDeviceId(deviceId)
-    switchDevice(deviceId)
-  }, [setSelectedDeviceId, switchDevice])
-
-  // ── Memoized context values (4 independent useMemo) ───────────────────
-
-  const engineValue = useMemo<EngineContextValue>(() => ({
-    isRunning,
-    isStarting,
-    error,
-    workerError,
-    start: startWithDevice,
-    stop,
-    switchDevice,
-    devices,
-    selectedDeviceId,
-    handleDeviceChange,
-    dspWorker,
-    roomEstimate,
-    roomMeasuring,
-    roomProgress,
-    startRoomMeasurement,
-    stopRoomMeasurement,
-    clearRoomEstimate,
-  }), [
-    isRunning,
-    isStarting,
-    error,
-    workerError,
-    startWithDevice,
-    stop,
-    switchDevice,
-    devices,
-    selectedDeviceId,
-    handleDeviceChange,
-    dspWorker,
-    roomEstimate,
-    roomMeasuring,
-    roomProgress,
-    startRoomMeasurement,
-    stopRoomMeasurement,
-    clearRoomEstimate,
+  const engineValue = useMemo(() => createEngineContextValue(state), [
+    state.isRunning,
+    state.isStarting,
+    state.error,
+    state.workerError,
+    state.startWithDevice,
+    state.stop,
+    state.switchDevice,
+    state.devices,
+    state.selectedDeviceId,
+    state.handleDeviceChange,
+    state.dspWorker,
+    state.roomEstimate,
+    state.roomMeasuring,
+    state.roomProgress,
+    state.startRoomMeasurement,
+    state.stopRoomMeasurement,
+    state.clearRoomEstimate,
   ])
 
-  const settingsValue = useMemo<SettingsContextValue>(() => ({
-    settings,
-    resetSettings,
-    handleModeChange,
-    handleFreqRangeChange,
-    session: layeredSession,
-    displayPrefs: layeredDisplay,
-    // Semantic actions (Phase 5+)
-    setMode: layered.setMode,
-    setEnvironment: layered.setEnvironment,
-    setSensitivityOffset: layered.setSensitivityOffset,
-    setInputGain: layered.setInputGain,
-    setAutoGain: layered.setAutoGain,
-    setFocusRange: layered.setFocusRange,
-    setEqStyle: layered.setEqStyle,
-    setMicProfile: layered.setMicProfile,
-    updateDisplay: layered.updateDisplay,
-    updateDiagnostics: layered.updateDiagnostics,
-    updateLiveOverrides: layered.updateLiveOverrides,
-  }), [
-    settings,
-    resetSettings,
-    handleModeChange,
-    handleFreqRangeChange,
-    layeredSession,
-    layeredDisplay,
-    layered.setMode,
-    layered.setEnvironment,
-    layered.setSensitivityOffset,
-    layered.setInputGain,
-    layered.setAutoGain,
-    layered.setFocusRange,
-    layered.setEqStyle,
-    layered.setMicProfile,
-    layered.updateDisplay,
-    layered.updateDiagnostics,
-    layered.updateLiveOverrides,
+  const settingsValue = useMemo(() => createSettingsContextValue(state), [
+    state.settings,
+    state.resetSettings,
+    state.layeredSession,
+    state.layeredDisplay,
+    state.layered.setMode,
+    state.layered.setEnvironment,
+    state.layered.setSensitivityOffset,
+    state.layered.setInputGain,
+    state.layered.setAutoGain,
+    state.layered.setFocusRange,
+    state.layered.setEqStyle,
+    state.layered.setMicProfile,
+    state.layered.updateDisplay,
+    state.layered.updateDiagnostics,
+    state.layered.updateLiveOverrides,
   ])
 
-  const meteringValue = useMemo<MeteringContextValue>(() => ({
-    spectrumRef,
-    tracksRef,
-    spectrumStatus,
-    noiseFloorDb,
-    sampleRate,
-    fftSize,
-    inputLevel,
-    isAutoGain,
-    autoGainDb,
-    autoGainLocked,
-  }), [
-    spectrumRef,
-    tracksRef,
-    spectrumStatus,
-    noiseFloorDb,
-    sampleRate,
-    fftSize,
-    inputLevel,
-    isAutoGain,
-    autoGainDb,
-    autoGainLocked,
+  const meteringValue = useMemo(() => createMeteringContextValue(state), [
+    state.spectrumRef,
+    state.tracksRef,
+    state.spectrumStatus,
+    state.noiseFloorDb,
+    state.sampleRate,
+    state.fftSize,
+    state.inputLevel,
+    state.isAutoGain,
+    state.autoGainDb,
+    state.autoGainLocked,
   ])
 
-  const detectionValue = useMemo<DetectionContextValue>(() => ({
-    advisories,
-    earlyWarning,
-  }), [
-    advisories,
-    earlyWarning,
+  const detectionValue = useMemo(() => createDetectionContextValue(state), [
+    state.advisories,
+    state.earlyWarning,
   ])
 
-  // Nest providers: outermost = least frequent updates, innermost = most frequent
   return (
     <EngineContext.Provider value={engineValue}>
       <SettingsContext.Provider value={settingsValue}>
         <DetectionContext.Provider value={detectionValue}>
           <MeteringContext.Provider value={meteringValue}>
-            <PA2Provider advisories={advisories}>
+            <PA2Provider advisories={state.advisories}>
               {children}
             </PA2Provider>
           </MeteringContext.Provider>
@@ -256,20 +122,20 @@ export function AudioAnalyzerProvider({
   )
 }
 
-// ── Legacy hook (deprecated) ────────────────────────────────────────────────
-
 /**
  * @deprecated Use `useEngine()`, `useSettings()`, `useMetering()`, or `useDetection()` instead.
- * This hook reads all 4 contexts and re-renders on ANY context change — no re-render savings.
+ * This hook reads all 4 contexts and re-renders on ANY context change.
  */
 export function useAudio(): AudioAnalyzerContextValue {
   if (process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console
-    console.warn('[DWA] useAudio() is deprecated — use useEngine(), useSettings(), useMetering(), or useDetection() for granular re-renders')
+    console.warn('[DWA] useAudio() is deprecated â€” use useEngine(), useSettings(), useMetering(), or useDetection() for granular re-renders')
   }
+
   const engine = useEngine()
   const settingsCtx = useSettings()
   const metering = useMetering()
   const detection = useDetection()
+
   return { ...engine, ...settingsCtx, ...metering, ...detection }
 }
